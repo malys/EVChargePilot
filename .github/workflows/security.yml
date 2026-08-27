@@ -55,8 +55,13 @@ jobs:
           semgrep --config p/java --config p/security-audit --sarif -o semgrep.sarif app/src || true
           [ -s semgrep.sarif ] || empty_sarif semgrep semgrep.sarif
 
+      # Code scanning needs GitHub Advanced Security on a private repository. This repo is
+      # private for now, so the upload is expected to fail with "Resource not accessible by
+      # integration" — the scan itself still runs and the findings still ship as an artifact.
+      # These become real Security-tab entries the day the repo goes public.
       - name: Upload mobsfscan SARIF
         if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: mobsfscan.sarif
@@ -64,6 +69,7 @@ jobs:
 
       - name: Upload Semgrep SARIF
         if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
@@ -112,6 +118,7 @@ jobs:
           args: --nvdApiKey ${{ env.NVD_API_KEY }}
       - name: Upload dependency SARIF
         if: ${{ env.NVD_API_KEY != '' }}
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: reports/dependency-check-report.sarif
