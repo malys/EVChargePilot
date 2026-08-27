@@ -1,0 +1,106 @@
+name: 🔐 Security Vulnerability
+description: Report a security vulnerability (confidential)
+title: "[SECURITY] "
+labels: [security, confidential]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Security Vulnerability Report
+
+        **⚠️ CONFIDENTIAL:** Do not disclose vulnerability details publicly.
+
+        Please report security issues via private GitHub Security Advisory instead:
+        1. Click "Report a vulnerability" at `/security/advisories/new`
+        2. Or email: [maintainer security contact]
+        3. Do **not** post details in public issues
+
+        This template is for urgent in-scope vulnerabilities only.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "Security Classification"
+      description: "Select the vulnerability type"
+      options:
+        - label: "Vehicle write from an app that declares itself read-only"
+        - label: "Permission drift (a permission beyond the reviewed allowlist)"
+        - label: "Vehicle data leaving the head unit (network, file export, log sink)"
+        - label: "Permission escalation (elevation of privilege)"
+        - label: "Code execution vulnerability"
+        - label: "Information disclosure (trip history or diagnostics readable by another app)"
+        - label: "Driver distraction (a control usable above 0 km/h that should not be)"
+        - label: "Other security issue affecting vehicle data integrity"
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: "Vulnerability Title"
+      description: "Concise title (do not include exploit details)"
+      placeholder: "Trip history file is world-readable"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Vulnerability Description"
+      description: |
+        High-level description (no exploit steps or proof-of-concept):
+        - What is vulnerable
+        - Why it matters
+        - Impact on driver and vehicle
+      placeholder: |
+        Recorded trips are written outside app-private storage.
+        Any app on the head unit can read where and how far the vehicle has been driven.
+        Impact: the driver's movement history is disclosed to unrelated software.
+      rows: 6
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity (CVSS)"
+      description: "CVSS v3.1 rating"
+      options:
+        - "Critical (9.0–10.0) — Vehicle write or code execution"
+        - "High (7.0–8.9) — Vehicle data disclosed off-device"
+        - "Medium (4.0–6.9) — Local disclosure or permission drift"
+        - "Low (0.1–3.9) — Minor issue"
+    validations:
+      required: true
+
+  - type: input
+    id: affected
+    attributes:
+      label: "Affected Versions"
+      description: "Which versions are affected?"
+      placeholder: "EVChargePilot < 0.2.0 (all channels)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: remediation
+    attributes:
+      label: "Suggested Remediation"
+      description: "How should this be fixed?"
+      placeholder: |
+        1. Write the history through Context.getFilesDir() only
+        2. Assert app-private mode in a unit test
+        3. Delete any file left behind by an earlier version on upgrade
+      rows: 5
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: "Consent"
+      options:
+        - label: I understand this vulnerability will be handled according to the security policy
+          required: true
+        - label: I consent to coordinated disclosure and a reasonable embargo period
+          required: true

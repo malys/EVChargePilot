@@ -1,0 +1,3 @@
+[submodule "EVHardware"]
+	path = EVHardware
+	url = https://github.com/malys/EVHardware.git

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: ../../security/advisories/new
+    about: Report privately, never in a public issue. This app reads vehicle telemetry.
+  - name: EVHardware (the vehicle layer)
+    url: ../../../EVHardware
+    about: Property ids, units, firmware routing and the energy snapshot live there, not here.
+  - name: EVTasker / EVProfile (vehicle control)
+    url: ../../../EVTasker
+    about: This app writes nothing to the car. Anything that commands the vehicle belongs there.

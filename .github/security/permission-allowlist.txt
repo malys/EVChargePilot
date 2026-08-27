@@ -1,0 +1,6 @@
+# Read-only Android Automotive telemetry. Any addition requires security review.
+android.car.permission.CAR_SPEED
+android.car.permission.CAR_ENERGY
+android.car.permission.CAR_EXTERIOR_ENVIRONMENT
+android.car.permission.CONTROL_CAR_CLIMATE
+android.car.permission.CAR_VENDOR_EXTENSION

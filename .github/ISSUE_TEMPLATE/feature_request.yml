@@ -1,0 +1,131 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement to the energy dashboard
+title: "[FEATURE] "
+labels: [enhancement, needs-review]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Feature Request
+
+        Have an idea to improve the energy dashboard? We'd love to hear it!
+
+        **Before requesting:** Please check if a similar feature has been requested in [Discussions](https://github.com/malys/EVChargePilot/discussions).
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "Pre-submission checks"
+      description: "Ensure you've done these before submitting"
+      options:
+        - label: I've checked existing issues/discussions and found no duplicate
+          required: true
+        - label: This feature reads the vehicle only — anything that commands the car belongs in EVProfile/EVTasker
+          required: true
+        - label: This feature needs no network access (the app is offline by design)
+          required: true
+        - label: I understand this project is not affiliated with SAIC/MG Motor
+          required: false
+
+  - type: input
+    id: title
+    attributes:
+      label: "Feature Title"
+      description: "Clear, concise name for the feature"
+      placeholder: "Show consumption for the last completed trip next to the live one"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem or Use Case"
+      description: |
+        What problem does this solve? Why is it needed?
+        - Current limitation
+        - Driver need
+        - How this improves the dashboard
+      placeholder: |
+        The live consumption figure is only meaningful against a reference.
+        Today the driver has to stop the trip and reopen the history to compare.
+        Showing the previous trip's average beside the live one makes the comparison immediate.
+      rows: 5
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed Solution"
+      description: |
+        How should this feature work?
+        - Which EVHardware signal or snapshot field it needs
+        - Where it appears on the dashboard
+        - What it shows when the value is unreadable
+      placeholder: |
+        1. Read the newest entry from EnergyTripHistoryStore on start
+        2. Render its averageConsumptionKwhPer100Km under the live figure
+        3. Show an em dash when there is no history yet
+      rows: 6
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternative Approaches"
+      description: "Have you considered other ways to solve this?"
+      placeholder: |
+        - Alternative 1: a rolling average over the last five trips
+        - Pro: less noisy than a single trip
+        - Con: hides the effect of a change the driver just made
+      rows: 4
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: "Estimated Complexity"
+      description: "How much work is this?"
+      options:
+        - "Small (< 1 day)"
+        - "Medium (1–3 days)"
+        - "Large (1–2 weeks)"
+        - "Unknown"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: data_impact
+    attributes:
+      label: "Data Impact"
+      description: "What does this feature touch?"
+      options:
+        - "No — presentation only"
+        - "Yes — needs a new vehicle signal from EVHardware"
+        - "Yes — changes trip integration or stored history"
+        - "Unknown — unclear"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance Criteria"
+      description: "How will we know this feature is done?"
+      placeholder: |
+        - [ ] The previous trip's average appears under the live figure
+        - [ ] An em dash is shown when no trip has been recorded yet
+        - [ ] A corrupt or empty history file never crashes the dashboard
+        - [ ] No new permission and no network access is introduced
+        - [ ] Covered by a unit test in EVHardware or the app
+      rows: 5
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: "Consent"
+      options:
+        - label: I understand this project is not affiliated with SAIC/MG Motor and carries no warranty (see DISCLAIMER.md)
+          required: true

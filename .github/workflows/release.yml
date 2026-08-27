@@ -1,0 +1,103 @@
+name: Release
+
+# Stable channel. Tag push only — a stable APK is something a human decided to publish.
+# Stable builds carry no self-update path: nothing in this app contacts a release server.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and publish stable APK
+    runs-on: ubuntu-latest
+    env:
+      EV_KEYSTORE_BASE64: ${{ secrets.EV_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode platform keystore
+        if: ${{ env.EV_KEYSTORE_BASE64 != '' }}
+        run: |
+          # Tolerate newlines in the secret; printf avoids a stray trailing newline.
+          printf '%s' "$EV_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/platform.keystore"
+          # A PKCS12/JKS keystore starts with 0x30 (DER SEQUENCE); anything else is corrupt.
+          if [ "$(head -c1 "$RUNNER_TEMP/platform.keystore" | od -An -tx1 | tr -d ' ')" != "30" ]; then
+            echo "::error::EV_KEYSTORE_BASE64 is invalid. Recreate the secret with: base64 -w0 platform.keystore"
+            exit 1
+          fi
+          echo "EV_KEYSTORE=$RUNNER_TEMP/platform.keystore" >> "$GITHUB_ENV"
+
+      - name: Run checks before publishing
+        run: |
+          chmod +x gradlew
+          bash .github/security/check-permissions.sh
+          ./gradlew testStableDebugUnitTest lintStableDebug --no-daemon
+
+      - name: Build stable release APK
+        env:
+          EV_KEYSTORE_PASSWORD: ${{ secrets.EV_KEYSTORE_PASSWORD }}
+          EV_KEY_ALIAS: ${{ secrets.EV_KEY_ALIAS }}
+          EV_KEY_PASSWORD: ${{ secrets.EV_KEY_PASSWORD }}
+        run: |
+          # An unsigned stable APK is not publishable: fail here, not on the driver's USB stick.
+          test -n "${EV_KEYSTORE:-}"
+          ./gradlew assembleStableRelease --no-daemon
+
+      - name: Collect APK
+        run: |
+          mkdir -p dist
+          find app/build/outputs/apk/stable/release -name "*.apk" \
+            -exec cp {} "dist/EVChargePilot-stable-${GITHUB_REF_NAME#v}.apk" \;
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evchargepilot-stable
+          path: dist/*.apk
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          {
+            echo 'notes<<CHANGELOG_EOF'
+            ./release-notes.sh "${{ github.ref_name }}" || ./release-notes.sh --latest
+            echo 'CHANGELOG_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          prerelease: false
+          files: dist/*.apk
+          body: |
+            ## EVChargePilot ${{ github.ref_name }} — stable
+
+            Read-only energy dashboard. This build has **no auto-update**, no network access,
+            no overlay and no vehicle-write capability: it reads the car and draws it.
+
+            If you want builds that update themselves, there is no such channel here — the
+            unstable pre-release is a manual install too.
+
+            ### Install
+            Copy the APK to a USB stick, open the Files app on the car and tap it, with the
+            vehicle parked. See the README for how to reach the Files app on an MG4.
+
+            ### Changelog
+            ${{ steps.changelog.outputs.notes }}

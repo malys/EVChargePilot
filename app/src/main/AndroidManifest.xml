@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Read-only vehicle data. EVChargePilot declares no network, install, overlay or
+         location capability, and writes no vehicle property.
+
+         Two of the permissions below read like write access and are not:
+         CONTROL_CAR_CLIMATE is what AAOS requires to *read* HVAC state — the platform
+         defines no read-only HVAC permission — and CAR_VENDOR_EXTENSION is what the
+         vendor property space requires to be read at all. The app calls no setter: every
+         vehicle access goes through EVHardware's telemetry reader, which exposes getters
+         only, and VehicleWriteGate has nothing to gate here. -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="android.car.permission.CAR_EXTERIOR_ENVIRONMENT" />
+    <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
+    <uses-permission android:name="android.car.permission.CAR_VENDOR_EXTENSION" />
+
+    <application
+        android:name=".ChargePilotApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.EVChargePilot">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="uiMode"
+            android:exported="true"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

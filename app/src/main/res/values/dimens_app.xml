@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fixed instrument rail: app-specific because it balances live readouts against
+         one parked-only action on the 1920×720 MG4 panel. -->
+    <dimen name="chargepilot_rail_width">420dp</dimen>
+</resources>
+

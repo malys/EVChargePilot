@@ -1,0 +1,133 @@
+name: 🐛 Bug Report
+description: Report a bug or issue you've encountered
+title: "[BUG] "
+labels: [bug, needs-review]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Bug Report
+
+        Thank you for helping improve this project! Please provide as much detail as possible.
+
+        **⚠️ READ-ONLY:** EVChargePilot never writes a vehicle property. A bug report claiming
+        the app changed something in the car is a security report — use the security template.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "Pre-submission checks"
+      description: "Ensure you've done these before submitting"
+      options:
+        - label: I've searched existing issues and found no duplicate
+          required: true
+        - label: I'm using the latest version
+          required: true
+        - label: I've tested this on the actual vehicle (or emulator)
+          required: false
+        - label: This bug affects a displayed vehicle value or a recorded trip
+          required: false
+
+  - type: input
+    id: title
+    attributes:
+      label: "Bug Summary"
+      description: "One-line summary of the bug"
+      placeholder: "Range shows a dash while the cluster shows 240 km"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: |
+        Detailed description of the bug. Include:
+        - What you expected to happen
+        - What actually happened
+        - Why this is a problem
+      placeholder: |
+        Expected: Range mirrors the instrument cluster
+        Actual: Range stays "—" for the whole drive while SOC updates normally
+        Impact: The dashboard looks broken and the trip summary has no reference range
+      rows: 6
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Exact steps to reproduce the bug"
+      placeholder: |
+        1. Start the vehicle and wait for the cluster to show a range
+        2. Open EVChargePilot
+        3. Wait 30 s for several samples
+        4. Observe: RANGE stays "—"
+      rows: 5
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Device and software details"
+      placeholder: |
+        - Vehicle: MG4 EV
+        - Firmware: SWI133
+        - Android Automotive: v9
+        - App Version: 0.1.0 (stable)
+        - Signed with the platform certificate: yes / no
+        - Charging or driving at the time: driving
+      rows: 5
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs or Screenshots"
+      description: |
+        Attach:
+        - Screenshot of the dashboard showing the issue
+        - The in-app Diagnostics dialog (it lists firmware generation and the recent log)
+        - Logcat output (from ADB: `adb logcat -s EVChargePilot:V EV_HW:V`)
+      placeholder: "Paste logcat or the diagnostics text here"
+      rows: 8
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      description: "How critical is this bug?"
+      options:
+        - "Critical (app crashes / no vehicle data at all)"
+        - "High (a value is wrong, not merely absent)"
+        - "Medium (a value is absent, or a trip is lost)"
+        - "Low (cosmetic / very rare)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: data_impact
+    attributes:
+      label: "Data Impact"
+      description: "What part of the app is affected?"
+      options:
+        - "No — UI or layout only"
+        - "Yes — a live vehicle reading is wrong or missing"
+        - "Yes — trip integration or trip history affected"
+        - "Unknown — unclear"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: "Consent"
+      options:
+        - label: I understand this project is not affiliated with SAIC/MG Motor and carries no warranty (see DISCLAIMER.md)
+          required: true

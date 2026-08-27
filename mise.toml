@@ -1,0 +1,176 @@
+[tools]
+java = "17"
+
+[env]
+ANDROID_HOME = "{{env.HOME}}/Android/Sdk"
+ANDROID_SDK_ROOT = "{{env.HOME}}/Android/Sdk"
+_.path = [
+    "{{env.HOME}}/Android/Sdk/platform-tools",
+    "{{env.HOME}}/Android/Sdk/cmdline-tools/latest/bin",
+]
+
+# Google publishes no Automotive image for the vehicle's AAOS 9 / API 28. The two
+# profiles therefore validate different axes and neither replaces an on-vehicle pass:
+#   emulator-car     API 33 Automotive, with CarPropertyManager but the wrong OS version.
+#   emulator-screen  API 28 tablet, with the target OS and 1920x720 layout but no car service.
+EMU_CAR_AVD = "evchargepilot-car"
+EMU_CAR_IMAGE = "system-images;android-33;android-automotive;x86_64"
+EMU_SCREEN_AVD = "evchargepilot-screen"
+EMU_SCREEN_IMAGE = "system-images;android-28;google_apis;x86_64"
+EMU_WIDTH = "1920"
+EMU_HEIGHT = "720"
+EMU_DENSITY = "160"
+COMPILE_SDK = "36"
+BUILD_TOOLS = "36.0.0"
+
+[tasks.bootstrap]
+description = "Install the required Android SDK platform and build tools"
+run = '''
+set -e
+if [ -d "$ANDROID_HOME/platforms/android-$COMPILE_SDK" ]; then
+  echo "sdk.dir=$ANDROID_HOME" > local.properties
+  echo "Android SDK $COMPILE_SDK ready."
+  exit 0
+fi
+SDK="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+if [ ! -x "$SDK" ]; then
+  echo "sdkmanager is missing from $ANDROID_HOME/cmdline-tools/latest." >&2
+  exit 1
+fi
+yes | "$SDK" --sdk_root="$ANDROID_HOME" --licenses > /dev/null
+"$SDK" --sdk_root="$ANDROID_HOME" \
+  "platform-tools" "platforms;android-$COMPILE_SDK" "build-tools;$BUILD_TOOLS"
+echo "sdk.dir=$ANDROID_HOME" > local.properties
+'''
+
+[tasks.build]
+description = "Build the stable debug APK"
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME assembleStableDebug'
+
+[tasks.test]
+description = "Run application and EVHardware JVM tests"
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME testStableDebugUnitTest testUnstableDebugUnitTest :evhardware:testDebugUnitTest'
+
+[tasks.lint]
+description = "Run Android lint"
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME lintStableDebug lintUnstableDebug'
+
+[tasks.permissions]
+description = "Permission-drift gate — the same one CI runs"
+run = "bash .github/security/check-permissions.sh"
+
+[tasks.check]
+description = "What CI runs: permissions + lint + tests"
+depends = ["permissions", "lint", "test"]
+
+[tasks.release]
+description = "Build the minified stable release APK"
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME assembleStableRelease'
+
+[tasks.clean]
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME clean'
+
+[tasks.emulator-setup]
+description = "Install emulator images and create the Automotive and API 28 AVDs"
+run = '''
+set -e
+SDK="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+AVDM="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+
+if [ ! -e /dev/kvm ]; then
+  echo "ERROR: /dev/kvm is unavailable; the emulator would be unusably slow." >&2
+  exit 1
+fi
+if ! id -nG | tr ' ' '\n' | grep -qx kvm; then
+  echo "WARNING: current user is not in the kvm group." >&2
+fi
+if [ ! -x "$SDK" ] || [ ! -x "$AVDM" ]; then
+  echo "Android command-line tools are missing; run 'mise run bootstrap' first." >&2
+  exit 1
+fi
+
+yes | "$SDK" --sdk_root="$ANDROID_HOME" --licenses > /dev/null
+"$SDK" --sdk_root="$ANDROID_HOME" \
+  "emulator" "platform-tools" "$EMU_CAR_IMAGE" "$EMU_SCREEN_IMAGE"
+
+create_avd() {
+  name="$1"; image="$2"; device="$3"
+  if "$AVDM" list avd 2>/dev/null | grep -q "Name: $name"; then
+    echo "AVD $name already exists"
+  else
+    echo no | "$AVDM" create avd -n "$name" -k "$image" -d "$device" --force
+  fi
+  cfg="$HOME/.android/avd/$name.avd/config.ini"
+  sed -i '/^hw.lcd/d;/^disk.dataPartition.size/d' "$cfg"
+  {
+    echo "hw.lcd.width=$EMU_WIDTH"
+    echo "hw.lcd.height=$EMU_HEIGHT"
+    echo "hw.lcd.density=$EMU_DENSITY"
+    echo "disk.dataPartition.size=4G"
+  } >> "$cfg"
+  echo "AVD $name configured at ${EMU_WIDTH}x${EMU_HEIGHT} @ ${EMU_DENSITY}dpi"
+}
+
+create_avd "$EMU_CAR_AVD" "$EMU_CAR_IMAGE" "automotive_1024p_landscape"
+create_avd "$EMU_SCREEN_AVD" "$EMU_SCREEN_IMAGE" "pixel_c"
+'''
+
+# Software rendering is the reliable default under WSL2, where -gpu host commonly sees
+# only Mesa llvmpipe and exits before the emulator window appears.
+[tasks.emulator-car]
+description = "Start the API 33 Automotive emulator"
+run = '''
+set -e
+"$ANDROID_HOME/emulator/emulator" -avd "$EMU_CAR_AVD" \
+  -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim &
+ADB="$ANDROID_HOME/platform-tools/adb"
+"$ADB" wait-for-device
+for attempt in $(seq 1 120); do
+  [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] && break
+  [ "$attempt" -eq 120 ] && { echo "Automotive emulator boot timed out." >&2; exit 1; }
+  sleep 1
+done
+echo "Automotive emulator ready."
+'''
+
+[tasks.emulator-screen]
+description = "Start the API 28 1920x720 screen emulator"
+run = '''
+set -e
+"$ANDROID_HOME/emulator/emulator" -avd "$EMU_SCREEN_AVD" \
+  -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim &
+ADB="$ANDROID_HOME/platform-tools/adb"
+"$ADB" wait-for-device
+for attempt in $(seq 1 120); do
+  [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] && break
+  [ "$attempt" -eq 120 ] && { echo "Screen emulator boot timed out." >&2; exit 1; }
+  sleep 1
+done
+echo "Screen emulator ready."
+'''
+
+[tasks.emulator-stop]
+description = "Stop the connected emulator"
+run = '"$ANDROID_HOME/platform-tools/adb" emu kill || true'
+
+[tasks.run]
+description = "Build, install and launch on the connected emulator or vehicle"
+depends = ["build"]
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+if [ -z "$($ADB devices | sed '1d' | grep -w device || true)" ]; then
+  echo "No device connected. Start emulator-car/emulator-screen or connect the vehicle." >&2
+  exit 1
+fi
+APK=$(ls -t app/build/outputs/apk/stable/debug/*.apk | head -1)
+echo "Installing $APK"
+"$ADB" install -r -g "$APK"
+"$ADB" shell am start -n \
+  "com.evsuite.chargepilot/com.evsuite.chargepilot.MainActivity"
+echo "EVChargePilot launched."
+'''
+
+[tasks.logs]
+description = "Follow EVChargePilot and shared hardware logs"
+run = 'adb logcat -s EVChargePilot:V EV_HW:V AndroidRuntime:E'

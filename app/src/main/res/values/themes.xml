@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.EVChargePilot" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/ev_accent</item>
+        <item name="colorOnPrimary">@color/ev_on_accent</item>
+        <item name="colorSurface">@color/ev_surface</item>
+        <item name="colorSurfaceContainer">@color/ev_surface_raised</item>
+        <item name="android:colorBackground">@color/ev_background</item>
+        <item name="android:windowBackground">@color/ev_background</item>
+        <item name="colorOnSurface">@color/ev_text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/ev_text_secondary</item>
+        <item name="colorOnBackground">@color/ev_text_primary</item>
+        <item name="colorOutline">@color/ev_outline</item>
+        <item name="colorError">@color/ev_error</item>
+        <item name="android:textColorPrimary">@color/ev_text_primary</item>
+        <item name="android:textColorSecondary">@color/ev_text_secondary</item>
+        <item name="android:statusBarColor">@color/ev_background</item>
+        <item name="android:navigationBarColor">@color/ev_background</item>
+        <item name="android:windowLightStatusBar">@bool/ev_light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/ev_light_system_bars</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.EVChargePilot.Dialog</item>
+    </style>
+
+    <style name="ThemeOverlay.EVChargePilot.Dialog" parent="ThemeOverlay.EV.Dialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/EVChargePilot.Dialog.Title</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/EVChargePilot.Dialog.Body</item>
+    </style>
+
+    <style name="EVChargePilot.Dialog.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/ev_text_primary</item>
+    </style>
+
+    <style name="EVChargePilot.Dialog.Body" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textColor">@color/ev_text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EVChargePilot</string>
+    <string name="status_vehicle_connected">Données véhicule disponibles</string>
+    <string name="status_waiting_for_vehicle">En attente des données véhicule</string>
+    <string name="label_battery">BATTERIE</string>
+    <string name="soc_vehicle_reported">État de charge rapporté par le véhicule</string>
+    <string name="label_power">PUISSANCE BATTERIE</string>
+    <string name="power_sign_help">+ consommation · − récupération</string>
+    <string name="label_range">AUTONOMIE</string>
+    <string name="label_speed">VITESSE</string>
+    <string name="label_climate">CLIMATISATION</string>
+    <string name="label_outside_temp">EXTÉRIEUR</string>
+    <string name="label_battery_temp">TEMP. BATTERIE</string>
+    <string name="label_consumption">MOYENNE</string>
+    <string name="label_current_trip">Trajet en cours</string>
+    <string name="label_duration">ENREGISTRÉ</string>
+    <string name="label_distance">DISTANCE</string>
+    <string name="label_energy_used">ÉNERGIE UTILISÉE</string>
+    <string name="label_regenerated">RÉCUPÉRÉE</string>
+    <string name="action_start_trip">Démarrer le trajet</string>
+    <string name="action_stop_trip">Arrêter et enregistrer</string>
+    <string name="action_view_diagnostics">Voir le diagnostic</string>
+    <string name="action_close">Fermer</string>
+    <string name="trip_control_speed_unavailable">Les commandes restent désactivées tant que la vitesse est illisible.</string>
+    <string name="trip_control_park_to_change">L’enregistrement continue. Stationnez-vous pour le modifier.</string>
+    <string name="trip_recording">Enregistrement actif. L’énergie apparaît seulement si le véhicule l’expose.</string>
+    <string name="trip_ready">Prêt. Démarrez le trajet avant de rouler.</string>
+    <string name="climate_on">Active</string>
+    <string name="climate_ac_on">A/C active</string>
+    <string name="climate_off">Arrêtée</string>
+    <string name="climate_fan_level"> · ventilation %1$d</string>
+    <string name="diagnostics_title">Diagnostic</string>
+    <string name="diagnostics_firmware">Génération du firmware : %1$s</string>
+    <string name="diagnostics_read_only">Accès au véhicule : lecture seule</string>
+    <string name="diagnostics_previous_crash">Rapport du crash précédent</string>
+    <string name="diagnostics_recent_log">Journal récent de l’application</string>
+    <string name="diagnostics_no_log">Aucune entrée pour le moment.</string>
+</resources>
+

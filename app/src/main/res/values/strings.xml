@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EVChargePilot</string>
+    <string name="value_unavailable" translatable="false">—</string>
+    <string name="value_soc_unavailable" translatable="false">— %</string>
+    <string name="value_power_unavailable" translatable="false">— kW</string>
+    <string name="status_vehicle_connected">Vehicle data available</string>
+    <string name="status_waiting_for_vehicle">Waiting for vehicle data</string>
+    <string name="label_battery">BATTERY</string>
+    <string name="soc_vehicle_reported">Vehicle-reported state of charge</string>
+    <string name="label_power">BATTERY POWER</string>
+    <string name="power_sign_help">+ consumption · − regeneration</string>
+    <string name="label_range">RANGE</string>
+    <string name="label_speed">SPEED</string>
+    <string name="label_climate">CLIMATE</string>
+    <string name="label_outside_temp">OUTSIDE</string>
+    <string name="label_battery_temp">BATTERY TEMP.</string>
+    <string name="label_consumption">AVERAGE</string>
+    <string name="label_current_trip">Current trip</string>
+    <string name="label_duration">RECORDED</string>
+    <string name="label_distance">DISTANCE</string>
+    <string name="label_energy_used">ENERGY USED</string>
+    <string name="label_regenerated">REGENERATED</string>
+    <string name="action_start_trip">Start trip</string>
+    <string name="action_stop_trip">Stop and save trip</string>
+    <string name="action_view_diagnostics">View diagnostics</string>
+    <string name="action_close">Close</string>
+    <string name="trip_control_speed_unavailable">Trip controls stay disabled until speed is readable.</string>
+    <string name="trip_control_park_to_change">Live recording continues. Park to change it.</string>
+    <string name="trip_recording">Recording. Power-derived energy appears only when the vehicle exposes it.</string>
+    <string name="trip_ready">Ready. Start the trip before moving.</string>
+    <string name="climate_on">On</string>
+    <string name="climate_ac_on">A/C on</string>
+    <string name="climate_off">Off</string>
+    <string name="climate_fan_level"> · fan %1$d</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="diagnostics_firmware">Firmware generation: %1$s</string>
+    <string name="diagnostics_read_only">Vehicle access: read-only</string>
+    <string name="diagnostics_previous_crash">Previous crash report</string>
+    <string name="diagnostics_recent_log">Recent application log</string>
+    <string name="diagnostics_no_log">No log entries yet.</string>
+</resources>
