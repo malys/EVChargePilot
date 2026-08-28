@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unstable channel only. The capture screen is a development instrument for recording what
+     each energy property does on a given firmware generation; the stable manifest declares no
+     such activity and the stable source set contains no such class. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".EvidenceCaptureActivity"
+            android:exported="false"
+            android:configChanges="uiMode"
+            android:screenOrientation="landscape" />
+    </application>
+</manifest>

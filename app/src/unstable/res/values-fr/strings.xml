@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="evidence_title">Relevé des signaux</string>
+    <string name="evidence_start">Démarrer le relevé</string>
+    <string name="evidence_stop">Arrêter et enregistrer</string>
+    <string name="evidence_copy">Copier le tableau</string>
+    <string name="evidence_ready">Prêt. Démarrez le relevé avant de dérouler le protocole.</string>
+    <string name="evidence_speed_unavailable">Les commandes restent désactivées tant que la vitesse n’est pas lisible.</string>
+    <string name="evidence_recording">Relevé en cours. Les 60 premières secondes sont échantillonnées à 200 ms.</string>
+    <string name="evidence_park_to_change">Le relevé continue. Stationnez pour le modifier.</string>
+    <string name="evidence_idle">Aucun relevé en cours</string>
+    <string name="evidence_no_data">Aucun échantillon pour le moment.</string>
+    <string name="evidence_capturing">%1$d instantanés · %2$d s</string>
+    <string name="evidence_saved">Relevé enregistré. Récupérez le fichier ci-dessous avec adb.</string>
+    <string name="evidence_write_failed">Le relevé est arrêté, mais son fichier n’a pas pu être enregistré.</string>
+    <string name="evidence_refused">Stationnez et attendez une vitesse lisible avant de modifier le relevé.</string>
+    <string name="evidence_copied">Tableau copié dans le presse-papiers</string>
+</resources>

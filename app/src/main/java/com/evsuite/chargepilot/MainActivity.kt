@@ -54,7 +54,13 @@ class MainActivity : AppCompatActivity() {
 
         provenance = ProvenanceText(this)
         binding.tripAction.setOnClickListener { toggleTrip() }
-        binding.diagnosticsAction.setOnClickListener { showDiagnostics() }
+        binding.diagnosticsAction.setOnClickListener {
+            if (EvidenceCaptureHook.IS_SUPPORTED) {
+                EvidenceCaptureHook.open(this)
+            } else {
+                showDiagnostics()
+            }
+        }
         renderUnavailable()
     }
 

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Impeccable direction contract
+     THESIS: one parked-only action creates a factual vehicle-signal record.
+     OWN-WORLD: EVSuite instrument surfaces, data table, one rail, no decoration or motion.
+     STORY: verify speed, capture the drive, save privately, then retrieve the exact artifact.
+     FIRST VIEWPORT: live evidence fills the field; state, path and actions stay in the rail.
+     FORM: inherited asymmetric instrument binnacle; seed key chargepilot-evidence-rail.
+     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/evidence_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <TextView
+            android:id="@+id/captureStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="end"
+            android:text="@string/evidence_idle"
+            android:textAppearance="@style/Text.EV.Body" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:padding="@dimen/spacing_lg">
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:padding="@dimen/spacing_md">
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/evidenceTable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="@string/evidence_no_data"
+                    android:textAppearance="@style/Text.EV.Body" />
+            </HorizontalScrollView>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="@dimen/chargepilot_rail_width"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <TextView
+                android:id="@+id/captureHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="@string/evidence_ready"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
+            <TextView
+                android:id="@+id/capturePath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:maxLines="4"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:textIsSelectable="true"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/captureAction"
+                style="@style/Widget.EVChargePilot.Button"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:text="@string/evidence_start" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/copyAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/evidence_copy" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

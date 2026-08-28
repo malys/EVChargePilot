@@ -6,6 +6,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Unstable builds can capture firmware-specific telemetry evidence from one parked-only
+  diagnostics screen.** The screen shows per-signal availability and statistics, records at the
+  dashboard's 1 Hz cadence plus a 200 ms burst for the first minute, and saves schema-versioned
+  JSON atomically in app-private storage. Start and stop both fail closed until speed is readable
+  and at or below 0.1 km/h. The completed file path stays visible for `adb pull`, while its
+  Markdown table can be copied without storage or network permission. Stable builds contain no
+  capture activity, recorder controller or file store.
+
 - **A trip keeps recording while the driver looks at something else.** Sampling used to live
   between the dashboard's `onStart` and `onStop`, so switching to the media app for ten minutes
   left a hole in the middle of the drive: the accumulator refuses to integrate across a gap
