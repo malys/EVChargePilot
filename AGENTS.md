@@ -50,3 +50,19 @@ the complementary `emulator-car` (Automotive API 33) and `emulator-screen` (API 
 1920×720) profiles; `mise run run` installs and launches the debug APK. JDK 17 and Android
 SDK 36 are used for compilation; the deployed minimum remains API 28. Emulator checks do
 not replace a vehicle pass on each supported firmware generation.
+
+## Continuation handoff
+
+- The implemented baseline is the passive dashboard, nullable shared energy snapshot,
+  parked-only process-local trip recording, bounded atomic trip history, crash diagnostics,
+  stable/unstable variants, CI gates and the two emulator profiles documented in `README.md`.
+- Arrival-SOC prediction, charger routing, background trip recording and energy attribution
+  are not implemented. Treat each as a separately scoped milestone with explicit evidence
+  for every input; do not fill missing vehicle signals with inferred measurements.
+- Start app work by checking `git status` and the EVHardware submodule branch. Any shared
+  telemetry model, property, unit, fallback or integration change starts in the standalone
+  `../EVHardware` repository, is tested and pushed there, then reaches this app through a
+  submodule pointer update. Never develop library changes inside the nested checkout.
+- Before handing off a change, run `mise run check` and `mise run build`. For UI/lifecycle
+  work, also run the API 28 screen emulator at 1920×720; for vehicle interfaces, record the
+  remaining on-vehicle validation requirement rather than claiming emulator coverage.

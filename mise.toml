@@ -61,7 +61,14 @@ run = "bash .github/security/check-permissions.sh"
 
 [tasks.check]
 description = "What CI runs: permissions + lint + tests"
-depends = ["permissions", "lint", "test"]
+run = '''
+set -e
+bash .github/security/check-permissions.sh
+./gradlew -Dorg.gradle.java.home=$JAVA_HOME \
+  :evhardware:testDebugUnitTest \
+  testStableDebugUnitTest testUnstableDebugUnitTest \
+  lintStableDebug lintUnstableDebug
+'''
 
 [tasks.release]
 description = "Build the minified stable release APK"

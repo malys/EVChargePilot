@@ -67,10 +67,8 @@ Recording currently samples only while the dashboard is visible and survives act
 recreation only while the process remains alive. Persistent background recording is a later,
 separately reviewed milestone. A trip's reported duration is therefore the time actually
 covered by usable samples, not wall clock: hiding the dashboard for ten minutes adds nothing
-to the duration, the distance or the energy, so the averages divide comparable numbers. Because of that, a trip reports the time its samples actually
-cover, not wall clock: hide the dashboard for ten minutes and the recorded time does not
-move, so the average consumption stays the quotient of a distance and an energy that were
-measured over the same interval.
+to the duration, distance or energy, so consumption averages compare values measured over
+the same interval.
 
 ## Install
 
