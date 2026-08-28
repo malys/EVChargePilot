@@ -39,4 +39,6 @@
     <string name="diagnostics_previous_crash">Previous crash report</string>
     <string name="diagnostics_recent_log">Recent application log</string>
     <string name="diagnostics_no_log">No log entries yet.</string>
+    <string name="diagnostics_properties">Vehicle energy properties</string>
+    <string name="diagnostics_properties_hint">What the vehicle answers for each read-only property. A property the firmware declares but never publishes reads as unavailable and is shown as an em dash on the dashboard, never as zero.</string>
 </resources>

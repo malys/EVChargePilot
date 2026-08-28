@@ -36,5 +36,7 @@
     <string name="diagnostics_previous_crash">Rapport du crash précédent</string>
     <string name="diagnostics_recent_log">Journal récent de l’application</string>
     <string name="diagnostics_no_log">Aucune entrée pour le moment.</string>
+    <string name="diagnostics_properties">Propriétés énergie du véhicule</string>
+    <string name="diagnostics_properties_hint">Ce que le véhicule répond pour chaque propriété en lecture seule. Une propriété déclarée par le firmware mais jamais publiée est signalée indisponible et affichée par un tiret cadratin sur le tableau de bord, jamais par zéro.</string>
 </resources>
 

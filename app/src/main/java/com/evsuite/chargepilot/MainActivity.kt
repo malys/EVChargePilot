@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityMainBinding
 import com.evsuite.hardware.AppLogger
+import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -135,12 +136,30 @@ class MainActivity : AppCompatActivity() {
         binding.tripHint.text = getString(R.string.trip_control_speed_unavailable)
     }
 
+    /**
+     * The report reads ten vehicle properties over binder and the crash file off disk, so it is
+     * built on the sampler thread and only the dialog itself touches the main one.
+     */
     private fun showDiagnostics() {
-        val crash = CrashLogger.read(this)
+        sampler.execute {
+            val body = diagnosticsReport()
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.diagnostics_title)
+                    .setMessage(body)
+                    .setPositiveButton(R.string.action_close, null)
+                    .show()
+            }
+        }
+    }
+
+    private fun diagnosticsReport(): String {
+        val crash = CrashLogger.read(applicationContext)
         val recentLog = AppLogger.entries.takeLast(30).joinToString("\n") {
             "[${it.time}] ${it.level}/${it.tag}: ${it.msg}"
         }
-        val body = buildString {
+        return buildString {
             appendLine(getString(R.string.diagnostics_firmware, FirmwareInfo.getGeneration().name))
             appendLine(getString(R.string.diagnostics_read_only))
             appendLine()
@@ -149,14 +168,15 @@ class MainActivity : AppCompatActivity() {
                 appendLine(crash)
                 appendLine()
             }
+            // A field showing an em dash says the signal is unusable but not why. This says why:
+            // unsupported, declared and never published, or unreachable on this runtime.
+            appendLine(getString(R.string.diagnostics_properties))
+            appendLine(getString(R.string.diagnostics_properties_hint))
+            EVHardware.probeTelemetryProperties().forEach { appendLine(it.toString()) }
+            appendLine()
             appendLine(getString(R.string.diagnostics_recent_log))
             append(recentLog.ifBlank { getString(R.string.diagnostics_no_log) })
         }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.diagnostics_title)
-            .setMessage(body)
-            .setPositiveButton(R.string.action_close, null)
-            .show()
     }
 
     private fun percent(value: Float?) = value?.let { format("%.1f %%", it) }
