@@ -38,5 +38,18 @@
     <string name="diagnostics_no_log">Aucune entrée pour le moment.</string>
     <string name="diagnostics_properties">Propriétés énergie du véhicule</string>
     <string name="diagnostics_properties_hint">Ce que le véhicule répond pour chaque propriété en lecture seule. Une propriété déclarée par le firmware mais jamais publiée est signalée indisponible et affichée par un tiret cadratin sur le tableau de bord, jamais par zéro.</string>
+    <string name="provenance_measured">mesuré par le véhicule</string>
+    <string name="provenance_derived">calculé à partir des mesures véhicule</string>
+    <string name="provenance_estimated">estimé par un modèle</string>
+    <string name="provenance_unavailable">indisponible</string>
+    <string name="provenance_description">%1$s : %2$s, %3$s</string>
+    <string name="provenance_description_missing">%1$s : %2$s, %3$s</string>
+    <string name="reason_unsupported_firmware">cette génération de firmware n\'expose pas le signal</string>
+    <string name="reason_unvalidated_firmware">le signal n\'est pas encore validé sur ce firmware</string>
+    <string name="reason_signal_absent">le véhicule ne publie pas ce signal actuellement</string>
+    <string name="reason_insufficient_samples">pas encore assez d\'échantillons</string>
+    <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
+    <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
+    <string name="label_soc">État de charge</string>
 </resources>
 

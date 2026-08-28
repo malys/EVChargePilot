@@ -6,6 +6,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Every figure on the dashboard now says what kind of claim it is.** The energy work ahead is
+  mostly inference — the MG4 publishes no per-consumer counters, so the climate share, the speed
+  comparison and the arrival state of charge will all be models — and a model drawn in the same
+  typeface as a vehicle reading is a vehicle reading as far as the driver is concerned. Readings
+  are mapped into EVHardware's `Provenanced` carrier, which cannot hold an estimate without its
+  uncertainty band and cannot hold a number for a value it calls unavailable. An estimate wears a
+  `≈` and its band; a missing figure stays an em dash whose reason — unsupported generation,
+  signal not published, not enough samples — is spoken by the reading's description and spelled
+  out in the diagnostics report. The distinction is carried by text, not colour, so it survives
+  daylight and reaches a screen reader.
+
 - **The diagnostics dialog lists what each energy property actually answers.** A field showing
   an em dash says a signal is unusable but not why, and unsupported, declared-but-never-published
   and unreachable all look identical from the driver's seat. The report names the status, the raw

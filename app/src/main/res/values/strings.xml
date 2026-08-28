@@ -41,4 +41,18 @@
     <string name="diagnostics_no_log">No log entries yet.</string>
     <string name="diagnostics_properties">Vehicle energy properties</string>
     <string name="diagnostics_properties_hint">What the vehicle answers for each read-only property. A property the firmware declares but never publishes reads as unavailable and is shown as an em dash on the dashboard, never as zero.</string>
+    <string name="value_estimated" translatable="false">≈ %1$s ± %2$s</string>
+    <string name="provenance_measured">measured by the vehicle</string>
+    <string name="provenance_derived">derived from vehicle readings</string>
+    <string name="provenance_estimated">estimated by a model</string>
+    <string name="provenance_unavailable">unavailable</string>
+    <string name="provenance_description">%1$s: %2$s, %3$s</string>
+    <string name="provenance_description_missing">%1$s: %2$s, %3$s</string>
+    <string name="reason_unsupported_firmware">this firmware generation does not offer the signal</string>
+    <string name="reason_unvalidated_firmware">the signal is not yet validated on this firmware</string>
+    <string name="reason_signal_absent">the vehicle is not publishing the signal right now</string>
+    <string name="reason_insufficient_samples">not enough samples yet</string>
+    <string name="reason_model_not_trained">the model has no fit to predict from</string>
+    <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
+    <string name="label_soc">State of charge</string>
 </resources>
