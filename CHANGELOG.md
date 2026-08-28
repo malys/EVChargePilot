@@ -6,6 +6,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The unstable evidence capture records usable battery capacity as an unvalidated candidate.**
+  The public post-AAOS 9 property is shown beside normal snapshot fields, remains null when the
+  runtime does not publish it, and is never copied into `EnergySnapshot` or a stable screen.
+
 - **Unstable builds can capture firmware-specific telemetry evidence from one parked-only
   diagnostics screen.** The screen shows per-signal availability and statistics, records at the
   dashboard's 1 Hz cadence plus a 200 ms burst for the first minute, and saves schema-versioned

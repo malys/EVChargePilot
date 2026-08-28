@@ -87,14 +87,15 @@ class EvidenceCaptureActivity : AppCompatActivity() {
             return
         }
         lastReadElapsedMs = elapsedNow
-        val snapshot = runCatching { reader.read(System.currentTimeMillis()) }
+        val sample = runCatching { reader.readEvidence(System.currentTimeMillis()) }
             .onFailure { AppLogger.w(TAG, "evidence sample failed: ${it.message}") }
             .getOrNull() ?: return
+        val snapshot = sample.snapshot
         latest = snapshot
         // The table is live even before a file capture starts. This preview remains in memory and
         // is never passed to the file store; opening diagnostics alone cannot create an artifact.
-        previewRecorder.record(snapshot)
-        recorder?.record(snapshot)
+        previewRecorder.record(sample)
+        recorder?.record(sample)
         publish()
     }
 
