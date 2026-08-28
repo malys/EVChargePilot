@@ -6,6 +6,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A trip keeps recording while the driver looks at something else.** Sampling used to live
+  between the dashboard's `onStart` and `onStop`, so switching to the media app for ten minutes
+  left a hole in the middle of the drive: the accumulator refuses to integrate across a gap
+  longer than five seconds, correctly, since it has no idea what the car did in between, and the
+  trip came back missing the distance and energy of the part nobody was watching. A foreground
+  service now owns the sampler and the trip history, and the dashboard is one of its readers. It
+  samples while a dashboard is bound or a trip is recording, and stops itself when neither is
+  true, so nothing reads vehicle properties for nobody. The service claims only the foreground
+  type its held permissions back, and the notification stays a low-importance status line — it
+  never interrupts a moving car.
+
 - **Every figure on the dashboard now says what kind of claim it is.** The energy work ahead is
   mostly inference — the MG4 publishes no per-consumer counters, so the climate share, the speed
   comparison and the arrival state of charge will all be models — and a model drawn in the same

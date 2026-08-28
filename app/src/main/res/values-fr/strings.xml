@@ -51,5 +51,10 @@
     <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
     <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
     <string name="label_soc">État de charge</string>
+    <string name="notification_channel_recording">Enregistrement de trajet</string>
+    <string name="notification_channel_recording_description">Affichée pendant l\'enregistrement d\'un trajet, pour qu\'il ne tourne jamais de manière invisible.</string>
+    <string name="notification_recording_title">Enregistrement d\'un trajet</string>
+    <string name="notification_recording_distance">%1$s parcourus</string>
+    <string name="notification_recording_waiting">En attente des données véhicule</string>
 </resources>
 

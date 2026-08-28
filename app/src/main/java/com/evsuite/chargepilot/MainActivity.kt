@@ -1,6 +1,11 @@
 package com.evsuite.chargepilot
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -10,30 +15,37 @@ import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
 import com.evsuite.hardware.telemetry.EnergySnapshot
-import com.evsuite.hardware.telemetry.EnergyTelemetryReader
-import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.Provenanced
-import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var reader: EnergyTelemetryReader
-    private lateinit var tripStore: EnergyTripHistoryStore
     private lateinit var provenance: ProvenanceText
-    private val sampler = Executors.newSingleThreadScheduledExecutor { runnable ->
-        Thread(runnable, "chargepilot-sampler")
+    /** Ten binder reads and a disk read for the diagnostics report; not the main thread's work. */
+    private val background = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "chargepilot-diagnostics")
     }
-    private var samplingTask: ScheduledFuture<*>? = null
-    /** Written by the sampler thread, read by the main thread on a control tap. */
-    @Volatile private var latest: EnergySnapshot? = null
+
+    /** The recorder owns the sampler; this screen is one of its readers. */
+    private var recorder: TripRecordingService? = null
     /** The last frame drawn, so the diagnostics report can explain what the screen shows. */
     @Volatile private var latestReadings: DashboardReadings = DashboardReadings.empty()
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val bound = (service as? TripRecordingService.LocalBinder)?.service ?: return
+            recorder = bound
+            bound.setListener(::render)
+            bound.latest?.let(::render)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            recorder = null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,49 +53,46 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         provenance = ProvenanceText(this)
-        reader = EnergyTelemetryReader(applicationContext)
-        tripStore = EnergyTripHistoryStore(File(filesDir, "trips.json"))
         binding.tripAction.setOnClickListener { toggleTrip() }
         binding.diagnosticsAction.setOnClickListener { showDiagnostics() }
         renderUnavailable()
     }
 
+    /**
+     * Binding is what makes the recorder sample for this screen; it keeps sampling after the
+     * unbind only when a trip is actually being recorded.
+     */
     override fun onStart() {
         super.onStart()
-        samplingTask = sampler.scheduleWithFixedDelay(::sample, 0L, 1L, TimeUnit.SECONDS)
+        bindService(
+            Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE
+        )
     }
 
     override fun onStop() {
-        samplingTask?.cancel(false)
-        samplingTask = null
+        recorder?.setListener(null)
+        recorder = null
+        unbindService(connection)
         super.onStop()
     }
 
     override fun onDestroy() {
-        sampler.shutdownNow()
+        background.shutdownNow()
         super.onDestroy()
     }
 
-    private fun sample() {
-        val value = runCatching { reader.read() }
-            .onFailure { AppLogger.w(TAG, "telemetry sample failed: ${it.message}") }
-            .getOrNull() ?: return
-        latest = value
-        EnergyTripSession.add(value)
-        runOnUiThread { render(value) }
-    }
-
     private fun toggleTrip() {
-        val value = latest ?: return
+        val service = recorder
         if (EnergyTripSession.isRecording) {
-            val summary = EnergyTripSession.stop(value.timestampMs) ?: return
-            if (!tripStore.append(summary)) {
-                AppLogger.w(TAG, "trip history could not be saved")
+            if (service == null) {
+                AppLogger.w(TAG, "trip stop ignored: recorder not bound")
+                return
             }
+            service.stopTrip()
+            service.latest?.let(::render)
         } else {
-            EnergyTripSession.start(value)
+            TripRecordingService.start(this)
         }
-        render(value)
     }
 
     private fun render(value: EnergySnapshot) {
@@ -165,7 +174,7 @@ class MainActivity : AppCompatActivity() {
      * built on the sampler thread and only the dialog itself touches the main one.
      */
     private fun showDiagnostics() {
-        sampler.execute {
+        background.execute {
             val body = diagnosticsReport()
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread

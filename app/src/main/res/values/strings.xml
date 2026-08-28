@@ -55,4 +55,9 @@
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>
+    <string name="notification_channel_recording">Trip recording</string>
+    <string name="notification_channel_recording_description">Shown while a trip is being recorded, so the recording is never running invisibly.</string>
+    <string name="notification_recording_title">Recording a trip</string>
+    <string name="notification_recording_distance">%1$s so far</string>
+    <string name="notification_recording_waiting">Waiting for vehicle data</string>
 </resources>

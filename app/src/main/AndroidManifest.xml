@@ -16,6 +16,19 @@
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
     <uses-permission android:name="android.car.permission.CAR_VENDOR_EXTENSION" />
 
+    <!-- Trip recording keeps sampling while the driver looks at another app, which on API 26+
+         means a foreground service. Both permissions are install-time and neither reaches the
+         vehicle: FOREGROUND_SERVICE allows the service at all, and FOREGROUND_SERVICE_SPECIAL_USE
+         backs the one type that fits. The platform's catalogue has no entry for recording a
+         vehicle's own energy telemetry to local storage — `dataSync` describes transferring data
+         to somewhere else, which this app has no permission to do and no code for, and from
+         Android 15 it carries a daily runtime cap a long drive would hit. POST_NOTIFICATIONS is
+         deliberately absent: the target head unit runs API 28, where it does not exist, and a
+         permission this app never asks for on a screen the driver reaches is a permission it
+         does not have. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <application
         android:name=".ChargePilotApp"
         android:allowBackup="false"
@@ -36,6 +49,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".TripRecordingService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Records the vehicle's own energy telemetry to app-private storage for the duration of a trip the driver started. No data leaves the car." />
+        </service>
     </application>
 
 </manifest>

@@ -4,3 +4,7 @@ android.car.permission.CAR_ENERGY
 android.car.permission.CAR_EXTERIOR_ENVIRONMENT
 android.car.permission.CONTROL_CAR_CLIMATE
 android.car.permission.CAR_VENDOR_EXTENSION
+# Trip recording outlives the dashboard, which on API 26+ requires a foreground service.
+# Install-time permissions, no vehicle access, no network.
+android.permission.FOREGROUND_SERVICE
+android.permission.FOREGROUND_SERVICE_SPECIAL_USE
