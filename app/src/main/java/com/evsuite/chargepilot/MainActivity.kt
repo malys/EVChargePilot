@@ -54,6 +54,9 @@ class MainActivity : AppCompatActivity() {
 
         provenance = ProvenanceText(this)
         binding.tripAction.setOnClickListener { toggleTrip() }
+        binding.historyAction.setOnClickListener {
+            startActivity(Intent(this, TripHistoryActivity::class.java))
+        }
         binding.diagnosticsAction.setOnClickListener {
             if (EvidenceCaptureHook.IS_SUPPORTED) {
                 EvidenceCaptureHook.open(this)
@@ -172,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         binding.climateValue.text = DASH
         binding.dataStatus.text = getString(R.string.status_waiting_for_vehicle)
         binding.tripAction.isEnabled = false
+        binding.historyAction.isEnabled = true
         binding.tripHint.text = getString(R.string.trip_control_speed_unavailable)
     }
 

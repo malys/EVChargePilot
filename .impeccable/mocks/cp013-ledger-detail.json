@@ -1,0 +1,8 @@
+{
+  "surface": "CP-013 trip history",
+  "viewport": "1920x720",
+  "composition": "fixed chronological ledger at left; selected trip totals and speed/power trace at right",
+  "prompt": "EVChargePilot native Android Automotive trip-history comp in the established Instrument Binnacle world; fixed 420dp ledger, large evidence detail, simple factual trace, 72dp targets, no shadow or decorative colour",
+  "approved": true,
+  "approval": "Delegated by the user's instruction to continue; selected because it preserves list context and the normative two-pane layout. Illustrative values and unsupported metrics are not implementation requirements."
+}

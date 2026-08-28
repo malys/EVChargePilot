@@ -33,4 +33,9 @@
         <item name="android:textColor">@color/ev_button_text</item>
         <item name="backgroundTint">@color/ev_button_fill</item>
     </style>
+
+    <style name="Widget.EVChargePilot.Button.Danger" parent="Widget.EV.Button">
+        <item name="android:textColor">@color/ev_on_accent</item>
+        <item name="backgroundTint">@color/ev_error</item>
+    </style>
 </resources>

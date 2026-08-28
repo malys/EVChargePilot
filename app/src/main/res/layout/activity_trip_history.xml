@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Impeccable direction contract
+  THESIS: a trip is a factual ledger entry whose evidence stays visible beside its index.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow.
+  STORY: choose a completed trip, inspect only recorded totals and trace, delete while parked.
+  FIRST VIEWPORT: a fixed 420dp chronological ledger anchors the left; detail owns the right.
+  FORM: selected archive label opening into an evidence sheet; seed key 0bf7e507.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="140dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_lg"
+            android:layout_weight="1"
+            android:text="@string/trip_history_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteAllAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="220dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_delete_all_trips" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/historyContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_lg"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="@dimen/chargepilot_rail_width"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_sm">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_sm"
+                    android:text="@string/trip_history_recent"
+                    android:textAppearance="@style/Text.EV.SectionHeader" />
+
+                <ListView
+                    android:id="@+id/historyList"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:choiceMode="singleChoice"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="@dimen/spacing_sm"
+                    android:listSelector="@android:color/transparent"
+                    android:scrollbars="vertical" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/detailDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@style/Text.EV.Title" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/deleteTripAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="220dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:text="@string/action_delete_trip" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_duration" />
+                        <TextView android:id="@+id/detailDuration" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_distance" />
+                        <TextView android:id="@+id/detailDistance" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
+                        <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc_change" />
+                        <TextView android:id="@+id/detailSoc" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_energy_used" />
+                        <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_regenerated" />
+                        <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.TripValue" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/trackGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/trip_track_legend"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <com.evsuite.chargepilot.TripPlotView
+                        android:id="@+id/tripPlot"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:importantForAccessibility="yes" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/trackUnavailable"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/trip_track_unavailable"
+                    android:textAppearance="@style/Text.EV.Body"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/trip_history_empty_title"
+                android:textAppearance="@style/Text.EV.Title" />
+
+            <TextView
+                android:layout_width="720dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center"
+                android:text="@string/trip_history_empty_body"
+                android:textAppearance="@style/Text.EV.Body" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/loadingState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/trip_history_loading"
+            android:textAppearance="@style/Text.EV.Body" />
+    </FrameLayout>
+</LinearLayout>

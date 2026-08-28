@@ -6,6 +6,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A parked-only trip ledger now exposes the complete local record.** Up to 200 trips appear
+  newest first with recorded totals, SOC change, consumed/regenerated energy and a lightweight
+  speed/power trace when samples exist. Missing values remain explicit and explainable; single
+  and bulk deletion require a fresh readable speed at or below 0.1 km/h and a full-screen
+  confirmation.
+
 - **The unstable evidence capture records usable battery capacity as an unvalidated candidate.**
   The public post-AAOS 9 property is shown beside normal snapshot fields, remains null when the
   runtime does not publish it, and is never copied into `EnergySnapshot` or a stable screen.
