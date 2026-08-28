@@ -49,6 +49,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **A recorded trip now stores its sample track alongside its totals.** The recorder hands the
+  track to EVHardware's versioned history file, which keeps one sample per five seconds and
+  drops the oldest tracks — never a whole trip — when the file approaches its size ceiling.
+  Nothing on screen changes yet; the tracks are what the consumption, climate-share and
+  arrival-state-of-charge models will be fitted from, and they have to exist before those
+  models can.
+
 - The diagnostics report is built on the sampler thread. It reads ten vehicle properties over
   binder and the crash file off disk, neither of which belongs on the thread drawing the dialog.
 

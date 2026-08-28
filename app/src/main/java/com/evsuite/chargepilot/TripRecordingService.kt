@@ -140,9 +140,9 @@ class TripRecordingService : Service() {
     /** Called through the binder: the dashboard is on screen whenever a trip can be stopped. */
     fun stopTrip() {
         val endedAt = latestSnapshot?.timestampMs ?: System.currentTimeMillis()
-        val summary = EnergyTripSession.stop(endedAt)
+        val recorded = EnergyTripSession.stop(endedAt)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        if (summary == null) {
+        if (recorded == null) {
             stopWhenNobodyNeedsIt()
             return
         }
@@ -152,7 +152,8 @@ class TripRecordingService : Service() {
         // service stops itself the moment nobody needs it, and a stopSelf() racing the append
         // would drop the trip the driver just finished.
         sampler.execute {
-            if (!tripStore.append(summary)) AppLogger.w(TAG, "trip history could not be saved")
+            val saved = tripStore.append(recorded.summary, recorded.samples)
+            if (!saved) AppLogger.w(TAG, "trip history could not be saved")
             main.post { stopWhenNobodyNeedsIt() }
         }
     }
