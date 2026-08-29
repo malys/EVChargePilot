@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Vehicle range stays authoritative beside a visibly modelled adaptive estimate.**
+  Up to eight recent trip averages feed EVHardware's estimate after three usable observations;
+  the dashboard prefixes it with `≈` and shows the observed-spread uncertainty in kilometres.
+  Missing current power, usable energy, or history leaves an explained gap instead of a guess.
+
 - **The dashboard now separates immediate and trip consumption without competing with SOC.**
   Instant kWh/100 km uses EVHardware's five-second smoothing and stays unavailable below
   5 km/h; regeneration remains negative. The adjacent trip average keeps the accumulator's

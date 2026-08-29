@@ -10,7 +10,8 @@
     <string name="soc_vehicle_reported">Vehicle-reported state of charge</string>
     <string name="label_power">BATTERY POWER</string>
     <string name="power_sign_help">+ consumption · − regeneration</string>
-    <string name="label_range">RANGE</string>
+    <string name="label_range">VEHICLE RANGE</string>
+    <string name="label_adaptive_range">ADAPTIVE ESTIMATE</string>
     <string name="label_speed">SPEED</string>
     <string name="label_climate">CLIMATE</string>
     <string name="label_outside_temp">OUTSIDE</string>

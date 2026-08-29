@@ -146,6 +146,13 @@
                         android:layout_marginEnd="@dimen/spacing_sm">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_range" />
                         <TextView android:id="@+id/rangeValue" style="@style/Text.EV.ReadoutValue" />
+                        <TextView
+                            style="@style/Text.EV.ReadoutLabel"
+                            android:layout_marginTop="@dimen/spacing_sm"
+                            android:text="@string/label_adaptive_range" />
+                        <TextView
+                            android:id="@+id/adaptiveRangeValue"
+                            style="@style/Text.EV.TripValue" />
                     </LinearLayout>
 
                     <View

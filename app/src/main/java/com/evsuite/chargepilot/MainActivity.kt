@@ -14,11 +14,15 @@ import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
+import com.evsuite.hardware.telemetry.AdaptiveRangeEstimator
 import com.evsuite.hardware.telemetry.ConsumptionCalculator
 import com.evsuite.hardware.telemetry.EnergySnapshot
+import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
+import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.Provenanced
 import com.evsuite.hardware.telemetry.UnavailableReason
+import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
 
@@ -27,15 +31,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var provenance: ProvenanceText
     private val consumption = ConsumptionCalculator()
-    /** Ten binder reads and a disk read for the diagnostics report; not the main thread's work. */
+    private val rangeEstimator = AdaptiveRangeEstimator()
+    /** Bounded history parsing and diagnostics I/O never run on the main thread. */
     private val background = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "chargepilot-diagnostics")
+        Thread(runnable, "chargepilot-background")
     }
 
     /** The recorder owns the sampler; this screen is one of its readers. */
     private var recorder: TripRecordingService? = null
     /** The last frame drawn, so the diagnostics report can explain what the screen shows. */
     @Volatile private var latestReadings: DashboardReadings = DashboardReadings.empty()
+    /** Immutable snapshot loaded off the UI thread; the store writes newest trips first. */
+    @Volatile private var recentTrips: List<EnergyTripSummary> = emptyList()
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -76,6 +83,7 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onStart() {
         super.onStart()
+        loadRecentTrips()
         bindService(
             Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE
         )
@@ -100,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 AppLogger.w(TAG, "trip stop ignored: recorder not bound")
                 return
             }
-            service.stopTrip()
+            service.stopTrip(::loadRecentTrips)
             service.latest?.let(::render)
         } else {
             TripRecordingService.start(this)
@@ -114,10 +122,18 @@ class MainActivity : AppCompatActivity() {
             UnavailableReason.SIGNAL_ABSENT
         }
         val consumptionReading = consumption.add(value, missingReason)
+        val currentTrip = EnergyTripSession.current(value.timestampMs)
+        val adaptiveRange = rangeEstimator.estimate(
+            value,
+            currentTrip,
+            recentTrips,
+            missingReason,
+        )
         val readings = DashboardReadings.of(
             value,
-            EnergyTripSession.current(value.timestampMs),
+            currentTrip,
             consumptionReading.smoothedInstantaneous,
+            adaptiveRange,
         )
         latestReadings = readings
         renderReadings(readings)
@@ -147,6 +163,13 @@ class MainActivity : AppCompatActivity() {
     private fun renderReadings(readings: DashboardReadings) {
         bind(binding.socValue, R.string.label_soc, readings.soc, PATTERN_SOC, SOC_UNAVAILABLE)
         bind(binding.rangeValue, R.string.label_range, readings.range, PATTERN_DISTANCE)
+        bind(
+            binding.adaptiveRangeValue,
+            R.string.label_adaptive_range,
+            readings.adaptiveRange,
+            PATTERN_DISTANCE,
+            DISTANCE_UNAVAILABLE,
+        )
         bind(binding.speedValue, R.string.label_speed, readings.speed, PATTERN_SPEED)
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
         bind(binding.outsideTempValue, R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP)
@@ -197,6 +220,20 @@ class MainActivity : AppCompatActivity() {
         binding.tripAction.isEnabled = false
         binding.historyAction.isEnabled = true
         binding.tripHint.text = getString(R.string.trip_control_speed_unavailable)
+    }
+
+    /** History is bounded but still disk-backed; never parse it on the one-second UI path. */
+    private fun loadRecentTrips() {
+        runCatching {
+            background.execute {
+                val summaries = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).readSummaries()
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    recentTrips = summaries
+                    recorder?.latest?.let(::render)
+                }
+            }
+        }
     }
 
     /**
@@ -251,6 +288,7 @@ class MainActivity : AppCompatActivity() {
     private fun describeReadings(readings: DashboardReadings): List<String> = listOf(
         Triple(R.string.label_soc, readings.soc, PATTERN_SOC),
         Triple(R.string.label_range, readings.range, PATTERN_DISTANCE),
+        Triple(R.string.label_adaptive_range, readings.adaptiveRange, PATTERN_DISTANCE),
         Triple(R.string.label_speed, readings.speed, PATTERN_SPEED),
         Triple(R.string.label_power, readings.power, PATTERN_POWER),
         Triple(R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP),
@@ -291,11 +329,13 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val TAG = "EVChargePilot"
+        const val HISTORY_FILE = "trips.json"
         const val DASH = "—"
         // The unit-bearing fields keep their unit while unavailable so the layout does not
         // shift the moment the vehicle starts answering.
         const val SOC_UNAVAILABLE = "— %"
         const val POWER_UNAVAILABLE = "— kW"
+        const val DISTANCE_UNAVAILABLE = "— km"
         const val PATTERN_SOC = "%.1f %%"
         const val PATTERN_SPEED = "%.0f km/h"
         const val PATTERN_POWER = "%+.1f kW"

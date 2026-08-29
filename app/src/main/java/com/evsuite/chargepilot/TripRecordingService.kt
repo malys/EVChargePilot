@@ -138,7 +138,7 @@ class TripRecordingService : Service() {
     }
 
     /** Called through the binder: the dashboard is on screen whenever a trip can be stopped. */
-    fun stopTrip() {
+    fun stopTrip(onSaved: (() -> Unit)? = null) {
         val endedAt = latestSnapshot?.timestampMs ?: System.currentTimeMillis()
         val recorded = EnergyTripSession.stop(endedAt)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -154,7 +154,11 @@ class TripRecordingService : Service() {
         sampler.execute {
             val saved = tripStore.append(recorded.summary, recorded.samples)
             if (!saved) AppLogger.w(TAG, "trip history could not be saved")
-            main.post { stopWhenNobodyNeedsIt() }
+            main.post {
+                runCatching { onSaved?.invoke() }
+                    .onFailure { AppLogger.w(TAG, "trip saved callback failed: ${it.message}") }
+                stopWhenNobodyNeedsIt()
+            }
         }
     }
 

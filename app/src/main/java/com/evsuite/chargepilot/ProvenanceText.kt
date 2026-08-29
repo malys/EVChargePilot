@@ -31,7 +31,7 @@ class ProvenanceText(private val context: Context) {
         Provenance.ESTIMATED -> context.getString(
             R.string.value_estimated,
             format(pattern, value.value!!),
-            format(BAND_PATTERN, value.uncertainty!!),
+            format(pattern, value.uncertainty!!),
         )
     }
 
@@ -74,6 +74,5 @@ class ProvenanceText(private val context: Context) {
 
     private companion object {
         const val DASH = "—"
-        const val BAND_PATTERN = "%.1f"
     }
 }

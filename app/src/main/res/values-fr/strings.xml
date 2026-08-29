@@ -7,7 +7,8 @@
     <string name="soc_vehicle_reported">État de charge rapporté par le véhicule</string>
     <string name="label_power">PUISSANCE BATTERIE</string>
     <string name="power_sign_help">+ consommation · − récupération</string>
-    <string name="label_range">AUTONOMIE</string>
+    <string name="label_range">AUTONOMIE VÉHICULE</string>
+    <string name="label_adaptive_range">ESTIMATION ADAPTATIVE</string>
     <string name="label_speed">VITESSE</string>
     <string name="label_climate">CLIMATISATION</string>
     <string name="label_outside_temp">EXTÉRIEUR</string>

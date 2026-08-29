@@ -18,6 +18,7 @@ import com.evsuite.hardware.telemetry.UnavailableReason
 data class DashboardReadings(
     val soc: Provenanced<Float>,
     val range: Provenanced<Float>,
+    val adaptiveRange: Provenanced<Double>,
     val speed: Provenanced<Float>,
     val power: Provenanced<Float>,
     val outsideTemp: Provenanced<Float>,
@@ -34,7 +35,7 @@ data class DashboardReadings(
         fun empty(): DashboardReadings {
             fun <T : Any> gap() = Provenanced.unavailable<T>(UnavailableReason.SIGNAL_ABSENT)
             return DashboardReadings(
-                soc = gap(), range = gap(), speed = gap(), power = gap(),
+                soc = gap(), range = gap(), adaptiveRange = gap(), speed = gap(), power = gap(),
                 outsideTemp = gap(), batteryTemp = gap(), instantConsumption = gap(),
                 tripDuration = gap(), tripDistance = gap(), tripEnergy = gap(),
                 tripRegen = gap(), tripConsumption = gap(),
@@ -45,6 +46,7 @@ data class DashboardReadings(
             snapshot: EnergySnapshot,
             trip: EnergyTripSummary?,
             instantConsumption: Provenanced<Double>,
+            adaptiveRange: Provenanced<Double>,
         ): DashboardReadings {
             // An unrecognised generation is not a car that stopped publishing: it is a car
             // this build was never taught to read. The screen says which.
@@ -56,6 +58,7 @@ data class DashboardReadings(
             return DashboardReadings(
                 soc = Provenanced.measured(snapshot.socPercent, absent),
                 range = Provenanced.measured(snapshot.rangeKm, absent),
+                adaptiveRange = adaptiveRange,
                 speed = Provenanced.measured(snapshot.speedKmh, absent),
                 power = Provenanced.measured(snapshot.batteryPowerKw, absent),
                 outsideTemp = Provenanced.measured(snapshot.outsideTempCelsius, absent),
