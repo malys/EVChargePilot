@@ -318,6 +318,14 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/automaticDetection"
+                style="@style/Widget.EV.Switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/action_automatic_trips" />
+
             <Space
                 android:layout_width="1dp"
                 android:layout_height="0dp"

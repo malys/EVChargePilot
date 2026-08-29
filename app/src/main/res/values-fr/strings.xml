@@ -23,6 +23,7 @@
     <string name="label_regenerated">RÉCUPÉRÉE</string>
     <string name="action_start_trip">Démarrer le trajet</string>
     <string name="action_stop_trip">Arrêter et enregistrer</string>
+    <string name="action_automatic_trips">Trajets automatiques</string>
     <string name="action_view_diagnostics">Voir le diagnostic</string>
     <string name="action_trip_history">Historique des trajets</string>
     <string name="action_back">Retour</string>
@@ -40,6 +41,11 @@
     <string name="trip_control_park_to_change">L’enregistrement continue. Stationnez-vous pour le modifier.</string>
     <string name="trip_recording">Enregistrement actif. L’énergie apparaît seulement si le véhicule l’expose.</string>
     <string name="trip_ready">Prêt. Démarrez le trajet avant de rouler.</string>
+    <string name="trip_automatic_waiting">Détection automatique : en attente de mouvement.</string>
+    <string name="trip_automatic_confirming_motion">Détection automatique : confirmation du mouvement continu.</string>
+    <string name="trip_automatic_confirming_end">Détection automatique : confirmation de la fin du trajet.</string>
+    <string name="trip_automatic_speed_unavailable">Détection automatique indisponible : la vitesse du véhicule est illisible.</string>
+    <string name="trip_automatic_recording_speed_unavailable">L’enregistrement continue ; la fin automatique est indisponible tant que la vitesse est illisible.</string>
     <string name="climate_on">Active</string>
     <string name="climate_ac_on">A/C active</string>
     <string name="climate_off">Arrêtée</string>
@@ -66,9 +72,10 @@
     <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
     <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
     <string name="label_soc">État de charge</string>
-    <string name="notification_channel_recording">Enregistrement de trajet</string>
-    <string name="notification_channel_recording_description">Affichée pendant l\'enregistrement d\'un trajet, pour qu\'il ne tourne jamais de manière invisible.</string>
+    <string name="notification_channel_recording">Détection et enregistrement des trajets</string>
+    <string name="notification_channel_recording_description">Affichée pendant la détection automatique ou l’enregistrement, afin que l’échantillonnage véhicule en arrière-plan ne soit jamais invisible.</string>
     <string name="notification_recording_title">Enregistrement d\'un trajet</string>
+    <string name="notification_automatic_title">Détection automatique des trajets</string>
     <string name="notification_recording_distance">%1$s parcourus</string>
     <string name="notification_recording_waiting">En attente des données véhicule</string>
     <string name="trip_history_title">Historique des trajets</string>

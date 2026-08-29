@@ -21,6 +21,7 @@ import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.Provenanced
+import com.evsuite.hardware.telemetry.TripDetector
 import com.evsuite.hardware.telemetry.UnavailableReason
 import java.io.File
 import java.util.Locale
@@ -43,11 +44,13 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var latestReadings: DashboardReadings = DashboardReadings.empty()
     /** Immutable snapshot loaded off the UI thread; the store writes newest trips first. */
     @Volatile private var recentTrips: List<EnergyTripSummary> = emptyList()
+    private var updatingAutomaticSwitch = false
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val bound = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = bound
+            setAutomaticSwitchChecked(bound.automaticDetectionEnabled)
             bound.setListener(::render)
             bound.latest?.let(::render)
         }
@@ -64,6 +67,10 @@ class MainActivity : AppCompatActivity() {
 
         provenance = ProvenanceText(this)
         binding.tripAction.setOnClickListener { toggleTrip() }
+        setAutomaticSwitchChecked(TripRecordingService.isAutomaticDetectionEnabled(this))
+        binding.automaticDetection.setOnCheckedChangeListener { _, enabled ->
+            if (!updatingAutomaticSwitch) changeAutomaticDetection(enabled)
+        }
         binding.historyAction.setOnClickListener {
             startActivity(Intent(this, TripHistoryActivity::class.java))
         }
@@ -75,6 +82,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         renderUnavailable()
+        if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
+            TripRecordingService.monitorAutomaticTrips(this)
+        }
     }
 
     /**
@@ -149,15 +159,64 @@ class MainActivity : AppCompatActivity() {
         // while moving; the app never presents an overlay or asks for attention.
         val parked = value.speedKmh?.let { it <= 0.1f } == true
         binding.tripAction.isEnabled = parked
+        binding.automaticDetection.isEnabled = parked
+        val automatic = recorder?.automaticDetectionEnabled
+            ?: TripRecordingService.isAutomaticDetectionEnabled(this)
+        setAutomaticSwitchChecked(automatic)
         binding.tripAction.text = getString(
             if (EnergyTripSession.isRecording) R.string.action_stop_trip else R.string.action_start_trip
         )
-        binding.tripHint.text = when {
-            value.speedKmh == null -> getString(R.string.trip_control_speed_unavailable)
-            !parked -> getString(R.string.trip_control_park_to_change)
-            EnergyTripSession.isRecording -> getString(R.string.trip_recording)
-            else -> getString(R.string.trip_ready)
+        binding.tripHint.text = tripHint(value, parked, automatic)
+    }
+
+    private fun tripHint(value: EnergySnapshot, parked: Boolean, automatic: Boolean): String {
+        val recording = EnergyTripSession.isRecording
+        if (automatic && value.speedKmh == null) {
+            return getString(
+                if (recording) R.string.trip_automatic_recording_speed_unavailable
+                else R.string.trip_automatic_speed_unavailable
+            )
         }
+        if (automatic) {
+            return getString(
+                when (recorder?.detectorState ?: TripDetector.State.IDLE) {
+                    TripDetector.State.IDLE -> R.string.trip_automatic_waiting
+                    TripDetector.State.ARMED -> R.string.trip_automatic_confirming_motion
+                    TripDetector.State.RECORDING -> R.string.trip_recording
+                    TripDetector.State.ENDING -> R.string.trip_automatic_confirming_end
+                }
+            )
+        }
+        return getString(
+            when {
+                value.speedKmh == null -> R.string.trip_control_speed_unavailable
+                !parked -> R.string.trip_control_park_to_change
+                recording -> R.string.trip_recording
+                else -> R.string.trip_ready
+            }
+        )
+    }
+
+    private fun changeAutomaticDetection(enabled: Boolean) {
+        val service = recorder
+        val parked = service?.latest?.speedKmh?.let { it <= 0.1f } == true
+        if (!parked) {
+            setAutomaticSwitchChecked(
+                service?.automaticDetectionEnabled
+                    ?: TripRecordingService.isAutomaticDetectionEnabled(this)
+            )
+            return
+        }
+        TripRecordingService.storeAutomaticDetectionEnabled(this, enabled)
+        service.setAutomaticDetectionEnabled(enabled)
+        if (enabled) TripRecordingService.monitorAutomaticTrips(this)
+        service.latest?.let(::render)
+    }
+
+    private fun setAutomaticSwitchChecked(checked: Boolean) {
+        updatingAutomaticSwitch = true
+        binding.automaticDetection.isChecked = checked
+        updatingAutomaticSwitch = false
     }
 
     private fun renderReadings(readings: DashboardReadings) {
@@ -218,8 +277,14 @@ class MainActivity : AppCompatActivity() {
         binding.climateValue.text = DASH
         binding.dataStatus.text = getString(R.string.status_waiting_for_vehicle)
         binding.tripAction.isEnabled = false
+        binding.automaticDetection.isEnabled = false
+        val automatic = TripRecordingService.isAutomaticDetectionEnabled(this)
+        setAutomaticSwitchChecked(automatic)
         binding.historyAction.isEnabled = true
-        binding.tripHint.text = getString(R.string.trip_control_speed_unavailable)
+        binding.tripHint.text = getString(
+            if (automatic) R.string.trip_automatic_speed_unavailable
+            else R.string.trip_control_speed_unavailable
+        )
     }
 
     /** History is bounded but still disk-backed; never parse it on the one-second UI path. */

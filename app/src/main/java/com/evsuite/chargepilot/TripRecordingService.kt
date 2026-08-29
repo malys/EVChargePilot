@@ -21,6 +21,7 @@ import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
+import com.evsuite.hardware.telemetry.TripDetector
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -59,11 +60,14 @@ class TripRecordingService : Service() {
     }
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
+    private val detector = TripDetector()
 
     private var samplingTask: ScheduledFuture<*>? = null
     private var boundClients = 0
     private var listener: Listener? = null
     private var samplesSinceNotification = 0
+    var automaticDetectionEnabled: Boolean = true
+        private set
 
     @Volatile private var latestSnapshot: EnergySnapshot? = null
 
@@ -76,6 +80,7 @@ class TripRecordingService : Service() {
         super.onCreate()
         reader = EnergyTelemetryReader(applicationContext)
         tripStore = EnergyTripHistoryStore(File(filesDir, "trips.json"))
+        automaticDetectionEnabled = isAutomaticDetectionEnabled(this)
         createNotificationChannel()
     }
 
@@ -98,7 +103,10 @@ class TripRecordingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_START_TRIP) startTrip()
+        when (intent?.action) {
+            ACTION_START_TRIP -> startTrip()
+            ACTION_MONITOR_AUTOMATIC -> setAutomaticDetectionEnabled(true)
+        }
         // Not sticky: a restarted process has no accumulator and no samples, and resuming a
         // trip it cannot account for would produce a record with a hole in it.
         return START_NOT_STICKY
@@ -114,6 +122,24 @@ class TripRecordingService : Service() {
         this.listener = listener
     }
 
+    val detectorState: TripDetector.State get() = detector.state
+
+    fun setAutomaticDetectionEnabled(enabled: Boolean) {
+        automaticDetectionEnabled = enabled
+        if (enabled) {
+            if (EnergyTripSession.isRecording) detector.markRecording() else detector.reset()
+            startAutomaticMonitor()
+        } else {
+            detector.reset()
+            if (EnergyTripSession.isRecording) {
+                updateNotification()
+            } else {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopWhenNobodyNeedsIt()
+            }
+        }
+    }
+
     /**
      * `startForegroundService` promised a notification within five seconds, so that promise is
      * kept before anything else can decide the trip cannot start — a service that returns from
@@ -124,25 +150,41 @@ class TripRecordingService : Service() {
      * claim is a SecurityException in this service's own `onCreate`.
      */
     private fun startTrip() {
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), foregroundTypes())
+        ServiceCompat.startForeground(
+            this, NOTIFICATION_ID, notification(forceRecording = true), foregroundTypes()
+        )
         val sample = latestSnapshot
         if (sample == null) {
             AppLogger.w(TAG, "trip start ignored: no vehicle sample yet")
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            if (!automaticDetectionEnabled) {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            } else {
+                updateNotification()
+            }
             stopWhenNobodyNeedsIt()
             return
         }
+        beginTrip(sample)
+    }
+
+    private fun beginTrip(sample: EnergySnapshot) {
         if (!EnergyTripSession.isRecording) EnergyTripSession.start(sample)
+        detector.markRecording()
         samplesSinceNotification = 0
         ensureSampling()
+        updateNotification()
     }
 
     /** Called through the binder: the dashboard is on screen whenever a trip can be stopped. */
     fun stopTrip(onSaved: (() -> Unit)? = null) {
         val endedAt = latestSnapshot?.timestampMs ?: System.currentTimeMillis()
         val recorded = EnergyTripSession.stop(endedAt)
-        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        detector.reset()
+        if (!automaticDetectionEnabled) {
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        }
         if (recorded == null) {
+            if (automaticDetectionEnabled) updateNotification()
             stopWhenNobodyNeedsIt()
             return
         }
@@ -157,6 +199,7 @@ class TripRecordingService : Service() {
             main.post {
                 runCatching { onSaved?.invoke() }
                     .onFailure { AppLogger.w(TAG, "trip saved callback failed: ${it.message}") }
+                if (automaticDetectionEnabled) updateNotification()
                 stopWhenNobodyNeedsIt()
             }
         }
@@ -173,6 +216,13 @@ class TripRecordingService : Service() {
             .getOrNull() ?: return
         latestSnapshot = value
         EnergyTripSession.add(value)
+        if (automaticDetectionEnabled) {
+            when (detector.add(value).event) {
+                TripDetector.Event.START -> beginTrip(value)
+                TripDetector.Event.STOP -> stopTrip()
+                null -> Unit
+            }
+        }
         if (EnergyTripSession.isRecording && ++samplesSinceNotification >= NOTIFICATION_SAMPLES) {
             samplesSinceNotification = 0
             main.post { updateNotification() }
@@ -182,7 +232,7 @@ class TripRecordingService : Service() {
 
     /** Nothing bound and nothing recording: sampling has no reader and no record to keep. */
     private fun stopWhenNobodyNeedsIt() {
-        if (boundClients > 0 || EnergyTripSession.isRecording) return
+        if (boundClients > 0 || EnergyTripSession.isRecording || automaticDetectionEnabled) return
         samplingTask?.cancel(false)
         samplingTask = null
         stopSelf()
@@ -204,12 +254,18 @@ class TripRecordingService : Service() {
      */
     @SuppressLint("NotificationPermission")
     private fun updateNotification() {
-        if (!EnergyTripSession.isRecording) return
+        if (!EnergyTripSession.isRecording && !automaticDetectionEnabled) return
         val manager = getSystemService(NotificationManager::class.java) ?: return
         manager.notify(NOTIFICATION_ID, notification())
     }
 
-    private fun notification(): Notification {
+    private fun startAutomaticMonitor() {
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), foregroundTypes())
+        ensureSampling()
+    }
+
+    private fun notification(forceRecording: Boolean = false): Notification {
+        val recording = forceRecording || EnergyTripSession.isRecording
         val summary = EnergyTripSession.current(System.currentTimeMillis())
         val distance = summary?.distanceKm?.let {
             String.format(Locale.getDefault(), "%.1f km", it)
@@ -223,10 +279,24 @@ class TripRecordingService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
-            .setContentTitle(getString(R.string.notification_recording_title))
+            .setContentTitle(
+                getString(
+                    if (recording) R.string.notification_recording_title
+                    else R.string.notification_automatic_title
+                )
+            )
             .setContentText(
-                distance?.let { getString(R.string.notification_recording_distance, it) }
-                    ?: getString(R.string.notification_recording_waiting)
+                if (recording) {
+                    distance?.let { getString(R.string.notification_recording_distance, it) }
+                        ?: getString(R.string.notification_recording_waiting)
+                } else {
+                    getString(
+                        when (detector.state) {
+                            TripDetector.State.ARMED -> R.string.trip_automatic_confirming_motion
+                            else -> R.string.trip_automatic_waiting
+                        }
+                    )
+                }
             )
             .setContentIntent(pending)
             .setOngoing(true)
@@ -252,10 +322,14 @@ class TripRecordingService : Service() {
 
     companion object {
         const val ACTION_START_TRIP = "com.evsuite.chargepilot.START_TRIP"
+        const val ACTION_MONITOR_AUTOMATIC =
+            "com.evsuite.chargepilot.MONITOR_AUTOMATIC_TRIPS"
 
         private const val TAG = "EVChargePilot"
         private const val CHANNEL_ID = "trip_recording"
         private const val NOTIFICATION_ID = 1
+        private const val PREFERENCES = "trip_detection"
+        private const val PREF_AUTOMATIC = "automatic_enabled"
         /** One notification update per ten samples: the text changes slowly, the sampler does not. */
         private const val NOTIFICATION_SAMPLES = 10
 
@@ -267,6 +341,23 @@ class TripRecordingService : Service() {
             val intent = Intent(context, TripRecordingService::class.java)
                 .setAction(ACTION_START_TRIP)
             ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun monitorAutomaticTrips(context: Context) {
+            val intent = Intent(context, TripRecordingService::class.java)
+                .setAction(ACTION_MONITOR_AUTOMATIC)
+            ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun isAutomaticDetectionEnabled(context: Context): Boolean =
+            context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+                .getBoolean(PREF_AUTOMATIC, true)
+
+        fun storeAutomaticDetectionEnabled(context: Context, enabled: Boolean) {
+            context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean(PREF_AUTOMATIC, enabled)
+                .apply()
         }
     }
 }

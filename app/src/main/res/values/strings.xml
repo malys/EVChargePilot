@@ -26,6 +26,7 @@
     <string name="label_regenerated">REGENERATED</string>
     <string name="action_start_trip">Start trip</string>
     <string name="action_stop_trip">Stop and save trip</string>
+    <string name="action_automatic_trips">Automatic trips</string>
     <string name="action_view_diagnostics">View diagnostics</string>
     <string name="action_trip_history">Trip history</string>
     <string name="action_back">Back</string>
@@ -43,6 +44,11 @@
     <string name="trip_control_park_to_change">Live recording continues. Park to change it.</string>
     <string name="trip_recording">Recording. Power-derived energy appears only when the vehicle exposes it.</string>
     <string name="trip_ready">Ready. Start the trip before moving.</string>
+    <string name="trip_automatic_waiting">Automatic detection: waiting for motion.</string>
+    <string name="trip_automatic_confirming_motion">Automatic detection: confirming sustained motion.</string>
+    <string name="trip_automatic_confirming_end">Automatic detection: confirming the trip has ended.</string>
+    <string name="trip_automatic_speed_unavailable">Automatic detection unavailable: vehicle speed is unreadable.</string>
+    <string name="trip_automatic_recording_speed_unavailable">Recording continues; automatic end is unavailable while speed is unreadable.</string>
     <string name="climate_on">On</string>
     <string name="climate_ac_on">A/C on</string>
     <string name="climate_off">Off</string>
@@ -70,9 +76,10 @@
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>
-    <string name="notification_channel_recording">Trip recording</string>
-    <string name="notification_channel_recording_description">Shown while a trip is being recorded, so the recording is never running invisibly.</string>
+    <string name="notification_channel_recording">Trip detection and recording</string>
+    <string name="notification_channel_recording_description">Shown while automatic detection or trip recording is active, so background vehicle sampling never runs invisibly.</string>
     <string name="notification_recording_title">Recording a trip</string>
+    <string name="notification_automatic_title">Automatic trip detection</string>
     <string name="notification_recording_distance">%1$s so far</string>
     <string name="notification_recording_waiting">Waiting for vehicle data</string>
     <string name="trip_history_title">Trip history</string>
