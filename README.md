@@ -21,6 +21,7 @@ Read-only live energy dashboard and local trip analyser for the SAIC MG4 head un
 - [Features](#features)
 - [Requirements](#requirements)
 - [How it works](#how-it-works)
+- [Trip export formats](#trip-export-formats)
 - [Install](#install)
 - [Configuration](#configuration)
 - [Building](#building)
@@ -63,12 +64,31 @@ Its shared `EnergyTripAccumulator` integrates adjacent snapshots, rejecting gaps
 five seconds instead of inventing motion. `EnergyTripHistoryStore` writes a bounded history
 through a unique temporary file and atomic rename.
 
-Recording currently samples only while the dashboard is visible and survives activity
-recreation only while the process remains alive. Persistent background recording is a later,
-separately reviewed milestone. A trip's reported duration is therefore the time actually
-covered by usable samples, not wall clock: hiding the dashboard for ten minutes adds nothing
-to the duration, distance or energy, so consumption averages compare values measured over
-the same interval.
+While a trip is active, a foreground service owns the sampler so recording continues when the
+driver opens another app. A trip's reported duration is the time actually covered by usable
+samples, not wall clock: a suspended sampler adds nothing to duration, distance or energy, so
+consumption averages compare values measured over the same interval.
+
+## Trip export formats
+
+The trip history can export one trip or the full bounded ledger without network or storage
+permission. Exports are written atomically under the app-private `files/exports/` directory;
+the completed absolute path is shown in the app for an explicit `adb pull`. **Share file** opens
+Android's chooser with temporary read access to that one file through `FileProvider`.
+
+CSV contains summary rows only, in this exact order:
+
+```text
+started_at_utc,ended_at_utc,recorded_duration_seconds,distance_km,start_soc_percent,end_soc_percent,consumed_kwh,regenerated_kwh,average_consumption_kwh_per_100km
+```
+
+Times are ISO-8601 UTC, duration is seconds, distance is kilometres, SOC is percent, energy is
+kWh, and average consumption is kWh/100 km. An unavailable value is an empty cell, never `0`.
+
+JSON export schema version 1 contains `exportedAtUtc` and the complete stored trip objects:
+each summary plus its retained sample track. Unavailable nullable readings are explicit `null`.
+Both formats are limited to the history ceiling of 200 trips and 2 MiB per export. The export
+directory retains the eight newest generated files so repeated exports cannot grow without bound.
 
 ## Install
 

@@ -47,9 +47,17 @@ class TripHistoryActivity : AppCompatActivity() {
         binding.deleteAllAction.setOnClickListener {
             startActivity(TripDeleteConfirmationActivity.all(this))
         }
+        binding.exportAllAction.setOnClickListener {
+            startActivity(TripExportActivity.all(this))
+        }
         binding.deleteTripAction.setOnClickListener {
             selectedStartedAtMs?.let { startedAt ->
                 startActivity(TripDeleteConfirmationActivity.single(this, startedAt))
+            }
+        }
+        binding.exportTripAction.setOnClickListener {
+            selectedStartedAtMs?.let { startedAt ->
+                startActivity(TripExportActivity.single(this, startedAt))
             }
         }
     }
@@ -86,6 +94,7 @@ class TripHistoryActivity : AppCompatActivity() {
                 binding.emptyState.visibility = if (empty) View.VISIBLE else View.GONE
                 binding.historyContent.visibility = if (empty) View.GONE else View.VISIBLE
                 binding.deleteAllAction.isEnabled = !empty
+                binding.exportAllAction.isEnabled = !empty
                 renderSelected()
             }
         }

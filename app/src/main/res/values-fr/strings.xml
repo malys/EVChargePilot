@@ -27,6 +27,11 @@
     <string name="action_delete">Supprimer</string>
     <string name="action_delete_trip">Supprimer le trajet</string>
     <string name="action_delete_all_trips">Tout supprimer</string>
+    <string name="action_export_trip">Exporter le trajet</string>
+    <string name="action_export_all_trips">Tout exporter</string>
+    <string name="action_export_csv">Exporter en CSV</string>
+    <string name="action_export_json">Exporter en JSON</string>
+    <string name="action_share_export">Partager le fichier</string>
     <string name="action_close">Fermer</string>
     <string name="trip_control_speed_unavailable">Les commandes restent désactivées tant que la vitesse est illisible.</string>
     <string name="trip_control_park_to_change">L’enregistrement continue. Stationnez-vous pour le modifier.</string>
@@ -73,6 +78,18 @@
     <string name="trip_track_legend">Vitesse (accent) et puissance batterie pendant la durée enregistrée</string>
     <string name="trip_track_description">Courbe de vitesse et de puissance batterie sur %1$d minutes enregistrées</string>
     <string name="trip_track_unavailable">Aucune trace d’échantillons n’a été conservée pour ce trajet.</string>
+    <string name="trip_export_one_title">Exporter ce trajet</string>
+    <string name="trip_export_all_title">Exporter tous les trajets</string>
+    <string name="trip_export_one_message">Le CSV exporte les totaux enregistrés. Le JSON inclut aussi la trace conservée. Le fichier reste dans le stockage privé de l’application jusqu’à son partage.</string>
+    <string name="trip_export_all_message">Le CSV exporte une ligne de synthèse par trajet. Le JSON inclut aussi toutes les traces conservées. Le fichier borné reste dans le stockage privé de l’application jusqu’à son partage.</string>
+    <string name="trip_export_ready">Choisissez un format hors ligne. Les mesures indisponibles restent vides en CSV et nulles en JSON.</string>
+    <string name="trip_export_working">Écriture de l’export…</string>
+    <string name="trip_export_failed">L’export n’a pas pu être écrit. Aucun trajet existant n’a été modifié.</string>
+    <string name="trip_export_share_title">Partager l’export des trajets</string>
+    <plurals name="trip_export_success">
+        <item quantity="one">%1$d trajet exporté. Le chemin privé de l’application est affiché ci-dessous.</item>
+        <item quantity="other">%1$d trajets exportés. Le chemin privé de l’application est affiché ci-dessous.</item>
+    </plurals>
     <string name="trip_delete_one_title">Supprimer ce trajet ?</string>
     <string name="trip_delete_all_title">Supprimer tous les trajets ?</string>
     <string name="trip_delete_one_message">Cette action supprime le trajet sélectionné et sa trace du stockage privé de l’application. La récupération sera impossible.</string>

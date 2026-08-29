@@ -30,6 +30,11 @@
     <string name="action_delete">Delete</string>
     <string name="action_delete_trip">Delete trip</string>
     <string name="action_delete_all_trips">Delete all</string>
+    <string name="action_export_trip">Export trip</string>
+    <string name="action_export_all_trips">Export all</string>
+    <string name="action_export_csv">Export CSV</string>
+    <string name="action_export_json">Export JSON</string>
+    <string name="action_share_export">Share file</string>
     <string name="action_close">Close</string>
     <string name="trip_control_speed_unavailable">Trip controls stay disabled until speed is readable.</string>
     <string name="trip_control_park_to_change">Live recording continues. Park to change it.</string>
@@ -77,6 +82,18 @@
     <string name="trip_track_legend">Speed (accent) and battery power over recorded time</string>
     <string name="trip_track_description">Speed and battery power trace over %1$d recorded minutes</string>
     <string name="trip_track_unavailable">No sample track was retained for this trip.</string>
+    <string name="trip_export_one_title">Export this trip</string>
+    <string name="trip_export_all_title">Export all trips</string>
+    <string name="trip_export_one_message">CSV exports the recorded totals. JSON also includes the retained sample track. The file stays in app-private storage until you share it.</string>
+    <string name="trip_export_all_message">CSV exports one summary row per trip. JSON also includes every retained sample track. The bounded file stays in app-private storage until you share it.</string>
+    <string name="trip_export_ready">Choose an offline format. Unavailable readings remain empty in CSV and null in JSON.</string>
+    <string name="trip_export_working">Writing the export…</string>
+    <string name="trip_export_failed">The export could not be written. No existing trip was changed.</string>
+    <string name="trip_export_share_title">Share trip export</string>
+    <plurals name="trip_export_success">
+        <item quantity="one">Exported %1$d trip. The app-private path is shown below.</item>
+        <item quantity="other">Exported %1$d trips. The app-private path is shown below.</item>
+    </plurals>
     <string name="trip_delete_one_title">Delete this trip?</string>
     <string name="trip_delete_all_title">Delete all trips?</string>
     <string name="trip_delete_one_message">This removes the selected trip and its sample track from app-private storage. It cannot be recovered.</string>

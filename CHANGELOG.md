@@ -6,6 +6,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Completed trips can now leave the head unit without granting broad storage access.** The
+  ledger exports either one trip or all retained trips as a documented CSV summary or a
+  schema-versioned JSON document with sample tracks. Files are bounded, written atomically to
+  app-private storage on a worker thread, and shared only through a user-chosen app with
+  temporary read access; unavailable readings stay empty or null rather than becoming zero.
+
 - **A parked-only trip ledger now exposes the complete local record.** Up to 200 trips appear
   newest first with recorded totals, SOC change, consumed/regenerated energy and a lightweight
   speed/power trace when samples exist. Missing values remain explicit and explainable; single

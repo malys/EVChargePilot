@@ -38,6 +38,14 @@
             android:textAppearance="@style/Text.EV.Title" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/exportAllAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="220dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            android:text="@string/action_export_all_trips" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteAllAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="220dp"
@@ -107,6 +115,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAppearance="@style/Text.EV.Title" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exportTripAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="220dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:text="@string/action_export_trip" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/deleteTripAction"

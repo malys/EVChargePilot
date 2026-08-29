@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:id="@+id/exportTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_lg">
+
+        <TextView
+            android:id="@+id/exportMessage"
+            android:layout_width="1100dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/Text.EV.Body" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/exportCsvAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="240dp"
+                android:layout_height="@dimen/touch_target"
+                android:text="@string/action_export_csv" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/exportJsonAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="240dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:text="@string/action_export_json" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/shareAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="240dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:text="@string/action_share_export" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/exportStatus"
+            android:layout_width="1100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:gravity="center"
+            android:textAppearance="@style/Text.EV.Body"
+            android:accessibilityLiveRegion="polite" />
+
+        <TextView
+            android:id="@+id/exportPath"
+            android:layout_width="1400dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:gravity="center"
+            android:textAppearance="@style/Text.EV.Secondary" />
+    </LinearLayout>
+</LinearLayout>
