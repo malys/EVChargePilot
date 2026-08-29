@@ -16,6 +16,8 @@
     <string name="label_outside_temp">OUTSIDE</string>
     <string name="label_battery_temp">BATTERY TEMP.</string>
     <string name="label_consumption">AVERAGE</string>
+    <string name="label_instant_consumption">INSTANT</string>
+    <string name="label_trip_average_consumption">TRIP AVERAGE</string>
     <string name="label_current_trip">Current trip</string>
     <string name="label_duration">RECORDED</string>
     <string name="label_distance">DISTANCE</string>
@@ -63,6 +65,7 @@
     <string name="reason_unvalidated_firmware">the signal is not yet validated on this firmware</string>
     <string name="reason_signal_absent">the vehicle is not publishing the signal right now</string>
     <string name="reason_insufficient_samples">not enough samples yet</string>
+    <string name="reason_speed_too_low">vehicle speed is too low for stable distance-normalized consumption</string>
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>

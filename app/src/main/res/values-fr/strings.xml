@@ -13,6 +13,8 @@
     <string name="label_outside_temp">EXTÉRIEUR</string>
     <string name="label_battery_temp">TEMP. BATTERIE</string>
     <string name="label_consumption">MOYENNE</string>
+    <string name="label_instant_consumption">INSTANTANÉE</string>
+    <string name="label_trip_average_consumption">MOYENNE TRAJET</string>
     <string name="label_current_trip">Trajet en cours</string>
     <string name="label_duration">ENREGISTRÉ</string>
     <string name="label_distance">DISTANCE</string>
@@ -59,6 +61,7 @@
     <string name="reason_unvalidated_firmware">le signal n\'est pas encore validé sur ce firmware</string>
     <string name="reason_signal_absent">le véhicule ne publie pas ce signal actuellement</string>
     <string name="reason_insufficient_samples">pas encore assez d\'échantillons</string>
+    <string name="reason_speed_too_low">la vitesse est trop faible pour une consommation stable rapportée à la distance</string>
     <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
     <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
     <string name="label_soc">État de charge</string>

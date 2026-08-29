@@ -6,6 +6,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The dashboard now separates immediate and trip consumption without competing with SOC.**
+  Instant kWh/100 km uses EVHardware's five-second smoothing and stays unavailable below
+  5 km/h; regeneration remains negative. The adjacent trip average keeps the accumulator's
+  integrated consumed-energy/distance definition, and both numbers are labelled as arithmetic
+  derived from vehicle readings rather than measurements or predictions.
+
 - **Completed trips can now leave the head unit without granting broad storage access.** The
   ledger exports either one trip or all retained trips as a documented CSV summary or a
   schema-versioned JSON document with sample tracks. Files are bounded, written atomically to

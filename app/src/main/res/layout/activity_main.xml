@@ -228,9 +228,27 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:layout_marginStart="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
-                        <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.ReadoutValue" />
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_instant_consumption" />
+                            <TextView android:id="@+id/instantConsumptionValue" style="@style/Text.EV.TripValue" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_trip_average_consumption" />
+                            <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.TripValue" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

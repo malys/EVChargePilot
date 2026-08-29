@@ -65,6 +65,7 @@ class ProvenanceText(private val context: Context) {
         UnavailableReason.UNVALIDATED_FIRMWARE -> R.string.reason_unvalidated_firmware
         UnavailableReason.SIGNAL_ABSENT -> R.string.reason_signal_absent
         UnavailableReason.INSUFFICIENT_SAMPLES -> R.string.reason_insufficient_samples
+        UnavailableReason.SPEED_TOO_LOW -> R.string.reason_speed_too_low
         UnavailableReason.MODEL_NOT_TRAINED -> R.string.reason_model_not_trained
     }
 

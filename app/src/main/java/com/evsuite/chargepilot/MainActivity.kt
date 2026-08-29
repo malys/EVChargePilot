@@ -14,9 +14,11 @@ import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
+import com.evsuite.hardware.telemetry.ConsumptionCalculator
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.Provenanced
+import com.evsuite.hardware.telemetry.UnavailableReason
 import java.util.Locale
 import java.util.concurrent.Executors
 
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var provenance: ProvenanceText
+    private val consumption = ConsumptionCalculator()
     /** Ten binder reads and a disk read for the diagnostics report; not the main thread's work. */
     private val background = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-diagnostics")
@@ -105,7 +108,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(value: EnergySnapshot) {
-        val readings = DashboardReadings.of(value, EnergyTripSession.current(value.timestampMs))
+        val missingReason = if (value.firmware == FirmwareInfo.Gen.UNKNOWN) {
+            UnavailableReason.UNSUPPORTED_FIRMWARE
+        } else {
+            UnavailableReason.SIGNAL_ABSENT
+        }
+        val consumptionReading = consumption.add(value, missingReason)
+        val readings = DashboardReadings.of(
+            value,
+            EnergyTripSession.current(value.timestampMs),
+            consumptionReading.smoothedInstantaneous,
+        )
         latestReadings = readings
         renderReadings(readings)
         binding.climateValue.text = climate(value)
@@ -138,11 +151,17 @@ class MainActivity : AppCompatActivity() {
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
         bind(binding.outsideTempValue, R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP)
         bind(binding.batteryTempValue, R.string.label_battery_temp, readings.batteryTemp, PATTERN_TEMP)
+        bind(
+            binding.instantConsumptionValue,
+            R.string.label_instant_consumption,
+            readings.instantConsumption,
+            PATTERN_CONSUMPTION,
+        )
         bind(binding.tripDistanceValue, R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE)
         bind(binding.tripEnergyValue, R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY)
         bind(binding.tripRegenValue, R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY)
         bind(
-            binding.tripConsumptionValue, R.string.label_consumption,
+            binding.tripConsumptionValue, R.string.label_trip_average_consumption,
             readings.tripConsumption, PATTERN_CONSUMPTION,
         )
         val recorded = provenance.renderWith(readings.tripDuration, transform = ::duration)
@@ -171,6 +190,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderUnavailable() {
         latestReadings = DashboardReadings.empty()
+        consumption.reset()
         renderReadings(latestReadings)
         binding.climateValue.text = DASH
         binding.dataStatus.text = getString(R.string.status_waiting_for_vehicle)
@@ -235,10 +255,19 @@ class MainActivity : AppCompatActivity() {
         Triple(R.string.label_power, readings.power, PATTERN_POWER),
         Triple(R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP),
         Triple(R.string.label_battery_temp, readings.batteryTemp, PATTERN_TEMP),
+        Triple(
+            R.string.label_instant_consumption,
+            readings.instantConsumption,
+            PATTERN_CONSUMPTION,
+        ),
         Triple(R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE),
         Triple(R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY),
         Triple(R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY),
-        Triple(R.string.label_consumption, readings.tripConsumption, PATTERN_CONSUMPTION),
+        Triple(
+            R.string.label_trip_average_consumption,
+            readings.tripConsumption,
+            PATTERN_CONSUMPTION,
+        ),
     ).map { (label, value, pattern) ->
         provenance.describe(getString(label), value, provenance.render(value, pattern))
     }

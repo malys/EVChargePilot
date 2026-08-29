@@ -22,6 +22,7 @@ data class DashboardReadings(
     val power: Provenanced<Float>,
     val outsideTemp: Provenanced<Float>,
     val batteryTemp: Provenanced<Float>,
+    val instantConsumption: Provenanced<Double>,
     val tripDuration: Provenanced<Long>,
     val tripDistance: Provenanced<Double>,
     val tripEnergy: Provenanced<Double>,
@@ -34,13 +35,17 @@ data class DashboardReadings(
             fun <T : Any> gap() = Provenanced.unavailable<T>(UnavailableReason.SIGNAL_ABSENT)
             return DashboardReadings(
                 soc = gap(), range = gap(), speed = gap(), power = gap(),
-                outsideTemp = gap(), batteryTemp = gap(),
+                outsideTemp = gap(), batteryTemp = gap(), instantConsumption = gap(),
                 tripDuration = gap(), tripDistance = gap(), tripEnergy = gap(),
                 tripRegen = gap(), tripConsumption = gap(),
             )
         }
 
-        fun of(snapshot: EnergySnapshot, trip: EnergyTripSummary?): DashboardReadings {
+        fun of(
+            snapshot: EnergySnapshot,
+            trip: EnergyTripSummary?,
+            instantConsumption: Provenanced<Double>,
+        ): DashboardReadings {
             // An unrecognised generation is not a car that stopped publishing: it is a car
             // this build was never taught to read. The screen says which.
             val absent = if (snapshot.firmware == FirmwareInfo.Gen.UNKNOWN) {
@@ -55,11 +60,12 @@ data class DashboardReadings(
                 power = Provenanced.measured(snapshot.batteryPowerKw, absent),
                 outsideTemp = Provenanced.measured(snapshot.outsideTempCelsius, absent),
                 batteryTemp = Provenanced.measured(snapshot.batteryTempCelsius, absent),
+                instantConsumption = instantConsumption,
                 // The trip figures are arithmetic over those readings, so they are derived,
                 // and they are missing for a different reason: no trip is being recorded, or
                 // no usable interval has accumulated yet.
                 tripDuration = Provenanced.derived(trip?.durationMs),
-                tripDistance = Provenanced.derived(trip?.distanceKm),
+                tripDistance = Provenanced.derived(trip?.recordedDistanceKm),
                 tripEnergy = Provenanced.derived(trip?.consumedKwh),
                 tripRegen = Provenanced.derived(trip?.regeneratedKwh),
                 tripConsumption = Provenanced.derived(trip?.averageConsumptionKwhPer100Km),
