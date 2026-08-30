@@ -54,11 +54,12 @@ not replace a vehicle pass on each supported firmware generation.
 ## Continuation handoff
 
 - The implemented baseline is the passive dashboard, nullable shared energy snapshot,
-  parked-only process-local trip recording, bounded atomic trip history, crash diagnostics,
-  stable/unstable variants, CI gates and the two emulator profiles documented in `README.md`.
-- Arrival-SOC prediction, charger routing, background trip recording and energy attribution
-  are not implemented. Treat each as a separately scoped milestone with explicit evidence
-  for every input; do not fill missing vehicle signals with inferred measurements.
+  automatic foreground trip detection/recording with parked-only manual controls, bounded
+  atomic trip history, crash diagnostics, stable/unstable variants, CI gates and the two
+  emulator profiles documented in `README.md`.
+- Arrival-SOC prediction, charger routing and energy attribution are not implemented. Treat
+  each as a separately scoped milestone with explicit evidence for every input; do not fill
+  missing vehicle signals with inferred measurements.
 - Start app work by checking `git status` and the EVHardware submodule branch. Any shared
   telemetry model, property, unit, fallback or integration change starts in the standalone
   `../EVHardware` repository, is tested and pushed there, then reaches this app through a

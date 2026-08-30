@@ -41,7 +41,7 @@ It does not write to the vehicle and does not contain network or update code.
 
 - Vehicle-reported SOC and range.
 - Speed, outside temperature and climate state.
-- Parked-only trip recording controls.
+- Automatic trip detection plus parked-only manual controls and configuration.
 - Distance and duration calculated locally.
 - Battery power, pack temperature and charging state when exposed by the current firmware.
 - Energy and regeneration integration from the shared EVHardware power convention.
@@ -60,14 +60,20 @@ initial milestone.
 ## How it works
 
 EVHardware's `EnergyTelemetryReader` produces one coherent nullable snapshot per second.
-Its shared `EnergyTripAccumulator` integrates adjacent snapshots, rejecting gaps longer than
-five seconds instead of inventing motion. `EnergyTripHistoryStore` writes a bounded history
-through a unique temporary file and atomic rename.
+Its shared `TripDetector` starts after five continuous seconds at or above 5 km/h and stops
+after 120 continuous seconds at or below 1 km/h, with park or charge-port confirmation when
+either signal exists. Missing speed and observation gaps over five seconds invalidate partial
+evidence rather than inventing a boundary. `EnergyTripAccumulator` likewise rejects integration
+gaps longer than five seconds, and `EnergyTripHistoryStore` writes a bounded history through a
+unique temporary file and atomic rename.
 
-While a trip is active, a foreground service owns the sampler so recording continues when the
-driver opens another app. A trip's reported duration is the time actually covered by usable
-samples, not wall clock: a suspended sampler adds nothing to duration, distance or energy, so
-consumption averages compare values measured over the same interval.
+Automatic detection is enabled by default. A foreground service owns the sampler so detection
+and recording continue when the driver opens another app. On firmware where speed stays
+unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
+performs a bounded retry. Active trips remain fail-closed and under manual control. A trip's
+reported duration is the time actually covered by usable samples, not wall clock: a suspended
+sampler adds nothing to duration, distance or energy, so consumption averages compare values
+measured over the same interval.
 
 ## Trip export formats
 
@@ -97,8 +103,9 @@ self-update.
 
 ## Configuration
 
-There is no configuration in v0.1. Start or stop a trip from the right-hand rail while the
-vehicle reports zero speed.
+Automatic trip detection is enabled by default. Its switch, and the manual start/stop action,
+can be changed only while the vehicle reports zero speed. If speed is unavailable, the controls
+fail closed and the dashboard explains why.
 
 ## Building
 
