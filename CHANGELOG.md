@@ -9,7 +9,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **Automatic trip detection is fail-closed and parked-configurable.** A small persisted switch
   enables the existing foreground sampler, while EVHardware alone decides start/end boundaries.
   Five seconds of motion starts a trip; a confirmed two-minute standstill ends it. Missing speed
-  can do neither, and the dashboard states whether it is waiting, confirming, or unavailable.
+  or a telemetry gap can do neither, and the dashboard states whether it is waiting, confirming,
+  or unavailable. Ten consecutive unavailable speed reads suspend idle background polling until
+  the next foreground launch, keeping unsupported firmware quiet and bounded.
 
 - **Vehicle range stays authoritative beside a visibly modelled adaptive estimate.**
   Up to eight recent trip averages feed EVHardware's estimate after three usable observations;

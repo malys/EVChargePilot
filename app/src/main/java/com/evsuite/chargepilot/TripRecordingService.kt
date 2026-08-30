@@ -27,6 +27,7 @@ import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Owns the sampler, so a trip survives the driver looking at something else.
@@ -38,9 +39,10 @@ import java.util.concurrent.TimeUnit
  * and energy quietly missing the part where the driver was not watching. A log that only
  * works while you stare at it is not a log.
  *
- * The service samples whenever something needs it: while a dashboard is bound, or while a
- * trip is recording. When neither is true it stops itself, because a background process
- * reading vehicle properties for nobody is a battery cost with no reader.
+ * The service samples whenever something needs it: while a dashboard is bound, while a trip
+ * is recording, or while automatic detection is enabled. Automatic monitoring keeps only the
+ * latest sample in memory; it does not write to disk until a completed trip is stored. When no
+ * consumer remains it stops itself, because background reads with no purpose waste resources.
  */
 class TripRecordingService : Service() {
 
@@ -61,13 +63,16 @@ class TripRecordingService : Service() {
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
     private val detector = TripDetector()
+    private val pendingHistoryWrites = AtomicInteger()
+    private val missingSpeedSamples = AtomicInteger()
 
     private var samplingTask: ScheduledFuture<*>? = null
-    private var boundClients = 0
+    @Volatile private var boundClients = 0
     private var listener: Listener? = null
     private var samplesSinceNotification = 0
-    var automaticDetectionEnabled: Boolean = true
+    @Volatile var automaticDetectionEnabled: Boolean = true
         private set
+    @Volatile private var automaticMonitoringSuspended = false
 
     @Volatile private var latestSnapshot: EnergySnapshot? = null
 
@@ -125,12 +130,18 @@ class TripRecordingService : Service() {
     val detectorState: TripDetector.State get() = detector.state
 
     fun setAutomaticDetectionEnabled(enabled: Boolean) {
+        if (automaticDetectionEnabled == enabled) {
+            if (enabled) startAutomaticMonitor()
+            return
+        }
         automaticDetectionEnabled = enabled
         if (enabled) {
             if (EnergyTripSession.isRecording) detector.markRecording() else detector.reset()
             startAutomaticMonitor()
         } else {
             detector.reset()
+            automaticMonitoringSuspended = false
+            missingSpeedSamples.set(0)
             if (EnergyTripSession.isRecording) {
                 updateNotification()
             } else {
@@ -193,15 +204,27 @@ class TripRecordingService : Service() {
         // between two one-second reads. Shutting the service down waits for that write: this
         // service stops itself the moment nobody needs it, and a stopSelf() racing the append
         // would drop the trip the driver just finished.
-        sampler.execute {
-            val saved = tripStore.append(recorded.summary, recorded.samples)
-            if (!saved) AppLogger.w(TAG, "trip history could not be saved")
-            main.post {
-                runCatching { onSaved?.invoke() }
-                    .onFailure { AppLogger.w(TAG, "trip saved callback failed: ${it.message}") }
-                if (automaticDetectionEnabled) updateNotification()
-                stopWhenNobodyNeedsIt()
+        pendingHistoryWrites.incrementAndGet()
+        runCatching {
+            sampler.execute {
+                val saved = runCatching {
+                    tripStore.append(recorded.summary, recorded.samples)
+                }.onFailure {
+                    AppLogger.w(TAG, "trip history write failed: ${it.message}")
+                }.getOrDefault(false)
+                if (!saved) AppLogger.w(TAG, "trip history could not be saved")
+                pendingHistoryWrites.decrementAndGet()
+                main.post {
+                    runCatching { onSaved?.invoke() }
+                        .onFailure { AppLogger.w(TAG, "trip saved callback failed: ${it.message}") }
+                    if (automaticDetectionEnabled) updateNotification()
+                    stopWhenNobodyNeedsIt()
+                }
             }
+        }.onFailure {
+            pendingHistoryWrites.decrementAndGet()
+            AppLogger.w(TAG, "trip history write could not be scheduled: ${it.message}")
+            stopWhenNobodyNeedsIt()
         }
     }
 
@@ -213,14 +236,24 @@ class TripRecordingService : Service() {
     private fun sample() {
         val value = runCatching { reader.read() }
             .onFailure { AppLogger.w(TAG, "telemetry sample failed: ${it.message}") }
-            .getOrNull() ?: return
+            .getOrNull()
+        if (value == null) {
+            if (automaticDetectionEnabled) updateAutomaticMonitorAvailability(null)
+            return
+        }
         latestSnapshot = value
         EnergyTripSession.add(value)
         if (automaticDetectionEnabled) {
-            when (detector.add(value).event) {
+            updateAutomaticMonitorAvailability(value)
+            val previousState = detector.state
+            val result = detector.add(value)
+            when (result.event) {
                 TripDetector.Event.START -> beginTrip(value)
                 TripDetector.Event.STOP -> stopTrip()
                 null -> Unit
+            }
+            if (result.event == null && result.state != previousState) {
+                main.post { updateNotification() }
             }
         }
         if (EnergyTripSession.isRecording && ++samplesSinceNotification >= NOTIFICATION_SAMPLES) {
@@ -230,12 +263,49 @@ class TripRecordingService : Service() {
         main.post { listener?.onSample(value) }
     }
 
-    /** Nothing bound and nothing recording: sampling has no reader and no record to keep. */
+    /** No dashboard, recording, or automatic monitor: sampling has no consumer to keep. */
     private fun stopWhenNobodyNeedsIt() {
-        if (boundClients > 0 || EnergyTripSession.isRecording || automaticDetectionEnabled) return
+        val automaticMonitorNeeded = automaticDetectionEnabled && !automaticMonitoringSuspended
+        if (boundClients > 0 || EnergyTripSession.isRecording || automaticMonitorNeeded ||
+            pendingHistoryWrites.get() > 0
+        ) return
         samplingTask?.cancel(false)
         samplingTask = null
         stopSelf()
+    }
+
+    /**
+     * Unsupported firmware must not leave a one-hertz foreground poll running indefinitely.
+     * A bound dashboard still receives its normal samples; only idle background monitoring is
+     * suspended, and opening the dashboard later performs one bounded retry.
+     */
+    private fun updateAutomaticMonitorAvailability(value: EnergySnapshot?) {
+        if (EnergyTripSession.isRecording) {
+            missingSpeedSamples.set(0)
+            return
+        }
+        val speed = value?.speedKmh
+        val usableSpeed = speed != null && speed.isFinite() && speed >= 0f
+        if (usableSpeed) {
+            missingSpeedSamples.set(0)
+            if (automaticMonitoringSuspended) {
+                automaticMonitoringSuspended = false
+                main.post {
+                    if (automaticDetectionEnabled && !EnergyTripSession.isRecording) {
+                        startAutomaticMonitor()
+                    }
+                }
+            }
+            return
+        }
+        if (missingSpeedSamples.incrementAndGet() == MISSING_SPEED_SAMPLE_LIMIT) {
+            automaticMonitoringSuspended = true
+            AppLogger.w(TAG, "automatic trip monitor suspended: speed unavailable")
+            main.post {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopWhenNobodyNeedsIt()
+            }
+        }
     }
 
     private fun foregroundTypes(): Int {
@@ -260,6 +330,8 @@ class TripRecordingService : Service() {
     }
 
     private fun startAutomaticMonitor() {
+        automaticMonitoringSuspended = false
+        missingSpeedSamples.set(0)
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), foregroundTypes())
         ensureSampling()
     }
@@ -332,6 +404,8 @@ class TripRecordingService : Service() {
         private const val PREF_AUTOMATIC = "automatic_enabled"
         /** One notification update per ten samples: the text changes slowly, the sampler does not. */
         private const val NOTIFICATION_SAMPLES = 10
+        /** Ten one-second misses allow startup settling, then end unsupported background polling. */
+        private const val MISSING_SPEED_SAMPLE_LIMIT = 10
 
         /**
          * Starting is an intent rather than a binder call: it is what makes the service a
