@@ -4,6 +4,7 @@ import com.evsuite.hardware.telemetry.EvidenceCapture
 import com.evsuite.hardware.telemetry.TelemetryEvidenceFormat
 import java.nio.file.Files
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -43,6 +44,39 @@ class EvidenceCaptureFileStoreTest {
             assertEquals("previous", occupied.readText())
         } finally {
             parent.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `repeated captures retain only the newest bounded set`() {
+        val directory = Files.createTempDirectory("evidence-store-retention").toFile()
+        try {
+            val store = EvidenceCaptureFileStore(directory) { 1_700_000_000_000L }
+            repeat(EvidenceCaptureFileStore.MAX_CAPTURE_FILES + 2) { index ->
+                assertNotNull(store.write(capture(snapshots = index + 1)))
+            }
+
+            val retainedSnapshots = directory.listFiles { file -> file.extension == "json" }
+                .orEmpty()
+                .mapNotNull { TelemetryEvidenceFormat.fromJson(it.readText())?.snapshots }
+                .toSet()
+            assertEquals(EvidenceCaptureFileStore.MAX_CAPTURE_FILES, retainedSnapshots.size)
+            assertEquals((3..10).toSet(), retainedSnapshots)
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a write removes stale temporary evidence files`() {
+        val directory = Files.createTempDirectory("evidence-store-temp").toFile()
+        val stale = directory.resolve(".orphan.tmp").apply { writeText("partial") }
+        try {
+            assertNotNull(EvidenceCaptureFileStore(directory).write(capture(snapshots = 1)))
+
+            assertFalse(stale.exists())
+        } finally {
+            directory.deleteRecursively()
         }
     }
 

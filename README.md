@@ -69,7 +69,8 @@ derived from it remains unavailable, until the checked-in evidence catalogue val
 signal's scale and sign on that exact firmware generation. A trusted energy summary stores the
 exact firmware and conversion version as a small metadata tag; legacy and mismatched totals are
 excluded from adaptive models. The bounded unstable CP-003 recorder is the separate raw-evidence
-path used to establish that validation.
+path used to establish that validation. It stores aggregated signal statistics rather than a raw
+sample stream and retains only the eight newest app-private JSON files.
 The dashboard states `+` battery output and `−` regeneration/charging in text as well as on a
 static centred scale; it never animates that passive display while driving.
 The thermal/climate block is likewise passive and keeps each field independently nullable, so a

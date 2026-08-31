@@ -11,6 +11,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Unstable telemetry evidence now has a hard retention ceiling.** Captures remain
+  app-private and atomic, but only the eight newest JSON summaries are kept; stale temporary
+  files are removed before a write. Repeated validation runs therefore cannot grow AAOS storage
+  without bound.
+
 - **Thermal and climate telemetry is grouped without implying energy use.** Outside, cabin and
   battery temperatures now sit with HVAC, AC, auto, econ and recirculation states, fan
   level/maximum and both target temperatures. Every field stays independently nullable, so a
