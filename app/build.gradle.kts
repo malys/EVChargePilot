@@ -10,8 +10,8 @@ android {
         applicationId = "com.evsuite.chargepilot"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     val keystorePath = System.getenv("EV_KEYSTORE")
@@ -78,7 +78,7 @@ kotlin {
 }
 
 // Prints the unstable versionName so the unstable workflow can name the APK asset
-// numerically comparable ("EVChargePilot-unstable-0.1.0.42.apk"). The pre-release itself
+// numerically comparable ("EVChargePilot-unstable-0.2.0.42.apk"). The pre-release itself
 // is always tagged "unstable" and overwritten, so the asset name carries the version.
 tasks.register("printUnstableVersion") {
     doLast {

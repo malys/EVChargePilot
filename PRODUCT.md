@@ -19,8 +19,9 @@ completed trips on the vehicle's centre display.
 ## Product Purpose
 
 EVChargePilot presents available battery, range, motion, temperature and climate readings
-without replacing missing data with estimates. It records local trip summaries and will
-later support explicitly labelled energy models and arrival-SOC forecasts.
+without replacing missing data with zero. It records local trip summaries and presents its
+current adaptive-range model as an estimate with an uncertainty band. Arrival-SOC forecasts
+remain future work.
 
 ## Positioning
 
@@ -37,12 +38,14 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 ## Capabilities and Constraints
 
 - Read-only vehicle access; no setting writes, remote control, overlay or network capability.
-- Vehicle-reported SOC, range, speed, outside temperature and climate state where available.
-- Nullable battery power and temperature supplied by EVHardware where the firmware exposes
-  the standard read-only properties.
-- Local atomic trip history. The initial recording session is process-local and samples only
-  while the dashboard is visible.
-- Stable and unstable packages install side by side; neither contains an updater in v0.1.
+- Vehicle-reported SOC, range and speed, plus an independently nullable thermal/climate block.
+- Battery power and temperature remain hidden until EVHardware's exact-firmware evidence
+  catalogue validates their units and semantics.
+- Automatic foreground trip detection, bounded atomic trip history and a bounded sample track.
+- Explicitly estimated adaptive range; no estimate is rendered as a vehicle measurement.
+- App-private CSV/JSON trip export and parked-only bounded diagnostic export to removable USB.
+- Stable and unstable packages install side by side; neither contains an updater or network
+  capability.
 - Arrival SOC, charger routing and energy-source attribution are deliberately out of the MVP.
 
 ## Brand Commitments
