@@ -92,6 +92,8 @@ class TripExporter(
                     decimal(summary.consumedKwh),
                     decimal(summary.regeneratedKwh),
                     decimal(summary.averageConsumptionKwhPer100Km),
+                    summary.batteryPowerEvidence?.firmware?.name.orEmpty(),
+                    summary.batteryPowerEvidence?.conversionVersion?.toString().orEmpty(),
                 ).joinToString(",")
             )
             append('\n')
@@ -117,6 +119,15 @@ class TripExporter(
             addFiniteOrNull("consumedKwh", summary.consumedKwh)
             addFiniteOrNull("regeneratedKwh", summary.regeneratedKwh)
             addNullable("distanceAvailable", summary.distanceAvailable)
+            add(
+                "batteryPowerEvidence",
+                summary.batteryPowerEvidence?.let { evidence ->
+                    JsonObject().apply {
+                        addProperty("firmware", evidence.firmware.name)
+                        addProperty("conversionVersion", evidence.conversionVersion)
+                    }
+                } ?: JsonNull.INSTANCE,
+            )
         })
         add(
             "samples",
@@ -181,11 +192,12 @@ class TripExporter(
         const val CSV_HEADER =
             "started_at_utc,ended_at_utc,recorded_duration_seconds,distance_km," +
                 "start_soc_percent,end_soc_percent,consumed_kwh,regenerated_kwh," +
-                "average_consumption_kwh_per_100km"
+                "average_consumption_kwh_per_100km,battery_power_firmware," +
+                "battery_power_conversion_version"
         const val MAX_EXPORT_BYTES = 2 * 1024 * 1024
         const val MAX_TRIPS = 200
         const val MAX_EXPORT_FILES = 8
-        private const val JSON_SCHEMA_VERSION = 1
+        private const val JSON_SCHEMA_VERSION = 2
         private val exportLock = Any()
     }
 }

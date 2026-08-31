@@ -1,5 +1,7 @@
 package com.evsuite.chargepilot
 
+import com.evsuite.hardware.BatteryPowerEvidence
+import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSummary
@@ -47,6 +49,20 @@ data class DashboardReadings(
             trip: EnergyTripSummary?,
             instantConsumption: Provenanced<Double>,
             adaptiveRange: Provenanced<Double>,
+        ): DashboardReadings = of(
+            snapshot,
+            trip,
+            instantConsumption,
+            adaptiveRange,
+            isPowerValidated(snapshot.firmware),
+        )
+
+        internal fun of(
+            snapshot: EnergySnapshot,
+            trip: EnergyTripSummary?,
+            instantConsumption: Provenanced<Double>,
+            adaptiveRange: Provenanced<Double>,
+            powerValidated: Boolean,
         ): DashboardReadings {
             // An unrecognised generation is not a car that stopped publishing: it is a car
             // this build was never taught to read. The screen says which.
@@ -55,24 +71,58 @@ data class DashboardReadings(
             } else {
                 UnavailableReason.SIGNAL_ABSENT
             }
+            val powerReason = powerUnavailableReason(snapshot.firmware)
+            fun <T : Any> powerDerived(value: T?): Provenanced<T> = if (powerValidated) {
+                Provenanced.derived(value)
+            } else {
+                Provenanced.unavailable(powerReason)
+            }
             return DashboardReadings(
                 soc = Provenanced.measured(snapshot.socPercent, absent),
                 range = Provenanced.measured(snapshot.rangeKm, absent),
-                adaptiveRange = adaptiveRange,
+                adaptiveRange = if (powerValidated) adaptiveRange
+                    else Provenanced.unavailable(powerReason),
                 speed = Provenanced.measured(snapshot.speedKmh, absent),
-                power = Provenanced.measured(snapshot.batteryPowerKw, absent),
+                power = if (powerValidated) {
+                    Provenanced.measured(snapshot.batteryPowerKw, absent)
+                } else {
+                    Provenanced.unavailable(powerReason)
+                },
                 outsideTemp = Provenanced.measured(snapshot.outsideTempCelsius, absent),
                 batteryTemp = Provenanced.measured(snapshot.batteryTempCelsius, absent),
-                instantConsumption = instantConsumption,
+                instantConsumption = if (powerValidated) instantConsumption
+                    else Provenanced.unavailable(powerReason),
                 // The trip figures are arithmetic over those readings, so they are derived,
                 // and they are missing for a different reason: no trip is being recorded, or
                 // no usable interval has accumulated yet.
                 tripDuration = Provenanced.derived(trip?.durationMs),
                 tripDistance = Provenanced.derived(trip?.recordedDistanceKm),
-                tripEnergy = Provenanced.derived(trip?.consumedKwh),
-                tripRegen = Provenanced.derived(trip?.regeneratedKwh),
-                tripConsumption = Provenanced.derived(trip?.averageConsumptionKwhPer100Km),
+                tripEnergy = powerDerived(trip?.consumedKwh),
+                tripRegen = powerDerived(trip?.regeneratedKwh),
+                tripConsumption = powerDerived(trip?.averageConsumptionKwhPer100Km),
             )
+        }
+
+        fun isPowerValidated(firmware: FirmwareInfo.Gen): Boolean =
+            CarPropertyEvidence.isValidated(
+                CarPropertyEvidence.Signal.BATTERY_POWER_KW,
+                firmware,
+            )
+
+        fun powerUnavailableReason(firmware: FirmwareInfo.Gen): UnavailableReason = when {
+            firmware == FirmwareInfo.Gen.UNKNOWN -> UnavailableReason.UNSUPPORTED_FIRMWARE
+            !isPowerValidated(firmware) -> UnavailableReason.UNVALIDATED_FIRMWARE
+            else -> UnavailableReason.SIGNAL_ABSENT
+        }
+
+        /** Models may reuse only totals produced by this exact firmware/conversion pair. */
+        fun trustedPowerTrips(
+            trips: List<EnergyTripSummary>,
+            evidence: BatteryPowerEvidence?,
+        ): List<EnergyTripSummary> = if (evidence == null) {
+            emptyList()
+        } else {
+            trips.filter { it.batteryPowerEvidence == evidence }
         }
     }
 }

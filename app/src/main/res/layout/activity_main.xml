@@ -115,6 +115,21 @@
                         android:textAppearance="@style/Text.EV.Body" />
 
                     <TextView
+                        android:id="@+id/powerState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:text="@string/power_state_waiting"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <com.evsuite.chargepilot.PowerFlowView
+                        android:id="@+id/powerFlow"
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_xs"

@@ -8,7 +8,10 @@ Commit author: `malys.training@gmail.com`.
 
 ## Product boundary
 
-- EVChargePilot reads vehicle state and writes only its own app-private trip files.
+- EVChargePilot reads vehicle state and writes its bounded trip/export files in app-private
+  storage. A diagnostic report may additionally be written only after an explicit parked-user
+  choice to a removable USB volume; it is bounded, atomic and never targets internal AAOS
+  storage as a fallback.
 - It never changes a vehicle setting, controls charging, exposes a remote command surface,
   draws an overlay, or silently opens another application.
 - Vehicle property ids, service descriptors, transaction codes and firmware routing belong
@@ -40,6 +43,8 @@ Commit author: `malys.training@gmail.com`.
 ## Security
 
 - The stable manifest has no `INTERNET`, location, overlay, install or boot capability.
+- USB diagnostic export adds no storage permission: offer only removable roots already visible
+  to the app, and fall back only to this app's directory on that same removable volume.
 - Any new permission requires an allowlist change and a security review in the same commit.
 - Signing configuration comes only from environment variables or local Gradle properties.
 

@@ -1,5 +1,7 @@
 package com.evsuite.chargepilot
 
+import com.evsuite.hardware.BatteryPowerEvidence
+import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.TripSample
@@ -35,12 +37,14 @@ class TripExporterTest {
         )
 
         val exported = exporter().export(listOf(trip), TripExporter.Format.CSV, true).getOrThrow()
-        val cells = exported.file.readLines()[1].split(",", ignoreCase = false, limit = 10)
+        val cells = exported.file.readLines()[1].split(",", ignoreCase = false, limit = 12)
 
         assertEquals("12.5", cells[3])
         assertEquals("", cells[6])
         assertEquals("", cells[7])
         assertEquals("", cells[8])
+        assertEquals("", cells[9])
+        assertEquals("", cells[10])
         assertFalse(exported.file.readText().contains(",0,0,0"))
     }
 
@@ -70,14 +74,14 @@ class TripExporterTest {
         val exportedSummary = exportedTrip.getAsJsonObject("summary")
         val exportedSample = exportedTrip.getAsJsonArray("samples")[0].asJsonObject
 
-        assertEquals(1, document.get("schemaVersion").asInt)
+        assertEquals(2, document.get("schemaVersion").asInt)
         assertEquals("2023-11-14T22:13:20Z", document.get("exportedAtUtc").asString)
         assertEquals(setOf("schemaVersion", "exportedAtUtc", "trips"), document.keySet())
         assertEquals(
             setOf(
                 "startedAtMs", "endedAtMs", "durationMs", "distanceKm",
                 "startSocPercent", "endSocPercent", "consumedKwh", "regeneratedKwh",
-                "distanceAvailable",
+                "distanceAvailable", "batteryPowerEvidence",
             ),
             exportedSummary.keySet(),
         )
@@ -90,8 +94,32 @@ class TripExporterTest {
             exportedSample.keySet(),
         )
         assertTrue(exportedSummary.get("consumedKwh").isJsonNull)
+        assertTrue(exportedSummary.get("batteryPowerEvidence").isJsonNull)
         assertTrue(exportedSample.get("speedKmh").isJsonNull)
         assertEquals(2L, exportedSample.get("atMs").asLong)
+    }
+
+    @Test
+    fun trustedPowerEvidenceSurvivesCsvAndJsonExports() {
+        val evidence = BatteryPowerEvidence(
+            FirmwareInfo.Gen.SWI68,
+            BatteryPowerEvidence.OUTPUT_POSITIVE_MW_V1,
+        )
+        val trusted = trip(startedAtMs = 1L, batteryPowerEvidence = evidence)
+
+        val csv = exporter().export(listOf(trusted), TripExporter.Format.CSV, true)
+            .getOrThrow().file.readLines()[1].split(",", ignoreCase = false, limit = 12)
+        assertEquals("SWI68", csv[9])
+        assertEquals(evidence.conversionVersion.toString(), csv[10])
+
+        val json = exporter().export(listOf(trusted), TripExporter.Format.JSON, true)
+            .getOrThrow().file.readText()
+        val exportedEvidence = JsonParser.parseString(json).asJsonObject
+            .getAsJsonArray("trips")[0].asJsonObject
+            .getAsJsonObject("summary")
+            .getAsJsonObject("batteryPowerEvidence")
+        assertEquals("SWI68", exportedEvidence.get("firmware").asString)
+        assertEquals(evidence.conversionVersion, exportedEvidence.get("conversionVersion").asInt)
     }
 
     @Test
@@ -138,6 +166,7 @@ class TripExporterTest {
         consumedKwh: Double? = 2.5,
         regeneratedKwh: Double? = 0.25,
         distanceAvailable: Boolean? = true,
+        batteryPowerEvidence: BatteryPowerEvidence? = null,
         samples: List<TripSample>? = null,
     ) = StoredTrip(
         summary = EnergyTripSummary(
@@ -150,6 +179,7 @@ class TripExporterTest {
             consumedKwh = consumedKwh,
             regeneratedKwh = regeneratedKwh,
             distanceAvailable = distanceAvailable,
+            batteryPowerEvidence = batteryPowerEvidence,
         ),
         samples = samples,
     )

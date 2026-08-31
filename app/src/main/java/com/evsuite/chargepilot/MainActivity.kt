@@ -7,10 +7,13 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityMainBinding
 import com.evsuite.hardware.AppLogger
+import com.evsuite.hardware.BatteryPowerEvidence
+import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
@@ -44,6 +47,10 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var latestReadings: DashboardReadings = DashboardReadings.empty()
     /** Immutable snapshot loaded off the UI thread; the store writes newest trips first. */
     @Volatile private var recentTrips: List<EnergyTripSummary> = emptyList()
+    /** Rebuilt only when history or firmware evidence changes, never on every 1 Hz frame. */
+    private var trustedTripsSource: List<EnergyTripSummary> = emptyList()
+    private var trustedTripsEvidence: BatteryPowerEvidence? = null
+    private var trustedTripsCache: List<EnergyTripSummary> = emptyList()
     private var updatingAutomaticSwitch = false
 
     private val connection = object : ServiceConnection {
@@ -126,18 +133,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(value: EnergySnapshot) {
-        val missingReason = if (value.firmware == FirmwareInfo.Gen.UNKNOWN) {
-            UnavailableReason.UNSUPPORTED_FIRMWARE
-        } else {
-            UnavailableReason.SIGNAL_ABSENT
-        }
-        val consumptionReading = consumption.add(value, missingReason)
+        val powerValidated = DashboardReadings.isPowerValidated(value.firmware)
+        val calculationSnapshot = if (powerValidated || value.batteryPowerKw == null) value
+            else value.copy(batteryPowerKw = null)
+        val powerMissingReason = DashboardReadings.powerUnavailableReason(value.firmware)
+        val consumptionReading = consumption.add(calculationSnapshot, powerMissingReason)
         val currentTrip = EnergyTripSession.current(value.timestampMs)
+        val powerEvidence = CarPropertyEvidence.batteryPowerEvidence(value.firmware)
         val adaptiveRange = rangeEstimator.estimate(
-            value,
+            calculationSnapshot,
             currentTrip,
-            recentTrips,
-            missingReason,
+            trustedRecentTrips(powerEvidence),
+            powerMissingReason,
         )
         val readings = DashboardReadings.of(
             value,
@@ -146,7 +153,7 @@ class MainActivity : AppCompatActivity() {
             adaptiveRange,
         )
         latestReadings = readings
-        renderReadings(readings)
+        renderReadings(readings, value.firmware)
         binding.climateValue.text = climate(value)
 
         val hasVehicleData = value.hasVehicleData
@@ -219,7 +226,10 @@ class MainActivity : AppCompatActivity() {
         updatingAutomaticSwitch = false
     }
 
-    private fun renderReadings(readings: DashboardReadings) {
+    private fun renderReadings(
+        readings: DashboardReadings,
+        firmware: FirmwareInfo.Gen? = null,
+    ) {
         bind(binding.socValue, R.string.label_soc, readings.soc, PATTERN_SOC, SOC_UNAVAILABLE)
         bind(binding.rangeValue, R.string.label_range, readings.range, PATTERN_DISTANCE)
         bind(
@@ -231,6 +241,7 @@ class MainActivity : AppCompatActivity() {
         )
         bind(binding.speedValue, R.string.label_speed, readings.speed, PATTERN_SPEED)
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
+        renderPowerFlow(readings.power, firmware)
         bind(binding.outsideTempValue, R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP)
         bind(binding.batteryTempValue, R.string.label_battery_temp, readings.batteryTemp, PATTERN_TEMP)
         bind(
@@ -250,6 +261,30 @@ class MainActivity : AppCompatActivity() {
         binding.tripDurationValue.text = recorded
         binding.tripDurationValue.contentDescription =
             provenance.describe(getString(R.string.label_duration), readings.tripDuration, recorded)
+    }
+
+    private fun renderPowerFlow(power: Provenanced<Float>, firmware: FirmwareInfo.Gen?) {
+        binding.powerFlow.showPower(power.value)
+        val state = when {
+            firmware == null -> R.string.power_state_waiting
+            power.reason == UnavailableReason.UNVALIDATED_FIRMWARE ->
+                R.string.power_state_unvalidated
+            power.reason == UnavailableReason.UNSUPPORTED_FIRMWARE ->
+                R.string.power_state_unsupported
+            power.value == null -> R.string.power_state_unavailable
+            powerFlowDirection(power.value) == PowerFlowDirection.OUTPUT ->
+                R.string.power_state_output
+            powerFlowDirection(power.value) == PowerFlowDirection.REGENERATION ->
+                R.string.power_state_regeneration
+            else -> R.string.power_state_idle
+        }
+        binding.powerState.text = if (firmware == null) getString(state)
+        else getString(state, firmware.name)
+        binding.powerState.contentDescription = provenance.describe(
+            getString(R.string.label_power),
+            power,
+            binding.powerState.text.toString(),
+        )
     }
 
     /**
@@ -287,6 +322,18 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun trustedRecentTrips(
+        evidence: BatteryPowerEvidence?,
+    ): List<EnergyTripSummary> {
+        val source = recentTrips
+        if (source !== trustedTripsSource || evidence != trustedTripsEvidence) {
+            trustedTripsSource = source
+            trustedTripsEvidence = evidence
+            trustedTripsCache = DashboardReadings.trustedPowerTrips(source, evidence)
+        }
+        return trustedTripsCache
+    }
+
     /** History is bounded but still disk-backed; never parse it on the one-second UI path. */
     private fun loadRecentTrips() {
         runCatching {
@@ -313,18 +360,98 @@ class MainActivity : AppCompatActivity() {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.diagnostics_title)
                     .setMessage(body)
+                    .setNeutralButton(R.string.diagnostics_export_usb) { _, _ ->
+                        exportDiagnostics(body)
+                    }
                     .setPositiveButton(R.string.action_close, null)
                     .show()
             }
         }
     }
 
+    /** Export remains a parked, explicit action; missing speed fails closed with a reason. */
+    private fun exportDiagnostics(report: String) {
+        if (showDiagnosticExportRefusal(diagnosticExportDecision(recorder?.latest))) return
+        val appContext = applicationContext
+        background.execute {
+            val roots = DiagnosticUsbStorage.roots(appContext)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (roots.isEmpty()) {
+                    toastLong(R.string.diagnostics_export_no_usb)
+                } else {
+                    chooseDiagnosticDestination(report, roots)
+                }
+            }
+        }
+    }
+
+    private fun chooseDiagnosticDestination(report: String, roots: List<File>) {
+        val labels = roots.map(File::getAbsolutePath).toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.diagnostics_export_pick_usb)
+            .setItems(labels) { _, which -> writeDiagnostic(report, roots[which]) }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    private fun writeDiagnostic(report: String, directory: File) {
+        val appContext = applicationContext
+        val service = recorder
+        background.execute {
+            // Root discovery and the user's choice can take arbitrarily long. Re-read the
+            // volatile latest sample at the last responsible moment so parking cannot go stale.
+            val decision = diagnosticExportDecision(service?.latest)
+            val file = if (decision == DiagnosticExportPolicy.Decision.ALLOWED) {
+                DiagnosticExporter.export(appContext, report, directory)
+            } else null
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (showDiagnosticExportRefusal(decision)) {
+                    Unit
+                } else if (file == null) {
+                    toastLong(R.string.diagnostics_export_failed)
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.diagnostics_export_ok, file.absolutePath),
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun diagnosticExportDecision(sample: EnergySnapshot?): DiagnosticExportPolicy.Decision =
+        DiagnosticExportPolicy.decide(
+            speedKmh = sample?.speedKmh,
+            sampledAtMs = sample?.timestampMs,
+            nowMs = System.currentTimeMillis(),
+        )
+
+    /** @return true when a visible refusal was shown. */
+    private fun showDiagnosticExportRefusal(decision: DiagnosticExportPolicy.Decision): Boolean =
+        when (decision) {
+            DiagnosticExportPolicy.Decision.SPEED_UNAVAILABLE -> {
+                toastLong(R.string.diagnostics_export_speed_unavailable)
+                true
+            }
+            DiagnosticExportPolicy.Decision.VEHICLE_MOVING -> {
+                toastLong(R.string.diagnostics_export_park_vehicle)
+                true
+            }
+            DiagnosticExportPolicy.Decision.ALLOWED -> false
+        }
+
+    private fun toastLong(message: Int) =
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
     private fun diagnosticsReport(): String {
         val crash = CrashLogger.read(applicationContext)
         val recentLog = AppLogger.entries.takeLast(30).joinToString("\n") {
             "[${it.time}] ${it.level}/${it.tag}: ${it.msg}"
         }
-        return buildString {
+        return DiagnosticExporter.bounded(buildString {
             appendLine(getString(R.string.diagnostics_firmware, FirmwareInfo.getGeneration().name))
             appendLine(getString(R.string.diagnostics_read_only))
             appendLine()
@@ -347,7 +474,7 @@ class MainActivity : AppCompatActivity() {
             appendLine()
             appendLine(getString(R.string.diagnostics_recent_log))
             append(recentLog.ifBlank { getString(R.string.diagnostics_no_log) })
-        }
+        })
     }
 
     private fun describeReadings(readings: DashboardReadings): List<String> = listOf(

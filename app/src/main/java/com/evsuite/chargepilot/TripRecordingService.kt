@@ -179,7 +179,7 @@ class TripRecordingService : Service() {
     }
 
     private fun beginTrip(sample: EnergySnapshot) {
-        if (!EnergyTripSession.isRecording) EnergyTripSession.start(sample)
+        if (!EnergyTripSession.isRecording) EnergyTripSession.start(PowerHistoryPolicy.sanitize(sample))
         detector.markRecording()
         samplesSinceNotification = 0
         ensureSampling()
@@ -241,14 +241,15 @@ class TripRecordingService : Service() {
             if (automaticDetectionEnabled) updateAutomaticMonitorAvailability(null)
             return
         }
-        latestSnapshot = value
-        EnergyTripSession.add(value)
+        val recordable = PowerHistoryPolicy.sanitize(value)
+        latestSnapshot = recordable
+        EnergyTripSession.add(recordable)
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state
             val result = detector.add(value)
             when (result.event) {
-                TripDetector.Event.START -> beginTrip(value)
+                TripDetector.Event.START -> beginTrip(recordable)
                 TripDetector.Event.STOP -> stopTrip()
                 null -> Unit
             }
@@ -260,7 +261,7 @@ class TripRecordingService : Service() {
             samplesSinceNotification = 0
             main.post { updateNotification() }
         }
-        main.post { listener?.onSample(value) }
+        main.post { listener?.onSample(recordable) }
     }
 
     /** No dashboard, recording, or automatic monitor: sampling has no consumer to keep. */

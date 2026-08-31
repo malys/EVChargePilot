@@ -6,6 +6,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Diagnostics can be exported explicitly to a removable USB volume.** The action is
+  parked-only and fail-closed when speed is unreadable, offers no internal-storage fallback,
+  adds no storage permission, and writes a report capped at 128 KiB through a unique temporary
+  file plus same-directory rename. A pathological oversized report keeps its head and an explicit
+  truncation marker. Firmware, property/provenance status, the recent bounded log and the previous
+  bounded crash report are included; probing and I/O stay off the main thread.
+
+- **Battery power flow is directional, static and evidence-gated.** The signed kW value is paired
+  with a centred, non-animated scale and explicit output/regeneration text, so colour never
+  carries direction alone. EVHardware's per-firmware evidence catalogue starts empty: until
+  CP-003 validates a generation, raw power is not integrated into normal trips and every
+  dependent dashboard calculation renders as unavailable instead of confidently applying an
+  assumed scale or sign. Trusted trip totals store only a small exact firmware/conversion tag;
+  legacy and mismatched totals are excluded from models, while CP-003's bounded unstable
+  evidence recorder remains the separate path for proving the raw signal. CSV and JSON schema 2
+  exports preserve that tag explicitly; legacy exports carry empty/null evidence instead of
+  silently presenting the totals as validated.
+
 - **Automatic trip detection is fail-closed and parked-configurable.** A small persisted switch
   enables the existing foreground sampler, while EVHardware alone decides start/end boundaries.
   Five seconds of motion starts a trip; a confirmed two-minute standstill ends it. Missing speed

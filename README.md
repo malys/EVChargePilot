@@ -43,8 +43,10 @@ It does not write to the vehicle and does not contain network or update code.
 - Speed, outside temperature and climate state.
 - Automatic trip detection plus parked-only manual controls and configuration.
 - Distance and duration calculated locally.
-- Battery power, pack temperature and charging state when exposed by the current firmware.
+- Evidence-gated signed battery power with a static traction/regeneration scale.
+- Pack temperature and charging state when exposed by the current firmware.
 - Energy and regeneration integration from the shared EVHardware power convention.
+- Parked-only, bounded diagnostic export to an explicitly chosen removable USB volume.
 - Atomic, app-private trip history and in-app crash diagnostics.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
@@ -60,6 +62,14 @@ initial milestone.
 ## How it works
 
 EVHardware's `EnergyTelemetryReader` produces one coherent nullable snapshot per second.
+Battery power is not integrated into normal trip history, and every dashboard calculation
+derived from it remains unavailable, until the checked-in evidence catalogue validates the
+signal's scale and sign on that exact firmware generation. A trusted energy summary stores the
+exact firmware and conversion version as a small metadata tag; legacy and mismatched totals are
+excluded from adaptive models. The bounded unstable CP-003 recorder is the separate raw-evidence
+path used to establish that validation.
+The dashboard states `+` battery output and `−` regeneration/charging in text as well as on a
+static centred scale; it never animates that passive display while driving.
 Its shared `TripDetector` starts after five continuous seconds at or above 5 km/h and stops
 after 120 continuous seconds at or below 1 km/h, with park or charge-port confirmation when
 either signal exists. Missing speed and observation gaps over five seconds invalidate partial
@@ -75,6 +85,14 @@ reported duration is the time actually covered by usable samples, not wall clock
 sampler adds nothing to duration, distance or energy, so consumption averages compare values
 measured over the same interval.
 
+The diagnostics dialog can export the same firmware, property/provenance, recent-log and crash
+context to a removable USB volume. The app offers only removable roots already visible at
+runtime and can fall back only to its own folder on that same USB volume; it never falls back to
+internal AAOS storage and declares no storage permission. Export requires a fresh readable
+speed at or below 0.1 km/h, runs off the main thread, caps the report at 128 KiB with an explicit
+truncation marker, and renames a unique temporary file only after its contents have been flushed
+and synced.
+
 ## Trip export formats
 
 The trip history can export one trip or the full bounded ledger without network or storage
@@ -85,14 +103,18 @@ Android's chooser with temporary read access to that one file through `FileProvi
 CSV contains summary rows only, in this exact order:
 
 ```text
-started_at_utc,ended_at_utc,recorded_duration_seconds,distance_km,start_soc_percent,end_soc_percent,consumed_kwh,regenerated_kwh,average_consumption_kwh_per_100km
+started_at_utc,ended_at_utc,recorded_duration_seconds,distance_km,start_soc_percent,end_soc_percent,consumed_kwh,regenerated_kwh,average_consumption_kwh_per_100km,battery_power_firmware,battery_power_conversion_version
 ```
 
 Times are ISO-8601 UTC, duration is seconds, distance is kilometres, SOC is percent, energy is
-kWh, and average consumption is kWh/100 km. An unavailable value is an empty cell, never `0`.
+kWh, and average consumption is kWh/100 km. The last two columns name the exact validation
+evidence behind power totals; legacy/unvalidated trips leave them empty. An unavailable value is
+an empty cell, never `0`.
 
-JSON export schema version 1 contains `exportedAtUtc` and the complete stored trip objects:
-each summary plus its retained sample track. Unavailable nullable readings are explicit `null`.
+JSON export schema version 2 contains `exportedAtUtc` and the complete stored trip objects:
+each summary plus its retained sample track. `batteryPowerEvidence` carries `firmware` and
+`conversionVersion`, or is `null` for legacy/unvalidated totals. Other unavailable nullable
+readings are likewise explicit `null`.
 Both formats are limited to the history ceiling of 200 trips and 2 MiB per export. The export
 directory retains the eight newest generated files so repeated exports cannot grow without bound.
 
@@ -155,6 +177,8 @@ Release signing reads `EV_KEYSTORE`, `EV_KEYSTORE_PASSWORD`, `EV_KEY_ALIAS` and
 ## Security
 
 The application has no network, location, overlay, installer or vehicle-write capability.
+USB diagnostic export adds no broad storage permission and writes only after an explicit parked
+user selects a removable volume.
 Permission drift is blocked in CI. Report vulnerabilities according to [SECURITY.md](SECURITY.md).
 
 ## Contributing
