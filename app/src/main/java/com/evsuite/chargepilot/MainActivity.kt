@@ -154,7 +154,6 @@ class MainActivity : AppCompatActivity() {
         )
         latestReadings = readings
         renderReadings(readings, value.firmware)
-        binding.climateValue.text = climate(value)
 
         val hasVehicleData = value.hasVehicleData
         binding.dataStatus.text = getString(
@@ -242,8 +241,7 @@ class MainActivity : AppCompatActivity() {
         bind(binding.speedValue, R.string.label_speed, readings.speed, PATTERN_SPEED)
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
         renderPowerFlow(readings.power, firmware)
-        bind(binding.outsideTempValue, R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP)
-        bind(binding.batteryTempValue, R.string.label_battery_temp, readings.batteryTemp, PATTERN_TEMP)
+        renderClimate(readings.climate, firmware)
         bind(
             binding.instantConsumptionValue,
             R.string.label_instant_consumption,
@@ -262,6 +260,88 @@ class MainActivity : AppCompatActivity() {
         binding.tripDurationValue.contentDescription =
             provenance.describe(getString(R.string.label_duration), readings.tripDuration, recorded)
     }
+
+    private fun renderClimate(readings: ClimateReadings, firmware: FirmwareInfo.Gen?) {
+        bind(
+            binding.outsideTempValue,
+            R.string.label_outside_temp,
+            readings.outsideTemp,
+            PATTERN_TEMP,
+        )
+        bind(
+            binding.cabinTempValue,
+            R.string.label_cabin_temp,
+            readings.cabinTemp,
+            PATTERN_TEMP,
+        )
+        bind(
+            binding.batteryTempValue,
+            R.string.label_battery_temp,
+            readings.batteryTemp,
+            PATTERN_TEMP,
+        )
+        bindState(binding.climatePowerValue, R.string.label_climate_power, readings.hvacOn)
+        bindState(binding.climateAcValue, R.string.label_climate_ac, readings.acOn)
+        bindState(binding.climateAutoValue, R.string.label_climate_auto, readings.autoOn)
+        bindWith(binding.climateFanValue, R.string.label_climate_fan, readings.fan) {
+            getString(R.string.climate_fan_value, it.level, it.maximum)
+        }
+        bind(
+            binding.climateDriverTargetValue,
+            R.string.label_climate_driver_target,
+            readings.driverTarget,
+            PATTERN_TEMP,
+        )
+        bind(
+            binding.climatePassengerTargetValue,
+            R.string.label_climate_passenger_target,
+            readings.passengerTarget,
+            PATTERN_TEMP,
+        )
+        bindState(binding.climateEconValue, R.string.label_climate_econ, readings.econOn)
+        bindState(
+            binding.climateRecirculationValue,
+            R.string.label_climate_recirculation,
+            readings.recirculationOn,
+        )
+        binding.climateAvailability.text = climateAvailability(readings, firmware)
+    }
+
+    private fun bindState(view: TextView, label: Int, value: Provenanced<Boolean>) =
+        bindWith(view, label, value) {
+            getString(if (it) R.string.state_on else R.string.state_off)
+        }
+
+    private fun <T : Any> bindWith(
+        view: TextView,
+        label: Int,
+        value: Provenanced<T>,
+        transform: (T) -> String,
+    ) {
+        val rendered = provenance.renderWith(value, transform = transform)
+        view.text = rendered
+        view.contentDescription = provenance.describe(getString(label), value, rendered)
+    }
+
+    private fun climateAvailability(
+        readings: ClimateReadings,
+        firmware: FirmwareInfo.Gen?,
+    ): String = buildList {
+        add(getString(R.string.climate_state_only))
+        if (firmware == null) {
+            add(getString(R.string.climate_missing_waiting))
+        } else {
+            readings.unavailableReasons.forEach { reason ->
+                add(when (reason) {
+                    UnavailableReason.UNSUPPORTED_FIRMWARE ->
+                        getString(R.string.climate_missing_unsupported)
+                    UnavailableReason.UNVALIDATED_FIRMWARE ->
+                        getString(R.string.climate_missing_unvalidated, firmware.name)
+                    else -> getString(R.string.climate_missing_signal)
+                })
+            }
+        }
+    }.distinct().joinToString(" · ")
 
     private fun renderPowerFlow(power: Provenanced<Float>, firmware: FirmwareInfo.Gen?) {
         binding.powerFlow.showPower(power.value)
@@ -309,7 +389,6 @@ class MainActivity : AppCompatActivity() {
         latestReadings = DashboardReadings.empty()
         consumption.reset()
         renderReadings(latestReadings)
-        binding.climateValue.text = DASH
         binding.dataStatus.text = getString(R.string.status_waiting_for_vehicle)
         binding.tripAction.isEnabled = false
         binding.automaticDetection.isEnabled = false
@@ -477,38 +556,62 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun describeReadings(readings: DashboardReadings): List<String> = listOf(
-        Triple(R.string.label_soc, readings.soc, PATTERN_SOC),
-        Triple(R.string.label_range, readings.range, PATTERN_DISTANCE),
-        Triple(R.string.label_adaptive_range, readings.adaptiveRange, PATTERN_DISTANCE),
-        Triple(R.string.label_speed, readings.speed, PATTERN_SPEED),
-        Triple(R.string.label_power, readings.power, PATTERN_POWER),
-        Triple(R.string.label_outside_temp, readings.outsideTemp, PATTERN_TEMP),
-        Triple(R.string.label_battery_temp, readings.batteryTemp, PATTERN_TEMP),
-        Triple(
-            R.string.label_instant_consumption,
-            readings.instantConsumption,
-            PATTERN_CONSUMPTION,
-        ),
-        Triple(R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE),
-        Triple(R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY),
-        Triple(R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY),
-        Triple(
-            R.string.label_trip_average_consumption,
-            readings.tripConsumption,
-            PATTERN_CONSUMPTION,
-        ),
-    ).map { (label, value, pattern) ->
-        provenance.describe(getString(label), value, provenance.render(value, pattern))
-    }
-
-    private fun climate(value: EnergySnapshot): String = when (value.climate.powerOn) {
-        true -> buildString {
-            append(getString(if (value.climate.acOn == true) R.string.climate_ac_on else R.string.climate_on))
-            value.climate.fanLevel?.let { append(getString(R.string.climate_fan_level, it)) }
+    private fun describeReadings(readings: DashboardReadings): List<String> {
+        val numeric = listOf(
+            Triple(R.string.label_soc, readings.soc, PATTERN_SOC),
+            Triple(R.string.label_range, readings.range, PATTERN_DISTANCE),
+            Triple(R.string.label_adaptive_range, readings.adaptiveRange, PATTERN_DISTANCE),
+            Triple(R.string.label_speed, readings.speed, PATTERN_SPEED),
+            Triple(R.string.label_power, readings.power, PATTERN_POWER),
+            Triple(R.string.label_outside_temp, readings.climate.outsideTemp, PATTERN_TEMP),
+            Triple(R.string.label_cabin_temp, readings.climate.cabinTemp, PATTERN_TEMP),
+            Triple(R.string.label_battery_temp, readings.climate.batteryTemp, PATTERN_TEMP),
+            Triple(
+                R.string.label_climate_driver_target,
+                readings.climate.driverTarget,
+                PATTERN_TEMP,
+            ),
+            Triple(
+                R.string.label_climate_passenger_target,
+                readings.climate.passengerTarget,
+                PATTERN_TEMP,
+            ),
+            Triple(
+                R.string.label_instant_consumption,
+                readings.instantConsumption,
+                PATTERN_CONSUMPTION,
+            ),
+            Triple(R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE),
+            Triple(R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY),
+            Triple(R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY),
+            Triple(
+                R.string.label_trip_average_consumption,
+                readings.tripConsumption,
+                PATTERN_CONSUMPTION,
+            ),
+        ).map { (label, value, pattern) ->
+            provenance.describe(getString(label), value, provenance.render(value, pattern))
         }
-        false -> getString(R.string.climate_off)
-        null -> DASH
+        val states = listOf(
+            R.string.label_climate_power to readings.climate.hvacOn,
+            R.string.label_climate_ac to readings.climate.acOn,
+            R.string.label_climate_auto to readings.climate.autoOn,
+            R.string.label_climate_econ to readings.climate.econOn,
+            R.string.label_climate_recirculation to readings.climate.recirculationOn,
+        ).map { (label, value) ->
+            val rendered = provenance.renderWith(value) {
+                getString(if (it) R.string.state_on else R.string.state_off)
+            }
+            provenance.describe(getString(label), value, rendered)
+        }
+        val fan = provenance.renderWith(readings.climate.fan) {
+            getString(R.string.climate_fan_value, it.level, it.maximum)
+        }
+        return numeric + states + provenance.describe(
+            getString(R.string.label_climate_fan),
+            readings.climate.fan,
+            fan,
+        )
     }
 
     private fun duration(milliseconds: Long): String {

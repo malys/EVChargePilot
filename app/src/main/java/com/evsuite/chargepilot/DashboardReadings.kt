@@ -23,8 +23,7 @@ data class DashboardReadings(
     val adaptiveRange: Provenanced<Double>,
     val speed: Provenanced<Float>,
     val power: Provenanced<Float>,
-    val outsideTemp: Provenanced<Float>,
-    val batteryTemp: Provenanced<Float>,
+    val climate: ClimateReadings,
     val instantConsumption: Provenanced<Double>,
     val tripDuration: Provenanced<Long>,
     val tripDistance: Provenanced<Double>,
@@ -38,7 +37,7 @@ data class DashboardReadings(
             fun <T : Any> gap() = Provenanced.unavailable<T>(UnavailableReason.SIGNAL_ABSENT)
             return DashboardReadings(
                 soc = gap(), range = gap(), adaptiveRange = gap(), speed = gap(), power = gap(),
-                outsideTemp = gap(), batteryTemp = gap(), instantConsumption = gap(),
+                climate = ClimateReadings.empty(), instantConsumption = gap(),
                 tripDuration = gap(), tripDistance = gap(), tripEnergy = gap(),
                 tripRegen = gap(), tripConsumption = gap(),
             )
@@ -88,8 +87,7 @@ data class DashboardReadings(
                 } else {
                     Provenanced.unavailable(powerReason)
                 },
-                outsideTemp = Provenanced.measured(snapshot.outsideTempCelsius, absent),
-                batteryTemp = Provenanced.measured(snapshot.batteryTempCelsius, absent),
+                climate = ClimateReadings.of(snapshot),
                 instantConsumption = if (powerValidated) instantConsumption
                     else Provenanced.unavailable(powerReason),
                 // The trip figures are arithmetic over those readings, so they are derived,

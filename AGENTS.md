@@ -38,6 +38,9 @@ Commit author: `malys.training@gmail.com`.
 - Integrate only adjacent samples no more than five seconds apart. A larger gap represents
   unknown motion/energy and must not be filled by extrapolation.
 - Energy and consumption remain null until at least one valid power interval exists.
+- Climate telemetry is passive state, not energy consumption. Keep every climate field nullable,
+  evidence-gate battery temperature per firmware, and never derive HVAC power from an on/off
+  state or fan setting.
 - The app owns only sampling cadence, lifecycle and presentation.
 
 ## Security

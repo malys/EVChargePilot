@@ -18,8 +18,18 @@
     <string name="label_adaptive_range">ESTIMATION ADAPTATIVE</string>
     <string name="label_speed">VITESSE</string>
     <string name="label_climate">CLIMATISATION</string>
+    <string name="label_thermal_climate">THERMIQUE + CLIMATISATION</string>
     <string name="label_outside_temp">EXTÉRIEUR</string>
+    <string name="label_cabin_temp">HABITACLE</string>
     <string name="label_battery_temp">TEMP. BATTERIE</string>
+    <string name="label_climate_power">CLIM.</string>
+    <string name="label_climate_ac">A/C</string>
+    <string name="label_climate_auto">AUTO</string>
+    <string name="label_climate_fan">VENTILATION</string>
+    <string name="label_climate_driver_target">CIBLE COND.</string>
+    <string name="label_climate_passenger_target">CIBLE PASS.</string>
+    <string name="label_climate_econ">ÉCO</string>
+    <string name="label_climate_recirculation">RECYCLAGE</string>
     <string name="label_consumption">MOYENNE</string>
     <string name="label_instant_consumption">INSTANTANÉE</string>
     <string name="label_trip_average_consumption">MOYENNE TRAJET</string>
@@ -53,10 +63,14 @@
     <string name="trip_automatic_confirming_end">Détection automatique : confirmation de la fin du trajet.</string>
     <string name="trip_automatic_speed_unavailable">Détection automatique indisponible : la vitesse du véhicule est illisible.</string>
     <string name="trip_automatic_recording_speed_unavailable">L’enregistrement continue ; la fin automatique est indisponible tant que la vitesse est illisible.</string>
-    <string name="climate_on">Active</string>
-    <string name="climate_ac_on">A/C active</string>
-    <string name="climate_off">Arrêtée</string>
-    <string name="climate_fan_level"> · ventilation %1$d</string>
+    <string name="state_on">Active</string>
+    <string name="state_off">Arrêtée</string>
+    <string name="climate_fan_value">%1$d / %2$d</string>
+    <string name="climate_state_only">État du véhicule uniquement — aucune puissance CVC n’est mesurée</string>
+    <string name="climate_missing_waiting">— = en attente des données véhicule</string>
+    <string name="climate_missing_signal">— = signal actuellement indisponible</string>
+    <string name="climate_missing_unvalidated">Température batterie non validée sur %1$s</string>
+    <string name="climate_missing_unsupported">— = firmware non pris en charge</string>
     <string name="diagnostics_title">Diagnostic</string>
     <string name="diagnostics_export_usb">Exporter vers USB</string>
     <string name="diagnostics_export_pick_usb">Choisir le stockage USB</string>

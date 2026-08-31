@@ -6,6 +6,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Thermal and climate telemetry is grouped without implying energy use.** Outside, cabin and
+  battery temperatures now sit with HVAC, AC, auto, econ and recirculation states, fan
+  level/maximum and both target temperatures. Every field stays independently nullable, so a
+  partial firmware snapshot remains useful and every missing value keeps an explained em dash.
+  Battery temperature is evidence-gated per firmware and therefore remains explicitly
+  unvalidated until CP-003 proves it. The block states that it shows climate state only and that
+  no HVAC power is measured; it adds no control path and retains no additional history.
+
 - **Diagnostics can be exported explicitly to a removable USB volume.** The action is
   parked-only and fail-closed when speed is unreadable, offers no internal-storage fallback,
   adds no storage permission, and writes a report capped at 128 KiB through a unique temporary

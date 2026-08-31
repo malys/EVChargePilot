@@ -29,6 +29,23 @@
         <item name="android:text">@string/value_unavailable</item>
     </style>
 
+    <style name="Widget.EV.ClimateReadout" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">@dimen/spacing_sm</item>
+        <item name="android:paddingEnd">@dimen/spacing_sm</item>
+    </style>
+
+    <style name="Text.EV.ClimateValue" parent="Text.EV.Body">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/spacing_xs</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:text">@string/value_unavailable</item>
+    </style>
+
     <style name="Widget.EVChargePilot.Button" parent="Widget.EV.Button">
         <item name="android:textColor">@color/ev_button_text</item>
         <item name="backgroundTint">@color/ev_button_fill</item>

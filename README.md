@@ -40,7 +40,9 @@ It does not write to the vehicle and does not contain network or update code.
 ## Features
 
 - Vehicle-reported SOC and range.
-- Speed, outside temperature and climate state.
+- A grouped thermal/climate state block: outside, cabin and evidence-gated battery
+  temperatures; HVAC, AC, auto, econ and recirculation states; fan level/maximum; and
+  driver/passenger targets when each signal is available.
 - Automatic trip detection plus parked-only manual controls and configuration.
 - Distance and duration calculated locally.
 - Evidence-gated signed battery power with a static traction/regeneration scale.
@@ -70,6 +72,11 @@ excluded from adaptive models. The bounded unstable CP-003 recorder is the separ
 path used to establish that validation.
 The dashboard states `+` battery output and `−` regeneration/charging in text as well as on a
 static centred scale; it never animates that passive display while driving.
+The thermal/climate block is likewise passive and keeps each field independently nullable, so a
+firmware that publishes only part of the climate snapshot still shows the usable readings and an
+explained `—` for every gap. Battery temperature remains hidden as unvalidated until CP-003 proves
+its unit and semantics for the exact firmware generation. HVAC and AC indicators describe state
+only: the vehicle has not supplied an HVAC power measurement, and the app does not infer one.
 Its shared `TripDetector` starts after five continuous seconds at or above 5 km/h and stops
 after 120 continuous seconds at or below 1 km/h, with park or charge-port confirmation when
 either signal exists. Missing speed and observation gaps over five seconds invalidate partial

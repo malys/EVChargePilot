@@ -21,8 +21,18 @@
     <string name="label_adaptive_range">ADAPTIVE ESTIMATE</string>
     <string name="label_speed">SPEED</string>
     <string name="label_climate">CLIMATE</string>
+    <string name="label_thermal_climate">THERMAL + CLIMATE</string>
     <string name="label_outside_temp">OUTSIDE</string>
+    <string name="label_cabin_temp">CABIN</string>
     <string name="label_battery_temp">BATTERY TEMP.</string>
+    <string name="label_climate_power">HVAC</string>
+    <string name="label_climate_ac">A/C</string>
+    <string name="label_climate_auto">AUTO</string>
+    <string name="label_climate_fan">FAN</string>
+    <string name="label_climate_driver_target">DRIVER TARGET</string>
+    <string name="label_climate_passenger_target">PASSENGER TARGET</string>
+    <string name="label_climate_econ">ECON</string>
+    <string name="label_climate_recirculation">RECIRCULATION</string>
     <string name="label_consumption">AVERAGE</string>
     <string name="label_instant_consumption">INSTANT</string>
     <string name="label_trip_average_consumption">TRIP AVERAGE</string>
@@ -56,10 +66,14 @@
     <string name="trip_automatic_confirming_end">Automatic detection: confirming the trip has ended.</string>
     <string name="trip_automatic_speed_unavailable">Automatic detection unavailable: vehicle speed is unreadable.</string>
     <string name="trip_automatic_recording_speed_unavailable">Recording continues; automatic end is unavailable while speed is unreadable.</string>
-    <string name="climate_on">On</string>
-    <string name="climate_ac_on">A/C on</string>
-    <string name="climate_off">Off</string>
-    <string name="climate_fan_level"> · fan %1$d</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="climate_fan_value">%1$d / %2$d</string>
+    <string name="climate_state_only">Vehicle state only — no HVAC power is measured</string>
+    <string name="climate_missing_waiting">— = waiting for vehicle data</string>
+    <string name="climate_missing_signal">— = signal unavailable right now</string>
+    <string name="climate_missing_unvalidated">Battery temperature not validated on %1$s</string>
+    <string name="climate_missing_unsupported">— = unsupported firmware</string>
     <string name="diagnostics_title">Diagnostics</string>
     <string name="diagnostics_export_usb">Export to USB</string>
     <string name="diagnostics_export_pick_usb">Choose USB storage</string>

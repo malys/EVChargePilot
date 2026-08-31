@@ -158,16 +158,27 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_range" />
-                        <TextView android:id="@+id/rangeValue" style="@style/Text.EV.ReadoutValue" />
-                        <TextView
-                            style="@style/Text.EV.ReadoutLabel"
-                            android:layout_marginTop="@dimen/spacing_sm"
-                            android:text="@string/label_adaptive_range" />
-                        <TextView
-                            android:id="@+id/adaptiveRangeValue"
-                            style="@style/Text.EV.TripValue" />
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_range" />
+                            <TextView android:id="@+id/rangeValue" style="@style/Text.EV.TripValue" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_adaptive_range" />
+                            <TextView android:id="@+id/adaptiveRangeValue" style="@style/Text.EV.TripValue" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <View
@@ -184,60 +195,6 @@
                         android:layout_marginEnd="@dimen/spacing_sm">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_speed" />
                         <TextView android:id="@+id/speedValue" style="@style/Text.EV.ReadoutValue" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/ev_outline" />
-
-                    <LinearLayout
-                        style="@style/Widget.EV.Readout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate" />
-                        <TextView android:id="@+id/climateValue" style="@style/Text.EV.ReadoutValue" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/ev_outline" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        style="@style/Widget.EV.Readout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_outside_temp" />
-                        <TextView android:id="@+id/outsideTempValue" style="@style/Text.EV.ReadoutValue" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/ev_outline" />
-
-                    <LinearLayout
-                        style="@style/Widget.EV.Readout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:layout_marginEnd="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_battery_temp" />
-                        <TextView android:id="@+id/batteryTempValue" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
 
                     <View
@@ -272,6 +229,101 @@
                             <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.TripValue" />
                         </LinearLayout>
                     </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/ev_outline" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.1"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/spacing_sm"
+                    android:paddingEnd="@dimen/spacing_sm">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:text="@string/label_thermal_climate"
+                        android:textAppearance="@style/Text.EV.SectionHeader" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_outside_temp" />
+                            <TextView android:id="@+id/outsideTempValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_cabin_temp" />
+                            <TextView android:id="@+id/cabinTempValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_battery_temp" />
+                            <TextView android:id="@+id/batteryTempValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_power" />
+                            <TextView android:id="@+id/climatePowerValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_ac" />
+                            <TextView android:id="@+id/climateAcValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_auto" />
+                            <TextView android:id="@+id/climateAutoValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_fan" />
+                            <TextView android:id="@+id/climateFanValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_driver_target" />
+                            <TextView android:id="@+id/climateDriverTargetValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_passenger_target" />
+                            <TextView android:id="@+id/climatePassengerTargetValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_econ" />
+                            <TextView android:id="@+id/climateEconValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                        <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_recirculation" />
+                            <TextView android:id="@+id/climateRecirculationValue" style="@style/Text.EV.ClimateValue" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/climateAvailability"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:layout_marginBottom="@dimen/spacing_sm"
+                        android:maxLines="2"
+                        android:text="@string/climate_state_only"
+                        android:textAppearance="@style/Text.EV.Secondary" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
