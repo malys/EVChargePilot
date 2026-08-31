@@ -4,6 +4,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Security
+
+- The application declares an empty task affinity, reducing launcher-task hijacking exposure on
+  the target Android 9 platform without adding a permission or changing vehicle access.
+
 ### Added
 
 - **Thermal and climate telemetry is grouped without implying energy use.** Outside, cabin and
