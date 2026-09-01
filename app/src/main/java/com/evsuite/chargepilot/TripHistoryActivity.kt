@@ -98,6 +98,11 @@ class TripHistoryActivity : AppCompatActivity() {
             }
         }
         binding.speedWhatIfAction.setOnClickListener { openSpeedWhatIfIfParked() }
+        binding.energyBreakdownAction.setOnClickListener {
+            selectedStartedAtMs?.let { startedAt ->
+                startActivity(EnergyBreakdownActivity.forTrip(this, startedAt))
+            }
+        }
         renderSpeedWhatIfGate()
     }
 
@@ -161,6 +166,7 @@ class TripHistoryActivity : AppCompatActivity() {
                 binding.historyContent.visibility = if (empty) View.GONE else View.VISIBLE
                 binding.deleteAllAction.isEnabled = !empty
                 binding.exportAllAction.isEnabled = !empty
+                binding.energyBreakdownAction.isEnabled = !empty
                 renderSelected()
                 renderSpeedWhatIfGate()
             }

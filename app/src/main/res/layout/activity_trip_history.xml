@@ -180,13 +180,30 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/detailAttribution"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:layout_marginBottom="@dimen/spacing_sm"
-                    android:textAppearance="@style/Text.EV.Secondary" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/detailAttribution"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:maxLines="3"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/energyBreakdownAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="280dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:text="@string/action_energy_breakdown" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/trackGroup"

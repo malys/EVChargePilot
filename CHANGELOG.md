@@ -11,6 +11,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A two-column post-trip breakdown separates facts from model claims.** Integrated consumed,
+  regenerated and net battery energy plus the unmodelled remainder sit beside banded traction
+  and residual estimates. Plain-language summaries call out model noise, negative error and the
+  lack of a vehicle consumer meter. Unsupported battery-heating and accessory categories never
+  appear; missing evidence gets a complete explanatory state.
+
 - **Trip detail exposes honest energy attribution.** Integrated consumption is reconciled with
   modelled traction, measured regeneration, climate-conditioned residual groups and a visible
   unmodelled discrepancy. Every attributed number has a band; model-noise residuals say they are
