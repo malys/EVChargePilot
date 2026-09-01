@@ -1,8 +1,11 @@
 package com.evsuite.chargepilot
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +32,32 @@ class TripHistoryActivity : AppCompatActivity() {
     }
     private val adapter = TripAdapter()
     private var selectedStartedAtMs: Long? = null
+    private var recorder: TripRecordingService? = null
+    private var speedKmh: Float? = null
+    private var speedObservedAtMs: Long? = null
+    private var bound = false
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val value = (service as? TripRecordingService.LocalBinder)?.service ?: return
+            recorder = value
+            value.setListener(this@TripHistoryActivity) { snapshot ->
+                speedKmh = snapshot.speedKmh
+                speedObservedAtMs = snapshot.timestampMs
+                renderSpeedWhatIfGate()
+            }
+            speedKmh = value.latest?.speedKmh
+            speedObservedAtMs = value.latest?.timestampMs
+            renderSpeedWhatIfGate()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            recorder = null
+            speedKmh = null
+            speedObservedAtMs = null
+            renderSpeedWhatIfGate()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +89,18 @@ class TripHistoryActivity : AppCompatActivity() {
                 startActivity(TripExportActivity.single(this, startedAt))
             }
         }
+        binding.speedWhatIfAction.setOnClickListener { openSpeedWhatIfIfParked() }
+        renderSpeedWhatIfGate()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        bound = bindService(
+            Intent(this, TripRecordingService::class.java),
+            connection,
+            Context.BIND_AUTO_CREATE,
+        )
+        if (!bound) renderSpeedWhatIfGate()
     }
 
     override fun onResume() {
@@ -70,6 +111,17 @@ class TripHistoryActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         selectedStartedAtMs?.let { outState.putLong(STATE_SELECTED, it) }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onStop() {
+        recorder?.clearListener(this)
+        recorder = null
+        binding.speedWhatIfAction.removeCallbacks(gateExpiry)
+        if (bound) unbindService(connection)
+        bound = false
+        speedKmh = null
+        speedObservedAtMs = null
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -96,8 +148,47 @@ class TripHistoryActivity : AppCompatActivity() {
                 binding.deleteAllAction.isEnabled = !empty
                 binding.exportAllAction.isEnabled = !empty
                 renderSelected()
+                renderSpeedWhatIfGate()
             }
         }
+    }
+
+    private fun renderSpeedWhatIfGate() {
+        binding.speedWhatIfAction.removeCallbacks(gateExpiry)
+        val nowMs = System.currentTimeMillis()
+        val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, nowMs)
+        binding.speedWhatIfAction.isEnabled = selectedStartedAtMs != null &&
+            gate == ParkedDeletionGate.PARKED
+        if (gate == ParkedDeletionGate.PARKED) {
+            val ageMs = nowMs - checkNotNull(speedObservedAtMs)
+            binding.speedWhatIfAction.postDelayed(
+                gateExpiry,
+                ParkedDeletionPolicy.MAX_READING_AGE_MS - ageMs + 1L,
+            )
+        }
+    }
+
+    private fun openSpeedWhatIfIfParked() {
+        val gate = ParkedDeletionPolicy.gate(
+            speedKmh,
+            speedObservedAtMs,
+            System.currentTimeMillis(),
+        )
+        val startedAtMs = selectedStartedAtMs
+        if (gate != ParkedDeletionGate.PARKED || startedAtMs == null) {
+            renderSpeedWhatIfGate()
+            Snackbar.make(
+                binding.root,
+                if (gate == ParkedDeletionGate.MOVING) {
+                    R.string.speed_what_if_moving
+                } else {
+                    R.string.speed_what_if_speed_unavailable
+                },
+                Snackbar.LENGTH_LONG,
+            ).show()
+            return
+        }
+        startActivity(SpeedWhatIfActivity.forTrip(this, startedAtMs))
     }
 
     private fun renderSelected() {
@@ -309,4 +400,6 @@ class TripHistoryActivity : AppCompatActivity() {
         const val STATE_SELECTED = "selected_started_at"
         const val DASH = "—"
     }
+
+    private val gateExpiry = Runnable { renderSpeedWhatIfGate() }
 }

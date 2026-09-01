@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             val bound = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = bound
             setAutomaticSwitchChecked(bound.automaticDetectionEnabled)
-            bound.setListener(::render)
+            bound.setListener(this@MainActivity, ::render)
             bound.latest?.let(::render)
         }
 
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        recorder?.setListener(null)
+        recorder?.clearListener(this)
         recorder = null
         unbindService(connection)
         super.onStop()

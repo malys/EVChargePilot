@@ -31,7 +31,7 @@ class TripDeleteConfirmationActivity : AppCompatActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val value = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = value
-            value.setListener { snapshot ->
+            value.setListener(this@TripDeleteConfirmationActivity) { snapshot ->
                 speedKmh = snapshot.speedKmh
                 speedObservedAtMs = snapshot.timestampMs
                 renderGate()
@@ -81,7 +81,7 @@ class TripDeleteConfirmationActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        recorder?.setListener(null)
+        recorder?.clearListener(this)
         recorder = null
         binding.confirmAction.removeCallbacks(gateExpiry)
         if (bound) unbindService(connection)

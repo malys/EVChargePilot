@@ -1,0 +1,194 @@
+package com.evsuite.chargepilot
+
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.Bundle
+import android.os.IBinder
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.evsuite.chargepilot.databinding.ActivitySpeedWhatIfBinding
+import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.model.EnergyModelStore
+import com.evsuite.hardware.telemetry.model.EnergyModelTrainer
+import com.evsuite.hardware.telemetry.model.EnergyModelTrainingResult
+import java.io.File
+import java.util.Locale
+import java.util.concurrent.Executors
+
+/** Parked-only explanation of modelled motorway speed alternatives for one completed trip. */
+class SpeedWhatIfActivity : AppCompatActivity() {
+    private lateinit var binding: ActivitySpeedWhatIfBinding
+    private val disk = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "chargepilot-speed-what-if")
+    }
+    private var recorder: TripRecordingService? = null
+    private var speedKmh: Float? = null
+    private var speedObservedAtMs: Long? = null
+    private var bound = false
+    private var loaded = false
+    private var result: SpeedWhatIfResult? = null
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val value = (service as? TripRecordingService.LocalBinder)?.service ?: return
+            recorder = value
+            value.setListener(this@SpeedWhatIfActivity) { snapshot ->
+                speedKmh = snapshot.speedKmh
+                speedObservedAtMs = snapshot.timestampMs
+                renderGate()
+            }
+            speedKmh = value.latest?.speedKmh
+            speedObservedAtMs = value.latest?.timestampMs
+            renderGate()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            recorder = null
+            speedKmh = null
+            speedObservedAtMs = null
+            renderGate()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivitySpeedWhatIfBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.backAction.setOnClickListener { finish() }
+        val startedAtMs = intent.getLongExtra(EXTRA_STARTED_AT, INVALID_ID)
+        if (startedAtMs == INVALID_ID) {
+            finish()
+            return
+        }
+        load(startedAtMs)
+        renderGate()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        bound = bindService(
+            Intent(this, TripRecordingService::class.java),
+            connection,
+            Context.BIND_AUTO_CREATE,
+        )
+        if (!bound) renderGate()
+    }
+
+    override fun onStop() {
+        recorder?.clearListener(this)
+        recorder = null
+        binding.root.removeCallbacks(gateExpiry)
+        if (bound) unbindService(connection)
+        bound = false
+        speedKmh = null
+        speedObservedAtMs = null
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        disk.shutdownNow()
+        super.onDestroy()
+    }
+
+    private fun load(startedAtMs: Long) {
+        disk.execute {
+            val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
+            val trip = trips.firstOrNull { it.summary.startedAtMs == startedAtMs }
+            val evidence = trip?.summary?.batteryPowerEvidence
+            val modelStore = EnergyModelStore(File(filesDir, MODEL_FILE))
+            var model = modelStore.read()?.takeIf { it.evidence == evidence }
+            if (model == null && evidence != null) {
+                val trained = EnergyModelTrainer().train(trips, evidence.firmware)
+                if (trained is EnergyModelTrainingResult.Ready) {
+                    model = trained.model
+                    modelStore.write(trained.model)
+                }
+            }
+            result = trip?.let { SpeedWhatIfCalculator.calculate(it, model) }
+                ?: SpeedWhatIfResult.Unavailable(SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION)
+            loaded = true
+            runOnUiThread {
+                if (!isFinishing && !isDestroyed) renderGate()
+            }
+        }
+    }
+
+    private fun renderGate() {
+        binding.root.removeCallbacks(gateExpiry)
+        val nowMs = System.currentTimeMillis()
+        when (ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, nowMs)) {
+            ParkedDeletionGate.MOVING -> renderBlocked(R.string.speed_what_if_moving)
+            ParkedDeletionGate.SPEED_UNAVAILABLE -> renderBlocked(
+                R.string.speed_what_if_speed_unavailable,
+            )
+            ParkedDeletionGate.PARKED -> {
+                val ageMs = nowMs - checkNotNull(speedObservedAtMs)
+                binding.root.postDelayed(
+                    gateExpiry,
+                    ParkedDeletionPolicy.MAX_READING_AGE_MS - ageMs + 1L,
+                )
+                if (!loaded) renderBlocked(R.string.speed_what_if_loading) else renderResult()
+            }
+        }
+    }
+
+    private fun renderBlocked(message: Int) {
+        binding.whatIfStatus.setText(message)
+        binding.whatIfResults.text = ""
+        binding.whatIfResults.visibility = View.GONE
+    }
+
+    private fun renderResult() {
+        when (val current = result) {
+            is SpeedWhatIfResult.Ready -> {
+                binding.whatIfResults.visibility = View.VISIBLE
+                binding.whatIfStatus.text = getString(
+                    R.string.speed_what_if_ready,
+                    current.motorwayDistanceKm,
+                )
+                binding.whatIfResults.text = current.comparisons.joinToString("\n\n") { row ->
+                    getString(
+                        R.string.speed_what_if_row,
+                        row.referenceSpeedKmh,
+                        range(row.modelledEnergyLowKwh, row.modelledEnergyHighKwh, "kWh"),
+                        range(row.energyDeltaLowKwh, row.energyDeltaHighKwh, "kWh"),
+                        range(row.rangeDeltaLowKm, row.rangeDeltaHighKm, "km"),
+                    )
+                }
+            }
+            is SpeedWhatIfResult.Unavailable -> renderBlocked(reason(current.reason))
+            null -> renderBlocked(R.string.reason_model_not_trained)
+        }
+    }
+
+    private fun reason(reason: SpeedWhatIfUnavailable): Int = when (reason) {
+        SpeedWhatIfUnavailable.MODEL_NOT_TRAINED -> R.string.reason_model_not_trained
+        SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION -> R.string.speed_what_if_no_motorway
+        SpeedWhatIfUnavailable.MOTORWAY_ENERGY_UNAVAILABLE ->
+            R.string.speed_what_if_energy_unavailable
+        SpeedWhatIfUnavailable.MOTORWAY_TEMPERATURE_UNAVAILABLE ->
+            R.string.speed_what_if_temperature_unavailable
+        SpeedWhatIfUnavailable.RANGE_BASELINE_UNAVAILABLE ->
+            R.string.speed_what_if_range_unavailable
+        SpeedWhatIfUnavailable.NO_REFERENCE_SPEED_IN_ENVELOPE ->
+            R.string.speed_what_if_envelope_unavailable
+    }
+
+    private fun range(low: Double, high: Double, unit: String): String =
+        String.format(Locale.getDefault(), "≈ %.2f–%.2f %s", low, high, unit)
+
+    companion object {
+        private const val EXTRA_STARTED_AT = "started_at"
+        private const val INVALID_ID = Long.MIN_VALUE
+        private const val HISTORY_FILE = "trips.json"
+        private const val MODEL_FILE = "energy-model.json"
+
+        fun forTrip(context: Context, startedAtMs: Long) =
+            Intent(context, SpeedWhatIfActivity::class.java)
+                .putExtra(EXTRA_STARTED_AT, startedAtMs)
+    }
+
+    private val gateExpiry = Runnable { renderGate() }
+}

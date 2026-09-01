@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THESIS: compare only defensible post-trip speed estimates; refuse live coaching and false precision.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
+  STORY: confirm parked state, explain evidence gaps, then read model bands at eligible speeds.
+  FIRST VIEWPORT: fixed top context and Back action; one centred evidence sheet owns remaining space.
+  FORM: parked evidence sheet extending trip history; seed key cp032-20260901.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/speed_what_if_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg">
+
+            <TextView
+                android:id="@+id/whatIfStatus"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/Text.EV.Body"
+                android:accessibilityLiveRegion="polite" />
+
+            <TextView
+                android:id="@+id/whatIfResults"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_card"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:lineSpacingExtra="6dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

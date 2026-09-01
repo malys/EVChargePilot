@@ -117,6 +117,14 @@
                         android:textAppearance="@style/Text.EV.Title" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/speedWhatIfAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="220dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:text="@string/action_speed_what_if" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/exportTripAction"
                         style="@style/Widget.EV.Button.Outlined"
                         android:layout_width="220dp"

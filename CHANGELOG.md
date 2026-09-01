@@ -11,6 +11,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Completed trips can show a parked-only motorway speed comparison.** The panel offers only
+  90–130 km/h reference speeds inside the exact trained speed/temperature envelope, labels every
+  result as estimated, and propagates the model band into energy and equivalent-range intervals.
+  Missing model evidence, motorway samples, power, temperature, range baseline or fresh parked
+  speed produces an explanation instead of a number. Training remains bounded and fail-closed
+  until CP-003 validates exact firmware evidence.
+
 - **Unstable telemetry evidence now has a hard retention ceiling.** Captures remain
   app-private and atomic, but only the eight newest JSON summaries are kept; stale temporary
   files are removed before a write. Repeated validation runs therefore cannot grow AAOS storage

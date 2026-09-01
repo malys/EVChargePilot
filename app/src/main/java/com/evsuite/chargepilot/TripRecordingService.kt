@@ -68,6 +68,7 @@ class TripRecordingService : Service() {
 
     private var samplingTask: ScheduledFuture<*>? = null
     @Volatile private var boundClients = 0
+    private var listenerOwner: Any? = null
     private var listener: Listener? = null
     private var samplesSinceNotification = 0
     @Volatile var automaticDetectionEnabled: Boolean = true
@@ -123,8 +124,16 @@ class TripRecordingService : Service() {
         super.onDestroy()
     }
 
-    fun setListener(listener: Listener?) {
+    /** One visible screen owns delivery; a stopping predecessor cannot clear its successor. */
+    fun setListener(owner: Any, listener: Listener) {
+        listenerOwner = owner
         this.listener = listener
+    }
+
+    fun clearListener(owner: Any) {
+        if (listenerOwner !== owner) return
+        listenerOwner = null
+        listener = null
     }
 
     val detectorState: TripDetector.State get() = detector.state
