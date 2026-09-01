@@ -11,6 +11,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Trip detail exposes honest energy attribution.** Integrated consumption is reconciled with
+  modelled traction, measured regeneration, climate-conditioned residual groups and a visible
+  unmodelled discrepancy. Every attributed number has a band; model-noise residuals say they are
+  indistinguishable from zero, negative residuals remain model error, and the copy explicitly
+  says no vehicle per-consumer measurement exists.
+
 - **Completed trips can show a parked-only motorway speed comparison.** The panel offers only
   90–130 km/h reference speeds inside the exact trained speed/temperature envelope, labels every
   result as estimated, and propagates the model band into energy and equivalent-range intervals.

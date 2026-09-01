@@ -117,6 +117,16 @@
     <string name="trip_track_legend">Vitesse (accent) et puissance batterie pendant la durée enregistrée</string>
     <string name="trip_track_description">Courbe de vitesse et de puissance batterie sur %1$d minutes enregistrées</string>
     <string name="trip_track_unavailable">Aucune trace d’échantillons n’a été conservée pour ce trajet.</string>
+    <string name="trip_attribution_intro">RÉSIDUEL ESTIMÉ · Calculé par différence entre l’énergie batterie intégrée et la traction modélisée ; ce n’est pas une mesure véhicule par consommateur.</string>
+    <string name="trip_attribution_traction">Traction modélisée : %1$s</string>
+    <string name="trip_attribution_climate_active">Climatisation active</string>
+    <string name="trip_attribution_climate_inactive">Climatisation inactive / autre erreur modèle</string>
+    <string name="trip_attribution_climate_unknown">État de climatisation inconnu</string>
+    <string name="trip_attribution_residual">Résiduel %1$s : ESTIMATION %2$s</string>
+    <string name="trip_attribution_residual_indistinguishable">Résiduel %1$s : impossible à distinguer de zéro (%2$s)</string>
+    <string name="trip_attribution_residual_negative">Résiduel %1$s : erreur modèle négative, non masquée (%2$s)</string>
+    <string name="trip_attribution_reconciliation">Récupération : %1$.2f kWh · écart non modélisé : %2$.2f kWh · erreur de rapprochement : %3$.3f kWh</string>
+    <string name="trip_attribution_unavailable">Attribution énergétique indisponible : %1$s.</string>
     <string name="action_speed_what_if">Comparer les vitesses</string>
     <string name="speed_what_if_title">Comparaison des vitesses sur autoroute</string>
     <string name="speed_what_if_loading">Chargement du modèle local borné…</string>

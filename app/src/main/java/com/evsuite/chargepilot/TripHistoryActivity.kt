@@ -15,6 +15,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.model.AttributedEnergyEstimate
+import com.evsuite.hardware.telemetry.model.EnergyAttribution
+import com.evsuite.hardware.telemetry.model.EnergyAttributionCalculator
+import com.evsuite.hardware.telemetry.model.EnergyAttributionResult
+import com.evsuite.hardware.telemetry.model.ResidualAttribution
+import com.evsuite.hardware.telemetry.model.ResidualContext
+import com.evsuite.hardware.telemetry.model.ResidualFinding
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.text.DateFormat
@@ -32,6 +39,7 @@ class TripHistoryActivity : AppCompatActivity() {
     }
     private val adapter = TripAdapter()
     private var selectedStartedAtMs: Long? = null
+    private var attributions: Map<Long, EnergyAttributionResult> = emptyMap()
     private var recorder: TripRecordingService? = null
     private var speedKmh: Float? = null
     private var speedObservedAtMs: Long? = null
@@ -132,10 +140,16 @@ class TripHistoryActivity : AppCompatActivity() {
     private fun loadTrips() {
         disk.execute {
             val trips = store.read()
+            val evidence = trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence }
+            val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
+            val loadedAttributions = trips.associate { trip ->
+                trip.summary.startedAtMs to EnergyAttributionCalculator.calculate(trip, model)
+            }
             val dateFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
             val rows = trips.map { trip -> buildRow(trip, dateFormatter) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
+                attributions = loadedAttributions
                 adapter.submit(trips, rows)
                 if (trips.none { it.summary.startedAtMs == selectedStartedAtMs }) {
                     selectedStartedAtMs = trips.firstOrNull()?.summary?.startedAtMs
@@ -229,6 +243,7 @@ class TripHistoryActivity : AppCompatActivity() {
             summary.regeneratedKwh?.let(::energy),
             R.string.trip_power_not_recorded,
         )
+        renderAttribution(attributions[summary.startedAtMs])
 
         val samples = trip.samples
         val hasTrack = !samples.isNullOrEmpty()
@@ -240,6 +255,74 @@ class TripHistoryActivity : AppCompatActivity() {
             binding.tripPlot.contentDescription = getString(R.string.trip_track_description, minutes)
         }
     }
+
+    private fun renderAttribution(result: EnergyAttributionResult?) {
+        binding.detailAttribution.text = when (result) {
+            is EnergyAttributionResult.Ready -> attributionText(result.attribution)
+            is EnergyAttributionResult.Unavailable -> getString(
+                R.string.trip_attribution_unavailable,
+                getString(
+                    if (result.reason == com.evsuite.hardware.telemetry.UnavailableReason.MODEL_NOT_TRAINED) {
+                        R.string.reason_model_not_trained
+                    } else {
+                        R.string.reason_insufficient_samples
+                    },
+                ),
+            )
+            null -> getString(
+                R.string.trip_attribution_unavailable,
+                getString(R.string.reason_model_not_trained),
+            )
+        }
+        binding.detailAttribution.contentDescription = binding.detailAttribution.text
+    }
+
+    private fun attributionText(value: EnergyAttribution): String = buildString {
+        appendLine(getString(R.string.trip_attribution_intro))
+        appendLine(
+            getString(
+                R.string.trip_attribution_traction,
+                band(value.modelledTraction),
+            ),
+        )
+        value.residuals.forEach { appendLine(residualText(it)) }
+        append(
+            getString(
+                R.string.trip_attribution_reconciliation,
+                checkNotNull(value.measuredRegenerationKwh.value),
+                checkNotNull(value.unmodelledDiscrepancyKwh.value),
+                value.reconciliationErrorKwh,
+            ),
+        )
+    }
+
+    private fun residualText(value: ResidualAttribution): String {
+        val context = getString(
+            when (value.context) {
+                ResidualContext.CLIMATE_ACTIVE -> R.string.trip_attribution_climate_active
+                ResidualContext.CLIMATE_INACTIVE -> R.string.trip_attribution_climate_inactive
+                ResidualContext.CLIMATE_UNKNOWN -> R.string.trip_attribution_climate_unknown
+            },
+        )
+        return getString(
+            when (value.finding) {
+                ResidualFinding.DISTINGUISHABLE -> R.string.trip_attribution_residual
+                ResidualFinding.NOT_DISTINGUISHABLE_FROM_ZERO ->
+                    R.string.trip_attribution_residual_indistinguishable
+                ResidualFinding.NEGATIVE_MODEL_ERROR ->
+                    R.string.trip_attribution_residual_negative
+            },
+            context,
+            band(value.estimate),
+        )
+    }
+
+    private fun band(value: AttributedEnergyEstimate): String = String.format(
+        Locale.getDefault(),
+        "%.2f–%.2f kWh",
+        value.bandLowKwh,
+        value.bandHighKwh,
+    )
 
     /** Missing values explain themselves both to TalkBack and to a tap on the em dash. */
     private fun bindValue(

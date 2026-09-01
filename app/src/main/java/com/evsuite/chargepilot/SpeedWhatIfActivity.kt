@@ -10,9 +10,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivitySpeedWhatIfBinding
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
-import com.evsuite.hardware.telemetry.model.EnergyModelStore
-import com.evsuite.hardware.telemetry.model.EnergyModelTrainer
-import com.evsuite.hardware.telemetry.model.EnergyModelTrainingResult
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -97,15 +94,7 @@ class SpeedWhatIfActivity : AppCompatActivity() {
             val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
             val trip = trips.firstOrNull { it.summary.startedAtMs == startedAtMs }
             val evidence = trip?.summary?.batteryPowerEvidence
-            val modelStore = EnergyModelStore(File(filesDir, MODEL_FILE))
-            var model = modelStore.read()?.takeIf { it.evidence == evidence }
-            if (model == null && evidence != null) {
-                val trained = EnergyModelTrainer().train(trips, evidence.firmware)
-                if (trained is EnergyModelTrainingResult.Ready) {
-                    model = trained.model
-                    modelStore.write(trained.model)
-                }
-            }
+            val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
             result = trip?.let { SpeedWhatIfCalculator.calculate(it, model) }
                 ?: SpeedWhatIfResult.Unavailable(SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION)
             loaded = true
@@ -183,7 +172,6 @@ class SpeedWhatIfActivity : AppCompatActivity() {
         private const val EXTRA_STARTED_AT = "started_at"
         private const val INVALID_ID = Long.MIN_VALUE
         private const val HISTORY_FILE = "trips.json"
-        private const val MODEL_FILE = "energy-model.json"
 
         fun forTrip(context: Context, startedAtMs: Long) =
             Intent(context, SpeedWhatIfActivity::class.java)

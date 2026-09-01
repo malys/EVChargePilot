@@ -121,6 +121,16 @@
     <string name="trip_track_legend">Speed (accent) and battery power over recorded time</string>
     <string name="trip_track_description">Speed and battery power trace over %1$d recorded minutes</string>
     <string name="trip_track_unavailable">No sample track was retained for this trip.</string>
+    <string name="trip_attribution_intro">ESTIMATED RESIDUAL · Derived from integrated battery energy minus modelled traction; not a vehicle per-consumer measurement.</string>
+    <string name="trip_attribution_traction">Modelled traction: %1$s</string>
+    <string name="trip_attribution_climate_active">Climate active</string>
+    <string name="trip_attribution_climate_inactive">Climate inactive / other model error</string>
+    <string name="trip_attribution_climate_unknown">Climate state unknown</string>
+    <string name="trip_attribution_residual">%1$s residual: ESTIMATED %2$s</string>
+    <string name="trip_attribution_residual_indistinguishable">%1$s residual: not distinguishable from zero (%2$s)</string>
+    <string name="trip_attribution_residual_negative">%1$s residual: negative model error, not hidden (%2$s)</string>
+    <string name="trip_attribution_reconciliation">Regeneration: %1$.2f kWh · unmodelled discrepancy: %2$.2f kWh · reconciliation error: %3$.3f kWh</string>
+    <string name="trip_attribution_unavailable">Energy attribution unavailable: %1$s.</string>
     <string name="action_speed_what_if">Speed comparison</string>
     <string name="speed_what_if_title">Motorway speed comparison</string>
     <string name="speed_what_if_loading">Loading the bounded local model…</string>
