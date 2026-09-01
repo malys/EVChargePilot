@@ -43,12 +43,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   unvalidated until CP-003 proves it. The block states that it shows climate state only and that
   no HVAC power is measured; it adds no control path and retains no additional history.
 
-- **Diagnostics can be exported explicitly to a removable USB volume.** The action is
-  parked-only and fail-closed when speed is unreadable, offers no internal-storage fallback,
-  adds no storage permission, and writes a report capped at 128 KiB through a unique temporary
-  file plus same-directory rename. A pathological oversized report keeps its head and an explicit
-  truncation marker. Firmware, property/provenance status, the recent bounded log and the previous
-  bounded crash report are included; probing and I/O stay off the main thread.
+- **Diagnostics and vehicle-test evidence export as one bounded USB bundle.** The parked-only ZIP
+  carries runtime/APK/signer identity, exact firmware, service and latest-sample state, property
+  probes, provenance, bounded logs, previous crash, and up to eight scenario-named CP-003 JSON
+  captures. Its manifest provides byte counts and SHA-256 per artifact. Report, capture and bundle
+  limits are 128/64/768 KiB; the atomic temporary file lives on USB, no archive accumulates on
+  AAOS, and no network or storage permission is added. Unstable diagnostics now require choosing
+  the physical test scenario before capture so evidence cannot be mistaken for another segment.
 
 - **Battery power flow is directional, static and evidence-gated.** The signed kW value is paired
   with a centred, non-animated scale and explicit output/regeneration text, so colour never

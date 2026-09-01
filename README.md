@@ -48,7 +48,7 @@ It does not write to the vehicle and does not contain network or update code.
 - Evidence-gated signed battery power with a static traction/regeneration scale.
 - Pack temperature and charging state when exposed by the current firmware.
 - Energy and regeneration integration from the shared EVHardware power convention.
-- Parked-only, bounded diagnostic export to an explicitly chosen removable USB volume.
+- Parked-only, bounded diagnostic/evidence ZIP to an explicitly chosen removable USB volume.
 - Atomic, app-private trip history and in-app crash diagnostics.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
@@ -93,13 +93,15 @@ reported duration is the time actually covered by usable samples, not wall clock
 sampler adds nothing to duration, distance or energy, so consumption averages compare values
 measured over the same interval.
 
-The diagnostics dialog can export the same firmware, property/provenance, recent-log and crash
-context to a removable USB volume. The app offers only removable roots already visible at
-runtime and can fall back only to its own folder on that same USB volume; it never falls back to
-internal AAOS storage and declares no storage permission. Export requires a fresh readable
-speed at or below 0.1 km/h, runs off the main thread, caps the report at 128 KiB with an explicit
-truncation marker, and renames a unique temporary file only after its contents have been flushed
-and synced.
+The diagnostics dialog exports one self-contained ZIP to a removable USB volume: runtime/APK and
+signer identity, exact firmware, service and last-sample state, property/provenance probes,
+bounded recent log, previous crash, and up to eight newest unstable CP-003 evidence JSON files.
+Its manifest records byte counts and SHA-256 per artifact. The app offers only removable roots
+already visible at runtime and can fall back only to its own folder on that same USB volume; it
+never falls back to internal AAOS storage and declares no storage permission. Export requires a
+fresh readable speed at or below 0.1 km/h, runs off the main thread, caps the text report at
+128 KiB, each evidence file at 64 KiB and the ZIP at 768 KiB, then atomically renames a synced
+temporary file on USB. No archive copy accumulates on AAOS.
 
 ## Trip export formats
 

@@ -8,6 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import java.util.zip.ZipFile
 
 class DiagnosticExporterTest {
 
@@ -42,6 +43,17 @@ class DiagnosticExporterTest {
         assertFalse(bounded.contains('\uFFFD'))
     }
 
+    @Test fun `bounded log keeps newest utf8 events`() {
+        val content = "old-é\n" + "x".repeat(200) + "\nnew-é"
+
+        val bounded = DiagnosticExporter.boundedTail(content, 64, "[older]\n")
+
+        assertTrue(bounded.toByteArray(Charsets.UTF_8).size <= 64)
+        assertTrue(bounded.startsWith("[older]\n"))
+        assertTrue(bounded.endsWith("new-é"))
+        assertFalse(bounded.contains('\uFFFD'))
+    }
+
     @Test fun `same-second exports never overwrite one another`() {
         val directory = tempDirectory()
 
@@ -51,6 +63,59 @@ class DiagnosticExporterTest {
         assertEquals("first", first!!.readText())
         assertEquals("second", second!!.readText())
         assertTrue(first.name != second.name)
+    }
+
+    @Test fun `bundle contains report manifest and newest bounded evidence`() {
+        val destination = tempDirectory()
+        val evidence = tempDirectory()
+        repeat(10) { index ->
+            File(evidence, "evidence-SWI68-$index.json").apply {
+                writeText("{\"capture\":$index}")
+                setLastModified(index.toLong())
+            }
+        }
+
+        val exported = DiagnosticExporter.writeBundle(
+            "firmware=SWI68\n",
+            evidence,
+            destination,
+            nowMs = 42L,
+        )
+
+        assertNotNull(exported)
+        assertTrue(exported!!.name.endsWith(".zip"))
+        assertTrue(exported.length() <= DiagnosticExporter.MAX_BUNDLE_BYTES)
+        ZipFile(exported).use { zip ->
+            val names = zip.entries().asSequence().map { it.name }.toList()
+            assertTrue("manifest.txt" in names)
+            assertTrue("diagnostic.txt" in names)
+            assertEquals(8, names.count { it.startsWith("evidence/") })
+            assertFalse("evidence/evidence-SWI68-0.json" in names)
+            val manifest = zip.getInputStream(zip.getEntry("manifest.txt")).reader().readText()
+            assertTrue(manifest.contains("schema=1"))
+            assertTrue(manifest.contains("evidence_included=8"))
+            assertTrue(manifest.contains("diagnostic_sha256="))
+        }
+        assertFalse(destination.listFiles()!!.any { it.name.endsWith(".tmp") })
+    }
+
+    @Test fun `bundle skips oversized evidence and records why`() {
+        val destination = tempDirectory()
+        val evidence = tempDirectory()
+        File(evidence, "evidence-SWI68-valid.json").writeText("{}")
+        File(evidence, "evidence-SWI68-too-big.json")
+            .writeBytes(ByteArray(DiagnosticExporter.MAX_EVIDENCE_BYTES + 1))
+
+        val exported = DiagnosticExporter.writeBundle("report", evidence, destination, 42L)!!
+
+        ZipFile(exported).use { zip ->
+            val names = zip.entries().asSequence().map { it.name }.toList()
+            assertTrue("evidence/evidence-SWI68-valid.json" in names)
+            assertFalse("evidence/evidence-SWI68-too-big.json" in names)
+            val manifest = zip.getInputStream(zip.getEntry("manifest.txt")).reader().readText()
+            assertTrue(manifest.contains("evidence_skipped=1"))
+            assertTrue(manifest.contains("evidence-SWI68-too-big.json: size="))
+        }
     }
 
     @Test fun `missing destination fails without creating a file`() {

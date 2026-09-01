@@ -80,6 +80,27 @@ class EvidenceCaptureFileStoreTest {
         }
     }
 
+    @Test
+    fun `capture filename carries the selected real vehicle scenario`() {
+        val root = Files.createTempDirectory("evidence-store-scenario").toFile()
+        val directory = root.resolve("evidence")
+        try {
+            assertTrue(
+                VehicleTestContextStore(root).write(
+                    VehicleTestContextStore.Scenario.STATIONARY_HVAC_MAX,
+                    nowMs = 123L,
+                )
+            )
+
+            val file = EvidenceCaptureFileStore(directory).write(capture(snapshots = 1))
+
+            assertNotNull(file)
+            assertTrue(file!!.name.contains("-stationary-hvac-max-"))
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
     private fun capture(snapshots: Int) = EvidenceCapture(
         firmware = "SWI68",
         startedAtMs = 1L,

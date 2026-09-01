@@ -35,7 +35,13 @@ internal class EvidenceCaptureFileStore(
     private fun uniqueTarget(capture: EvidenceCapture): File {
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT).format(Date(nowMs()))
         val firmware = capture.firmware.replace(Regex("[^A-Za-z0-9._-]"), "_")
-        val base = "evidence-$firmware-$stamp"
+        val scenario = directory.parentFile
+            ?.let(::VehicleTestContextStore)
+            ?.read()
+            ?.scenario
+            ?.id
+            ?: "unclassified"
+        val base = "evidence-$firmware-$scenario-$stamp"
         var candidate = File(directory, "$base.json")
         var suffix = 1
         while (candidate.exists()) candidate = File(directory, "$base-${suffix++}.json")

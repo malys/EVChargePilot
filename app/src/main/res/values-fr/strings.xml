@@ -73,12 +73,24 @@
     <string name="climate_missing_unsupported">— = firmware non pris en charge</string>
     <string name="diagnostics_title">Diagnostic</string>
     <string name="diagnostics_export_usb">Exporter vers USB</string>
+    <string name="diagnostics_open_evidence">Ouvrir la capture de preuves</string>
+    <string name="evidence_scenario_title">Choisir le scénario de test véhicule</string>
+    <string name="evidence_scenario_write_failed">Impossible d’enregistrer le scénario de test</string>
+    <string name="evidence_scenario_stationary_hvac_off">À l’arrêt · CVC coupée</string>
+    <string name="evidence_scenario_stationary_hvac_max">À l’arrêt · CVC au maximum</string>
+    <string name="evidence_scenario_urban_accel_regen">Urbain · accélération et régénération</string>
+    <string name="evidence_scenario_motorway_110">Autoroute · 110 km/h stabilisés</string>
+    <string name="evidence_scenario_motorway_130">Autoroute · 130 km/h stabilisés</string>
+    <string name="evidence_scenario_grade_uphill">Pente · montée</string>
+    <string name="evidence_scenario_grade_downhill">Pente · descente</string>
+    <string name="evidence_scenario_charging">Session de recharge</string>
+    <string name="evidence_scenario_other">Autre / exploration</string>
     <string name="diagnostics_export_pick_usb">Choisir le stockage USB</string>
     <string name="diagnostics_export_speed_unavailable">Export impossible : la vitesse du véhicule est indisponible</string>
     <string name="diagnostics_export_park_vehicle">Stationnez le véhicule avant d’exporter le diagnostic</string>
     <string name="diagnostics_export_no_usb">Aucun stockage USB accessible en écriture</string>
-    <string name="diagnostics_export_failed">Impossible d’écrire le rapport de diagnostic sur la clé USB</string>
-    <string name="diagnostics_export_ok">Diagnostic exporté vers %1$s</string>
+    <string name="diagnostics_export_failed">Impossible d’écrire le paquet de diagnostic sur la clé USB</string>
+    <string name="diagnostics_export_ok">Paquet de diagnostic exporté vers %1$s</string>
     <string name="diagnostics_firmware">Génération du firmware : %1$s</string>
     <string name="diagnostics_read_only">Accès au véhicule : lecture seule</string>
     <string name="diagnostics_previous_crash">Rapport du crash précédent</string>

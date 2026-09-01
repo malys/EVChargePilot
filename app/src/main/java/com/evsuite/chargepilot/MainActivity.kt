@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private var recorder: TripRecordingService? = null
     /** The last frame drawn, so the diagnostics report can explain what the screen shows. */
     @Volatile private var latestReadings: DashboardReadings = DashboardReadings.empty()
+    /** Exact normalized service frame; diagnostics must not reverse-engineer formatted UI text. */
+    @Volatile private var latestSnapshot: EnergySnapshot? = null
     /** Immutable snapshot loaded off the UI thread; the store writes newest trips first. */
     @Volatile private var recentTrips: List<EnergyTripSummary> = emptyList()
     /** Rebuilt only when history or firmware evidence changes, never on every 1 Hz frame. */
@@ -82,11 +84,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TripHistoryActivity::class.java))
         }
         binding.diagnosticsAction.setOnClickListener {
-            if (EvidenceCaptureHook.IS_SUPPORTED) {
-                EvidenceCaptureHook.open(this)
-            } else {
-                showDiagnostics()
-            }
+            showDiagnostics()
         }
         renderUnavailable()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
@@ -133,6 +131,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(value: EnergySnapshot) {
+        latestSnapshot = value
         val powerValidated = DashboardReadings.isPowerValidated(value.firmware)
         val calculationSnapshot = if (powerValidated || value.batteryPowerKw == null) value
             else value.copy(batteryPowerKw = null)
@@ -436,20 +435,25 @@ class MainActivity : AppCompatActivity() {
             val body = diagnosticsReport()
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                AlertDialog.Builder(this)
+                val dialog = AlertDialog.Builder(this)
                     .setTitle(R.string.diagnostics_title)
                     .setMessage(body)
                     .setNeutralButton(R.string.diagnostics_export_usb) { _, _ ->
-                        exportDiagnostics(body)
+                        exportDiagnostics()
                     }
                     .setPositiveButton(R.string.action_close, null)
-                    .show()
+                if (EvidenceCaptureHook.IS_SUPPORTED) {
+                    dialog.setNegativeButton(R.string.diagnostics_open_evidence) { _, _ ->
+                        chooseEvidenceScenario()
+                    }
+                }
+                dialog.show()
             }
         }
     }
 
     /** Export remains a parked, explicit action; missing speed fails closed with a reason. */
-    private fun exportDiagnostics(report: String) {
+    private fun exportDiagnostics() {
         if (showDiagnosticExportRefusal(diagnosticExportDecision(recorder?.latest))) return
         val appContext = applicationContext
         background.execute {
@@ -459,22 +463,22 @@ class MainActivity : AppCompatActivity() {
                 if (roots.isEmpty()) {
                     toastLong(R.string.diagnostics_export_no_usb)
                 } else {
-                    chooseDiagnosticDestination(report, roots)
+                    chooseDiagnosticDestination(roots)
                 }
             }
         }
     }
 
-    private fun chooseDiagnosticDestination(report: String, roots: List<File>) {
+    private fun chooseDiagnosticDestination(roots: List<File>) {
         val labels = roots.map(File::getAbsolutePath).toTypedArray()
         AlertDialog.Builder(this)
             .setTitle(R.string.diagnostics_export_pick_usb)
-            .setItems(labels) { _, which -> writeDiagnostic(report, roots[which]) }
+            .setItems(labels) { _, which -> writeDiagnostic(roots[which]) }
             .setNegativeButton(R.string.action_cancel, null)
             .show()
     }
 
-    private fun writeDiagnostic(report: String, directory: File) {
+    private fun writeDiagnostic(directory: File) {
         val appContext = applicationContext
         val service = recorder
         background.execute {
@@ -482,7 +486,8 @@ class MainActivity : AppCompatActivity() {
             // volatile latest sample at the last responsible moment so parking cannot go stale.
             val decision = diagnosticExportDecision(service?.latest)
             val file = if (decision == DiagnosticExportPolicy.Decision.ALLOWED) {
-                DiagnosticExporter.export(appContext, report, directory)
+                // Rebuild after USB selection so timestamps, logs and last sample match export.
+                DiagnosticExporter.export(appContext, diagnosticsReport(), directory)
             } else null
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
@@ -525,22 +530,96 @@ class MainActivity : AppCompatActivity() {
     private fun toastLong(message: Int) =
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
+    private fun chooseEvidenceScenario() {
+        val scenarios = VehicleTestContextStore.Scenario.entries
+        val labels = scenarios.map { getString(it.labelResource()) }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.evidence_scenario_title)
+            .setItems(labels) { _, which ->
+                val scenario = scenarios[which]
+                if (VehicleTestContextStore(filesDir).write(scenario)) {
+                    AppLogger.i(TAG, "vehicle test scenario selected; scenario=${scenario.id}")
+                    EvidenceCaptureHook.open(this)
+                } else {
+                    toastLong(R.string.evidence_scenario_write_failed)
+                }
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    private fun VehicleTestContextStore.Scenario.labelResource(): Int = when (this) {
+        VehicleTestContextStore.Scenario.STATIONARY_HVAC_OFF ->
+            R.string.evidence_scenario_stationary_hvac_off
+        VehicleTestContextStore.Scenario.STATIONARY_HVAC_MAX ->
+            R.string.evidence_scenario_stationary_hvac_max
+        VehicleTestContextStore.Scenario.URBAN_ACCEL_REGEN ->
+            R.string.evidence_scenario_urban_accel_regen
+        VehicleTestContextStore.Scenario.MOTORWAY_110 -> R.string.evidence_scenario_motorway_110
+        VehicleTestContextStore.Scenario.MOTORWAY_130 -> R.string.evidence_scenario_motorway_130
+        VehicleTestContextStore.Scenario.GRADE_UPHILL -> R.string.evidence_scenario_grade_uphill
+        VehicleTestContextStore.Scenario.GRADE_DOWNHILL -> R.string.evidence_scenario_grade_downhill
+        VehicleTestContextStore.Scenario.CHARGING -> R.string.evidence_scenario_charging
+        VehicleTestContextStore.Scenario.OTHER -> R.string.evidence_scenario_other
+    }
+
     private fun diagnosticsReport(): String {
         val crash = CrashLogger.read(applicationContext)
-        val recentLog = AppLogger.entries.takeLast(30).joinToString("\n") {
-            "[${it.time}] ${it.level}/${it.tag}: ${it.msg}"
-        }
+        val logEntries = AppLogger.entries
+        val recentLog = DiagnosticExporter.boundedTail(logEntries.joinToString("\n") {
+            "[${it.time}] ${it.level}/${it.tag}: ${it.msg.take(MAX_LOG_MESSAGE_CHARS)}" +
+                if (it.msg.length > MAX_LOG_MESSAGE_CHARS) " [message truncated]" else ""
+        }, MAX_LOG_SECTION_BYTES, "[older log entries omitted]\n")
+        val snapshot = latestSnapshot
+        val nowMs = System.currentTimeMillis()
+        val service = recorder
+        val testContext = VehicleTestContextStore(filesDir).read()
         return DiagnosticExporter.bounded(buildString {
+            appendLine("[report]")
+            appendLine("schema=2")
+            appendLine("producer=EVChargePilot/Codex")
+            appendLine("purpose=real-vehicle-validation")
+            appendLine()
+            appendLine("[runtime]")
+            DiagnosticRuntimeContext.collect(applicationContext, nowMs).forEach(::appendLine)
+            appendLine()
+            appendLine("[firmware]")
             appendLine(getString(R.string.diagnostics_firmware, FirmwareInfo.getGeneration().name))
+            appendLine("detected_firmware=${FirmwareInfo.getDetectedString()}")
+            appendLine("compatibility_forced=${FirmwareInfo.isForced(applicationContext)}")
+            appendLine(
+                "battery_power_evidence=" +
+                    (CarPropertyEvidence.batteryPowerEvidence(FirmwareInfo.getGeneration())
+                        ?.toString() ?: "unvalidated")
+            )
             appendLine(getString(R.string.diagnostics_read_only))
             appendLine()
-            if (crash != null) {
-                appendLine(getString(R.string.diagnostics_previous_crash))
-                appendLine(crash)
-                appendLine()
-            }
+            appendLine("[vehicle_test_context]")
+            appendLine("scenario=${testContext?.scenario?.id ?: "unclassified"}")
+            appendLine("selected_epoch_ms=${testContext?.selectedAtMs ?: "unavailable"}")
+            appendLine()
+            appendLine("[service]")
+            appendLine("bound=${service != null}")
+            appendLine("recording=${service?.isRecording ?: EnergyTripSession.isRecording}")
+            appendLine("automatic_detection=${service?.automaticDetectionEnabled ?: "unavailable"}")
+            appendLine("detector_state=${service?.detectorState?.name ?: "unavailable"}")
+            appendLine("automatic_monitor_suspended=${service?.isAutomaticMonitorSuspended ?: "unavailable"}")
+            appendLine("missing_speed_samples=${service?.missingSpeedSampleCount ?: "unavailable"}")
+            appendLine("bound_clients=${service?.boundClientCount ?: 0}")
+            appendLine("pending_history_writes=${service?.pendingHistoryWriteCount ?: "unavailable"}")
+            appendLine("latest_sample_age_ms=${snapshot?.timestampMs?.let(nowMs::minus) ?: "unavailable"}")
+            appendLine("app_log_total_since_start=${AppLogger.totalCount}")
+            appendLine("app_log_retained=${logEntries.size}")
+            appendLine()
+            appendLine("[internal_storage_artifacts]")
+            diagnosticFileInventory().forEach(::appendLine)
+            appendLine()
+            appendLine("[latest_normalized_snapshot]")
+            DiagnosticSnapshotFormatter.format(snapshot).forEach(::appendLine)
+            appendLine()
             // A field showing an em dash says the signal is unusable but not why. This says why:
             // unsupported, declared and never published, or unreachable on this runtime.
+            appendLine("[property_probe]")
             appendLine(getString(R.string.diagnostics_properties))
             appendLine(getString(R.string.diagnostics_properties_hint))
             EVHardware.probeTelemetryProperties().forEach { appendLine(it.toString()) }
@@ -548,12 +627,33 @@ class MainActivity : AppCompatActivity() {
             // The dashboard has room for an em dash and not for a sentence. The report is
             // where the sentence goes: per field, what kind of value it is and why it is
             // missing when it is.
+            appendLine("[provenance]")
             appendLine(getString(R.string.diagnostics_provenance))
             describeReadings(latestReadings).forEach { appendLine(it) }
             appendLine()
+            appendLine("[app_log]")
             appendLine(getString(R.string.diagnostics_recent_log))
             append(recentLog.ifBlank { getString(R.string.diagnostics_no_log) })
+            appendLine()
+            appendLine()
+            appendLine("[previous_crash]")
+            appendLine(crash ?: "none")
         })
+    }
+
+    /** Metadata only: no trip contents, location, VIN or other user data enters diagnostics. */
+    private fun diagnosticFileInventory(): List<String> {
+        val files = runCatching {
+            filesDir.walkTopDown().filter(File::isFile).toList()
+        }.getOrDefault(emptyList())
+        val lines = files.sortedBy { it.relativeTo(filesDir).path }.take(MAX_INVENTORY_FILES).map {
+            "${it.relativeTo(filesDir).path};bytes=${it.length()};modified_epoch_ms=${it.lastModified()}"
+        }.toMutableList()
+        if (files.size > MAX_INVENTORY_FILES) {
+            lines += "inventory_truncated=${files.size - MAX_INVENTORY_FILES}"
+        }
+        if (lines.isEmpty()) lines += "none"
+        return lines
     }
 
     private fun describeReadings(readings: DashboardReadings): List<String> {
@@ -625,6 +725,9 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val TAG = "EVChargePilot"
         const val HISTORY_FILE = "trips.json"
+        const val MAX_LOG_MESSAGE_CHARS = 1_024
+        const val MAX_LOG_SECTION_BYTES = 32 * 1_024
+        const val MAX_INVENTORY_FILES = 64
         const val DASH = "—"
         // The unit-bearing fields keep their unit while unavailable so the layout does not
         // shift the moment the vehicle starts answering.

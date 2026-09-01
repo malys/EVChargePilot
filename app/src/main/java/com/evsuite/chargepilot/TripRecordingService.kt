@@ -81,6 +81,10 @@ class TripRecordingService : Service() {
     val latest: EnergySnapshot? get() = latestSnapshot
 
     val isRecording: Boolean get() = EnergyTripSession.isRecording
+    val isAutomaticMonitorSuspended: Boolean get() = automaticMonitoringSuspended
+    val missingSpeedSampleCount: Int get() = missingSpeedSamples.get()
+    val boundClientCount: Int get() = boundClients
+    val pendingHistoryWriteCount: Int get() = pendingHistoryWrites.get()
 
     override fun onCreate() {
         super.onCreate()
@@ -88,10 +92,12 @@ class TripRecordingService : Service() {
         tripStore = EnergyTripHistoryStore(File(filesDir, "trips.json"))
         automaticDetectionEnabled = isAutomaticDetectionEnabled(this)
         createNotificationChannel()
+        AppLogger.i(TAG, "service created; automatic=$automaticDetectionEnabled")
     }
 
     override fun onBind(intent: Intent?): IBinder {
         boundClients++
+        AppLogger.i(TAG, "client bound; clients=$boundClients")
         ensureSampling()
         return binder
     }
@@ -99,12 +105,14 @@ class TripRecordingService : Service() {
     /** True so a returning dashboard gets [onRebind] rather than a fresh [onBind]. */
     override fun onUnbind(intent: Intent?): Boolean {
         boundClients--
+        AppLogger.i(TAG, "client unbound; clients=$boundClients")
         stopWhenNobodyNeedsIt()
         return true
     }
 
     override fun onRebind(intent: Intent?) {
         boundClients++
+        AppLogger.i(TAG, "client rebound; clients=$boundClients")
         ensureSampling()
     }
 
@@ -121,6 +129,7 @@ class TripRecordingService : Service() {
     override fun onDestroy() {
         samplingTask?.cancel(false)
         sampler.shutdownNow()
+        AppLogger.i(TAG, "service destroyed")
         super.onDestroy()
     }
 
@@ -144,6 +153,7 @@ class TripRecordingService : Service() {
             return
         }
         automaticDetectionEnabled = enabled
+        AppLogger.i(TAG, "automatic detection changed; enabled=$enabled")
         if (enabled) {
             if (EnergyTripSession.isRecording) detector.markRecording() else detector.reset()
             startAutomaticMonitor()
@@ -191,6 +201,7 @@ class TripRecordingService : Service() {
         if (!EnergyTripSession.isRecording) EnergyTripSession.start(PowerHistoryPolicy.sanitize(sample))
         detector.markRecording()
         samplesSinceNotification = 0
+        AppLogger.i(TAG, "trip recording started; sample_epoch_ms=${sample.timestampMs}")
         ensureSampling()
         updateNotification()
     }
@@ -222,6 +233,13 @@ class TripRecordingService : Service() {
                     AppLogger.w(TAG, "trip history write failed: ${it.message}")
                 }.getOrDefault(false)
                 if (!saved) AppLogger.w(TAG, "trip history could not be saved")
+                if (saved) {
+                    AppLogger.i(
+                        TAG,
+                        "trip recording saved; started_epoch_ms=${recorded.summary.startedAtMs}; " +
+                            "ended_epoch_ms=${recorded.summary.endedAtMs}",
+                    )
+                }
                 pendingHistoryWrites.decrementAndGet()
                 main.post {
                     runCatching { onSaved?.invoke() }
@@ -240,6 +258,7 @@ class TripRecordingService : Service() {
     private fun ensureSampling() {
         if (samplingTask != null) return
         samplingTask = sampler.scheduleWithFixedDelay(::sample, 0L, 1L, TimeUnit.SECONDS)
+        AppLogger.i(TAG, "telemetry sampler started; period_ms=1000")
     }
 
     private fun sample() {
@@ -281,6 +300,7 @@ class TripRecordingService : Service() {
         ) return
         samplingTask?.cancel(false)
         samplingTask = null
+        AppLogger.i(TAG, "telemetry sampler stopped; no active consumer")
         stopSelf()
     }
 

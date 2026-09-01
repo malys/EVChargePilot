@@ -76,12 +76,24 @@
     <string name="climate_missing_unsupported">— = unsupported firmware</string>
     <string name="diagnostics_title">Diagnostics</string>
     <string name="diagnostics_export_usb">Export to USB</string>
+    <string name="diagnostics_open_evidence">Open evidence capture</string>
+    <string name="evidence_scenario_title">Select vehicle test scenario</string>
+    <string name="evidence_scenario_write_failed">Could not save the test scenario</string>
+    <string name="evidence_scenario_stationary_hvac_off">Stationary · HVAC off</string>
+    <string name="evidence_scenario_stationary_hvac_max">Stationary · HVAC maximum</string>
+    <string name="evidence_scenario_urban_accel_regen">Urban · acceleration and regen</string>
+    <string name="evidence_scenario_motorway_110">Motorway · steady 110 km/h</string>
+    <string name="evidence_scenario_motorway_130">Motorway · steady 130 km/h</string>
+    <string name="evidence_scenario_grade_uphill">Grade · uphill</string>
+    <string name="evidence_scenario_grade_downhill">Grade · downhill</string>
+    <string name="evidence_scenario_charging">Charging session</string>
+    <string name="evidence_scenario_other">Other / exploratory</string>
     <string name="diagnostics_export_pick_usb">Choose USB storage</string>
     <string name="diagnostics_export_speed_unavailable">Cannot export: vehicle speed is unavailable</string>
     <string name="diagnostics_export_park_vehicle">Park the vehicle before exporting diagnostics</string>
     <string name="diagnostics_export_no_usb">No writable USB storage is available</string>
-    <string name="diagnostics_export_failed">Could not write the diagnostic report to USB storage</string>
-    <string name="diagnostics_export_ok">Diagnostic exported to %1$s</string>
+    <string name="diagnostics_export_failed">Could not write the diagnostic bundle to USB storage</string>
+    <string name="diagnostics_export_ok">Diagnostic bundle exported to %1$s</string>
     <string name="diagnostics_firmware">Firmware generation: %1$s</string>
     <string name="diagnostics_read_only">Vehicle access: read-only</string>
     <string name="diagnostics_previous_crash">Previous crash report</string>
