@@ -6,6 +6,9 @@ product boundary and commands.
 
 Commit author: `malys.training@gmail.com`.
 
+License exception: EVChargePilot's own sources use PolyForm Noncommercial 1.0.0, not the
+workspace MIT default. EVHardware remains separately licensed.
+
 ## Product boundary
 
 - EVChargePilot reads vehicle state and writes its bounded trip/export files in app-private

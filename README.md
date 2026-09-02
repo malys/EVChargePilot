@@ -3,7 +3,7 @@
 [![Tests](https://github.com/malys/EVChargePilot/actions/workflows/tests.yml/badge.svg)](https://github.com/malys/EVChargePilot/actions/workflows/tests.yml)
 [![Security](https://github.com/malys/EVChargePilot/actions/workflows/security.yml/badge.svg)](https://github.com/malys/EVChargePilot/actions/workflows/security.yml)
 [![Release](https://img.shields.io/github/v/release/malys/EVChargePilot?sort=semver)](https://github.com/malys/EVChargePilot/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 
 Read-only live energy dashboard and local trip analyser for the SAIC MG4 head unit.
 
@@ -198,4 +198,5 @@ JVM tests for decisions, and on-vehicle confirmation before release.
 
 ## Legal
 
-MIT licensed. Not affiliated with, endorsed by or supported by SAIC Motor or MG Motor.
+Source-available under the PolyForm Noncommercial License 1.0.0. Commercial use is not
+permitted. Not affiliated with, endorsed by or supported by SAIC Motor or MG Motor.
