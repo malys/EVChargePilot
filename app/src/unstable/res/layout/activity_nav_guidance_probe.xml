@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Impeccable direction contract
-     THESIS: one parked-only action creates a factual vehicle-signal record.
-     OWN-WORLD: EVSuite instrument surfaces, data table, one rail, no decoration or motion.
-     STORY: verify speed, capture the drive, save privately, then retrieve the exact artifact.
-     FIRST VIEWPORT: live evidence fills the field; state, path and actions stay in the rail.
+     THESIS: one parked-only action proves whether the head unit reports a route at all.
+     OWN-WORLD: EVSuite instrument surfaces, monospace trace, one rail, no decoration or motion.
+     STORY: bind the adapter, arm the listener while parked, drive, then read the trace parked.
+     FIRST VIEWPORT: the trace fills the field; state, hint and actions stay in the rail.
      FORM: inherited asymmetric instrument binnacle; seed key chargepilot-evidence-rail.
-     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+     FINISH: unreviewed and undocumented is unfinished; CP-040 ends with a written decision.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -25,16 +25,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/evidence_title"
+            android:text="@string/nav_probe_title"
             android:textAppearance="@style/Text.EV.Title" />
 
         <TextView
-            android:id="@+id/captureStatus"
+            android:id="@+id/probeStatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:gravity="end"
-            android:text="@string/evidence_idle"
+            android:text="@string/nav_probe_idle"
             android:textAppearance="@style/Text.EV.Body" />
     </LinearLayout>
 
@@ -58,11 +58,11 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/evidenceTable"
+                    android:id="@+id/probeTrace"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="@string/evidence_no_data"
+                    android:text="@string/nav_probe_no_data"
                     android:textAppearance="@style/Text.EV.Body" />
             </HorizontalScrollView>
         </ScrollView>
@@ -76,22 +76,12 @@
             android:padding="@dimen/spacing_md">
 
             <TextView
-                android:id="@+id/captureHint"
+                android:id="@+id/probeHint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:text="@string/evidence_ready"
+                android:text="@string/nav_probe_hint_ready"
                 android:textAppearance="@style/Text.EV.Secondary" />
-
-            <TextView
-                android:id="@+id/capturePath"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:maxLines="4"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:textIsSelectable="true"
-                android:visibility="gone" />
 
             <Space
                 android:layout_width="1dp"
@@ -99,11 +89,11 @@
                 android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/captureAction"
+                android:id="@+id/probeAction"
                 style="@style/Widget.EVChargePilot.Button"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/touch_target"
-                android:text="@string/evidence_start" />
+                android:text="@string/nav_probe_start" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/copyAction"
@@ -111,15 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/touch_target"
                 android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/evidence_copy" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/navProbeAction"
-                style="@style/Widget.EV.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/nav_probe_open" />
+                android:text="@string/nav_probe_copy" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

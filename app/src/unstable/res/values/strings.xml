@@ -15,4 +15,19 @@
     <string name="evidence_write_failed">Capture stopped, but its file could not be saved.</string>
     <string name="evidence_refused">Park and wait for a readable speed before changing capture.</string>
     <string name="evidence_copied">Table copied to the clipboard</string>
+    <string name="nav_probe_title">Navigation guidance probe</string>
+    <string name="nav_probe_start">Arm listener</string>
+    <string name="nav_probe_stop">Stop listener</string>
+    <string name="nav_probe_copy">Copy trace</string>
+    <string name="nav_probe_idle">Listener not armed</string>
+    <string name="nav_probe_unavailable">Adapter service unavailable</string>
+    <string name="nav_probe_silent">Armed · nothing reported yet</string>
+    <string name="nav_probe_receiving">Armed · %1$d callbacks</string>
+    <string name="nav_probe_no_data">No callback received yet.</string>
+    <string name="nav_probe_hint_ready">Park, arm the listener, then start guidance in the car’s own navigation and drive.</string>
+    <string name="nav_probe_hint_running">Listening. Silence here means the navigation reports nothing, which is itself the answer.</string>
+    <string name="nav_probe_hint_unavailable">The head unit’s adapter service did not bind. No route source on this firmware.</string>
+    <string name="nav_probe_refused">Park and wait for a readable speed before arming the listener.</string>
+    <string name="nav_probe_copied">Trace copied to the clipboard</string>
+    <string name="nav_probe_open">Guidance probe</string>
 </resources>

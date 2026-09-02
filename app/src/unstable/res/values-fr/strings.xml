@@ -15,4 +15,19 @@
     <string name="evidence_write_failed">Le relevé est arrêté, mais son fichier n’a pas pu être enregistré.</string>
     <string name="evidence_refused">Stationnez et attendez une vitesse lisible avant de modifier le relevé.</string>
     <string name="evidence_copied">Tableau copié dans le presse-papiers</string>
+    <string name="nav_probe_title">Sonde de guidage</string>
+    <string name="nav_probe_start">Armer l’écoute</string>
+    <string name="nav_probe_stop">Arrêter l’écoute</string>
+    <string name="nav_probe_copy">Copier la trace</string>
+    <string name="nav_probe_idle">Écoute non armée</string>
+    <string name="nav_probe_unavailable">Service adaptateur indisponible</string>
+    <string name="nav_probe_silent">Armée · rien de rapporté</string>
+    <string name="nav_probe_receiving">Armée · %1$d rappels</string>
+    <string name="nav_probe_no_data">Aucun rappel reçu.</string>
+    <string name="nav_probe_hint_ready">À l’arrêt, armez l’écoute, puis lancez un guidage dans la navigation du véhicule et roulez.</string>
+    <string name="nav_probe_hint_running">Écoute active. Un silence ici signifie que la navigation ne rapporte rien, ce qui est déjà la réponse.</string>
+    <string name="nav_probe_hint_unavailable">Le service adaptateur du head unit n’a pas répondu. Pas de source d’itinéraire sur ce firmware.</string>
+    <string name="nav_probe_refused">Mettez-vous à l’arrêt et attendez une vitesse lisible avant d’armer l’écoute.</string>
+    <string name="nav_probe_copied">Trace copiée dans le presse-papiers</string>
+    <string name="nav_probe_open">Sonde de guidage</string>
 </resources>

@@ -9,5 +9,11 @@
             android:exported="false"
             android:configChanges="uiMode"
             android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".NavGuidanceProbeActivity"
+            android:exported="false"
+            android:configChanges="uiMode"
+            android:screenOrientation="landscape" />
     </application>
 </manifest>

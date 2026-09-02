@@ -2,6 +2,7 @@ package com.evsuite.chargepilot
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
@@ -59,6 +60,9 @@ class EvidenceCaptureActivity : AppCompatActivity() {
         fileStore = EvidenceCaptureFileStore(File(filesDir, "evidence"))
         binding.captureAction.setOnClickListener { requestToggle() }
         binding.copyAction.setOnClickListener { copyMarkdown() }
+        binding.navProbeAction.setOnClickListener {
+            startActivity(Intent(this, NavGuidanceProbeActivity::class.java))
+        }
         render(CaptureViewState.empty())
     }
 

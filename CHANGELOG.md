@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **A route source exists after all, and the unstable channel can prove it.** The head unit's
+  adapter service fans remaining distance, remaining time, guidance status and road name out to
+  any registered listener, so a route no longer requires a network, a permission or an account.
+  A parked-armed probe in the unstable channel records that fan-out over a drive and reports it
+  as a copyable trace. Nothing is displayed as a value: the distance callbacks carry no proven
+  unit and the status codes no documented meaning, so every reading stays raw pending the
+  on-vehicle run. The stable channel is unchanged and gains no capability.
+
 ### Security
 
 - The application declares an empty task affinity, reducing launcher-task hijacking exposure on
