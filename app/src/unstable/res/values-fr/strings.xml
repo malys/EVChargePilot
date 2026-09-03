@@ -30,4 +30,5 @@
     <string name="nav_probe_refused">Mettez-vous à l’arrêt et attendez une vitesse lisible avant d’armer l’écoute.</string>
     <string name="nav_probe_copied">Trace copiée dans le presse-papiers</string>
     <string name="nav_probe_open">Sonde de guidage</string>
+    <string name="nav_probe_undecoded">Armée · trafic vu, rien de décodé</string>
 </resources>

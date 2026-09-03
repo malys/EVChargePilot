@@ -77,10 +77,34 @@ listener on its own, so this displaces neither the navigation app nor the cluste
 - **Behaviour with no guidance running.** If the navigation app publishes nothing when idle,
   the feature only exists for drivers who navigate with the OEM app. This is the single most
   decision-relevant unknown and the probe is built to record it.
+- **Whether R67 numbers the interface as R69 does.** See the section below; the probe is
+  built to answer it in the same capture.
 - **Whether a third-party navigation app feeds the same path.** TomTom broadcasts
   (`com.tomtom.navigation.GUIDE_INFO`) reach `MapService`, so at least one non-SAIC app does.
 
 None of these can be settled off-vehicle, which is why CP-040 carries `on_vehicle_required`.
+
+## Firmware revision risk, and how the probe catches it
+
+A diagnostic bundle captured on the vehicle reports `detected_firmware=SWI68-29958-1300R67`.
+The transaction map above was read from an R69 build of the same generation — two revisions
+apart, not a different family, but not the same binary either.
+
+This matters more than a missing signal would. If SAIC inserted a method into
+`IGeneralNotificationListener` between R67 and R69, every code after the insertion point
+shifts by one. A shifted map does not throw and does not read as unavailable: it decodes
+whatever callback now occupies code 13 and reports it as a remaining distance. Silent wrong
+numbers are the one outcome this project's provenance rules exist to prevent.
+
+`TransactionCensus` therefore counts every code the adapter sends, decoded or not, and the
+probe prints it. Two patterns condemn the map:
+
+- traffic on codes the build does not decode, marked `?` in the trace header; or
+- silence on the decoded codes while guidance is visibly running on the head unit.
+
+Either one means this firmware numbers the interface differently, and no reading from the
+capture may be used until the map is re-derived from an R67 build. Confirming the map is
+therefore part of the vehicle run, not an assumption it rests on.
 
 ## Scored comparison
 
