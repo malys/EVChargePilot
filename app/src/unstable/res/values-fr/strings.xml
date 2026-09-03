@@ -3,7 +3,6 @@
     <string name="evidence_title">Relevé des signaux</string>
     <string name="evidence_start">Démarrer le relevé</string>
     <string name="evidence_stop">Arrêter et enregistrer</string>
-    <string name="evidence_copy">Copier le tableau</string>
     <string name="evidence_ready">Prêt. Démarrez le relevé avant de dérouler le protocole.</string>
     <string name="evidence_speed_unavailable">Les commandes restent désactivées tant que la vitesse n’est pas lisible.</string>
     <string name="evidence_recording">Relevé en cours. Les 60 premières secondes sont échantillonnées à 200 ms.</string>
@@ -11,14 +10,13 @@
     <string name="evidence_idle">Aucun relevé en cours</string>
     <string name="evidence_no_data">Aucun échantillon pour le moment.</string>
     <string name="evidence_capturing">%1$d instantanés · %2$d s</string>
-    <string name="evidence_saved">Relevé enregistré. Récupérez le fichier ci-dessous avec adb.</string>
+    <string name="evidence_saved">Relevé enregistré. Exportez le diagnostic vers USB pour le sortir du véhicule.</string>
     <string name="evidence_write_failed">Le relevé est arrêté, mais son fichier n’a pas pu être enregistré.</string>
     <string name="evidence_refused">Stationnez et attendez une vitesse lisible avant de modifier le relevé.</string>
-    <string name="evidence_copied">Tableau copié dans le presse-papiers</string>
     <string name="nav_probe_title">Sonde de guidage</string>
     <string name="nav_probe_start">Armer l’écoute</string>
     <string name="nav_probe_stop">Arrêter l’écoute</string>
-    <string name="nav_probe_copy">Copier la trace</string>
+    <string name="nav_probe_save">Enregistrer pour l’export</string>
     <string name="nav_probe_idle">Écoute non armée</string>
     <string name="nav_probe_unavailable">Service adaptateur indisponible</string>
     <string name="nav_probe_silent">Armée · rien de rapporté</string>
@@ -28,7 +26,8 @@
     <string name="nav_probe_hint_running">Écoute active. Un silence ici signifie que la navigation ne rapporte rien, ce qui est déjà la réponse.</string>
     <string name="nav_probe_hint_unavailable">Le service adaptateur du head unit n’a pas répondu. Pas de source d’itinéraire sur ce firmware.</string>
     <string name="nav_probe_refused">Mettez-vous à l’arrêt et attendez une vitesse lisible avant d’armer l’écoute.</string>
-    <string name="nav_probe_copied">Trace copiée dans le presse-papiers</string>
+    <string name="nav_probe_saved">Trace enregistrée. Exportez le diagnostic vers USB pour la sortir du véhicule.</string>
+    <string name="nav_probe_save_failed">La trace n’a pas pu être enregistrée.</string>
     <string name="nav_probe_open">Sonde de guidage</string>
     <string name="nav_probe_undecoded">Armée · trafic vu, rien de décodé</string>
 </resources>

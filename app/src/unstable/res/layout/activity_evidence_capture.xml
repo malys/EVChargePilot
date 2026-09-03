@@ -2,7 +2,7 @@
 <!-- Impeccable direction contract
      THESIS: one parked-only action creates a factual vehicle-signal record.
      OWN-WORLD: EVSuite instrument surfaces, data table, one rail, no decoration or motion.
-     STORY: verify speed, capture the drive, save privately, then retrieve the exact artifact.
+     STORY: verify speed, capture the drive, save privately, then export the bundle to USB.
      FIRST VIEWPORT: live evidence fills the field; state, path and actions stay in the rail.
      FORM: inherited asymmetric instrument binnacle; seed key chargepilot-evidence-rail.
      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
@@ -104,14 +104,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/touch_target"
                 android:text="@string/evidence_start" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/copyAction"
-                style="@style/Widget.EV.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/evidence_copy" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/navProbeAction"

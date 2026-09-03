@@ -96,12 +96,12 @@
                 android:text="@string/nav_probe_start" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/copyAction"
+                android:id="@+id/saveAction"
                 style="@style/Widget.EV.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/touch_target"
                 android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/nav_probe_copy" />
+                android:text="@string/nav_probe_save" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

@@ -1,7 +1,5 @@
 package com.evsuite.chargepilot
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
@@ -12,9 +10,7 @@ import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.evsuite.hardware.telemetry.EvidenceCapture
 import com.evsuite.hardware.telemetry.SignalKind
-import com.evsuite.hardware.telemetry.TelemetryEvidenceFormat
 import com.evsuite.hardware.telemetry.TelemetryEvidenceRecorder
-import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -49,9 +45,6 @@ class EvidenceCaptureActivity : AppCompatActivity() {
     private var lastWrittenFile: File? = null
     private var writeFailed = false
 
-    // Main-thread state used only by the clipboard action.
-    private var displayedCapture: EvidenceCapture? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEvidenceCaptureBinding.inflate(layoutInflater)
@@ -59,7 +52,6 @@ class EvidenceCaptureActivity : AppCompatActivity() {
         reader = EnergyTelemetryReader(applicationContext)
         fileStore = EvidenceCaptureFileStore(File(filesDir, "evidence"))
         binding.captureAction.setOnClickListener { requestToggle() }
-        binding.copyAction.setOnClickListener { copyMarkdown() }
         binding.navProbeAction.setOnClickListener {
             startActivity(Intent(this, NavGuidanceProbeActivity::class.java))
         }
@@ -154,21 +146,7 @@ class EvidenceCaptureActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * The Markdown goes to the clipboard rather than through a share sheet: this app holds no
-     * network or storage permission, and the JSON remains app-private for adb retrieval.
-     */
-    private fun copyMarkdown() {
-        val capture = displayedCapture ?: return
-        val clipboard = getSystemService(ClipboardManager::class.java) ?: return
-        clipboard.setPrimaryClip(
-            ClipData.newPlainText("evidence", TelemetryEvidenceFormat.toMarkdown(capture))
-        )
-        Snackbar.make(binding.root, R.string.evidence_copied, Snackbar.LENGTH_SHORT).show()
-    }
-
     private fun render(state: CaptureViewState) {
-        displayedCapture = state.capture
         val gate = EvidenceCapturePolicy.gate(state.speedKmh)
 
         binding.captureAction.isEnabled = gate == EvidenceCaptureGate.PARKED
@@ -204,7 +182,6 @@ class EvidenceCaptureActivity : AppCompatActivity() {
         }
         binding.evidenceTable.text = state.capture?.let(::table)
             ?: getString(R.string.evidence_no_data)
-        binding.copyAction.isEnabled = state.capture != null
     }
 
     private fun table(capture: EvidenceCapture): String = buildString {

@@ -1,18 +1,17 @@
 package com.evsuite.chargepilot
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityNavGuidanceProbeBinding
+import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.NavGuidance
-import com.evsuite.hardware.saic.NavGuidanceReducer
 import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.google.android.material.snackbar.Snackbar
+import java.io.File
 import java.util.ArrayDeque
 import java.util.Locale
 
@@ -27,8 +26,8 @@ import java.util.Locale
  * **Cost while it runs.** The listener itself is push-driven and costs nothing when the
  * navigation app is silent. This screen adds one 1 Hz tick that reads two volatile fields and
  * compares them, which is a fifth of what the dashboard already does. The trace is a bounded
- * ring; a long drive overwrites its oldest lines rather than growing. Nothing is written to
- * disk and no service is started.
+ * ring; a long drive overwrites its oldest lines rather than growing. No service is started,
+ * and the only write is the artifact the driver saves for the diagnostic USB export.
  *
  * The tick outlives [onStop] on purpose: a capture is meant to survive the screen going dark
  * over three hours of motorway. It stops at [onDestroy], and so does the registration.
@@ -37,21 +36,24 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNavGuidanceProbeBinding
     private lateinit var reader: EnergyTelemetryReader
+    private lateinit var fileStore: EvidenceCaptureFileStore
 
     private val ticker = Handler(Looper.getMainLooper())
     private val trace = ArrayDeque<String>()
     private var lastEvents = -1
     private var visible = false
     private var startedAtElapsedMs: Long? = null
+    private var dropped = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityNavGuidanceProbeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         reader = EnergyTelemetryReader(applicationContext)
+        fileStore = EvidenceCaptureFileStore(File(filesDir, EVIDENCE_DIRECTORY))
         SaicNavGuidance.connect(applicationContext)
         binding.probeAction.setOnClickListener { toggle() }
-        binding.copyAction.setOnClickListener { copyTrace() }
+        binding.saveAction.setOnClickListener { saveTrace() }
         ticker.post(tick)
         render()
     }
@@ -92,7 +94,10 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         lastEvents = guidance.events
         if (guidance.events == 0) return
         val since = startedAtElapsedMs?.let { (SystemClock.elapsedRealtime() - it) / 1_000L } ?: 0L
-        if (trace.size >= TRACE_LINES) trace.removeFirst()
+        if (trace.size >= TRACE_LINES) {
+            trace.removeFirst()
+            dropped = true
+        }
         trace.addLast(
             String.format(
                 Locale.ROOT,
@@ -102,7 +107,9 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
                 guidance.remainingDistanceRaw.show(),
                 guidance.remainingMinutes.show(),
                 guidance.nextTurnDistanceRaw.show(),
-                guidance.road ?: guidance.direction ?: DASH,
+                // A road name is head-unit text of unknown length; the saved artifact has to
+                // stay under the export's per-file ceiling whatever it contains.
+                (guidance.road ?: guidance.direction ?: DASH).take(ROAD_CHARS),
             )
         )
     }
@@ -124,51 +131,40 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         if (SaicNavGuidance.start()) {
             startedAtElapsedMs = SystemClock.elapsedRealtime()
             trace.clear()
+            dropped = false
             lastEvents = -1
         }
         render()
     }
 
-    private fun copyTrace() {
-        val clipboard = getSystemService(ClipboardManager::class.java) ?: return
-        clipboard.setPrimaryClip(ClipData.newPlainText("nav-guidance", markdown()))
-        Snackbar.make(binding.root, R.string.nav_probe_copied, Snackbar.LENGTH_SHORT).show()
-    }
-
     /**
-     * The report a CP-040 decision is written from.
+     * Writes the trace where the diagnostic export finds it.
      *
-     * It states the unit question rather than hiding it: whoever reads the trace has to say
-     * what `dist` was in, and the only way to know is to compare it against a distance the
-     * driver already knows.
+     * The clipboard was never a way off this head unit: the file goes into the evidence
+     * folder, and the dashboard's "Export to USB" carries it out with the rest of the bundle.
+     * The write is a bounded JSON file on internal storage, so it stays on the click.
      */
-    private fun markdown(): String = buildString {
-        append("# CP-040 — navigation guidance trace\n\n")
-        append("- adapter bound: ${SaicNavGuidance.isAvailable}\n")
-        append("- listener registered: ${SaicNavGuidance.isListening}\n")
-        append("- callbacks seen: ${SaicNavGuidance.latest().events}\n")
-        append("- transaction census: ${census()}\n")
-        append("- codes past the census ceiling: ${SaicNavGuidance.censusBeyondCeiling()}\n")
-        append("- trace lines: ${trace.size}${if (trace.size >= TRACE_LINES) " (oldest dropped)" else ""}\n\n")
-        append("`dist` and `turn` are raw callback values. Their unit is unproven — state it\n")
-        append("by comparing against a distance known independently before using any of this.\n\n")
-        append("The transaction map was read from an R69 build. Check the census before\n")
-        append("trusting any number above: traffic on codes marked `?`, or silence on the\n")
-        append("decoded ones while guidance is clearly running, means this firmware numbers\n")
-        append("the interface differently and every reading here is off by the same shift.\n\n")
-        append("```\n")
-        trace.forEach { append(it).append('\n') }
-        append("```\n")
-    }
-
-    /** Decoded codes are named; anything else is flagged, because that is the shift signal. */
-    private fun census(): String {
-        val seen = SaicNavGuidance.census()
-        if (seen.isEmpty()) return "none"
-        return seen.entries.sortedBy { it.key }.joinToString(" ") { (code, count) ->
-            val mark = if (code in NavGuidanceReducer.KNOWN_TRANSACTIONS) "" else "?"
-            "$code$mark=$count"
-        }
+    private fun saveTrace() {
+        val saved = fileStore.write(
+            NavGuidanceProbeArtifact.of(
+                savedAtMs = System.currentTimeMillis(),
+                firmware = FirmwareInfo.getGeneration().name,
+                adapterBound = SaicNavGuidance.isAvailable,
+                listenerRegistered = SaicNavGuidance.isListening,
+                callbacks = SaicNavGuidance.latest().events,
+                census = SaicNavGuidance.census(),
+                censusBeyondCeiling = SaicNavGuidance.censusBeyondCeiling(),
+                trace = trace.toList(),
+                traceComplete = !dropped,
+            ).toJson(),
+            NavGuidanceProbeArtifact.KIND,
+            FirmwareInfo.getGeneration().name,
+        )
+        Snackbar.make(
+            binding.root,
+            if (saved == null) R.string.nav_probe_save_failed else R.string.nav_probe_saved,
+            Snackbar.LENGTH_LONG,
+        ).show()
     }
 
     private fun render() {
@@ -197,7 +193,7 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         } else {
             trace.joinToString("\n")
         }
-        binding.copyAction.isEnabled = trace.isNotEmpty()
+        binding.saveAction.isEnabled = trace.isNotEmpty()
     }
 
     private fun Int?.show(): String = this?.toString() ?: DASH
@@ -206,6 +202,9 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         const val TICK_MS = 1_000L
         /** Three hours of change at one line per second would not fit; the newest lines win. */
         const val TRACE_LINES = 300
+        /** A road name past this adds nothing a decision uses, and the file has a ceiling. */
+        const val ROAD_CHARS = 40
         const val DASH = "—"
+        const val EVIDENCE_DIRECTORY = "evidence"
     }
 }

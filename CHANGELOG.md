@@ -20,10 +20,21 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **A route source exists after all, and the unstable channel can prove it.** The head unit's
   adapter service fans remaining distance, remaining time, guidance status and road name out to
   any registered listener, so a route no longer requires a network, a permission or an account.
-  A parked-armed probe in the unstable channel records that fan-out over a drive and reports it
-  as a copyable trace. Nothing is displayed as a value: the distance callbacks carry no proven
-  unit and the status codes no documented meaning, so every reading stays raw pending the
-  on-vehicle run. The stable channel is unchanged and gains no capability.
+  A parked-armed probe in the unstable channel records that fan-out over a drive and saves it
+  as a trace file the diagnostic export carries to USB. Nothing is displayed as a value: the
+  distance callbacks carry no proven unit and the status codes no documented meaning, so every
+  reading stays raw pending the on-vehicle run. The stable channel is unchanged and gains no
+  capability.
+
+### Changed
+
+- **Every probe now leaves the car on a USB stick, not through the clipboard.** The guidance
+  probe kept its trace in memory and offered a copy button, so the only way off the head unit
+  was a paste into some other app — which the read-only, offline boundary makes pointless, and
+  which loses the census and the caveats a reading has to be judged against. Both probes now
+  write bounded JSON into the folder the diagnostic export bundles, so one **Export to USB**
+  carries the signal captures and the guidance trace out together, each hashed in the bundle
+  manifest. The copy actions are gone, and the capture screen no longer points at adb.
 
 ### Security
 

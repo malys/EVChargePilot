@@ -151,5 +151,6 @@ on a head-unit service for the life of the process.
 ## Next step
 
 Run the probe on the vehicle: park, arm, start a guidance in the car's own navigation, drive a
-leg whose distance is known independently, then park and copy the trace. The trace answers the
-unit question and the idle question together.
+leg whose distance is known independently, then park, save the trace, and take it out with
+**Diagnostic → Export to USB** — the trace lands in the bundle as `evidence/navguidance-*.json`
+beside the signal captures. It answers the unit question and the idle question together.

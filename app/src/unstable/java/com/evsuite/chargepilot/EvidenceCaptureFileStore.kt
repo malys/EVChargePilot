@@ -8,20 +8,30 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Writes a completed capture atomically and retains only a small fixed set. */
+/** Writes a completed probe artifact atomically and retains only a small fixed set. */
 internal class EvidenceCaptureFileStore(
     private val directory: File,
     private val maxFiles: Int = MAX_CAPTURE_FILES,
     private val nowMs: () -> Long = System::currentTimeMillis,
 ) {
-    fun write(capture: EvidenceCapture): File? {
+    fun write(capture: EvidenceCapture): File? =
+        write(TelemetryEvidenceFormat.toJson(capture), CAPTURE_KIND, capture.firmware)
+
+    /**
+     * Any probe artifact, not only a signal capture.
+     *
+     * Every probe writes its JSON here because this folder is what the diagnostic export
+     * bundles onto the USB stick; the retention below is one shared pool, so the newest
+     * artifacts of every probe are the ones that leave the car.
+     */
+    fun write(json: String, kind: String, firmware: String): File? {
         if (!directory.isDirectory && !directory.mkdirs()) return null
         if (maxFiles <= 0 || !prepareDirectory()) return null
-        val target = uniqueTarget(capture)
+        val target = uniqueTarget(kind, firmware)
         val temp = File(directory, ".${target.name}.${System.nanoTime()}.tmp")
         return try {
             FileOutputStream(temp).use { output ->
-                output.write(TelemetryEvidenceFormat.toJson(capture).toByteArray(Charsets.UTF_8))
+                output.write(json.toByteArray(Charsets.UTF_8))
                 output.fd.sync()
             }
             if (temp.renameTo(target)) target else null
@@ -32,16 +42,16 @@ internal class EvidenceCaptureFileStore(
         }
     }
 
-    private fun uniqueTarget(capture: EvidenceCapture): File {
+    private fun uniqueTarget(kind: String, firmware: String): File {
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT).format(Date(nowMs()))
-        val firmware = capture.firmware.replace(Regex("[^A-Za-z0-9._-]"), "_")
+        val safeFirmware = firmware.replace(Regex("[^A-Za-z0-9._-]"), "_")
         val scenario = directory.parentFile
             ?.let(::VehicleTestContextStore)
             ?.read()
             ?.scenario
             ?.id
             ?: "unclassified"
-        val base = "evidence-$firmware-$scenario-$stamp"
+        val base = "$kind-$safeFirmware-$scenario-$stamp"
         var candidate = File(directory, "$base.json")
         var suffix = 1
         while (candidate.exists()) candidate = File(directory, "$base-${suffix++}.json")
@@ -69,6 +79,7 @@ internal class EvidenceCaptureFileStore(
 
     companion object {
         internal const val MAX_CAPTURE_FILES = 8
+        internal const val CAPTURE_KIND = "evidence"
         private val CAPTURE_NAME = Regex("^(.*-\\d{8}-\\d{6}-\\d{3})(?:-(\\d+))?$")
     }
 }

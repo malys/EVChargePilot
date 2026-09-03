@@ -3,7 +3,6 @@
     <string name="evidence_title">Signal evidence</string>
     <string name="evidence_start">Start capture</string>
     <string name="evidence_stop">Stop and save</string>
-    <string name="evidence_copy">Copy table</string>
     <string name="evidence_ready">Ready. Start the capture before driving the protocol.</string>
     <string name="evidence_speed_unavailable">Capture controls stay disabled until speed is readable.</string>
     <string name="evidence_recording">Capturing. The first 60 seconds use 200 ms burst sampling.</string>
@@ -11,14 +10,13 @@
     <string name="evidence_idle">No capture running</string>
     <string name="evidence_no_data">No samples yet.</string>
     <string name="evidence_capturing">%1$d snapshots · %2$d s</string>
-    <string name="evidence_saved">Capture saved. Pull the file below with adb.</string>
+    <string name="evidence_saved">Capture saved. Export the diagnostic to USB to take it out of the car.</string>
     <string name="evidence_write_failed">Capture stopped, but its file could not be saved.</string>
     <string name="evidence_refused">Park and wait for a readable speed before changing capture.</string>
-    <string name="evidence_copied">Table copied to the clipboard</string>
     <string name="nav_probe_title">Navigation guidance probe</string>
     <string name="nav_probe_start">Arm listener</string>
     <string name="nav_probe_stop">Stop listener</string>
-    <string name="nav_probe_copy">Copy trace</string>
+    <string name="nav_probe_save">Save for export</string>
     <string name="nav_probe_idle">Listener not armed</string>
     <string name="nav_probe_unavailable">Adapter service unavailable</string>
     <string name="nav_probe_silent">Armed · nothing reported yet</string>
@@ -28,7 +26,8 @@
     <string name="nav_probe_hint_running">Listening. Silence here means the navigation reports nothing, which is itself the answer.</string>
     <string name="nav_probe_hint_unavailable">The head unit’s adapter service did not bind. No route source on this firmware.</string>
     <string name="nav_probe_refused">Park and wait for a readable speed before arming the listener.</string>
-    <string name="nav_probe_copied">Trace copied to the clipboard</string>
+    <string name="nav_probe_saved">Trace saved. Export the diagnostic to USB to take it out of the car.</string>
+    <string name="nav_probe_save_failed">The trace could not be saved.</string>
     <string name="nav_probe_open">Guidance probe</string>
     <string name="nav_probe_undecoded">Armed · traffic seen, none decoded</string>
 </resources>
