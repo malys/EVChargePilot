@@ -4,12 +4,15 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.evsuite.chargepilot.databinding.ActivityMainBinding
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.BatteryPowerEvidence
@@ -55,6 +58,17 @@ class MainActivity : AppCompatActivity() {
     private var trustedTripsCache: List<EnergyTripSummary> = emptyList()
     private var updatingAutomaticSwitch = false
 
+    private val vehiclePermissions = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { outcome ->
+        // A denial is not an error state to recover from: every reading it covers stays null,
+        // which the dashboard already renders and explains. It is logged so a diagnostic
+        // report distinguishes it from a firmware that publishes nothing.
+        outcome.filterValues { !it }.keys.forEach {
+            AppLogger.w(TAG, "vehicle permission denied: $it")
+        }
+    }
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val bound = (service as? TripRecordingService.LocalBinder)?.service ?: return
@@ -87,9 +101,22 @@ class MainActivity : AppCompatActivity() {
             showDiagnostics()
         }
         renderUnavailable()
+        requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
             TripRecordingService.monitorAutomaticTrips(this)
         }
+    }
+
+    /**
+     * Asked from the only screen the driver launches, because the recorder is a service and a
+     * service cannot ask. Nothing waits on the answer: the dashboard renders unavailable
+     * readings meanwhile, and the next sample after a grant carries the real values.
+     */
+    private fun requestVehiclePermissions() {
+        val missing = VehiclePermissions.missing {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isNotEmpty()) vehiclePermissions.launch(missing)
     }
 
     /**

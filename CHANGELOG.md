@@ -4,6 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The dashboard now asks for the vehicle signals it already declared.** AAOS classifies
+  `CAR_SPEED` and `CAR_ENERGY` as `dangerous` permissions, so declaring them in the manifest
+  granted nothing and every matching property read failed silently. The first on-vehicle test
+  showed the consequence: no speed anywhere, trip start and automatic detection permanently
+  disabled, and the USB diagnostic export refusing because it could not prove the car was
+  stopped — all of it indistinguishable from a firmware that publishes nothing. The main screen
+  now requests the two at launch and logs a denial. No permission was added: the manifest is
+  unchanged, and the app still holds no location, network, overlay or vehicle-write capability.
+
 ### Added
 
 - **A route source exists after all, and the unstable channel can prove it.** The head unit's
