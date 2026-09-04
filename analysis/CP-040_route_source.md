@@ -2,8 +2,8 @@
 
 Date: 2026-09-02
 
-Decision owner: pending. This document states the finding and the recommendation; the
-network question at the end of it is the owner's, not this session's.
+Decision: **build on the OEM adapter's guidance**, proven on the vehicle 2026-09-04. The
+network question at the end of this document is a separate one and remains the owner's.
 
 Firmware examined: `saicadapterservice_overseas_eh32` (R69 EH32), decompiled sources under
 workspace `apks/`.
@@ -83,6 +83,45 @@ listener on its own, so this displaces neither the navigation app nor the cluste
   (`com.tomtom.navigation.GUIDE_INFO`) reach `MapService`, so at least one non-SAIC app does.
 
 None of these can be settled off-vehicle, which is why CP-040 carries `on_vehicle_required`.
+
+
+## Answered on the vehicle — 2026-09-04
+
+A parked capture with a guidance running in the OEM navigation, on
+SWI68-29958-1300R67:
+
+```
+status=1   dist=9788   min=25   road=Rue de la Fontaine
+```
+
+**The route source works.** The adapter binds, accepts the registration, and answers the
+synchronous getters with a live route. Everything CP-040 was written to find out is now known.
+
+**The distance is in metres.** `MapService` logs the remaining-time value as
+`remainingMinutes`, so 9788 metres is 23,5 km/h to the destination — plausible for a town
+route — and 9788 kilometres is not a number about a car. Encoded per generation in
+`NavGuidance.remainingDistanceKm`; an unlisted firmware still claims no kilometres.
+
+**No transaction shift on R67.** The census recorded eleven callbacks on code 11 and none on
+the decoded ones. Code 11 is `onNetworkIsAvailableChanged` — an unrelated callback landing
+exactly where the R69 interface puts it, which is evidence against a shift rather than for one.
+The zero on the decoded codes is expected: nothing about the route changed while parked, and
+the getters are what answered.
+
+**Callbacks alone would never have answered this.** The five registered transactions are
+change notifications, so a stationary car with a route already running publishes nothing. The
+getters are what make a parked capture conclusive, and they were found only because the first
+capture's silence was read as undecidable rather than negative.
+
+### What this settles, and what it does not
+
+Settled: a route source exists, costs no permission and no network, and reports remaining
+distance in metres, remaining time in minutes, a guidance status and a road name.
+
+Not settled, and not this ticket's business: elevation, charger locations and alternative
+routes still cannot come from the head unit. They need a routing engine, therefore `INTERNET`
+in the stable variant, a `PRODUCT.md` rewrite and a fresh CP-091. That decision remains the
+owner's.
 
 ## Firmware revision risk, and how the probe catches it
 
