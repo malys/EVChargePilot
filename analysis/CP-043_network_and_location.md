@@ -3,9 +3,12 @@
 Date: 2026-09-04
 
 Decision taken by the owner on 2026-09-04: **`INTERNET` and location are accepted** for the
-route work. This document is the review that decision requires, and it reaches one conclusion
-the owner did not ask for and should read: **the permissions are approved but not declared
-yet**, because nothing in the app can use them today. See "What lands, and when".
+route work, and — after this review recommended waiting for a consumer — **declared in the main
+manifest the same day**, on the owner's instruction. `FOREGROUND_SERVICE_LOCATION` stays
+undeclared; no service reads a position. The recommendation and the decision that overrode it
+are both kept below, because the costs the recommendation named are now costs the project
+carries. Read "Declared ahead of the consumer" at the end: one of them, the `LOCATION`
+permission group shared with `CAR_SPEED`, still needs confirming on the vehicle.
 
 ## What CP-040 left, and what needs a network
 
@@ -52,7 +55,12 @@ that on 2026-09-04 ("Oui, via GPS altitude"). **CP-031's decision is superseded,
 contradicted** — its analysis was right about the cost and simply predates the owner paying it.
 
 `ACCESS_COARSE_LOCATION` is not enough: a route origin snapped to the wrong side of a junction
-sends the driver the wrong way, and coarse location carries no usable altitude.
+sends the driver the wrong way, and coarse location carries no usable altitude. It is declared
+anyway, because Android 12+ refuses a fine-only declaration outright — lint fails the build on
+it. That has a runtime consequence CP-042 must handle: on those platforms the driver is offered
+"approximate" as well as "precise", and a coarse-only grant must be treated as a refusal of what
+the app asked for, not as a usable origin. `checkSelfPermission(ACCESS_FINE_LOCATION)` is the
+only check that answers correctly.
 
 ### `FOREGROUND_SERVICE_LOCATION`
 
@@ -68,24 +76,32 @@ at runtime rather than from the manifest, as CP-091 item 6 requires and as
 
 The permission-drift gate compares the manifest against the allowlist. Those are two different
 statements: the allowlist says *reviewed and approved*, the manifest says *the shipped APK asks
-for this*. This ticket writes the first and deliberately not the second.
+for this*. The review wrote the first and recommended holding the second; the owner directed
+otherwise for the two that have a named consumer.
 
-| Permission | Allowlisted | Declared in manifest | Lands with |
+| Permission | Allowlisted | Declared in manifest | Consumer |
 | --- | --- | --- | --- |
-| `INTERNET` | yes, 2026-09-04 | no | CP-042, when a routing client exists |
-| `ACCESS_FINE_LOCATION` | yes, 2026-09-04 | no | CP-042, same commit as the first request |
-| `FOREGROUND_SERVICE_LOCATION` | yes, 2026-09-04 | no | only if a service reads position |
+| `INTERNET` | yes, 2026-09-04 | yes, 2026-09-04 | CP-042 routing client |
+| `ACCESS_FINE_LOCATION` | yes, 2026-09-04 | yes, 2026-09-04 | CP-042 route origin, altitude |
+| `ACCESS_COARSE_LOCATION` | yes, 2026-09-04 | yes, 2026-09-04 | none; Android 12+ requires it beside fine |
+| `FOREGROUND_SERVICE_LOCATION` | yes, 2026-09-04 | no | none; only if a service reads position |
 
-The reason is not caution for its own sake. Between this ticket and CP-042 there is no code
+**Amended the same day.** The two with a named consumer were declared immediately, by the
+owner's decision, ahead of the client that will use them. The reasoning below is what that
+decision was taken against and is kept rather than deleted, because the costs it names are now
+costs the project is carrying rather than costs it avoided — see "Declared ahead of the
+consumer" at the end of this document.
+
+The reason for the original recommendation was not caution for its own sake. Between this ticket and CP-042 there is no code
 that can use either permission: without a routing engine, a granted location gives a latitude,
 a longitude and an altitude with nothing to compare them to, and `INTERNET` gives a socket with
 nowhere to send anything. Declaring them now would mean shipping an APK that asks the driver
 for capabilities it does not exercise — and a permission prompt with no visible benefit is how
 drivers learn to deny prompts that matter.
 
-The ticket's own words are the test: *"no manifest line lands before the review that is supposed
-to precede it."* The review is done. The manifest line waits for the consumer, which is one
-ticket away and unblocked.
+The ticket's own words were the test: *"no manifest line lands before the review that is
+supposed to precede it."* The review came first, which is what that sentence protects. The
+consumer is one ticket away.
 
 ## The runtime flow, specified here and enforced in CP-042
 
@@ -169,3 +185,30 @@ where the manifest lines, the client and the key-entry screen land. The grade te
 out becomes reachable at the same time, from the route's elevation profile rather than from
 sampled GPS altitude — a profile of the road ahead is what the energy model wanted, and sampled
 altitude behind the car never was.
+
+## Declared ahead of the consumer — 2026-09-04
+
+The owner directed that `INTERNET` and `ACCESS_FINE_LOCATION` be declared immediately rather
+than waiting for CP-042. `FOREGROUND_SERVICE_LOCATION` was not declared: the ticket conditions
+it on a service consuming position, and none does.
+
+Three things follow, recorded here so none of them is discovered later.
+
+**The next build asks for capabilities it does not exercise.** There is no routing client, so
+`INTERNET` opens no socket and a granted location is compared to nothing. The permissions appear
+in the app's entry in system settings with no behaviour behind them.
+
+**The location prompt may never appear on this platform.** `CAR_SPEED` is in permission group
+`LOCATION` — this codebase already documented that in `VehiclePermissions` — and on API 28 the
+system grants a requested permission without a dialog when the app already holds another in the
+same group. The dashboard asks for `CAR_SPEED` at startup. A driver who granted it may therefore
+be handed `ACCESS_FINE_LOCATION` silently the first time CP-042 requests it. **This has not been
+confirmed on the vehicle and must be**, because if it holds, the consent for location is the
+owner's decision and this document, not a dialog. The two requests stay separate in code for
+exactly this reason: merging them into one `RequestMultiplePermissions` call would make the
+coupling invisible.
+
+**Acceptance criterion 3 is still specified rather than demonstrated.** "A refused location grant
+leaves a working app that still reads the CP-040 route source" holds trivially today — nothing
+reads a position, and the arrival forecast never needed one — but there is no request to refuse
+until CP-042 adds it. The contract is in "The runtime flow" above and CP-042 must satisfy it.

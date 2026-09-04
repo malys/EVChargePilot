@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Read-only vehicle data. EVChargePilot declares no network, install, overlay or
-         location capability, and writes no vehicle property.
+    <!-- Read-only vehicle data. EVChargePilot declares no install or overlay capability and
+         writes no vehicle property. Network and location it now declares; see the CP-043
+         block below for what they may and may not be used for.
 
          Two of the permissions below read like write access and are not:
          CONTROL_CAR_CLIMATE is what AAOS requires to *read* HVAC state — the platform
@@ -28,6 +29,38 @@
          does not have. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Route planning. Reviewed and accepted by the owner under CP-043 on 2026-09-04; the
+         reasoning, the engine choice and the privacy boundary are in
+         analysis/CP-043_network_and_location.md, and these two lines are meaningless without
+         it.
+
+         INTERNET carries route requests to the routing host the driver configures, and
+         nothing else. No trip, evidence capture, diagnostic bundle, charge, range, speed or
+         identifier crosses a network by any path this app controls. https and a host
+         allowlist are enforced on the initial URL and on every redirect hop; no API key ships
+         inside the APK.
+
+         ACCESS_FINE_LOCATION supplies a route origin and an altitude. Coarse location cannot:
+         it snaps an origin to the wrong side of a junction and carries no usable altitude.
+         ACCESS_COARSE_LOCATION is declared beside it because Android 12+ refuses a fine-only
+         request — the driver may grant approximate location instead, and the app must treat
+         that as a refusal of what it asked for rather than as a usable origin.
+         The grant is requested from a parked screen the driver reaches deliberately, never at
+         start and never from a service, and refusal is a supported state — the arrival
+         forecast keeps working from the head unit's own guidance, which never needed a
+         position.
+
+         Beware the group on this platform: CAR_SPEED is in permission group LOCATION, and on
+         API 28 the system grants a requested permission without a prompt when another in the
+         same group is already held. A driver who granted speed may therefore never see a
+         location dialog. Confirm on the vehicle before treating the prompt as the consent.
+
+         FOREGROUND_SERVICE_LOCATION is deliberately absent: no service reads a position, and
+         the foreground type mask stays derived from permissions held at runtime. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".ChargePilotApp"

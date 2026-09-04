@@ -14,10 +14,19 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   thing that will ever leave, and it carries an origin, a destination and a road profile to a
   host the driver configures — never a trip, an evidence capture, a diagnostic bundle, a charge
   or an identifier. The three permissions are in the allowlist with a security note each and in
-  **no manifest**: approval and declaration are different statements, and nothing in the app can
-  use either capability until the routing client exists. Engine chosen (OpenRouteService, key
-  entered by the driver, because a key inside a published APK is not a secret), transport rules
-  written down, security gate re-run green.
+  the manifest, by the owner's decision, ahead of the routing client that will use them:
+  `INTERNET` opens no socket yet and a granted position is compared to nothing yet.
+  `FOREGROUND_SERVICE_LOCATION` stays out, because no service reads a position;
+  `ACCESS_COARSE_LOCATION` had to come in, because Android 12+ refuses a fine-only declaration,
+  and a coarse-only grant will have to be treated as a refusal rather than as an origin. Engine chosen
+  (OpenRouteService, key entered by the driver, because a key inside a published APK is not a
+  secret), transport rules written down, security gate re-run green twice.
+
+  One thing to confirm in the car: `CAR_SPEED` is in permission group `LOCATION`, and on API 28
+  the system grants a permission without a dialog when the app already holds another from the
+  same group. A driver who granted speed at startup may therefore be handed location with no
+  prompt. The speed request and the location request are kept in separate call sites so the
+  coupling stays visible rather than merged into one silent grant.
 
 ### Fixed
 

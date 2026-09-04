@@ -41,11 +41,12 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 ## Capabilities and Constraints
 
 - Read-only vehicle access; no setting writes, remote control or overlay.
-- No network and no location capability in any published build to date. Both were approved on
-  2026-09-04 for route planning (CP-043) and are declared only in the release that uses them.
-  What will then leave the car is a route request — origin, destination, road profile — to a
-  host the driver configures. Trip history, evidence, diagnostics, charge, range and speed
-  never leave the car by any path the app controls.
+- Network and location are declared, for route planning only, approved by the owner on
+  2026-09-04 (CP-043). What leaves the car is a route request — origin, destination, road
+  profile — to a host the driver configures, while a route is being computed on a screen the
+  driver opened. Trip history, evidence, diagnostics, charge, range and speed never leave the
+  car by any path the app controls. No API key ships inside the package. Location is optional
+  at runtime: refused, the app keeps working from the head unit's own guidance.
 - Vehicle-reported SOC, range and speed, plus an independently nullable thermal/climate block.
 - Battery power and temperature remain hidden until EVHardware's exact-firmware evidence
   catalogue validates their units and semantics.

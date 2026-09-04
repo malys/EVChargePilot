@@ -23,7 +23,14 @@ object VehiclePermissions {
     const val CAR_SPEED = "android.car.permission.CAR_SPEED"
     const val CAR_ENERGY = "android.car.permission.CAR_ENERGY"
 
-    /** Asking for the LOCATION group grants no location: the app declares no location permission. */
+    /**
+     * The car permissions this object asks for, and only those.
+     *
+     * `ACCESS_FINE_LOCATION` is not in this list and must never be: CP-043 declared it for route
+     * planning, and it is requested from the screen that uses it. It shares the `LOCATION` group
+     * with `CAR_SPEED`, so on API 28 a driver who granted speed may receive it without a prompt —
+     * which is a reason to keep the two requests apart rather than a reason to merge them.
+     */
     val RUNTIME = listOf(CAR_SPEED, CAR_ENERGY)
 
     /** The ones still to ask for, empty once the vehicle signals are reachable. */
