@@ -152,12 +152,14 @@ published APK is a zip, so a key in it is not a secret. Get a free key from
 ```
 # EVChargePilot routing
 ors_api_key  = your-key-here
-ors_base_url = https://api.openrouteservice.org
+ors_base_url = https://api.heigit.org
 ```
 
 The file may have any name; it is found by its contents. `ors_base_url` is optional and exists
 so a self-hosted instance works without a code change — it must be `https`, with no credentials
-and no query. The key is stored encrypted through the Android keystore, is never displayed
+and no query. The default is HeiGIT's own host: `api.openrouteservice.org` was deprecated on
+2026-04-28, cut to a tenth of its quota on 2026-08-27 and switches off on 2026-09-28, so a
+config file still naming it will stop working. The key is stored encrypted through the Android keystore, is never displayed
 again, never written to a log, and never included in a diagnostic export.
 
 Free-tier allowances, as published by ORS: 2000 directions requests a day and 40 in any rolling

@@ -23,7 +23,7 @@ import com.google.gson.JsonParser
  */
 object OrsDirections {
 
-    const val PATH = "/v2/directions/driving-car/geojson"
+    const val PATH = "/openrouteservice/v2/directions/driving-car/geojson"
 
     /** A route with more points than this is not a route this screen can use. */
     const val MAX_POINTS = 20_000

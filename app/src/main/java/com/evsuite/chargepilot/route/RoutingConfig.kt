@@ -16,7 +16,7 @@ import java.util.Locale
  * ```
  * # EVChargePilot routing
  * ors_api_key  = 5b3ce35...
- * ors_base_url = https://api.openrouteservice.org
+ * ors_base_url = https://api.heigit.org
  * ```
  *
  * Every field is nullable: the caller applies what the file set and leaves the rest alone, so a
@@ -35,7 +35,14 @@ data class RoutingConfig(
         /** Big enough for any config, small enough that a wrong file is refused before it is read. */
         const val MAX_FILE_BYTES = 64 * 1024
 
-        val DEFAULT_BASE_URL = "https://api.openrouteservice.org"
+        /**
+         * HeiGIT's host, not the old `api.openrouteservice.org`. That one was deprecated on
+         * 2026-04-28, cut to 10 % of the published quota on 2026-08-27 and is scheduled to be
+         * switched off on 2026-09-28. Every HeiGIT API now has the shape
+         * `api.heigit.org/<service>/<version>/`, which is why the two paths in this package no
+         * longer look alike: directions is openrouteservice, geocoding is Pelias.
+         */
+        val DEFAULT_BASE_URL = "https://api.heigit.org"
 
         fun parse(text: String): RoutingConfig {
             var apiKey: String? = null

@@ -14,7 +14,7 @@ import com.google.gson.JsonParser
  * which of the answers they meant. If the probe succeeds, this stays as the way to route
  * somewhere the car is not already navigating to.
  *
- * `GET /geocode/search`, with the key in the `Authorization` header like every other request
+ * `GET /pelias/v1/search`, with the key in the `Authorization` header like every other request
  * here. ORS documents this endpoint with the key in the query string; a key in a URL reaches
  * access logs and `Referer` headers, so this app does not send one that way. If the header is
  * refused, the screen says the server rejected the request and the driver keeps a key that
@@ -30,7 +30,12 @@ import com.google.gson.JsonParser
  */
 object OrsGeocode {
 
-    const val PATH = "/geocode/search"
+    /**
+     * Pelias, not openrouteservice: geocoding was never part of the ORS software and HeiGIT's
+     * new host says so out loud. The old `/geocode/search` lives only on the host being
+     * switched off on 2026-09-28.
+     */
+    const val PATH = "/pelias/v1/search"
 
     /** Assumed, not verified — see the class note. */
     const val PER_DAY = 1000

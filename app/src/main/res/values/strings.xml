@@ -252,7 +252,7 @@ Spending %6$s %% per km</string>
     <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>
     <string name="routing_desc_toggle_key">Show or hide the key</string>
     <string name="routing_hint_base_url">Routing service (https)</string>
-    <string name="routing_helper_base_url">Leave as it is for openrouteservice.org, or point it at your own instance.</string>
+    <string name="routing_helper_base_url">Leave as it is for HeiGIT’s hosted service, or point it at your own instance.</string>
     <string name="routing_action_save">Save</string>
     <string name="routing_action_import">Import from USB</string>
     <string name="routing_action_clear">Remove</string>
