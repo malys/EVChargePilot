@@ -44,8 +44,10 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 - Network and location are declared, for route planning only, approved by the owner on
   2026-09-04 (CP-043). What leaves the car is a route request — origin, destination, road
   profile — to a host the driver configures, while a route is being computed on a screen the
-  driver opened. Trip history, evidence, diagnostics, charge, range and speed never leave the
-  car by any path the app controls. No API key ships inside the package. Location is optional
+  driver opened, plus a charger request carrying a 40 km stretch of that road around the
+  planned stop — a window, never the route. Trip history, evidence, diagnostics, charge, range
+  and speed never leave the car by any path the app controls. No API key ships inside the
+  package. Location is optional
   at runtime: refused, the app keeps working from the head unit's own guidance.
 - Vehicle-reported SOC, range and speed, plus an independently nullable thermal/climate block.
 - Battery power and temperature remain hidden until EVHardware's exact-firmware evidence

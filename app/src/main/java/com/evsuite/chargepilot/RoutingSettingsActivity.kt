@@ -100,8 +100,9 @@ class RoutingSettingsActivity : AppCompatActivity() {
         bound = false
         speedKmh = null
         speedObservedAtMs = null
-        // The typed key does not survive the screen going away.
+        // The typed keys do not survive the screen going away.
         binding.routingKeyInput.text?.clear()
+        binding.chargerKeyInput.text?.clear()
         super.onStop()
     }
 
@@ -112,7 +113,8 @@ class RoutingSettingsActivity : AppCompatActivity() {
 
     private fun save() {
         val key = binding.routingKeyInput.text?.toString()?.trim().orEmpty()
-        if (key.isEmpty()) {
+        val chargerKey = binding.chargerKeyInput.text?.toString()?.trim().orEmpty()
+        if (key.isEmpty() && chargerKey.isEmpty()) {
             announce(getString(R.string.routing_key_missing))
             return
         }
@@ -122,8 +124,17 @@ class RoutingSettingsActivity : AppCompatActivity() {
             announce(getString(R.string.routing_base_url_refused, reason))
             return
         }
-        RoutingCredentials.apply(this, RoutingConfig(key, RoutingConfig.validBaseUrl(baseUrl)))
+        // Only what was typed: saving a charger key must not wipe a routing key already stored.
+        RoutingCredentials.apply(
+            this,
+            RoutingConfig(
+                apiKey = key.ifEmpty { null },
+                baseUrl = RoutingConfig.validBaseUrl(baseUrl),
+                chargerApiKey = chargerKey.ifEmpty { null },
+            ),
+        )
         binding.routingKeyInput.text?.clear()
+        binding.chargerKeyInput.text?.clear()
         announce(getString(R.string.routing_saved))
     }
 
@@ -156,6 +167,7 @@ class RoutingSettingsActivity : AppCompatActivity() {
     private fun clear() {
         RoutingCredentials.clear(this)
         binding.routingKeyInput.text?.clear()
+        binding.chargerKeyInput.text?.clear()
         binding.routingBaseUrlInput.setText(RoutingConfig.DEFAULT_BASE_URL)
         announce(getString(R.string.routing_cleared))
     }
@@ -175,6 +187,7 @@ class RoutingSettingsActivity : AppCompatActivity() {
         }
         val editable = gate == ParkedDeletionGate.PARKED
         binding.routingKeyLayout.isEnabled = editable
+        binding.chargerKeyLayout.isEnabled = editable
         binding.routingBaseUrlLayout.isEnabled = editable
         binding.routingSaveAction.isEnabled = editable
         binding.routingImportAction.isEnabled = editable
@@ -182,10 +195,18 @@ class RoutingSettingsActivity : AppCompatActivity() {
         binding.routingStatus.text = message ?: when (gate) {
             ParkedDeletionGate.MOVING -> getString(R.string.routing_moving)
             ParkedDeletionGate.SPEED_UNAVAILABLE -> getString(R.string.routing_speed_unavailable)
-            ParkedDeletionGate.PARKED -> if (RoutingCredentials.isConfigured(this)) {
-                getString(R.string.routing_configured, RoutingCredentials.baseUrl(this))
-            } else {
-                getString(R.string.routing_absent)
+            ParkedDeletionGate.PARKED -> {
+                val routing = if (RoutingCredentials.isConfigured(this)) {
+                    getString(R.string.routing_configured, RoutingCredentials.baseUrl(this))
+                } else {
+                    getString(R.string.routing_absent)
+                }
+                val chargers = if (RoutingCredentials.isChargerConfigured(this)) {
+                    getString(R.string.routing_charger_configured)
+                } else {
+                    getString(R.string.routing_charger_absent)
+                }
+                "$routing $chargers"
             }
         }
         message = null

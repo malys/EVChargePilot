@@ -275,4 +275,18 @@ Spending %6$s %% per km</string>
     <string name="routing_refused_server_minute">The routing service is rate-limiting this key. Try again shortly.</string>
     <string name="routing_refused_server">The routing service refused the request (%1$s).</string>
     <string name="routing_refused_unreadable">The answer was too large or unreadable and was discarded.</string>
+
+    <!-- CP-048 charger dataset -->
+    <string name="routing_hint_charger_key">Open Charge Map API key (optional)</string>
+    <string name="routing_helper_charger_key">A second free key, from openchargemap.org. Without it the plan says when to stop, not where.</string>
+    <string name="routing_charger_configured">Charger lookup configured.</string>
+    <string name="routing_charger_absent">No charger key: the plan will say when to stop, not where.</string>
+    <string name="charge_stop_charger_searching">Looking for a charger on the way\u2026</string>
+    <string name="charge_stop_charger_none">No usable charger found on that stretch of road. Charge before it.</string>
+    <string name="charge_stop_charger_absent">Add an Open Charge Map key to be told where to stop.</string>
+    <string name="charge_stop_charger">%1$s\u2009· %2$s km along · %3$s kW · %4$s</string>
+    <string name="charge_stop_charger_arrival">About %1$s %% left on arrival there.</string>
+    <string name="charge_stop_charger_source">%1$s · last confirmed %2$s. This is a record, not a promise: it may be gone, busy or broken.</string>
+    <string name="charge_stop_charger_source_undated">%1$s · no confirmation date. This is a record, not a promise: it may be gone, busy or broken.</string>
+    <string name="charge_stop_charger_not_operational">The record says this one is not working.</string>
 </resources>

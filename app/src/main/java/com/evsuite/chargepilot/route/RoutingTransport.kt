@@ -22,8 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - `https` on the initial URL and on every redirect hop, checked by [RedirectPolicy] against
  *   the host the driver configured. Redirects are not followed by `HttpURLConnection` here —
  *   `instanceFollowRedirects` is off — because the platform would follow them without asking.
- * - The key travels in an `Authorization` header. A key in a query string reaches access logs,
- *   `Referer` headers and the next redirect.
+ * - The key travels in a header — `Authorization`, or whatever header the service names. A key
+ *   in a query string reaches access logs, `Referer` headers and the next redirect, so no
+ *   service gets one that way however it documents itself.
  * - Bounded: timeouts, a response cap, and a refusal to read past it. A head unit stuck on a
  *   socket is a head unit that stopped showing speed.
  * - Single flight. A second request while one is in flight is dropped, not queued: the driver
@@ -105,7 +106,7 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
         if (!inFlight.compareAndSet(false, true)) return Result.Refused(Reason.BUSY)
         return try {
             quota.record(nowMs)
-            send(url, allowedHost, credentials.apiKey, method, body, hop = 0)
+            send(url, allowedHost, credentials.apiKey, credentials.header, method, body, hop = 0)
         } finally {
             inFlight.set(false)
         }
@@ -115,6 +116,7 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
         url: String,
         allowedHost: String,
         apiKey: String,
+        header: String,
         method: String,
         body: String?,
         hop: Int,
@@ -126,8 +128,11 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
             connection.instanceFollowRedirects = false
             connection.connectTimeout = CONNECT_TIMEOUT_MS
             connection.readTimeout = READ_TIMEOUT_MS
-            connection.setRequestProperty("Authorization", apiKey)
-            connection.setRequestProperty("Accept", "application/geo+json")
+            connection.setRequestProperty(header, apiKey)
+            connection.setRequestProperty("Accept", "application/geo+json, application/json")
+            // Open Charge Map asks callers to identify their app. The same string for every
+            // install: it names the software and nothing about the car or the driver.
+            connection.setRequestProperty("User-Agent", USER_AGENT)
             if (body != null) {
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 connection.doOutput = true
@@ -143,7 +148,7 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
                     )
                     when (outcome) {
                         is RedirectPolicy.Outcome.Follow ->
-                            send(outcome.url, allowedHost, apiKey, method, body, hop + 1)
+                            send(outcome.url, allowedHost, apiKey, header, method, body, hop + 1)
                         is RedirectPolicy.Outcome.Refuse -> {
                             AppLogger.w(TAG, "redirect refused: ${outcome.reason}")
                             Result.Refused(Reason.TRANSPORT, outcome.reason)
@@ -197,6 +202,7 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
             URLEncoder.encode(value, StandardCharsets.UTF_8.name())
 
         private const val TAG = "RoutingTransport"
+        private const val USER_AGENT = "EVChargePilot"
         private const val CONNECT_TIMEOUT_MS = 10_000
         private const val READ_TIMEOUT_MS = 20_000
 

@@ -29,6 +29,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **Elevation, which the car will never give.** The route comes back as a 3D geometry, so climb
   and descent are shown with the distance and duration, and CP-050 has something to model with.
   OpenStreetMap under ODbL: the service's attribution is displayed wherever a route is.
+- **And *where* the stop is, not only how far away.** With a second key of the driver's own, the
+  screen names the last charger reachable before the reserve is reached — the last, not the
+  nearest, because stopping earlier than necessary costs a driver time they came for — with its
+  power, its connector as this car can use it, and the charge it would be reached with. Open
+  Charge Map was chosen over the routing engine's own POI service for the two things that
+  service cannot answer: which connector, and how old the record is. Every charger is shown
+  with its data provider and the date the record was last confirmed, because a charger dataset
+  is wrong the day it is published and hiding that turns a suggestion into a promise
+  (CC BY 4.0 for contributed records, the provider's own licence for imported ones, attributed
+  on screen either way). What leaves the car is a 40 km stretch of road around the planned stop
+  and a 5 km corridor — never the route, never the origin, never the destination.
 
 ### Changed
 

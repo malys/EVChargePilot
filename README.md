@@ -172,6 +172,33 @@ the host configured above. Never a trip, an evidence capture, a diagnostic bundl
 reading, a speed or an identifier. Route data comes from OpenStreetMap under ODbL and the
 service's attribution is displayed with every route.
 
+### Charger data key
+
+Knowing a stop is due in 180 km is only half an answer; the other half is *where*. That comes
+from [Open Charge Map](https://openchargemap.org/), which needs a second key of its own —
+free, and again never shipped in the APK. Type it under **Charging stop → Charger key**, or
+add it to the same USB file:
+
+```
+ocm_api_key  = your-other-key-here
+ocm_base_url = https://api.openchargemap.io
+```
+
+Open Charge Map publishes no numeric rate limit — it asks for reasonable use and bans at its
+own discretion — so the app imposes its own: 500 requests a day, 10 in any rolling minute, and
+one request per plan, after a driver action.
+
+What leaves the car is a 40 km stretch of the road before the planned stop, as an encoded
+polyline, with a 5 km corridor. Not the origin, not the destination, not the route. The service
+learns a piece of road; it does not learn the journey.
+
+Charger records are shown with their data provider and the date the record was last confirmed,
+because a charger dataset is out of date the day it is published and hiding that turns a
+suggestion into a promise. User-contributed Open Charge Map data is CC BY 4.0; imported records
+keep their original provider's licence, which is why the provider is named on screen next to
+each charger. Both licences permit use in this MIT-licensed app as long as the attribution is
+displayed, and it is.
+
 ## Building
 
 With [mise](https://mise.jdx.dev/):

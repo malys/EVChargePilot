@@ -17,7 +17,12 @@ import java.util.Locale
  * # EVChargePilot routing
  * ors_api_key  = 5b3ce35...
  * ors_base_url = https://api.heigit.org
+ * ocm_api_key  = 0a1b2c3...
  * ```
+ *
+ * Two keys, two services, two sign-ups: the second one names where the charging stop is
+ * (CP-048) and is optional. Without it the app still says *stop in N kilometres*; it just
+ * cannot say where.
  *
  * Every field is nullable: the caller applies what the file set and leaves the rest alone, so a
  * file carrying only a key does not silently reset a self-hosted base URL.
@@ -25,10 +30,13 @@ import java.util.Locale
 data class RoutingConfig(
     val apiKey: String? = null,
     val baseUrl: String? = null,
+    val chargerApiKey: String? = null,
+    val chargerBaseUrl: String? = null,
 ) {
 
     /** Nothing usable in it — an empty file, or a file that was never a config. */
-    fun isEmpty(): Boolean = apiKey == null && baseUrl == null
+    fun isEmpty(): Boolean =
+        apiKey == null && baseUrl == null && chargerApiKey == null && chargerBaseUrl == null
 
     companion object {
 
@@ -47,6 +55,8 @@ data class RoutingConfig(
         fun parse(text: String): RoutingConfig {
             var apiKey: String? = null
             var baseUrl: String? = null
+            var chargerApiKey: String? = null
+            var chargerBaseUrl: String? = null
             for (raw in text.lineSequence()) {
                 val line = raw.trim()
                 if (line.isEmpty() || line.startsWith("#")) continue
@@ -58,11 +68,14 @@ data class RoutingConfig(
                 when (key) {
                     "ors_api_key", "api_key", "apikey" -> apiKey = value
                     "ors_base_url", "base_url", "url" -> baseUrl = validBaseUrl(value)
+                    "ocm_api_key", "charger_api_key" -> chargerApiKey = value
+                    "ocm_base_url", "charger_base_url" ->
+                        chargerBaseUrl = validBaseUrl(value)
                     // Unknown keys are ignored rather than rejected: one file can configure
                     // several apps, and a future key must not break an older build.
                 }
             }
-            return RoutingConfig(apiKey, baseUrl)
+            return RoutingConfig(apiKey, baseUrl, chargerApiKey, chargerBaseUrl)
         }
 
         /**

@@ -83,6 +83,28 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/chargerKeyLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:hint="@string/routing_hint_charger_key"
+                app:endIconContentDescription="@string/routing_desc_toggle_key"
+                app:endIconMinSize="@dimen/touch_target"
+                app:endIconMode="password_toggle"
+                app:helperText="@string/routing_helper_charger_key"
+                app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/chargerKeyInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    android:textSize="@dimen/text_body" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/routingBaseUrlLayout"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="1400dp"

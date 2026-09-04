@@ -131,6 +131,27 @@
                 android:visibility="gone" />
 
             <TextView
+                android:id="@+id/chargerPlace"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:lineSpacingExtra="6dp"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
+            <!-- Never merged into the line above: a record's age is what stops it reading as a
+                 promise, and a promise is what sends someone to a charger that is not there. -->
+            <TextView
+                android:id="@+id/chargerSource"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/chargeStopAttribution"
                 android:layout_width="1400dp"
                 android:layout_height="wrap_content"

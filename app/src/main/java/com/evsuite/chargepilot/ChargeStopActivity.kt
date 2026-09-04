@@ -12,8 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityChargeStopBinding
 import com.evsuite.chargepilot.route.LocationSource
+import com.evsuite.chargepilot.route.OpenChargeMap
 import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
+import com.evsuite.chargepilot.route.RouteGeometry
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
@@ -37,9 +39,11 @@ import java.util.concurrent.Executors
  *
  * The route is the part the car will not give. CP-040 proved the head unit publishes a remaining
  * distance and nothing else — no shape, no elevation — so a route with a profile comes from
- * OpenRouteService with the driver's own key (CP-043, CP-047). Two requests per plan: one to turn
- * what was typed into coordinates, one for the route. Both are driver actions; nothing here is
- * on a timer, because 2000 requests a day is generous for a driver and an afternoon for a clock.
+ * OpenRouteService with the driver's own key (CP-043, CP-047). At most three requests per plan:
+ * one to turn what was typed into coordinates, one for the route, and — only when a stop is
+ * needed and a charger key is configured — one for the chargers near where that stop falls
+ * (CP-048). All of them are driver actions; nothing here is on a timer, because 2000 requests a
+ * day is generous for a driver and an afternoon for a clock.
  *
  * Parked-only. It takes a keyboard, and the answer is a decision about a trip rather than
  * something to read at 110.
@@ -52,9 +56,10 @@ class ChargeStopActivity : AppCompatActivity() {
         Thread(runnable, "chargepilot-charge-stop")
     }
 
-    /** Two, because ORS counts directions and geocoding against separate allowances. */
+    /** One per service: three separate allowances, and a shared counter would refuse the wrong call. */
     private val directions = RoutingTransport()
     private val geocode = RoutingTransport(OrsGeocode.quota())
+    private val chargers = RoutingTransport(OpenChargeMap.quota())
 
     private var recorder: TripRecordingService? = null
     private var bound = false
@@ -240,9 +245,15 @@ class ChargeStopActivity : AppCompatActivity() {
             val route = (result as? RoutingTransport.Result.Ok)
                 ?.let { OrsDirections.parse(it.body).firstOrNull() }
             val plan = route?.let { ChargeStopPlan.of(socPercent, it.distanceKm, effective) }
+            val stop = plan as? ChargeStopPlan.Plan.Stop
+            val charger = if (route != null && stop != null) {
+                findCharger(route, stop.afterKm, socPercent, effective)
+            } else {
+                null
+            }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(place, route, plan, effective)
+                render(place, route, plan, effective, charger)
                 announce(
                     when {
                         result is RoutingTransport.Result.Refused -> refusal(result)
@@ -254,16 +265,59 @@ class ChargeStopActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * The last charger reachable before the reserve floor, on the worker thread that already
+     * has the route.
+     *
+     * Only the stretch of road where a stop could fall is sent — [OpenChargeMap.WINDOW_KM] of it
+     * — and never the trip. The charger service has no business knowing where the driver started
+     * or where they are going, and CP-048 is where that boundary is argued.
+     */
+    private fun findCharger(
+        route: OrsDirections.Route,
+        afterKm: Double,
+        socPercent: Double?,
+        rate: SocRate?,
+    ): Found? {
+        val credentials = RoutingCredentials.readCharger(this) ?: return null
+        val window = RouteGeometry.window(
+            route.points,
+            (afterKm - OpenChargeMap.WINDOW_KM).coerceAtLeast(0.0),
+            afterKm,
+        )
+        if (window.size < 2) return null
+        val result = chargers.get(credentials, OpenChargeMap.PATH, OpenChargeMap.query(window))
+        val body = (result as? RoutingTransport.Result.Ok)?.body ?: return null
+        return OpenChargeMap.parse(body, MIN_POWER_KW)
+            .mapNotNull { charger ->
+                val alongKm = RouteGeometry.distanceAlongKm(
+                    route.points,
+                    charger.longitude,
+                    charger.latitude,
+                    OpenChargeMap.CORRIDOR_KM,
+                ) ?: return@mapNotNull null
+                if (alongKm > afterKm) return@mapNotNull null
+                val arrival = ChargeStopPlan.of(socPercent, alongKm, rate) as? ChargeStopPlan.Plan.NoStop
+                Found(charger, alongKm, arrival?.arrivalPercent)
+            }
+            // The last one before the floor, not the nearest: the nearest wastes the range the
+            // car still has, and this is the one the ticket asked for.
+            .maxByOrNull { it.alongKm }
+    }
+
     private fun render(
         place: OrsGeocode.Place,
         route: OrsDirections.Route?,
         plan: ChargeStopPlan.Plan?,
         rate: SocRate?,
+        charger: Found?,
     ) {
         if (route == null || plan == null) {
             binding.chargeStopPlan.visibility = View.GONE
             binding.chargeStopDetail.visibility = View.GONE
             binding.chargeStopAttribution.visibility = View.GONE
+            binding.chargerPlace.visibility = View.GONE
+            binding.chargerSource.visibility = View.GONE
             return
         }
         binding.chargeStopPlan.visibility = View.VISIBLE
@@ -299,10 +353,63 @@ class ChargeStopActivity : AppCompatActivity() {
             rate?.let { format(it.percentPerKm, "%.3f") } ?: getString(R.string.value_unavailable),
         )
 
+        renderCharger(plan, charger)
+
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
         binding.chargeStopAttribution.visibility =
             if (route.attribution == null) View.GONE else View.VISIBLE
         binding.chargeStopAttribution.text = route.attribution
+    }
+
+    /**
+     * Where to stop, and how much to trust it.
+     *
+     * A charger record is never rendered as a fact. Its provider and the date it was last
+     * confirmed are on their own line under it, because a dataset is wrong the day it is
+     * published and the driver is the one who finds out.
+     */
+    private fun renderCharger(plan: ChargeStopPlan.Plan, charger: Found?) {
+        if (plan !is ChargeStopPlan.Plan.Stop) {
+            binding.chargerPlace.visibility = View.GONE
+            binding.chargerSource.visibility = View.GONE
+            return
+        }
+        binding.chargerPlace.visibility = View.VISIBLE
+        if (charger == null) {
+            binding.chargerSource.visibility = View.GONE
+            binding.chargerPlace.text = if (RoutingCredentials.isChargerConfigured(this)) {
+                getString(R.string.charge_stop_charger_none)
+            } else {
+                getString(R.string.charge_stop_charger_absent)
+            }
+            return
+        }
+        val place = getString(
+            R.string.charge_stop_charger,
+            charger.charger.name,
+            format(charger.alongKm, "%.0f"),
+            charger.charger.powerKw?.let { format(it, "%.0f") }
+                ?: getString(R.string.value_unavailable),
+            charger.charger.connectors.joinToString(", "),
+        )
+        val arrival = charger.arrivalPercent
+            ?.let { getString(R.string.charge_stop_charger_arrival, format(it, "%.0f")) }
+        val working = if (charger.charger.operational == false) {
+            getString(R.string.charge_stop_charger_not_operational)
+        } else {
+            null
+        }
+        binding.chargerPlace.text = listOfNotNull(place, arrival, working).joinToString("\n")
+
+        // Open Charge Map's terms require the data provider's own attribution, visible to the
+        // driver: half the dataset is imported and is not OCM's to license.
+        val provider = charger.charger.operator
+            ?: charger.charger.dataProvider
+            ?: getString(R.string.value_unavailable)
+        binding.chargerSource.visibility = View.VISIBLE
+        binding.chargerSource.text = charger.charger.verifiedAt?.let {
+            getString(R.string.charge_stop_charger_source, provider, it.take(10))
+        } ?: getString(R.string.charge_stop_charger_source_undated, provider)
     }
 
     /**
@@ -362,7 +469,20 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun format(value: Double, pattern: String): String =
         String.format(Locale.getDefault(), pattern, value)
 
+    /** A charger, where it falls on this route, and the charge left on reaching it. */
+    private data class Found(
+        val charger: OpenChargeMap.Charger,
+        val alongKm: Double,
+        val arrivalPercent: Double?,
+    )
+
     private companion object {
         const val HISTORY_FILE = "trips.json"
+
+        /**
+         * Below this a mid-route stop is not a stop, it is an overnight. Not a driver setting
+         * yet — CP-048 asked for one and this is the constant standing in for it.
+         */
+        const val MIN_POWER_KW = 22.0
     }
 }

@@ -271,4 +271,18 @@ Consommation %6$s %% par km</string>
     <string name="routing_refused_server_minute">Le service de routage limite le débit de cette clé. Réessayez dans un instant.</string>
     <string name="routing_refused_server">Le service de routage a refusé la requête (%1$s).</string>
     <string name="routing_refused_unreadable">La réponse était trop volumineuse ou illisible : elle a été écartée.</string>
+
+    <!-- CP-048 jeu de données des bornes -->
+    <string name="routing_hint_charger_key">Clé d\u2019API Open Charge Map (facultative)</string>
+    <string name="routing_helper_charger_key">Une seconde clé gratuite, obtenue sur openchargemap.org. Sans elle, le plan dit quand s\u2019arrêter, pas où.</string>
+    <string name="routing_charger_configured">Recherche de bornes configurée.</string>
+    <string name="routing_charger_absent">Pas de clé bornes : le plan dira quand s\u2019arrêter, pas où.</string>
+    <string name="charge_stop_charger_searching">Recherche d\u2019une borne sur le trajet\u2026</string>
+    <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
+    <string name="charge_stop_charger_absent">Ajoutez une clé Open Charge Map pour savoir où vous arrêter.</string>
+    <string name="charge_stop_charger">%1$s\u2009· à %2$s km · %3$s kW · %4$s</string>
+    <string name="charge_stop_charger_arrival">Environ %1$s %% restants à l\u2019arrivée sur place.</string>
+    <string name="charge_stop_charger_source">%1$s · dernière confirmation %2$s. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
+    <string name="charge_stop_charger_source_undated">%1$s · aucune date de confirmation. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
+    <string name="charge_stop_charger_not_operational">L\u2019enregistrement indique que cette borne ne fonctionne pas.</string>
 </resources>
