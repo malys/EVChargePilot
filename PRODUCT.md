@@ -20,14 +20,17 @@ completed trips on the vehicle's centre display.
 
 EVChargePilot presents available battery, range, motion, temperature and climate readings
 without replacing missing data with zero. It records local trip summaries and presents its
-current adaptive-range model as an estimate with an uncertainty band. Arrival-SOC forecasts
-remain future work.
+current adaptive-range model as an estimate with an uncertainty band. It forecasts the charge
+on arrival from the head unit's own route and the driver's recorded consumption, with a band,
+and refuses the figure rather than showing one too wide to act on.
 
 ## Positioning
 
 The product runs directly on the MG4 head unit, reads through the shared firmware-aware
-EVHardware layer, works offline, and distinguishes measured, estimated and unavailable
-values throughout the interface.
+EVHardware layer, and distinguishes measured, estimated and unavailable values throughout
+the interface. Everything it does today it does with no network connection: telemetry,
+trips, forecasts and exports are local. Route planning is the one capability that will
+change that, and it is opt-in, driver-configured and confined to the route request itself.
 
 ## Operating Context
 
@@ -37,16 +40,21 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 
 ## Capabilities and Constraints
 
-- Read-only vehicle access; no setting writes, remote control, overlay or network capability.
+- Read-only vehicle access; no setting writes, remote control or overlay.
+- No network and no location capability in any published build to date. Both were approved on
+  2026-09-04 for route planning (CP-043) and are declared only in the release that uses them.
+  What will then leave the car is a route request — origin, destination, road profile — to a
+  host the driver configures. Trip history, evidence, diagnostics, charge, range and speed
+  never leave the car by any path the app controls.
 - Vehicle-reported SOC, range and speed, plus an independently nullable thermal/climate block.
 - Battery power and temperature remain hidden until EVHardware's exact-firmware evidence
   catalogue validates their units and semantics.
 - Automatic foreground trip detection, bounded atomic trip history and a bounded sample track.
 - Explicitly estimated adaptive range; no estimate is rendered as a vehicle measurement.
 - App-private CSV/JSON trip export and parked-only bounded diagnostic export to removable USB.
-- Stable and unstable packages install side by side; neither contains an updater or network
-  capability.
-- Arrival SOC, charger routing and energy-source attribution are deliberately out of the MVP.
+- Stable and unstable packages install side by side; neither contains an updater.
+- Arrival charge is answered from the head unit's own guidance and the driver's recorded
+  trips, offline. Charger routing and energy-source attribution stay out of the MVP.
 
 ## Brand Commitments
 
@@ -66,7 +74,8 @@ EVChargePilot does not copy their identifiers or reinterpret their units.
 - Measurement and estimation must never look interchangeable.
 - The road gets attention before the interface.
 - Vehicle access belongs to EVHardware.
-- Offline and read-only are the default capability boundary.
+- Read-only is the capability boundary; offline is the default, and leaving it is a product
+  decision taken in the open, never an implementation detail.
 
 ## Accessibility & Inclusion
 

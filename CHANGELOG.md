@@ -4,6 +4,21 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Changed
+
+- **"Works offline" stopped being true in one direction only, and the documents say so.**
+  Network and location were approved for route planning, which retires the first line of this
+  app's safety argument — an app that cannot open a socket cannot exfiltrate a trip history, and
+  that property came free from not declaring a permission. `PRODUCT.md` now states the boundary
+  as it is rather than as it was: everything shipped so far is local, a route request is the one
+  thing that will ever leave, and it carries an origin, a destination and a road profile to a
+  host the driver configures — never a trip, an evidence capture, a diagnostic bundle, a charge
+  or an identifier. The three permissions are in the allowlist with a security note each and in
+  **no manifest**: approval and declaration are different statements, and nothing in the app can
+  use either capability until the routing client exists. Engine chosen (OpenRouteService, key
+  entered by the driver, because a key inside a published APK is not a secret), transport rules
+  written down, security gate re-run green.
+
 ### Fixed
 
 - **Trip distances were 3.6× too long.** Speed is read through EVHardware, which converted a

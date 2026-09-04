@@ -8,3 +8,20 @@ android.car.permission.CAR_VENDOR_EXTENSION
 # Install-time permissions, no vehicle access, no network.
 android.permission.FOREGROUND_SERVICE
 android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+# Reviewed and approved 2026-09-04 (CP-043), NOT YET DECLARED in any manifest.
+# Approval and declaration are different statements: this file says a permission passed
+# security review, the manifest says the shipped APK asks for it. These three land with
+# CP-042, in the same commit as the code that uses them, and not before.
+# Route requests to a driver-configured routing host. https and a host allowlist on the
+# initial URL and every redirect hop. Origin, destination and profile leave the car;
+# nothing else ever does. See analysis/CP-043_network_and_location.md.
+android.permission.INTERNET
+# Route origin and altitude. Runtime request from a parked screen the driver reaches,
+# never at start and never from a service; refusal falls back to the CP-040 route source
+# with the forecast intact. Coarse location is insufficient: it snaps origins to the wrong
+# side of a junction and carries no usable altitude.
+android.permission.ACCESS_FINE_LOCATION
+# Only if a service ever reads position while backgrounded. Nothing does today. The
+# foreground type mask stays derived from permissions held at runtime, never from the
+# manifest.
+android.permission.FOREGROUND_SERVICE_LOCATION
