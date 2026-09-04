@@ -437,6 +437,14 @@
                 android:layout_height="@dimen/touch_target"
                 android:layout_marginTop="@dimen/spacing_sm"
                 android:text="@string/action_arrival_forecast" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chargeStopAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/action_charge_stop" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

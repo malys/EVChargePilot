@@ -218,4 +218,61 @@
 This charge reaches about %4$s at that rate</string>
     <string name="arrival_source_trips">your recorded trips</string>
     <string name="arrival_source_range">the vehicle’s own range</string>
+
+    <!-- CP-042 / CP-044 / CP-047: routing key, destination search, charging stop. -->
+    <string name="action_charge_stop">Charging stop</string>
+    <string name="charge_stop_title">Charging stop</string>
+    <string name="charge_stop_action_settings">Routing key</string>
+    <string name="charge_stop_action_search">Search</string>
+    <string name="charge_stop_hint_destination">Where are you going?</string>
+    <string name="charge_stop_helper_destination">Searched only when you tap. Nothing but the place and the car’s position leaves the car.</string>
+    <string name="charge_stop_idle">Parked. Type a destination to plan the stop.</string>
+    <string name="charge_stop_moving">Planning is refused while the vehicle is moving.</string>
+    <string name="charge_stop_speed_unavailable">Planning is refused until vehicle speed is readable.</string>
+    <string name="charge_stop_not_configured">No routing key yet. Add one under “Routing key” — none ships inside the app.</string>
+    <string name="charge_stop_destination_missing">Type a destination first.</string>
+    <string name="charge_stop_searching">Looking up that place…</string>
+    <string name="charge_stop_no_results">No place matched. A fuller address usually finds it.</string>
+    <string name="charge_stop_choose">Choose the one you meant.</string>
+    <string name="charge_stop_routing">Asking for the route…</string>
+    <string name="charge_stop_ready">Route received.</string>
+    <string name="charge_stop_no_route">No usable route came back. Nothing is shown rather than half a route.</string>
+    <string name="charge_stop_no_position">No recent position. The car has produced no fix in the last two minutes.</string>
+    <string name="charge_stop_plan_none">No stop needed · about %1$s %% left on arrival, %2$s %% above the reserve</string>
+    <string name="charge_stop_plan_stop">Charge after about %1$s km (± %2$s km)</string>
+    <string name="charge_stop_refused_charge">Charge is unreadable, so there is nothing to plan from.</string>
+    <string name="charge_stop_refused_route">No route length to plan against.</string>
+    <string name="charge_stop_refused_rate">No usable rate yet. Record a few trips and this fills in.</string>
+    <string name="charge_stop_refused_band">Too uncertain over this distance to be worth acting on.</string>
+    <string name="charge_stop_detail">%1$s
+%2$s km · %3$d min · climb %4$s m · descent %5$s m
+Spending %6$s %% per km</string>
+    <string name="routing_title">Routing key</string>
+    <string name="routing_hint_key">OpenRouteService API key</string>
+    <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>
+    <string name="routing_desc_toggle_key">Show or hide the key</string>
+    <string name="routing_hint_base_url">Routing service (https)</string>
+    <string name="routing_helper_base_url">Leave as it is for openrouteservice.org, or point it at your own instance.</string>
+    <string name="routing_action_save">Save</string>
+    <string name="routing_action_import">Import from USB</string>
+    <string name="routing_action_clear">Remove</string>
+    <string name="routing_configured">Configured · %1$s</string>
+    <string name="routing_absent">Not configured. Enter a key, or import one from a USB stick.</string>
+    <string name="routing_moving">Configuration is refused while the vehicle is moving.</string>
+    <string name="routing_speed_unavailable">Configuration is refused until vehicle speed is readable.</string>
+    <string name="routing_saved">Key saved. It is stored encrypted and never shown again.</string>
+    <string name="routing_cleared">Key removed from this car.</string>
+    <string name="routing_key_missing">Enter a key, or import one from a USB stick.</string>
+    <string name="routing_base_url_refused">Address refused: %1$s. It must be https, with no credentials and no query.</string>
+    <string name="routing_import_none">No configuration file found. Put one on a USB stick with a line reading ors_api_key = your-key.</string>
+    <string name="routing_import_done">Imported from %1$s.</string>
+    <string name="routing_privacy">Only the destination you type, the car’s position and the road profile ever leave the car. No trip, charge, speed, diagnostic bundle or identifier is sent anywhere. The key is stored encrypted, never written to a log and never included in a diagnostic export.</string>
+    <string name="routing_refused_busy">A request is already in flight. Wait for it.</string>
+    <string name="routing_refused_quota_minute">Too many requests just now. Try again in %1$s s.</string>
+    <string name="routing_refused_quota_day">Today’s routing allowance is spent. It rolls 24 h after the first request.</string>
+    <string name="routing_refused_transport">The request could not be made safely and was not sent.</string>
+    <string name="routing_refused_server_day">The routing service says the daily allowance for this key is spent.</string>
+    <string name="routing_refused_server_minute">The routing service is rate-limiting this key. Try again shortly.</string>
+    <string name="routing_refused_server">The routing service refused the request (%1$s).</string>
+    <string name="routing_refused_unreadable">The answer was too large or unreadable and was discarded.</string>
 </resources>

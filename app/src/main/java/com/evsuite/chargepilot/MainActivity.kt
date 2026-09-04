@@ -103,6 +103,9 @@ class MainActivity : AppCompatActivity() {
         binding.arrivalForecastAction.setOnClickListener {
             startActivity(Intent(this, ArrivalForecastActivity::class.java))
         }
+        binding.chargeStopAction.setOnClickListener {
+            startActivity(Intent(this, ChargeStopActivity::class.java))
+        }
         renderUnavailable()
         requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {

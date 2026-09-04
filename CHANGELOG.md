@@ -4,6 +4,32 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **"Do I need to charge on this trip, and in how many kilometres" — the sentence this app was
+  described by, now on a screen.** Type a destination while parked, choose which of the answers
+  you meant, and the app plans to a reserve rather than to zero: either the charge left on
+  arrival with the margin above that reserve, or the distance at which to stop. The stop
+  distance is computed at the top of the rate band, not its middle — being told to charge
+  earlier than necessary costs minutes, being told to charge later costs a tow truck — and a
+  plan too uncertain to act on is refused instead of shown. The arithmetic is `ChargeStopPlan`
+  in EVHardware, seven JVM tests, and it has no idea a network exists.
+- **A routing key that is yours.** No key ships in the APK, so there is a screen to enter one
+  and a USB import for the realistic case: this head unit's picker answers "no apps can perform
+  this action", so a `key = value` file is found by scanning the stick and parsing it, the same
+  format and the same reasoning as EVABRPUploader. The key is stored through the Android
+  keystore, is never displayed back, never logged, and never reaches a diagnostic export — the
+  exporter reads no preferences at all, which is a stronger guarantee than a filter.
+- **One place, and only one, where this app opens a socket.** `https` on the first URL and on
+  every redirect hop, checked against the host the driver configured, with redirects not
+  followed by the platform; the key travels in an `Authorization` header and never in a query,
+  even where the service documents a query; timeouts, a 2 MB cap, single flight, and a local
+  quota counter so the app refuses before the server does. An `https` → `http` `Location` is a
+  man in the middle and is refused, not followed.
+- **Elevation, which the car will never give.** The route comes back as a 3D geometry, so climb
+  and descent are shown with the distance and duration, and CP-050 has something to model with.
+  OpenStreetMap under ODbL: the service's attribution is displayed wherever a route is.
+
 ### Changed
 
 - **"Works offline" stopped being true in one direction only, and the documents say so.**

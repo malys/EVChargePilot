@@ -50,10 +50,13 @@ It does not write to the vehicle and does not contain network or update code.
 - Energy and regeneration integration from the shared EVHardware power convention.
 - Parked-only, bounded diagnostic/evidence ZIP to an explicitly chosen removable USB volume.
 - Atomic, app-private trip history and in-app crash diagnostics.
+- Charge on arrival from the head unit's own guidance, with no network and no key.
+- A parked-only charging-stop plan: type a destination, and the app answers whether the trip
+  needs a charging stop and in how many kilometres. It needs an OpenRouteService key you supply
+  (see [Configuration](#configuration)); without one, every other screen still works.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
-never zero. Arrival SOC, charger routing and energy-source attribution remain outside this
-initial milestone.
+never zero. Charger data and energy-source attribution remain outside this initial milestone.
 
 ## Requirements
 
@@ -138,6 +141,34 @@ self-update.
 Automatic trip detection is enabled by default. Its switch, and the manual start/stop action,
 can be changed only while the vehicle reports zero speed. If speed is unavailable, the controls
 fail closed and the dashboard explains why.
+
+### Routing key
+
+The charging-stop screen needs a routing service, and **no key ships inside the APK** — a
+published APK is a zip, so a key in it is not a secret. Get a free key from
+[openrouteservice.org](https://openrouteservice.org/), then either type it under
+**Charging stop → Routing key**, or drop a text file on a USB stick and use **Import from USB**:
+
+```
+# EVChargePilot routing
+ors_api_key  = your-key-here
+ors_base_url = https://api.openrouteservice.org
+```
+
+The file may have any name; it is found by its contents. `ors_base_url` is optional and exists
+so a self-hosted instance works without a code change — it must be `https`, with no credentials
+and no query. The key is stored encrypted through the Android keystore, is never displayed
+again, never written to a log, and never included in a diagnostic export.
+
+Free-tier allowances, as published by ORS: 2000 directions requests a day and 40 in any rolling
+60 seconds, counted from your first request rather than from midnight. The app counts its own
+requests and refuses before the server does, and every request follows a driver action — nothing
+is on a timer.
+
+What leaves the car is the destination you type, the car's position and the road profile, to
+the host configured above. Never a trip, an evidence capture, a diagnostic bundle, a charge
+reading, a speed or an identifier. Route data comes from OpenStreetMap under ODbL and the
+service's attribution is displayed with every route.
 
 ## Building
 

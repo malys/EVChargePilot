@@ -56,6 +56,11 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 - Stable and unstable packages install side by side; neither contains an updater.
 - Arrival charge is answered from the head unit's own guidance and the driver's recorded
   trips, offline. Charger routing and energy-source attribution stay out of the MVP.
+- A parked-only charging-stop screen answers whether a typed destination needs a stop and in
+  how many kilometres, planning to a reserve rather than to zero and refusing a plan too
+  uncertain to act on. It needs a routing key the driver supplies — typed, or imported from a
+  file on a USB stick — kept encrypted on the device and shown back to nobody. Without a key
+  every other screen is unchanged.
 
 ## Brand Commitments
 

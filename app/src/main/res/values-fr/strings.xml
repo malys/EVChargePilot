@@ -214,4 +214,61 @@
 Cette charge atteint environ %4$s à ce rythme</string>
     <string name="arrival_source_trips">vos trajets enregistrés</string>
     <string name="arrival_source_range">l’autonomie du véhicule</string>
+
+    <!-- CP-042 / CP-044 / CP-047 : clé de routage, recherche de destination, arrêt de charge. -->
+    <string name="action_charge_stop">Arrêt de charge</string>
+    <string name="charge_stop_title">Arrêt de charge</string>
+    <string name="charge_stop_action_settings">Clé de routage</string>
+    <string name="charge_stop_action_search">Rechercher</string>
+    <string name="charge_stop_hint_destination">Où allez-vous ?</string>
+    <string name="charge_stop_helper_destination">Recherché uniquement quand vous appuyez. Seuls le lieu et la position du véhicule sortent de la voiture.</string>
+    <string name="charge_stop_idle">Véhicule stationné. Saisissez une destination pour planifier l’arrêt.</string>
+    <string name="charge_stop_moving">La planification est refusée pendant que le véhicule roule.</string>
+    <string name="charge_stop_speed_unavailable">La planification est refusée tant que la vitesse du véhicule est illisible.</string>
+    <string name="charge_stop_not_configured">Aucune clé de routage. Ajoutez-en une via « Clé de routage » : aucune n’est livrée dans l’application.</string>
+    <string name="charge_stop_destination_missing">Saisissez d’abord une destination.</string>
+    <string name="charge_stop_searching">Recherche du lieu…</string>
+    <string name="charge_stop_no_results">Aucun lieu trouvé. Une adresse plus complète aboutit généralement.</string>
+    <string name="charge_stop_choose">Choisissez celui que vous vouliez.</string>
+    <string name="charge_stop_routing">Demande de l’itinéraire…</string>
+    <string name="charge_stop_ready">Itinéraire reçu.</string>
+    <string name="charge_stop_no_route">Aucun itinéraire exploitable. Rien n’est affiché plutôt qu’un demi-itinéraire.</string>
+    <string name="charge_stop_no_position">Aucune position récente. Le véhicule n’a fourni aucun point depuis deux minutes.</string>
+    <string name="charge_stop_plan_none">Aucun arrêt nécessaire · environ %1$s %% à l’arrivée, %2$s %% au-dessus de la réserve</string>
+    <string name="charge_stop_plan_stop">Recharger après environ %1$s km (± %2$s km)</string>
+    <string name="charge_stop_refused_charge">La charge est illisible : rien ne peut être planifié.</string>
+    <string name="charge_stop_refused_route">Aucune longueur d’itinéraire sur laquelle planifier.</string>
+    <string name="charge_stop_refused_rate">Pas encore de taux exploitable. Enregistrez quelques trajets et ceci se remplira.</string>
+    <string name="charge_stop_refused_band">Trop incertain sur cette distance pour être exploitable.</string>
+    <string name="charge_stop_detail">%1$s
+%2$s km · %3$d min · montée %4$s m · descente %5$s m
+Consommation %6$s %% par km</string>
+    <string name="routing_title">Clé de routage</string>
+    <string name="routing_hint_key">Clé d’API OpenRouteService</string>
+    <string name="routing_helper_key">Votre propre clé, obtenue sur openrouteservice.org. Aucune n’est livrée dans l’application.</string>
+    <string name="routing_desc_toggle_key">Afficher ou masquer la clé</string>
+    <string name="routing_hint_base_url">Service de routage (https)</string>
+    <string name="routing_helper_base_url">Laissez tel quel pour openrouteservice.org, ou pointez vers votre propre instance.</string>
+    <string name="routing_action_save">Enregistrer</string>
+    <string name="routing_action_import">Importer depuis USB</string>
+    <string name="routing_action_clear">Supprimer</string>
+    <string name="routing_configured">Configuré · %1$s</string>
+    <string name="routing_absent">Non configuré. Saisissez une clé ou importez-la depuis une clé USB.</string>
+    <string name="routing_moving">La configuration est refusée pendant que le véhicule roule.</string>
+    <string name="routing_speed_unavailable">La configuration est refusée tant que la vitesse du véhicule est illisible.</string>
+    <string name="routing_saved">Clé enregistrée. Elle est stockée chiffrée et n’est plus jamais affichée.</string>
+    <string name="routing_cleared">Clé supprimée de ce véhicule.</string>
+    <string name="routing_key_missing">Saisissez une clé, ou importez-la depuis une clé USB.</string>
+    <string name="routing_base_url_refused">Adresse refusée : %1$s. Elle doit être en https, sans identifiants ni paramètres.</string>
+    <string name="routing_import_none">Aucun fichier de configuration trouvé. Placez sur une clé USB un fichier contenant la ligne ors_api_key = votre-clé.</string>
+    <string name="routing_import_done">Importé depuis %1$s.</string>
+    <string name="routing_privacy">Seuls la destination saisie, la position du véhicule et le profil de la route sortent de la voiture. Aucun trajet, aucune charge, aucune vitesse, aucun rapport de diagnostic ni identifiant n’est transmis. La clé est stockée chiffrée, n’est jamais journalisée et n’apparaît dans aucun export de diagnostic.</string>
+    <string name="routing_refused_busy">Une requête est déjà en cours. Attendez sa réponse.</string>
+    <string name="routing_refused_quota_minute">Trop de requêtes en peu de temps. Réessayez dans %1$s s.</string>
+    <string name="routing_refused_quota_day">Le quota de routage du jour est épuisé. Il se renouvelle 24 h après la première requête.</string>
+    <string name="routing_refused_transport">La requête ne pouvait pas être émise en sécurité : elle n’a pas été envoyée.</string>
+    <string name="routing_refused_server_day">Le service de routage indique que le quota quotidien de cette clé est épuisé.</string>
+    <string name="routing_refused_server_minute">Le service de routage limite le débit de cette clé. Réessayez dans un instant.</string>
+    <string name="routing_refused_server">Le service de routage a refusé la requête (%1$s).</string>
+    <string name="routing_refused_unreadable">La réponse était trop volumineuse ou illisible : elle a été écartée.</string>
 </resources>

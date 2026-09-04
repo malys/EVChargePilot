@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THESIS: one sentence a driver acts on — charge in N km, or arrive with this much left.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
+  STORY: where are you going, which of these did you mean, then the stop and why it is uncertain.
+  FIRST VIEWPORT: fixed top context and Back action; the plan owns the centre once it exists.
+  FORM: parked planning sheet over the arrival forecast; the route is the only thing added.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/charge_stop_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/routingSettingsAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="240dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:text="@string/charge_stop_action_settings" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg">
+
+            <TextView
+                android:id="@+id/chargeStopStatus"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:accessibilityLiveRegion="polite"
+                android:gravity="center"
+                android:textAppearance="@style/Text.EV.Body" />
+
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/destinationLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/charge_stop_hint_destination"
+                    app:helperText="@string/charge_stop_helper_destination"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/destinationInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/searchAction"
+                    style="@style/Widget.EVChargePilot.Button"
+                    android:layout_width="280dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:text="@string/charge_stop_action_search" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/destinationResults"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/chargeStopPlan"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Title"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/chargeStopDetail"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:lineSpacingExtra="6dp"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/chargeStopAttribution"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

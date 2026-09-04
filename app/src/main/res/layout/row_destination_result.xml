@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One geocoding answer, as a target big enough to hit from the driver's seat. -->
+<com.google.android.material.button.MaterialButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.EV.Button.Outlined"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/touch_target"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:gravity="center_vertical|start"
+    android:paddingStart="@dimen/spacing_lg"
+    android:paddingEnd="@dimen/spacing_lg" />

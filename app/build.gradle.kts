@@ -93,5 +93,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
     implementation(libs.gson)
+    implementation(libs.androidx.security.crypto)
     testImplementation(libs.junit)
 }
