@@ -139,29 +139,39 @@ Never copy a conclusion from one row into another.
 
 ## Per-signal conclusions
 
-Allowed availability values: `validated`, `unavailable`, `intermittent`, `not tested`. Units and
-semantics must be observed or remain `unknown`; do not infer them from field names.
+Allowed availability values: `validated`, `available`, `never published`, `intermittent`,
+`not tested`. Units and semantics must be observed or remain `unknown`; do not infer them from
+field names.
+
+**What the 2026-09-04 evidence does and does not cover.** Three bundles, all captured stationary
+with the HVAC off, 51 samples between them. That is enough to say whether a signal publishes at
+all and enough to settle the two unit questions below, and it is *not* enough to state an update
+cadence or a working range for anything: nothing changed while the car stood still. Rows below
+say `not observed` where that is the honest answer rather than guessing from one value.
+
+The scenarios the protocol asks for and this evidence does not have: HVAC on max, urban
+accelerate/regen, motorway at 110 and 130, a gradient, and a charging session.
 
 | Signal | Generation | Availability | Unit/semantics | Sign | Median update | Valid range | Evidence files |
 |---|---|---|---|---|---|---|---|
-| socPercent | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| rangeKm | pending | not tested | unknown | n/a | unknown | unknown | pending |
+| socPercent | SWI68-29958-1300R67 | available | percent of charge | n/a | not observed (0 changes, stationary capture) | 56,1 % held; full range not exercised | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| rangeKm | SWI68-29958-1300R67 | available | km, the vehicle's own remaining range | n/a | not observed (0 changes, stationary capture) | 278 km at 56,1 %; not exercised | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | speedKmh | SWI68-29958-1300R67 | validated | **km/h at the property** — not m/s as AAOS specifies | magnitude taken; signed in reverse | 1000 ms (sampler-bound) | 0 at standstill; 34–36 km/h mean over two town drives | 2026-09-04 bundle: `trips-SWI68-*.json`, `evidence-SWI68-*.json` |
-| batteryPowerKw | pending | not tested | unknown | unknown | unknown | unknown | pending |
-| batteryTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| batteryEnergyKwh | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| batteryCapacityKwh | pending | not tested | unknown | n/a | unknown | unknown | pending |
+| batteryPowerKw | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| batteryTempCelsius | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| batteryEnergyKwh | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| batteryCapacityKwh | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | odometerKm | SWI68-29958-1300R67 | unavailable via `PERF_ODOMETER` | n/a | n/a | n/a | n/a | 2026-09-04 bundle: `no CarPropertyValue` on every read |
 | nav_adapter_odometer_km | SWI68-29958-1300R67 | validated | km, total mileage from `SaicNav` (adapter service, not `PERF_ODOMETER`) | n/a | getter, polled | 22564 km, stable at standstill | 2026-09-04 bundle: `evidence-SWI68-*.json` |
-| outsideTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| cabinTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| chargingStatus | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| chargePortConnected | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| parked | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| climate.powerOn | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| climate.acOn | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| climate.autoOn | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| climate.econOn | pending | not tested | unknown | n/a | unknown | unknown | pending |
+| outsideTempCelsius | SWI68-29958-1300R67 | available | °C | n/a | not observed (0 changes, stationary capture) | 39,5–40,0 °C, a car parked in the sun | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| cabinTempCelsius | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| chargingStatus | SWI68-29958-1300R67 | available | int; 0 while not charging | n/a | not observed (0 changes, stationary capture) | 0; charging session not captured | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| chargePortConnected | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| parked | SWI68-29958-1300R67 | available | boolean, from gear | n/a | not observed (0 changes, stationary capture) | true; gear transitions D→R→P seen in an earlier bundle | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| climate.powerOn | SWI68-29958-1300R67 | available | boolean | n/a | not observed (0 changes, stationary capture) | false; HVAC-on scenario not captured | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| climate.acOn | SWI68-29958-1300R67 | available | boolean | n/a | not observed (0 changes, stationary capture) | false; HVAC-on scenario not captured | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| climate.autoOn | SWI68-29958-1300R67 | available | boolean | n/a | not observed (0 changes, stationary capture) | false; HVAC-on scenario not captured | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| climate.econOn | SWI68-29958-1300R67 | available | boolean | n/a | not observed (0 changes, stationary capture) | false; HVAC-on scenario not captured | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | climate.recirculationOn | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | climate.fanLevel | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | climate.fanLevelMax | pending | not tested | unknown | n/a | unknown | unknown | pending |
@@ -222,3 +232,36 @@ SWI68 is listed.
 `getVehicleSpeedKmh`, so every telemetry upload from this car has carried a speed 3.6× too
 high. It picks the fix up with the next submodule bump; the history already sent to ABRP does
 not correct itself.
+
+## Verdict — 2026-09-04
+
+**CarPropertyManager is nearly silent on this car.** Of eleven probed energy properties, one
+answers: `PERF_VEHICLE_SPEED`. The other ten return `no CarPropertyValue` on every read, in
+every bundle. State of charge, range, outside temperature and the whole climate block do reach
+the app — through the SAIC vendor managers, not through the Android property layer. The
+firmware-aware layer is doing exactly the job it exists for.
+
+**Battery power is not pending, it is absent.** `EV_INSTANTANEOUS_CHARGE_RATE` is declared and
+never published on SWI68-29958-1300R67. Recorded in `EVHardware`'s
+`CarPropertyEvidence.isNeverPublished`, which is a different claim from "not validated yet" and
+reads differently to a driver: an unvalidated signal may start working, an absent one will not.
+
+Two consequences follow, and neither is a defeat:
+
+- The **CP-030 energy model can never train** from battery power on this generation. Anything
+  that needs kWh — consumption in kWh/100 km, the HVAC attribution, the post-trip breakdown —
+  stays unavailable here and must say so rather than showing a modelled number.
+- The **arrival forecast does not need it**. CP-041 takes a rate in percent of charge per
+  kilometre, from the vehicle's own range or from recorded trips, and both inputs read.
+
+**Two units were settled, and one bug found by settling them.** `PERF_VEHICLE_SPEED` reports
+km/h and was being converted a second time, inflating every recorded distance by 3.6 — a 2.4 km
+route stored as 8.46 km. `getRemainingDistance` on the navigation adapter reports metres. The
+independent reference for the first was the adapter's odometer, which reads where
+`PERF_ODOMETER` does not.
+
+**What this run did not cover.** HVAC on max, urban accelerate/regen, motorway at 110 and 130,
+a gradient, and a charging session. None of them can revive battery power — it is absent, not
+quiet — but they would establish the update cadence and working ranges the table leaves at
+`not observed`, and a charging session is the only way to characterise `chargingStatus` and
+`chargePortConnected`. Worth a follow-up run; not worth blocking anything on.
