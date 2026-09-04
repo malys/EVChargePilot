@@ -6,6 +6,7 @@ import android.os.Looper
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.evsuite.hardware.telemetry.EvidenceCapture
+import com.evsuite.hardware.saic.SaicNav
 import com.evsuite.hardware.telemetry.TelemetryEvidenceRecorder
 
 /**
@@ -27,6 +28,9 @@ internal object SignalEvidenceRecorder {
     private const val TAG = "EVChargePilot"
     private const val TICK_MS = 1_000L
 
+    /** Deliberately unlike the snapshot's `odometer_km`: a different service, a different read. */
+    private const val ADAPTER_ODOMETER_KM = "nav_adapter_odometer_km"
+
     private val ticker = Handler(Looper.getMainLooper())
     private var reader: EnergyTelemetryReader? = null
 
@@ -36,11 +40,33 @@ internal object SignalEvidenceRecorder {
     @Volatile
     private var running = false
 
+    @Volatile
+    private var startedAtMs: Long? = null
+
     val isRunning: Boolean get() = running
+
+    /** When this session's recording began, so a caller can tell which trips belong to it. */
+    val sessionStartedAtMs: Long? get() = startedAtMs
+
+    /**
+     * How far the adapter odometer moved during this session, or null when it never read.
+     *
+     * This is a distance nothing derived from speed, which is the whole point: see
+     * [SpeedScaleCheck].
+     */
+    fun adapterOdometerSpanKm(): Double? {
+        val evidence = capture().signals.firstOrNull { it.signal == ADAPTER_ODOMETER_KM }
+            ?: return null
+        val min = evidence.min ?: return null
+        val max = evidence.max ?: return null
+        return (max - min).takeIf { it >= 0.0 }
+    }
 
     fun start(context: Context) {
         if (running) return
         reader = EnergyTelemetryReader(context.applicationContext)
+        SaicNav.connect(context.applicationContext)
+        startedAtMs = System.currentTimeMillis()
         running = true
         ticker.removeCallbacks(tick)
         ticker.post(tick)
@@ -53,6 +79,28 @@ internal object SignalEvidenceRecorder {
 
     fun capture(): EvidenceCapture = synchronized(recorder) { recorder.capture() }
 
+    /**
+     * The odometer as the navigation adapter reports it, which is not where the snapshot's
+     * odometer comes from.
+     *
+     * `PERF_ODOMETER` answers nothing on this car, so a trip distance has had no independent
+     * check at all: it is integrated from speed, and if the speed scale is wrong the distance
+     * is wrong by exactly the same factor with nothing to contradict it. `SaicNav` reads a
+     * different service entirely, and its total mileage over a drive is a distance nobody
+     * derived from speed. The difference between the two settles the unit question without
+     * anyone watching a speedometer.
+     *
+     * Recorded under its own name so it is never mistaken for the vehicle property.
+     */
+    private fun recordAdapterOdometer() {
+        val km = runCatching { SaicNav.totalMileageKm() }
+            .onFailure { AppLogger.d(TAG, "adapter odometer failed: ${it.message}") }
+            .getOrNull()
+        synchronized(recorder) {
+            recorder.record(ADAPTER_ODOMETER_KM, km?.toDouble(), System.currentTimeMillis())
+        }
+    }
+
     private val tick = object : Runnable {
         override fun run() {
             val source = reader
@@ -64,6 +112,7 @@ internal object SignalEvidenceRecorder {
                     .getOrNull()
                     ?.let { sample -> synchronized(recorder) { recorder.record(sample) } }
             }
+            recordAdapterOdometer()
             ticker.postDelayed(this, TICK_MS)
         }
     }

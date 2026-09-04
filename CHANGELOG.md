@@ -6,6 +6,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The bundle answers the speed-unit question by itself.** A trip distance is integrated from
+  speed, so a wrong speed unit scales it by the same factor and nothing in the number says so —
+  a 2.4 km drive recorded as more than 7 km was the only symptom, and it needed somebody to
+  notice. The unstable signal recorder now also reads the navigation adapter's odometer, which
+  is not where the snapshot's odometer comes from and which nothing derives from speed. The trip
+  artifact carries the ratio between the two distances and names what it means: consistent, the
+  m/s factor applied twice, a disagreement that is neither, or too short a drive to tell.
+
 - **The unstable channel records its own evidence and the export carries all of it.** Validation
   had to be driven by hand: open a screen, arm a probe, remember a save button, then export —
   and the run that mattered most, the one where a probe heard nothing, was the one nobody

@@ -23,6 +23,8 @@ internal data class TripHistoryArtifact(
     val probe: String = PROBE,
     val savedAtMs: Long,
     val trips: Int,
+    /** The bundle's own answer to the speed-unit question, when a session can support one. */
+    val speedScaleCheck: SpeedScaleCheck.Result,
     val notes: List<String> = NOTES,
     val summaries: List<EnergyTripSummary>,
 ) {
@@ -44,14 +46,31 @@ internal data class TripHistoryArtifact(
             "distanceKm is integrated from speedKmh, so a wrong speed scale shows up here " +
                 "before anywhere else: divide distanceKm by durationMs to get the average " +
                 "speed the integration believed, and compare it with the drive.",
+            "The signal capture in the same bundle carries nav_adapter_odometer_km, read " +
+                "from the navigation adapter rather than from PERF_ODOMETER. Its span over a " +
+                "drive is a distance nothing derived from speed, so max minus min there " +
+                "against distanceKm here is the speed-scale check that needs no observer.",
         )
 
-        fun of(context: Context, nowMs: Long = System.currentTimeMillis()): TripHistoryArtifact {
+        fun of(
+            context: Context,
+            nowMs: Long = System.currentTimeMillis(),
+            sessionStartedAtMs: Long? = SignalEvidenceRecorder.sessionStartedAtMs,
+            odometerSpanKm: Double? = SignalEvidenceRecorder.adapterOdometerSpanKm(),
+        ): TripHistoryArtifact {
             val summaries = EnergyTripHistoryStore(File(context.filesDir, HISTORY_FILE))
                 .readSummaries()
+            // Only trips this session recorded can be compared against this session's odometer
+            // span. A trip from yesterday shares no clock with it.
+            val integratedKm = sessionStartedAtMs?.let { since ->
+                summaries.filter { it.endedAtMs >= since && it.distanceAvailable != false }
+                    .takeIf { it.isNotEmpty() }
+                    ?.sumOf { it.distanceKm }
+            }
             return TripHistoryArtifact(
                 savedAtMs = nowMs,
                 trips = summaries.size,
+                speedScaleCheck = SpeedScaleCheck.of(odometerSpanKm, integratedKm),
                 summaries = summaries.take(MAX_SUMMARIES),
             )
         }
