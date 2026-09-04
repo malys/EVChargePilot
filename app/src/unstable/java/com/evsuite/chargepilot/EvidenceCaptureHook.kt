@@ -44,7 +44,7 @@ object EvidenceCaptureHook {
             File(context.filesDir, NavGuidanceRecorder.EVIDENCE_DIRECTORY)
         )
         store.write(
-            NavGuidanceRecorder.artifact().toJson(),
+            NavGuidanceRecorder.artifact().toBoundedJson(),
             NavGuidanceProbeArtifact.KIND,
             firmware,
         )

@@ -68,3 +68,40 @@ class NavGuidanceProbeArtifactTest {
         traceComplete = traceComplete,
     )
 }
+
+class NavGuidanceProbeArtifactBoundTest {
+
+    private fun artifact(lines: Int, road: String) = NavGuidanceProbeArtifact.of(
+        savedAtMs = 1_700_000_000_000L,
+        firmware = "SWI68",
+        adapterBound = true,
+        listenerRegistered = true,
+        callbacks = lines,
+        census = mapOf(13 to lines),
+        censusBeyondCeiling = 0,
+        trace = List(lines) { "%5ds n=%-4d dist=%-8s road=%s".format(it, it, it * 10, road) },
+        traceComplete = true,
+    )
+
+    @Test fun `a full trace of accented road names still fits the export ceiling`() {
+        val json = artifact(300, "Avenue des Carabènes, Saint-Orens-de-Gam")
+            .toBoundedJson()
+        assertTrue(
+            "artifact must stay inside the exporter's per-file limit",
+            json.toByteArray(Charsets.UTF_8).size <= NavGuidanceProbeArtifact.MAX_ARTIFACT_BYTES,
+        )
+    }
+
+    @Test fun `a trace that has to be trimmed says so and keeps the end of the drive`() {
+        val json = artifact(300, "x".repeat(40)).toBoundedJson(maxBytes = 4_096)
+        assertTrue(json.toByteArray(Charsets.UTF_8).size <= 4_096)
+        assertTrue("trimming must mark the trace incomplete", json.contains("\"traceComplete\":false"))
+        // The last line of the drive is the one a forecast is judged on; it must survive.
+        assertTrue(json.contains("  299s"))
+    }
+
+    @Test fun `a short trace is left exactly as it was`() {
+        val full = artifact(5, "A61")
+        assertEquals(full.toJson(), full.toBoundedJson())
+    }
+}

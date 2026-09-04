@@ -150,7 +150,7 @@ internal object NavGuidanceRecorder {
     fun save(context: Context, nowMs: Long = System.currentTimeMillis()): File? {
         val firmware = FirmwareInfo.getGeneration().name
         return EvidenceCaptureFileStore(File(context.filesDir, EVIDENCE_DIRECTORY))
-            .write(artifact(nowMs).toJson(), NavGuidanceProbeArtifact.KIND, firmware)
+            .write(artifact(nowMs).toBoundedJson(), NavGuidanceProbeArtifact.KIND, firmware)
     }
 
     private fun Int?.show(): String = this?.toString() ?: DASH
