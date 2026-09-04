@@ -4,6 +4,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Trip distances were 3.6× too long.** Speed is read through EVHardware, which converted a
+  property this firmware already reports in km/h, so every integrated distance carried the same
+  factor: a 2.4 km town route was recorded as 8.46 km. Fixed in the library and picked up here;
+  trips already stored keep the distances they were recorded with.
+
 ### Added
 
 - **The bundle answers the speed-unit question by itself.** A trip distance is integrated from

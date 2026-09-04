@@ -146,12 +146,13 @@ semantics must be observed or remain `unknown`; do not infer them from field nam
 |---|---|---|---|---|---|---|---|
 | socPercent | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | rangeKm | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| speedKmh | pending | not tested | unknown | n/a | unknown | unknown | pending |
+| speedKmh | SWI68-29958-1300R67 | validated | **km/h at the property** — not m/s as AAOS specifies | magnitude taken; signed in reverse | 1000 ms (sampler-bound) | 0 at standstill; 34–36 km/h mean over two town drives | 2026-09-04 bundle: `trips-SWI68-*.json`, `evidence-SWI68-*.json` |
 | batteryPowerKw | pending | not tested | unknown | unknown | unknown | unknown | pending |
 | batteryTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | batteryEnergyKwh | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | batteryCapacityKwh | pending | not tested | unknown | n/a | unknown | unknown | pending |
-| odometerKm | pending | not tested | unknown | n/a | unknown | unknown | pending |
+| odometerKm | SWI68-29958-1300R67 | unavailable via `PERF_ODOMETER` | n/a | n/a | n/a | n/a | 2026-09-04 bundle: `no CarPropertyValue` on every read |
+| nav_adapter_odometer_km | SWI68-29958-1300R67 | validated | km, total mileage from `SaicNav` (adapter service, not `PERF_ODOMETER`) | n/a | getter, polled | 22564 km, stable at standstill | 2026-09-04 bundle: `evidence-SWI68-*.json` |
 | outsideTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | cabinTempCelsius | pending | not tested | unknown | n/a | unknown | unknown | pending |
 | chargingStatus | pending | not tested | unknown | n/a | unknown | unknown | pending |
@@ -193,3 +194,31 @@ permission to guess the sign.
 - [ ] Any conversion correction has a JVM test and changelog entries.
 - [ ] README firmware matrix matches the proven support set.
 - [ ] EVHardware `mise run check` and EVChargePilot `mise run check && mise run build` pass.
+
+## Speed unit — settled 2026-09-04
+
+`PERF_VEHICLE_SPEED` reports **km/h** on this firmware, not the metres per second AAOS
+specifies. `EVHardware.getVehicleSpeedKmh` multiplied every read by 3.6, so every distance
+integrated from speed was over by that factor.
+
+| Trip | Recorded | Duration | Implied average | ÷ 3.6 |
+|---|---|---|---|---|
+| 2026-09-03 20:30 | 7.69 km | 3 min 34 s | 129 km/h | 2.13 km at 36 km/h |
+| 2026-09-03 21:44 | 8.46 km | 4 min 06 s | 124 km/h | 2.35 km at 34 km/h |
+
+Both are the same 2.4 km town route (Auzielle → Saint-Orens-de-Gameville). 124 km/h over four
+minutes of town driving is not a reading anyone has to argue about, and the corrected figures
+land on the route's own length.
+
+The independent reference is `nav_adapter_odometer_km`: `PERF_ODOMETER` answers nothing on this
+car, but the navigation adapter's total mileage reads (22564 km), which is a distance nothing
+derives from speed. `SpeedScaleCheck` in the unstable channel now computes that ratio on every
+export, so the same class of error cannot go unnoticed again.
+
+Fixed in `EVHardware` `26b3d45` — the conversion is evidence-gated per generation, and only
+SWI68 is listed.
+
+**Carried over to the other apps.** `EVABRPUploader` reports speed to ABRP through the same
+`getVehicleSpeedKmh`, so every telemetry upload from this car has carried a speed 3.6× too
+high. It picks the fix up with the next submodule bump; the history already sent to ABRP does
+not correct itself.
