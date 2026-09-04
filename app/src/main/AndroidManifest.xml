@@ -72,6 +72,11 @@
             android:screenOrientation="landscape" />
 
         <activity
+            android:name=".ArrivalForecastActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+
+        <activity
             android:name=".EnergyBreakdownActivity"
             android:exported="false"
             android:screenOrientation="landscape" />

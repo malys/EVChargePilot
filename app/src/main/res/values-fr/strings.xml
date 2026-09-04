@@ -203,4 +203,15 @@
     <string name="trip_speed_not_recorded">Aucun intervalle exploitable de vitesse n’a été enregistré pour ce trajet.</string>
     <string name="trip_value_missing_description">%1$s : indisponible. %2$s</string>
     <string name="trip_value_description">%1$s : %2$s</string>
+    <string name="action_arrival_forecast">Charge à l’arrivée</string>
+    <string name="arrival_title">Charge à l’arrivée</string>
+    <string name="arrival_label">Charge à l’arrivée</string>
+    <string name="arrival_no_route">Aucun itinéraire. Lancez un guidage dans la navigation du véhicule et ceci se remplira.</string>
+    <string name="arrival_rate_loading">Lecture des trajets enregistrés…</string>
+    <string name="arrival_refused">Pas assez de preuves pour un chiffre exploitable. Rien n’est affiché plutôt qu’une fourchette large comme la moitié de la batterie.</string>
+    <string name="arrival_route">%1$s km restants · %2$d min · %3$s</string>
+    <string name="arrival_detail">Taux depuis %1$s (%2$d trajets) · %3$s %% par km
+Cette charge atteint environ %4$s à ce rythme</string>
+    <string name="arrival_source_trips">vos trajets enregistrés</string>
+    <string name="arrival_source_range">l’autonomie du véhicule</string>
 </resources>

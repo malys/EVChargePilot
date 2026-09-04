@@ -100,6 +100,9 @@ class MainActivity : AppCompatActivity() {
         binding.diagnosticsAction.setOnClickListener {
             showDiagnostics()
         }
+        binding.arrivalForecastAction.setOnClickListener {
+            startActivity(Intent(this, ArrivalForecastActivity::class.java))
+        }
         renderUnavailable()
         requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {

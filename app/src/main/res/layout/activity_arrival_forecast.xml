@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THESIS: one banded arrival figure, refused outright rather than shown too wide to act on.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
+  STORY: read the route the car already knows, then the charge it leaves you with, then why.
+  FIRST VIEWPORT: fixed top context and Back action; the arrival figure owns the centre.
+  FORM: parked evidence sheet extending the speed comparison; seed key cp041-20260904.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/arrival_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg">
+
+            <TextView
+                android:id="@+id/arrivalStatus"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/Text.EV.Body"
+                android:accessibilityLiveRegion="polite" />
+
+            <TextView
+                android:id="@+id/arrivalValue"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Title" />
+
+            <TextView
+                android:id="@+id/arrivalDetail"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_card"
+                android:lineSpacingExtra="6dp"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

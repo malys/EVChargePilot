@@ -13,6 +13,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The dashboard forecasts the charge you will arrive with.** The screen the whole trip
+  companion was supposed to lead to could not be built the obvious way: CP-003 proved this
+  firmware declares battery power and never publishes it, so nothing can integrate kWh. Charge
+  per kilometre needs no energy unit, and both its inputs read. The new "Arrival charge" screen
+  takes the remaining distance from the car's own guidance — read through synchronous getters,
+  never by registering on the adapter's callback fan-out — and spends it at a rate taken from
+  your recorded trips, or from the vehicle's own range estimate until three trips exist.
+  It refuses to show a figure whose band is wider than fifteen points, because a forecast that
+  says "somewhere between 20 and 60" is not a forecast. Trips recorded before the 3.6× speed fix
+  are excluded by the estimator rather than silently averaged in.
+
 - **The bundle answers the speed-unit question by itself.** A trip distance is integrated from
   speed, so a wrong speed unit scales it by the same factor and nothing in the number says so —
   a 2.4 km drive recorded as more than 7 km was the only symptom, and it needed somebody to

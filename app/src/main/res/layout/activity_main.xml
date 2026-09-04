@@ -429,6 +429,14 @@
                     android:layout_weight="1"
                     android:text="@string/action_trip_history" />
             </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/arrivalForecastAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/action_arrival_forecast" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

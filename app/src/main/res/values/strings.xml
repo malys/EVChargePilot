@@ -207,4 +207,15 @@
     <string name="trip_speed_not_recorded">No usable speed interval was recorded for the trip.</string>
     <string name="trip_value_missing_description">%1$s: unavailable. %2$s</string>
     <string name="trip_value_description">%1$s: %2$s</string>
+    <string name="action_arrival_forecast">Arrival charge</string>
+    <string name="arrival_title">Charge on arrival</string>
+    <string name="arrival_label">Charge on arrival</string>
+    <string name="arrival_no_route">No route. Start a guidance in the car’s own navigation and this fills in.</string>
+    <string name="arrival_rate_loading">Reading the trip record…</string>
+    <string name="arrival_refused">Not enough evidence for a figure worth acting on. Nothing is shown rather than a band half the pack wide.</string>
+    <string name="arrival_route">%1$s km remaining · %2$d min · %3$s</string>
+    <string name="arrival_detail">Rate from %1$s (%2$d trips) · %3$s %% per km
+This charge reaches about %4$s at that rate</string>
+    <string name="arrival_source_trips">your recorded trips</string>
+    <string name="arrival_source_range">the vehicle’s own range</string>
 </resources>
