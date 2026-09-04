@@ -37,7 +37,7 @@ internal object NavGuidanceRecorder {
     /** Guarded by itself: the tick appends on the main thread, an export reads on its own. */
     private val trace = ArrayDeque<String>()
 
-    private var lastEvents = -1
+    private var lastLine: String? = null
     private var startedAtElapsedMs: Long? = null
 
     @Volatile
@@ -67,7 +67,7 @@ internal object NavGuidanceRecorder {
         if (!SaicNavGuidance.start()) return false
         running = true
         startedAtElapsedMs = SystemClock.elapsedRealtime()
-        lastEvents = -1
+        lastLine = null
         ticker.removeCallbacks(tick)
         ticker.post(tick)
         return true
@@ -78,34 +78,35 @@ internal object NavGuidanceRecorder {
         SaicNavGuidance.stop()
         running = false
         startedAtElapsedMs = null
-        lastEvents = -1
+        lastLine = null
     }
 
     /** Forgets the trace without unregistering, so a new leg starts from a clean sheet. */
     fun clear() {
         synchronized(trace) { trace.clear() }
         dropped = false
-        lastEvents = -1
+        lastLine = null
         startedAtElapsedMs = SystemClock.elapsedRealtime()
     }
 
     private val tick = object : Runnable {
         override fun run() {
-            record(SaicNavGuidance.latest())
+            // readNow() polls the synchronous getters and folds in whatever the listener has
+            // already seen, so a car standing still with a guidance running still reports.
+            record(SaicNavGuidance.readNow())
             ticker.postDelayed(this, TICK_MS)
         }
     }
 
     /**
-     * Appends a line only when the listener saw something new.
+     * Appends a line only when the reported guidance actually differs from the last one.
      *
-     * A drive that produces no line is the finding, not a failure of this recorder, so the
-     * trace is never padded with repeats of an unchanged state.
+     * Deduplicating on the rendered line rather than on the callback counter is what lets the
+     * synchronous getters contribute: they answer every second with the same values while the
+     * car is stopped, and none of those repeats is worth a line. A drive that produces no line
+     * at all is the finding, not a failure of this recorder.
      */
     private fun record(guidance: NavGuidance) {
-        if (guidance.events == lastEvents) return
-        lastEvents = guidance.events
-        if (guidance.events == 0) return
         val since = startedAtElapsedMs?.let { (SystemClock.elapsedRealtime() - it) / 1_000L } ?: 0L
         val line = String.format(
             Locale.ROOT,
@@ -119,6 +120,9 @@ internal object NavGuidanceRecorder {
             // under the export's per-file ceiling whatever it contains.
             (guidance.road ?: guidance.direction ?: DASH).take(ROAD_CHARS),
         )
+        val body = line.substringAfter("s ")
+        if (body == lastLine) return
+        lastLine = body
         synchronized(trace) {
             if (trace.size >= TRACE_LINES) {
                 trace.removeFirst()
