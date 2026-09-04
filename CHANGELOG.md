@@ -4,6 +4,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **The unstable channel records its own evidence and the export carries all of it.** Validation
+  had to be driven by hand: open a screen, arm a probe, remember a save button, then export —
+  and the run that mattered most, the one where a probe heard nothing, was the one nobody
+  thought worth saving. The guidance listener and a session-long signal recorder now arm when
+  the application starts, and one "Export to USB" writes the guidance trace, the signal
+  statistics and the recorded trip summaries into the bundle by itself. The probe screen became
+  a window onto the recorder rather than its owner, so closing it no longer ends a capture.
+  Trip summaries travel because a distance integrated from a wrong speed scale shows up there
+  first. Stable arms nothing and contains none of it.
+
 ### Fixed
 
 - **The dashboard now asks for the vehicle signals it already declared.** AAOS classifies

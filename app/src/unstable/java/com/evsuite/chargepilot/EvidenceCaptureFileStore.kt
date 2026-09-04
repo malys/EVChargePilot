@@ -78,7 +78,11 @@ internal class EvidenceCaptureFileStore(
     }
 
     companion object {
-        internal const val MAX_CAPTURE_FILES = 8
+        /**
+     * One export now writes three artifacts — guidance, signal statistics and trips — so the
+     * pool holds four full exports rather than eight of a single kind.
+     */
+    internal const val MAX_CAPTURE_FILES = 12
         internal const val CAPTURE_KIND = "evidence"
         private val CAPTURE_NAME = Regex("^(.*-\\d{8}-\\d{6}-\\d{3})(?:-(\\d+))?$")
     }

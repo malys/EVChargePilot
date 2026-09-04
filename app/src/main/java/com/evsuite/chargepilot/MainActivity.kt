@@ -513,6 +513,10 @@ class MainActivity : AppCompatActivity() {
             // volatile latest sample at the last responsible moment so parking cannot go stale.
             val decision = diagnosticExportDecision(service?.latest)
             val file = if (decision == DiagnosticExportPolicy.Decision.ALLOWED) {
+                // Every always-on probe writes its current artifact first, so one export
+                // carries the guidance trace, the signal statistics and the trip record
+                // without anyone having remembered to save them during the drive.
+                EvidenceCaptureHook.saveProbeArtifacts(appContext)
                 // Rebuild after USB selection so timestamps, logs and last sample match export.
                 DiagnosticExporter.export(appContext, diagnosticsReport(), directory)
             } else null

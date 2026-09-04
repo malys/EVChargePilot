@@ -3,17 +3,11 @@ package com.evsuite.chargepilot
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityNavGuidanceProbeBinding
-import com.evsuite.hardware.FirmwareInfo
-import com.evsuite.hardware.saic.NavGuidance
 import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.google.android.material.snackbar.Snackbar
-import java.io.File
-import java.util.ArrayDeque
-import java.util.Locale
 
 /**
  * Records what the head unit's navigation actually reports during a drive.
@@ -36,22 +30,16 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNavGuidanceProbeBinding
     private lateinit var reader: EnergyTelemetryReader
-    private lateinit var fileStore: EvidenceCaptureFileStore
 
     private val ticker = Handler(Looper.getMainLooper())
-    private val trace = ArrayDeque<String>()
-    private var lastEvents = -1
     private var visible = false
-    private var startedAtElapsedMs: Long? = null
-    private var dropped = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityNavGuidanceProbeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         reader = EnergyTelemetryReader(applicationContext)
-        fileStore = EvidenceCaptureFileStore(File(filesDir, EVIDENCE_DIRECTORY))
-        SaicNavGuidance.connect(applicationContext)
+        NavGuidanceRecorder.start(applicationContext)
         binding.probeAction.setOnClickListener { toggle() }
         binding.saveAction.setOnClickListener { saveTrace() }
         ticker.post(tick)
@@ -69,57 +57,27 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         super.onStop()
     }
 
+    /**
+     * Leaves the recorder running. It belongs to the process now, so closing this screen
+     * neither unregisters the listener nor discards the trace — which is the whole reason a
+     * drive no longer has to be spent with a diagnostic screen in front of the driver.
+     */
     override fun onDestroy() {
         ticker.removeCallbacks(tick)
-        SaicNavGuidance.stop()
         super.onDestroy()
     }
 
     private val tick = object : Runnable {
         override fun run() {
-            record(SaicNavGuidance.latest())
             if (visible) render()
             ticker.postDelayed(this, TICK_MS)
         }
     }
 
-    /**
-     * Appends a line only when the listener actually saw something new.
-     *
-     * A drive that produces no line is the finding, not a failure of this screen — which is
-     * why the trace is never padded with repeats of an unchanged state.
-     */
-    private fun record(guidance: NavGuidance) {
-        if (guidance.events == lastEvents) return
-        lastEvents = guidance.events
-        if (guidance.events == 0) return
-        val since = startedAtElapsedMs?.let { (SystemClock.elapsedRealtime() - it) / 1_000L } ?: 0L
-        if (trace.size >= TRACE_LINES) {
-            trace.removeFirst()
-            dropped = true
-        }
-        trace.addLast(
-            String.format(
-                Locale.ROOT,
-                "%5ds n=%-4d status=%-4s dist=%-8s min=%-6s turn=%-8s road=%s",
-                since, guidance.events,
-                guidance.guideStatus.show(),
-                guidance.remainingDistanceRaw.show(),
-                guidance.remainingMinutes.show(),
-                guidance.nextTurnDistanceRaw.show(),
-                // A road name is head-unit text of unknown length; the saved artifact has to
-                // stay under the export's per-file ceiling whatever it contains.
-                (guidance.road ?: guidance.direction ?: DASH).take(ROAD_CHARS),
-            )
-        )
-    }
-
     /** Rechecks speed at the moment of the press; a disabled button is not a safety boundary. */
     private fun toggle() {
-        if (SaicNavGuidance.isListening) {
-            SaicNavGuidance.stop()
-            startedAtElapsedMs = null
-            lastEvents = -1
+        if (NavGuidanceRecorder.isRunning) {
+            NavGuidanceRecorder.stop()
             render()
             return
         }
@@ -128,38 +86,19 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
             Snackbar.make(binding.root, R.string.nav_probe_refused, Snackbar.LENGTH_LONG).show()
             return
         }
-        if (SaicNavGuidance.start()) {
-            startedAtElapsedMs = SystemClock.elapsedRealtime()
-            trace.clear()
-            dropped = false
-            lastEvents = -1
-        }
+        NavGuidanceRecorder.start(applicationContext)
+        NavGuidanceRecorder.clear()
         render()
     }
 
     /**
-     * Writes the trace where the diagnostic export finds it.
+     * Saves now, rather than waiting for the next export to do it.
      *
-     * The clipboard was never a way off this head unit: the file goes into the evidence
-     * folder, and the dashboard's "Export to USB" carries it out with the rest of the bundle.
-     * The write is a bounded JSON file on internal storage, so it stays on the click.
+     * The export writes this artifact on its own, so this button is a convenience for a
+     * driver who wants the current state pinned before carrying on.
      */
     private fun saveTrace() {
-        val saved = fileStore.write(
-            NavGuidanceProbeArtifact.of(
-                savedAtMs = System.currentTimeMillis(),
-                firmware = FirmwareInfo.getGeneration().name,
-                adapterBound = SaicNavGuidance.isAvailable,
-                listenerRegistered = SaicNavGuidance.isListening,
-                callbacks = SaicNavGuidance.latest().events,
-                census = SaicNavGuidance.census(),
-                censusBeyondCeiling = SaicNavGuidance.censusBeyondCeiling(),
-                trace = trace.toList(),
-                traceComplete = !dropped,
-            ).toJson(),
-            NavGuidanceProbeArtifact.KIND,
-            FirmwareInfo.getGeneration().name,
-        )
+        val saved = NavGuidanceRecorder.save(applicationContext)
         Snackbar.make(
             binding.root,
             if (saved == null) R.string.nav_probe_save_failed else R.string.nav_probe_saved,
@@ -169,7 +108,7 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
 
     private fun render() {
         val guidance = SaicNavGuidance.latest()
-        val listening = SaicNavGuidance.isListening
+        val listening = NavGuidanceRecorder.isRunning
         binding.probeAction.setText(
             if (listening) R.string.nav_probe_stop else R.string.nav_probe_start
         )
@@ -188,6 +127,7 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
                 else -> R.string.nav_probe_hint_ready
             }
         )
+        val trace = NavGuidanceRecorder.trace()
         binding.probeTrace.text = if (trace.isEmpty()) {
             getString(R.string.nav_probe_no_data)
         } else {
@@ -200,15 +140,7 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         binding.saveAction.isEnabled = true
     }
 
-    private fun Int?.show(): String = this?.toString() ?: DASH
-
     private companion object {
         const val TICK_MS = 1_000L
-        /** Three hours of change at one line per second would not fit; the newest lines win. */
-        const val TRACE_LINES = 300
-        /** A road name past this adds nothing a decision uses, and the file has a ceiling. */
-        const val ROAD_CHARS = 40
-        const val DASH = "—"
-        const val EVIDENCE_DIRECTORY = "evidence"
     }
 }

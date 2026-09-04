@@ -61,7 +61,10 @@ class EvidenceCaptureFileStoreTest {
                 .mapNotNull { TelemetryEvidenceFormat.fromJson(it.readText())?.snapshots }
                 .toSet()
             assertEquals(EvidenceCaptureFileStore.MAX_CAPTURE_FILES, retainedSnapshots.size)
-            assertEquals((3..10).toSet(), retainedSnapshots)
+            // The two oldest of the writes above are evicted; the rest survive, whatever the
+            // pool size happens to be.
+            val newest = EvidenceCaptureFileStore.MAX_CAPTURE_FILES + 2
+            assertEquals((3..newest).toSet(), retainedSnapshots)
         } finally {
             directory.deleteRecursively()
         }
