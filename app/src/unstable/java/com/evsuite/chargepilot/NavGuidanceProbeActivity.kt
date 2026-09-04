@@ -193,7 +193,11 @@ class NavGuidanceProbeActivity : AppCompatActivity() {
         } else {
             trace.joinToString("\n")
         }
-        binding.saveAction.isEnabled = trace.isNotEmpty()
+        // Always saveable. "Bound, registered, nothing received" is the outcome CP-040 most
+        // needs to hear, and an unbound adapter says there is no route source on this firmware
+        // at all — both are findings, and gating the button on a non-empty trace made exactly
+        // the negative results the only ones that could not leave the car.
+        binding.saveAction.isEnabled = true
     }
 
     private fun Int?.show(): String = this?.toString() ?: DASH
