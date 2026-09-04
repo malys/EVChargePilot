@@ -247,6 +247,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_detail">%1$s
 %2$s km · %3$d min · climb %4$s m · descent %5$s m
 Spending %6$s %% per km</string>
+    <string name="charge_stop_grade">Climb and descent: an estimated %1$s %% of charge, ± %2$s. Modelled from the route profile, never measured.</string>
     <string name="routing_title">Routing key</string>
     <string name="routing_hint_key">OpenRouteService API key</string>
     <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>

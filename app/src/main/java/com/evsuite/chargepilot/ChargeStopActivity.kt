@@ -19,9 +19,11 @@ import com.evsuite.chargepilot.route.RouteGeometry
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.RouteGrade
 import com.evsuite.hardware.telemetry.SocRate
 import com.evsuite.hardware.telemetry.SocRateEstimator
 import com.google.android.material.button.MaterialButton
@@ -244,7 +246,12 @@ class ChargeStopActivity : AppCompatActivity() {
             val result = directions.post(credentials, OrsDirections.PATH, body)
             val route = (result as? RoutingTransport.Result.Ok)
                 ?.let { OrsDirections.parse(it.body).firstOrNull() }
-            val plan = route?.let { ChargeStopPlan.of(socPercent, it.distanceKm, effective) }
+            // The road ahead, which is the only elevation a forecast can use: CP-031 refused
+            // the altitude behind the car and that refusal stands.
+            val grade = route?.let { RouteGrade.of(it.ascentMetres, it.descentMetres, PACK) }
+            val plan = route?.let {
+                ChargeStopPlan.of(socPercent, it.distanceKm, effective, grade = grade)
+            }
             val stop = plan as? ChargeStopPlan.Plan.Stop
             val charger = if (route != null && stop != null) {
                 findCharger(route, stop.afterKm, socPercent, effective)
@@ -253,7 +260,7 @@ class ChargeStopActivity : AppCompatActivity() {
             }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(place, route, plan, effective, charger)
+                render(place, route, plan, effective, charger, grade)
                 announce(
                     when {
                         result is RoutingTransport.Result.Refused -> refusal(result)
@@ -311,6 +318,7 @@ class ChargeStopActivity : AppCompatActivity() {
         plan: ChargeStopPlan.Plan?,
         rate: SocRate?,
         charger: Found?,
+        grade: RouteGrade.Cost?,
     ) {
         if (route == null || plan == null) {
             binding.chargeStopPlan.visibility = View.GONE
@@ -343,7 +351,7 @@ class ChargeStopActivity : AppCompatActivity() {
         }
 
         binding.chargeStopDetail.visibility = View.VISIBLE
-        binding.chargeStopDetail.text = getString(
+        val detail = getString(
             R.string.charge_stop_detail,
             place.label,
             format(route.distanceKm, "%.1f"),
@@ -352,6 +360,16 @@ class ChargeStopActivity : AppCompatActivity() {
             route.descentMetres?.let { format(it, "%.0f") } ?: getString(R.string.value_unavailable),
             rate?.let { format(it.percentPerKm, "%.3f") } ?: getString(R.string.value_unavailable),
         )
+        // Its own line, and only when there is a profile: no line at all says "not known",
+        // where a zero would say "flat road".
+        val gradeLine = grade?.let {
+            getString(
+                R.string.charge_stop_grade,
+                format(it.percent, "%+.1f"),
+                format(it.uncertaintyPercent, "%.1f"),
+            )
+        }
+        binding.chargeStopDetail.text = listOfNotNull(detail, gradeLine).joinToString("\n")
 
         renderCharger(plan, charger)
 
@@ -484,5 +502,19 @@ class ChargeStopActivity : AppCompatActivity() {
          * yet — CP-048 asked for one and this is the constant standing in for it.
          */
         const val MIN_POWER_KW = 22.0
+
+        /**
+         * The pack the grade term is a percentage of.
+         *
+         * MG4 Long Range usable capacity, 61,7 kWh, from EVKX's specification sheet by way of
+         * `AGENTS.md` — a figure describing the model, not this car, and health assumed intact
+         * because nothing here has measured it. Both assumptions sit inside
+         * [RouteGrade.RELATIVE_UNCERTAINTY], and like [MIN_POWER_KW] this is a constant
+         * standing in for a driver-declared setting.
+         */
+        val PACK = BatteryCapacityConfig(
+            usableCapacityKwhWhenNew = 61.7,
+            stateOfHealthPercent = 100.0,
+        )
     }
 }

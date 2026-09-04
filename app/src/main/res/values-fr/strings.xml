@@ -243,6 +243,7 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_detail">%1$s
 %2$s km · %3$d min · montée %4$s m · descente %5$s m
 Consommation %6$s %% par km</string>
+    <string name="charge_stop_grade">Montée et descente : %1$s %% de charge estimés, ± %2$s. Modélisé d’après le profil de l’itinéraire, jamais mesuré.</string>
     <string name="routing_title">Clé de routage</string>
     <string name="routing_hint_key">Clé d’API OpenRouteService</string>
     <string name="routing_helper_key">Votre propre clé, obtenue sur openrouteservice.org. Aucune n’est livrée dans l’application.</string>

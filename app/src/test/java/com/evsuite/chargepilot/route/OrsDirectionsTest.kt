@@ -8,6 +8,21 @@ import org.junit.Test
 
 class OrsDirectionsTest {
 
+    /** The same shape as [response], with the geometry the test cares about. */
+    private fun responseWith(coordinates: String): String = """
+        {
+          "type": "FeatureCollection",
+          "metadata": { "attribution": "openrouteservice.org" },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "summary": { "distance": 40.0, "duration": 1800.0 } },
+              "geometry": { "type": "LineString", "coordinates": [ $coordinates ] }
+            }
+          ]
+        }
+    """.trimIndent()
+
     /** Shaped like a real `geojson` answer, cut down to the fields this app reads. */
     private val response = """
         {
@@ -59,6 +74,25 @@ class OrsDirectionsTest {
         assertEquals(170.0, best.points.first().altitudeMetres!!, 1e-9)
         assertEquals(20.0, best.ascentMetres!!, 1e-9)
         assertEquals(40.0, best.descentMetres!!, 1e-9)
+    }
+
+    @Test
+    fun `terrain noise is not a mountain`() {
+        // A flat road sampled by a terrain model wobbles a metre or two at every point. Summed
+        // naively that is 60 m of climb over 30 points, and a forecast that believes it will
+        // send someone to a charger they did not need.
+        val wobbling = (0 until 30).joinToString(",") { index ->
+            "[4.0, ${45.0 + index * 0.01}, ${100.0 + if (index % 2 == 0) 2.0 else -2.0}]"
+        }
+        val route = OrsDirections.parse(responseWith(wobbling)).first()
+        assertEquals(0.0, route.ascentMetres!!, 1e-9)
+        assertEquals(0.0, route.descentMetres!!, 1e-9)
+
+        // The same points with a real climb in the middle keep the climb.
+        val col = "[4.0, 45.0, 100.0],[4.0, 45.1, 101.0],[4.0, 45.2, 900.0],[4.0, 45.3, 899.0]"
+        val overACol = OrsDirections.parse(responseWith(col)).first()
+        assertEquals(800.0, overACol.ascentMetres!!, 1e-9)
+        assertEquals(0.0, overACol.descentMetres!!, 1e-9)
     }
 
     @Test

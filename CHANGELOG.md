@@ -40,6 +40,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   (CC BY 4.0 for contributed records, the provider's own licence for imported ones, attributed
   on screen either way). What leaves the car is a 40 km stretch of road around the planned stop
   and a 5 km corridor — never the route, never the origin, never the destination.
+- **The Cévennes are on the screen, in charge rather than in metres.** The route already showed
+  climb and descent; now they cost something. The stop distance and the arrival figure carry a
+  grade term from `RouteGrade`, on its own line, labelled as modelled and never as measured —
+  and absent entirely when no profile came back, because a zero would be a claim that the road
+  is flat. The profile itself is filtered first: elevation behind these geometries is a sampled
+  terrain model that wobbles a metre or two at every one of thousands of points, and summing
+  that raw turns a flat road into hundreds of metres of imaginary climb. A 10 m threshold
+  discards the noise and keeps the col.
 
 ### Changed
 

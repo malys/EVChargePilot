@@ -28,6 +28,16 @@ object OrsDirections {
     /** A route with more points than this is not a route this screen can use. */
     const val MAX_POINTS = 20_000
 
+    /**
+     * How much the road has to move before it counts as climbing.
+     *
+     * The elevation behind these geometries is a sampled terrain model with metre-scale noise,
+     * and a route is thousands of points long. Summing every positive difference would turn
+     * that noise into hundreds of metres of climb that the road does not have, and CP-050 feeds
+     * this straight into a charge forecast. A threshold discards the noise and keeps the col.
+     */
+    const val ELEVATION_THRESHOLD_METRES = 10.0
+
     data class Point(val longitude: Double, val latitude: Double, val altitudeMetres: Double?)
 
     data class Route(
@@ -43,16 +53,24 @@ object OrsDirections {
         private fun elevationSplit(): Pair<Double, Double>? {
             var up = 0.0
             var down = 0.0
-            var previous: Double? = null
+            var reference: Double? = null
             var seen = 0
             for (point in points) {
                 val altitude = point.altitudeMetres ?: continue
                 seen++
-                previous?.let { last ->
-                    val delta = altitude - last
-                    if (delta > 0) up += delta else down -= delta
+                val last = reference
+                if (last == null) {
+                    reference = altitude
+                    continue
                 }
-                previous = altitude
+                val delta = altitude - last
+                if (delta > ELEVATION_THRESHOLD_METRES) {
+                    up += delta
+                    reference = altitude
+                } else if (-delta > ELEVATION_THRESHOLD_METRES) {
+                    down -= delta
+                    reference = altitude
+                }
             }
             return if (seen < 2) null else up to down
         }
