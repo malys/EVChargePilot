@@ -6,6 +6,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The destination probe now fires on the firmware it was written for.** CP-051's question —
+  do IMapService transactions 38 and 39 carry the destination — is worth asking at exactly one
+  moment: while the car is guiding to somewhere. That moment was detected by counting guidance
+  callbacks, and the capture of 2026-09-04 shows this head unit sending none of them: `n=0` on
+  the same line as `status=1 dist=9788 road=Rue de la Fontaine`, the whole state coming from the
+  synchronous getters. The probe would never have fired on a validation drive, and the bundle
+  would have carried the process-start sample twice over. A trip is now recognised by a distance
+  to a destination, a road name or a direction — each of which needs a trip to exist — and a
+  status code on its own is still not one, because no value is known to mean idle.
+
 - **The routing key goes back onto the stick it came from.** Configuring this car meant a key on
   a USB stick, because typing sixty characters on this head unit is not something anyone does
   twice — and there was no way back out, so a second car, a factory reset or the unstable

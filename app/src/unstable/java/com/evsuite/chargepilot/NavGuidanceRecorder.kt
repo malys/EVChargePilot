@@ -30,6 +30,25 @@ import java.util.Locale
  * listener is registered. The ring is bounded, so a three-hour drive overwrites its oldest
  * lines instead of growing. Nothing is written to disk until an export asks for it.
  */
+/**
+ * Whether the head unit is guiding to somewhere, whatever told us so.
+ *
+ * Not the callback counter. The capture of 2026-09-04 on SWI68 recorded `n=0` on the same
+ * line as `status=1 dist=9788 road=Rue de la Fontaine`: this firmware publishes no callbacks
+ * at all and the synchronous getters carry the whole state. Keying CP-051's destination probe
+ * on `events` meant it could never fire on the one firmware it was written for, and the drive
+ * that was supposed to answer the question would have come back with the process-start sample
+ * twice.
+ *
+ * A status code alone is not enough — nothing proves which value means idle — so it takes a
+ * distance to a destination, a road name or a direction, each of which needs a trip to exist.
+ */
+internal fun isGuiding(guidance: NavGuidance): Boolean =
+    guidance.events > 0 ||
+        guidance.remainingDistanceRaw != null ||
+        guidance.road != null ||
+        guidance.direction != null
+
 internal object NavGuidanceRecorder {
 
     private val ticker = Handler(Looper.getMainLooper())
@@ -97,7 +116,7 @@ internal object NavGuidanceRecorder {
             record(guidance)
             // The car is guiding, which is the one moment CP-051's destination transactions
             // can be asked with a destination set. The probe fires once and off this thread.
-            if (guidance.events > 0) ValidationProbe.onGuidanceHeard()
+            if (isGuiding(guidance)) ValidationProbe.onGuidanceHeard()
             ticker.postDelayed(this, TICK_MS)
         }
     }
