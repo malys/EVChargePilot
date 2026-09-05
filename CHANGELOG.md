@@ -4,6 +4,23 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Importing and exporting the routing configuration found no USB stick.** Storage discovery
+  demanded positive proof that a volume was removable — `Environment.isExternalStorageRemovable`,
+  `StorageVolume.isRemovable`, or a mount name matching `XXXX-XXXX`/`usb`/`udisk`. This head unit
+  gives none of the three for a stick it mounts itself, so the scan returned an empty list, the
+  import announced "no configuration file found" and the export announced "no USB stick that can
+  be written to" with a stick plugged in. Discovery now follows EVTasker's browser, which has
+  worked on this car for a year: every mounted volume the app can already list, sorted with the
+  ones that *say* they are removable first. The rule that mattered is kept and stated the other
+  way round — primary emulated storage is excluded outright, so neither the keys nor a diagnostic
+  bundle can land in storage the driver cannot unplug. `writableTarget` no longer refuses a
+  directory just because discovery had not listed it.
+- **The routing configuration was only looked for at the top of the stick.** A file dropped in
+  `Download/` — where this head unit's own file manager puts things — was never found. The scan
+  now goes one folder deep, files before folders, so a config at the top still wins.
+
 ### Added
 
 - **A companion that notices the plan stopped being true.** CP-058. A plan chosen at the kerb is

@@ -58,6 +58,36 @@ class RoutingConfigImportTest {
         assertNull(RoutingConfigImport.search(listOf(stick)))
     }
 
+    /**
+     * A driver drops the file in whatever folder their file manager made, and the import that
+     * answers "nothing here" on a stick that plainly has the key is the bug this fixes.
+     */
+    @Test
+    fun `a config one folder inside the stick is still found`() {
+        val stick = directory()
+        val folder = File(stick, "Download").apply { mkdirs() }
+        write(folder, "ors.txt", "ors_api_key = one-level-down")
+
+        assertEquals(
+            "one-level-down",
+            RoutingConfigImport.search(listOf(stick))?.config?.apiKey,
+        )
+    }
+
+    @Test
+    fun `the top level wins over a folder, and two levels down is not searched`() {
+        val stick = directory()
+        val folder = File(stick, "Download").apply { mkdirs() }
+        write(folder, "ors.txt", "ors_api_key = one-level-down")
+        write(stick, "config.txt", "ors_api_key = at-the-top")
+        assertEquals("at-the-top", RoutingConfigImport.search(listOf(stick))?.config?.apiKey)
+
+        val deep = directory()
+        val buried = File(deep, "music/albums").apply { mkdirs() }
+        write(buried, "ors.txt", "ors_api_key = too-deep")
+        assertNull(RoutingConfigImport.search(listOf(deep)))
+    }
+
     @Test
     fun `a config read directly is capped rather than truncated into nonsense`() {
         val stick = directory()

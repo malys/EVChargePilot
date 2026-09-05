@@ -49,8 +49,10 @@ workspace MIT default. EVHardware remains separately licensed.
 ## Security
 
 - The stable manifest has no `INTERNET`, location, overlay, install or boot capability.
-- USB diagnostic export adds no storage permission: offer only removable roots already visible
-  to the app, and fall back only to this app's directory on that same removable volume.
+- USB diagnostic export adds no storage permission: offer every mounted volume the app can
+  already list *except* primary emulated storage, and fall back only to this app's directory on
+  the same volume. Never require positive proof that a volume is removable — this head unit
+  cannot give it, and demanding it is why exports found nothing.
 - Any new permission requires an allowlist change and a security review in the same commit.
 - Signing configuration comes only from environment variables or local Gradle properties.
 

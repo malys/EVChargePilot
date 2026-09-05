@@ -20,15 +20,37 @@ object RoutingConfigImport {
 
     data class Found(val file: File, val config: RoutingConfig)
 
-    /** The first readable config in these directories, top level only. */
+    /**
+     * Directories that are searched inside each volume, beyond its top level.
+     *
+     * A stick handed to a driver has the file wherever the person who wrote it put it, and the
+     * head unit's own file manager drops downloads into folders of its own. One level down is the
+     * difference between finding the key and an import that says "nothing here" on a stick that
+     * plainly has it; two levels down is a scan of somebody's music library.
+     */
+    private const val MAX_DEPTH = 1
+
+    /** The first readable config in these directories, or one level inside them. */
     fun search(directories: List<File>): Found? {
         for (directory in directories) {
-            val files = runCatching { directory.listFiles() }.getOrNull() ?: continue
-            for (file in files.sortedBy { it.name.lowercase() }) {
-                if (!isCandidate(file)) continue
-                val config = read(file)
-                if (!config.isEmpty()) return Found(file, config)
-            }
+            searchIn(directory, MAX_DEPTH)?.let { return it }
+        }
+        return null
+    }
+
+    private fun searchIn(directory: File, depth: Int): Found? {
+        val entries = runCatching { directory.listFiles() }.getOrNull() ?: return null
+        val sorted = entries.sortedBy { it.name.lowercase() }
+        // Files before directories, so a config at the top level always wins over a deeper one.
+        for (file in sorted) {
+            if (!isCandidate(file)) continue
+            val config = read(file)
+            if (!config.isEmpty()) return Found(file, config)
+        }
+        if (depth <= 0) return null
+        for (child in sorted) {
+            if (!child.isDirectory || child.isHidden) continue
+            searchIn(child, depth - 1)?.let { return it }
         }
         return null
     }

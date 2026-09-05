@@ -103,9 +103,10 @@ measured over the same interval.
 The diagnostics dialog exports one self-contained ZIP to a removable USB volume: runtime/APK and
 signer identity, exact firmware, service and last-sample state, property/provenance probes,
 bounded recent log, previous crash, and up to eight newest unstable CP-003 evidence JSON files.
-Its manifest records byte counts and SHA-256 per artifact. The app offers only removable roots
-already visible at runtime and can fall back only to its own folder on that same USB volume; it
-never falls back to internal AAOS storage and declares no storage permission. Export requires a
+Its manifest records byte counts and SHA-256 per artifact. The app offers every volume it can
+already list except primary emulated storage, and can fall back only to its own folder on the
+volume that was chosen; it never writes to internal AAOS storage and declares no storage
+permission. Export requires a
 fresh readable speed at or below 0.1 km/h, runs off the main thread, caps the text report at
 128 KiB, each evidence file at 64 KiB and the ZIP at 768 KiB, then atomically renames a synced
 temporary file on USB. No archive copy accumulates on AAOS.
@@ -258,7 +259,7 @@ Release signing reads `EV_KEYSTORE`, `EV_KEYSTORE_PASSWORD`, `EV_KEY_ALIAS` and
 
 The application has no network, location, overlay, installer or vehicle-write capability.
 USB diagnostic export adds no broad storage permission and writes only after an explicit parked
-user selects a removable volume.
+user selects a volume, which is never primary emulated storage.
 Permission drift is blocked in CI. Report vulnerabilities according to [SECURITY.md](SECURITY.md).
 
 ## Contributing
