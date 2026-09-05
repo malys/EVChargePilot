@@ -361,6 +361,14 @@ class ChargeStopActivity : AppCompatActivity() {
                     RouteWhatIf.alternative(best, it, effective, settings.pack)
                 }
             }
+            // CP-057's third row, and the only extra request this screen ever makes. It is worth
+            // the driver's quota only when the planned road needs a stop and this one might not:
+            // an hour of departmental roads to arrive with the same charge is not a choice.
+            val motorwayFree = if (route != null && stop != null) {
+                motorwayFree(credentials, origin, place, socPercent, effective, settings)
+            } else {
+                null
+            }
             ValidationProbe.record(ValidationQuestion.WHAT_IF) {
                 val body = when (whatIf) {
                     null -> "no route, so no what-if"
@@ -378,7 +386,10 @@ class ChargeStopActivity : AppCompatActivity() {
             }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(place, route, plan, effective, charger, grade, whatIf, alternative)
+                render(
+                    place, route, plan, effective, charger, grade, whatIf, alternative,
+                    motorwayFree, if (motorwayFree == null) 1 else 2,
+                )
                 announce(
                     when {
                         result is RoutingTransport.Result.Refused -> refusal(result)
@@ -418,6 +429,55 @@ class ChargeStopActivity : AppCompatActivity() {
      * — and never the trip. The charger service has no business knowing where the driver started
      * or where they are going, and CP-048 is where that boundary is argued.
      */
+    /**
+     * The same trip on roads that are not motorways, planned but not searched for chargers.
+     *
+     * One ORS request and no Open Charge Map request: what makes this row a choice is whether it
+     * needs a stop at all, and [ChargeStopPlan] answers that from the distance alone. Finding a
+     * charger for a road the driver has not picked would spend a second allowance on a row they
+     * are about to dismiss.
+     *
+     * A refusal here is not a refusal of the plan. The two motorway rows stand on their own and
+     * this one is simply absent, with a line saying so.
+     */
+    private fun motorwayFree(
+        credentials: RoutingCredentials.Values,
+        origin: LocationSource.Fix,
+        place: OrsGeocode.Place,
+        socPercent: Double?,
+        rate: SocRate?,
+        settings: VehicleSettings.Values,
+    ): MotorwayFree? {
+        val body = OrsDirections.requestBody(
+            OrsDirections.Point(origin.longitude, origin.latitude, origin.altitudeMetres),
+            OrsDirections.Point(place.longitude, place.latitude, null),
+            avoidMotorways = true,
+        )
+        val result = directions.post(credentials, OrsDirections.PATH, body)
+        val road = (result as? RoutingTransport.Result.Ok)
+            ?.let { OrsDirections.parse(it.body) }?.firstOrNull()
+        ValidationProbe.record(ValidationQuestion.ROUTE_ALTERNATIVES) {
+            "motorway-free road: " + when {
+                result is RoutingTransport.Result.Refused -> "refused(${result.reason})"
+                road == null -> "answered, nothing parsed"
+                else -> "${probeFormat(road.distanceKm, "%.1f")} km in " +
+                    "${probeFormat(road.durationMinutes, "%.0f")} min via ${road.viaLabel ?: "?"}"
+            }
+        }
+        val chosen = road ?: return null
+        val grade = RouteGrade.of(chosen.ascentMetres, chosen.descentMetres, settings.pack)
+        return MotorwayFree(
+            route = chosen,
+            plan = ChargeStopPlan.of(
+                socPercent,
+                chosen.distanceKm,
+                rate,
+                settings.reservePercent,
+                grade,
+            ),
+        )
+    }
+
     private fun findCharger(
         route: OrsDirections.Route,
         afterKm: Double,
@@ -490,6 +550,8 @@ class ChargeStopActivity : AppCompatActivity() {
         grade: RouteGrade.Cost?,
         whatIf: RouteWhatIf.Result?,
         alternative: RouteWhatIf.Alternative?,
+        motorwayFree: MotorwayFree?,
+        routeRequests: Int,
     ) {
         if (route == null || plan == null) {
             binding.chargeStopPlan.visibility = View.GONE
@@ -498,6 +560,7 @@ class ChargeStopActivity : AppCompatActivity() {
             binding.chargerPlace.visibility = View.GONE
             binding.chargerSource.visibility = View.GONE
             binding.routeWhatIf.visibility = View.GONE
+            binding.routeChoices.visibility = View.GONE
             binding.navigateAction.visibility = View.GONE
             binding.navigateNote.visibility = View.GONE
             handoff = null
@@ -548,6 +611,7 @@ class ChargeStopActivity : AppCompatActivity() {
 
         renderCharger(plan, charger)
         renderWhatIf(whatIf, alternative)
+        renderChoices(route, plan, charger, whatIf, motorwayFree, routeRequests)
         renderHandoff(place, plan, charger)
 
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
@@ -634,6 +698,112 @@ class ChargeStopActivity : AppCompatActivity() {
      * confirmed are on their own line under it, because a dataset is wrong the day it is
      * published and the driver is the one who finds out.
      */
+    /**
+     * The comparison, on one card: same destination, three ways to reach it.
+     *
+     * Everything on this screen already answered part of "how should I drive to Alès" — the
+     * plan, the charging stop, the speed what-if, the motorway-free road — and the driver was
+     * doing the comparison across four cards, in their head, parked, before setting off. The
+     * comparison *is* the decision, so it gets stated rather than assembled by the reader.
+     *
+     * **Both figures on every row, or neither.** A row that showed a charge saved without the
+     * time it costs would be advice, and this screen does not give advice. A row that cannot
+     * produce both says which of them is missing and why.
+     *
+     * The request count is on the card because the allowance is the driver's, not this app's.
+     */
+    private fun renderChoices(
+        route: OrsDirections.Route,
+        plan: ChargeStopPlan.Plan,
+        charger: Found?,
+        whatIf: RouteWhatIf.Result?,
+        motorwayFree: MotorwayFree?,
+        routeRequests: Int,
+    ) {
+        // Only a plan that has to choose is worth a comparison: a route the car reaches on the
+        // charge it already holds has one way of being driven and no trade to make.
+        if (plan !is ChargeStopPlan.Plan.Stop) {
+            binding.routeChoices.visibility = View.GONE
+            return
+        }
+        val lines = ArrayList<String>()
+        lines += getString(R.string.route_choices_title)
+
+        lines += getString(
+            R.string.route_choices_planned,
+            format(route.distanceKm, "%.0f"),
+            format(route.durationMinutes, "%.0f"),
+        ) + "\n  " + stopLine(plan, charger)
+
+        val headline = (whatIf as? RouteWhatIf.Result.Ready)?.headline
+        lines += if (headline != null) {
+            getString(
+                R.string.route_choices_slower,
+                headline.speedKmh,
+                format(route.distanceKm, "%.0f"),
+                format(headline.delayMinutes, "%.0f"),
+            ) + "\n  " + getString(R.string.route_choices_removes_stop)
+        } else {
+            getString(R.string.route_choices_slower_absent)
+        }
+
+        lines += if (motorwayFree == null) {
+            getString(R.string.route_choices_no_motorway_absent)
+        } else {
+            val delta = motorwayFree.route.durationMinutes - route.durationMinutes
+            getString(
+                R.string.route_choices_no_motorway,
+                format(motorwayFree.route.distanceKm, "%.0f"),
+                format(motorwayFree.route.durationMinutes, "%.0f"),
+                if (delta >= 0.0) getString(R.string.route_choices_delta_slower, format(delta, "%.0f"))
+                else getString(R.string.route_choices_delta_faster, format(-delta, "%.0f")),
+            ) + "\n  " + when (val other = motorwayFree.plan) {
+                is ChargeStopPlan.Plan.NoStop -> getString(
+                    R.string.route_choices_no_stop,
+                    format(other.arrivalPercent, "%.0f"),
+                )
+                is ChargeStopPlan.Plan.Stop -> getString(
+                    R.string.route_choices_stop_unknown,
+                    format(other.afterKm, "%.0f"),
+                )
+                is ChargeStopPlan.Plan.Refused ->
+                    getString(R.string.route_choices_refused, refused(other.reason))
+            }
+        }
+
+        lines += getString(R.string.route_choices_requests, routeRequests)
+        binding.routeChoices.visibility = View.VISIBLE
+        binding.routeChoices.text = lines.joinToString("\n")
+    }
+
+    /**
+     * The planned row's own consequence: where the stop falls, and the charge left on reaching it.
+     *
+     * The charge *after* charging is deliberately absent. It depends on how long the driver
+     * plugs in, which this app does not model and must not appear to.
+     */
+    private fun stopLine(plan: ChargeStopPlan.Plan.Stop, charger: Found?): String {
+        val arrival = charger?.arrivalPercent
+        return if (arrival == null) {
+            getString(R.string.route_choices_stop_unknown, format(plan.afterKm, "%.0f"))
+        } else {
+            getString(
+                R.string.route_choices_stop,
+                format(charger.alongKm, "%.0f"),
+                format(arrival, "%.0f"),
+            )
+        }
+    }
+
+    private fun refused(reason: ChargeStopPlan.Reason): String = getString(
+        when (reason) {
+            ChargeStopPlan.Reason.NO_CHARGE -> R.string.charge_stop_refused_charge
+            ChargeStopPlan.Reason.NO_ROUTE -> R.string.charge_stop_refused_route
+            ChargeStopPlan.Reason.NO_RATE -> R.string.charge_stop_refused_rate
+            ChargeStopPlan.Reason.BAND_TOO_WIDE -> R.string.charge_stop_refused_band
+        }
+    )
+
     /**
      * Offers to hand the plan to the car's navigation, and says what that hand-off cannot do.
      *
@@ -812,6 +982,12 @@ class ChargeStopActivity : AppCompatActivity() {
         String.format(Locale.getDefault(), pattern, value)
 
     /** A charger, where it falls on this route, and the charge left on reaching it. */
+    /** CP-057's third row: another road, planned, with no charger search spent on it. */
+    private data class MotorwayFree(
+        val route: OrsDirections.Route,
+        val plan: ChargeStopPlan.Plan,
+    )
+
     /** What the button would send, held between the render that offered it and the tap. */
     private data class Handoff(
         val latitude: Double,

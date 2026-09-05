@@ -203,4 +203,17 @@ class OrsDirectionsTest {
         assertTrue(body.contains("\"target_count\":3"))
         assertNotNull(OrsDirections.parse(response).getOrNull(1))
     }
+
+    @Test
+    fun `the third row asks the router to leave the motorway alone`() {
+        val body = OrsDirections.requestBody(
+            OrsDirections.Point(4.8357, 45.7640, null),
+            OrsDirections.Point(5.3698, 43.2965, null),
+            avoidMotorways = true,
+        )
+        assertTrue(body.contains("\"avoid_features\":[\"highways\"]"))
+        // One road is the point of this request; alternatives to it would be a fourth row
+        // nobody asked for, on the driver's quota.
+        assertTrue(!body.contains("alternative"))
+    }
 }

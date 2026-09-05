@@ -6,6 +6,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Three ways to get there, on one card.** CP-057. Every part of the answer to "how should I
+  drive to Alès" was already computed and none of it was a choice: the plan, the charging stop,
+  the speed what-if and the road profile sat on four cards and the driver did the comparison in
+  their head, parked, before setting off. The comparison is the decision, so it is now stated —
+  the route as calculated with its stop, the mildest speed on that same road that removes the
+  stop, and the same trip avoiding motorways, each with a distance, a time and a charge.
+
+  **Both figures on every row, or neither.** A charge saved without the time it costs is advice,
+  and this screen does not give advice; a row that cannot produce both says which is missing.
+  The charge *after* charging is deliberately absent everywhere — it depends on how long the
+  driver plugs in, which this app does not model and must not appear to.
+
+  **The motorway-free road costs one request, and only when it could change the answer.** It is
+  fetched only where the planned road needs a charging stop, because an hour of departmental
+  roads to arrive with the same charge is not a choice. No charger search is spent on a road the
+  driver has not picked. The card states how many route requests the plan took: the allowance
+  belongs to the driver's key, not to this app.
+
 - **The plan can go to the car's navigation instead of being retyped.** CP-056. A route worked
   out here used to end on this screen: the driver turned to MG4 Navigator and entered it again,
   which is where the feature gets abandoned and, worse, where it goes wrong without saying so —

@@ -105,7 +105,17 @@ object OrsDirections {
      * @param alternatives how many routes to ask for in total, 0 or 1 for just the best. ORS
      *   charges one request either way, so asking is free; parsing more is not.
      */
-    fun requestBody(origin: Point, destination: Point, alternatives: Int = 0): String {
+    /**
+     * @param avoidMotorways CP-057's third row. A road the driver would not otherwise take is
+     *   worth one request only when the motorway plan needs a charging stop and this one might
+     *   not — an hour of departmental roads to arrive with the same charge is not a choice.
+     */
+    fun requestBody(
+        origin: Point,
+        destination: Point,
+        alternatives: Int = 0,
+        avoidMotorways: Boolean = false,
+    ): String {
         val coordinates = JsonArray().apply {
             add(JsonArray().apply { add(origin.longitude); add(origin.latitude) })
             add(JsonArray().apply { add(destination.longitude); add(destination.latitude) })
@@ -117,6 +127,11 @@ object OrsDirections {
             // steps are where that lives. The geometry still dwarfs them.
             addProperty("instructions", true)
             addProperty("units", "km")
+        }
+        if (avoidMotorways) {
+            body.add("options", JsonObject().apply {
+                add("avoid_features", JsonArray().apply { add("highways") })
+            })
         }
         if (alternatives > 1) {
             body.add("alternative_routes", JsonObject().apply {

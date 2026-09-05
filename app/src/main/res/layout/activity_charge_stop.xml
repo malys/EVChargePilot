@@ -172,6 +172,19 @@
                 android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone" />
 
+            <!-- CP-057. The comparison the driver was doing in their head across the cards
+                 above: same destination, three ways to reach it, one of which they pick. -->
+            <TextView
+                android:id="@+id/routeChoices"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:lineSpacingExtra="6dp"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
             <!-- CP-056. The action that ends this screen: the plan stops being something the
                  driver has to copy. Its caveat is a sibling and never the button's own label,
                  because a driver reads a button as a promise and this one cannot make it. -->

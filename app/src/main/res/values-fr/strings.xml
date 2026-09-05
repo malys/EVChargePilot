@@ -321,6 +321,22 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
     <string name="charge_stop_charger_absent">Ajoutez une clé Open Charge Map pour savoir où vous arrêter.</string>
     <string name="charge_stop_charger">%1$s\u2009· à %2$s km · %3$s kW · %4$s</string>
+    <!-- CP-057. Trois façons d’aller au même endroit. Chaque ligne porte une charge et un
+         temps, ou aucun des deux : une économie sans son prix est un conseil déguisé en fait. -->
+    <string name="route_choices_title">Trois façons d\u2019y aller</string>
+    <string name="route_choices_planned">Itinéraire calculé · %1$s km · %2$s min</string>
+    <string name="route_choices_slower">À %1$d km/h sur les sections rapides · %2$s km · +%3$s min</string>
+    <string name="route_choices_no_motorway">Sans autoroute · %1$s km · %2$s min · %3$s</string>
+    <string name="route_choices_stop">un arrêt de recharge après %1$s km, environ %2$s %% restants en y arrivant</string>
+    <string name="route_choices_stop_unknown">un arrêt de recharge après %1$s km</string>
+    <string name="route_choices_no_stop">pas d\u2019arrêt de recharge, environ %1$s %% restants à l\u2019arrivée</string>
+    <string name="route_choices_removes_stop">pas d\u2019arrêt de recharge</string>
+    <string name="route_choices_refused">non calculable : %1$s</string>
+    <string name="route_choices_slower_absent">Aucune vitesse sur cette route ne supprime l\u2019arrêt de recharge.</string>
+    <string name="route_choices_no_motorway_absent">Aucune route sans autoroute n\u2019est revenue pour ce trajet.</string>
+    <string name="route_choices_delta_faster">%1$s min de moins</string>
+    <string name="route_choices_delta_slower">+%1$s min</string>
+    <string name="route_choices_requests">Ce plan a utilisé %1$d requête(s) d\u2019itinéraire sur l\u2019allocation de votre clé.</string>
     <!-- CP-056. Le passage de relais. La note n’est jamais repliée dans le libellé du bouton :
          un conducteur lit un bouton comme une promesse, et « geo: » ne porte qu’un point. -->
     <string name="charge_stop_navigate">Y aller</string>
