@@ -29,8 +29,9 @@ work six weeks from now.
 
 1. Open the app. On the dashboard, check that **Automatic trips** is on, or start a trip by
    hand with **Start trip**. A drive nobody recorded teaches question 6 nothing.
-2. Go to **View diagnostics** → **Open evidence capture** → **Arm validation drive**. The line
-   under the button must read *Validation mode on*.
+2. Nothing to arm any more — the unstable build arms itself. Check it once anyway: **View
+   diagnostics** → **Open evidence capture**, and the line under the button must read
+   *Validation mode on*. If it says off, someone turned it off; press the button.
 3. **Close the app completely and reopen it.** This matters: question 2 asks whether Android
    grants fine location without ever showing a prompt, and that can only be observed at the
    start of a process, before any screen of the app has asked for anything. Arming, then
@@ -42,7 +43,18 @@ work six weeks from now.
    result. Choose somewhere far enough that the plan says a stop is needed; if the battery is
    nearly full, pick somewhere further away. A plan with no stop never searches for a charger,
    and question 5 stays blank.
-6. Note the charge percentage and the outside temperature the dashboard shows. Two lines in a
+6. **Press *Y aller* at the bottom of the plan.** New, and the one item on this list that
+   fails visibly: either the car's navigation opens on that destination, or the screen says
+   nothing accepted it. Either answer closes CP-056 — write down which one you saw.
+
+   Note *what* it sent. Where the plan has a charging stop, the button sends **the stop**, not
+   the final destination: a `geo:` destination carries no waypoints, so sending the endpoint
+   would let the car pick its own road and quietly make every figure on the screen a figure
+   about a different trip.
+
+   If it worked, step 4 is already done — the car has a destination, which is all question 1
+   needs.
+7. Note the charge percentage and the outside temperature the dashboard shows. Two lines in a
    notebook are worth an hour of guessing later.
 
 **Choose a destination you are willing to share.** The bundle records the names of the roads on
@@ -99,6 +111,7 @@ where the car was. It does contain road names and the destination bytes describe
 | 6 | CP-052 | Do the charge segments the consumption model needs appear on a real drive? |
 | 7 | CP-049 | Does the route what-if produce rows on this firmware, or a refusal? |
 | 8 | CP-046 | Is a refused or missing location survivable from end to end? |
+| 9 | CP-056 | Does anything on this head unit accept a destination from another app? |
 
 ## Afterwards
 
