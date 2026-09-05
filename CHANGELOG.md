@@ -6,6 +6,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **"On your trip of 12 March, 110 km/h would have saved about 4 % of charge."** The post-trip
+  speed comparison used to integrate battery power, so on this car it had nothing to integrate.
+  Where a trip carries no power it is now measured on the gauge the driver watched fall: the
+  charge spent over the recorded motorway stretch, against what CP-052's fit expects at 90, 100,
+  110, 120 and 130 km/h, with the equivalent kilometres from that trip's own percent per
+  kilometre — no pack capacity anywhere. A stretch the gauge moved a step or less on is refused
+  rather than divided by its own resolution, and the two units never share a table.
+
 - **The speed what-if now works on the car it was written for.** This MG4 declares battery power
   and never publishes it — three diagnostic bundles, 51 samples, not one reading — so the kWh
   model behind the what-if was never going to train, and the screen would have said "not yet"

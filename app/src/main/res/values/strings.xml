@@ -183,6 +183,10 @@
     <string name="speed_what_if_energy_unavailable">Unavailable: a motorway interval has no usable battery-power reading.</string>
     <string name="speed_what_if_temperature_unavailable">Unavailable: a motorway interval has no usable outside-temperature reading.</string>
     <string name="speed_what_if_range_unavailable">Unavailable: the recorded trip has no usable consumption baseline for the range conversion.</string>
+    <string name="speed_what_if_ready_charge">ESTIMATED · %1$.1f km of recorded motorway intervals, measured on the charge gauge. Positive differences mean the model estimates less charge spent at the reference speed.</string>
+    <string name="speed_what_if_row_charge">%1$d km/h · ESTIMATED\nModelled charge %2$s\nCharge difference %3$s · equivalent range %4$s</string>
+    <string name="speed_what_if_charge_unavailable">Unavailable: a motorway interval has no usable state-of-charge reading.</string>
+    <string name="speed_what_if_charge_too_small">Unavailable: the charge gauge moved a step or less over the recorded motorway stretch, which is too coarse to measure anything.</string>
     <string name="speed_what_if_envelope_unavailable">Unavailable: none of 90, 100, 110, 120 or 130 km/h is inside the trained speed and temperature envelope.</string>
     <string name="trip_export_one_title">Export this trip</string>
     <string name="trip_export_all_title">Export all trips</string>

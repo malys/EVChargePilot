@@ -179,6 +179,10 @@
     <string name="speed_what_if_energy_unavailable">Indisponible : un intervalle autoroutier ne possède pas de mesure exploitable de puissance batterie.</string>
     <string name="speed_what_if_temperature_unavailable">Indisponible : un intervalle autoroutier ne possède pas de mesure exploitable de température extérieure.</string>
     <string name="speed_what_if_range_unavailable">Indisponible : le trajet enregistré ne possède pas de consommation de référence exploitable pour convertir en autonomie.</string>
+    <string name="speed_what_if_ready_charge">ESTIMÉ · %1$.1f km d\'intervalles autoroutiers enregistrés, mesurés sur la jauge de charge. Une différence positive signifie que le modèle estime une charge dépensée moindre à la vitesse de référence.</string>
+    <string name="speed_what_if_row_charge">%1$d km/h · ESTIMÉ\nCharge modélisée %2$s\nDifférence de charge %3$s · autonomie équivalente %4$s</string>
+    <string name="speed_what_if_charge_unavailable">Indisponible : un intervalle autoroutier n\'a aucune lecture d\'état de charge exploitable.</string>
+    <string name="speed_what_if_charge_too_small">Indisponible : la jauge de charge n\'a bougé que d\'un pas ou moins sur le tronçon autoroutier enregistré, ce qui est trop grossier pour mesurer quoi que ce soit.</string>
     <string name="speed_what_if_envelope_unavailable">Indisponible : aucune des vitesses 90, 100, 110, 120 ou 130 km/h n’appartient à l’enveloppe de vitesse et de température apprise.</string>
     <string name="trip_export_one_title">Exporter ce trajet</string>
     <string name="trip_export_all_title">Exporter tous les trajets</string>

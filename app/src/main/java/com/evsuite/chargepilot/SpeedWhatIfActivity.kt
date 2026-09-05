@@ -10,6 +10,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivitySpeedWhatIfBinding
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitResult
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -95,7 +97,10 @@ class SpeedWhatIfActivity : AppCompatActivity() {
             val trip = trips.firstOrNull { it.summary.startedAtMs == startedAtMs }
             val evidence = trip?.summary?.batteryPowerEvidence
             val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
-            result = trip?.let { SpeedWhatIfCalculator.calculate(it, model) }
+            // The charge fit, for the car that publishes no power — which is this one.
+            val socModel = (SocConsumptionFitter().fit(trips) as? SocConsumptionFitResult.Ready)
+                ?.model
+            result = trip?.let { SpeedWhatIfCalculator.calculate(it, model, socModel) }
                 ?: SpeedWhatIfResult.Unavailable(SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION)
             loaded = true
             runOnUiThread {
@@ -133,16 +138,20 @@ class SpeedWhatIfActivity : AppCompatActivity() {
         when (val current = result) {
             is SpeedWhatIfResult.Ready -> {
                 binding.whatIfResults.visibility = View.VISIBLE
+                val charge = current.basis == SpeedWhatIfBasis.STATE_OF_CHARGE_PERCENT
                 binding.whatIfStatus.text = getString(
-                    R.string.speed_what_if_ready,
+                    if (charge) R.string.speed_what_if_ready_charge else R.string.speed_what_if_ready,
                     current.motorwayDistanceKm,
                 )
+                // The unit is written on every figure, because "4" in percent and "4" in
+                // kilowatt-hours are not the same drive told twice.
+                val unit = if (charge) "%" else "kWh"
                 binding.whatIfResults.text = current.comparisons.joinToString("\n\n") { row ->
                     getString(
-                        R.string.speed_what_if_row,
+                        if (charge) R.string.speed_what_if_row_charge else R.string.speed_what_if_row,
                         row.referenceSpeedKmh,
-                        range(row.modelledEnergyLowKwh, row.modelledEnergyHighKwh, "kWh"),
-                        range(row.energyDeltaLowKwh, row.energyDeltaHighKwh, "kWh"),
+                        range(row.modelledLow, row.modelledHigh, unit),
+                        range(row.deltaLow, row.deltaHigh, unit),
                         range(row.rangeDeltaLowKm, row.rangeDeltaHighKm, "km"),
                     )
                 }
@@ -170,6 +179,10 @@ class SpeedWhatIfActivity : AppCompatActivity() {
             R.string.speed_what_if_range_unavailable
         SpeedWhatIfUnavailable.NO_REFERENCE_SPEED_IN_ENVELOPE ->
             R.string.speed_what_if_envelope_unavailable
+        SpeedWhatIfUnavailable.MOTORWAY_CHARGE_UNAVAILABLE ->
+            R.string.speed_what_if_charge_unavailable
+        SpeedWhatIfUnavailable.MOTORWAY_CHARGE_DROP_TOO_SMALL ->
+            R.string.speed_what_if_charge_too_small
     }
 
     private fun range(low: Double, high: Double, unit: String): String =
