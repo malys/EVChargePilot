@@ -11,8 +11,11 @@ import com.google.gson.JsonParser
  * `[longitude, latitude, altitude]` triples — the elevation profile CP-050 needs and the thing
  * the head unit's own guidance cannot supply at any price.
  *
- * Turn instructions are not parsed. ChargePilot is not a navigation app, the car already has
- * one, and every field parsed is a field that can be malformed.
+ * Turn instructions are asked for and only their arithmetic is kept — a distance, a duration
+ * and a road name per step. ChargePilot is not a navigation app and the car already has one;
+ * what CP-049 needs from the steps is where the road ahead is fast, and the router's own
+ * duration over its own distance says that without a speed-limit dataset. No manoeuvre text is
+ * read, and every field parsed is a field that can be malformed.
  *
  * Gson rather than `org.json`, because this project's unit tests run on the JVM with
  * `isReturnDefaultValues`, where `org.json` answers every call with a default and a parser test
@@ -40,12 +43,34 @@ object OrsDirections {
 
     data class Point(val longitude: Double, val latitude: Double, val altitudeMetres: Double?)
 
+    /**
+     * A piece of the road ahead, with the pace the router expects on it.
+     *
+     * The implied speed is the router's own duration over its own distance, which is how CP-049
+     * knows where slowing down is a choice: no speed-limit dataset is consulted, because the
+     * question is not what the limit is but how fast this road is being driven.
+     */
+    data class Section(val distanceKm: Double, val durationMinutes: Double, val road: String?) {
+        val impliedSpeedKmh: Double?
+            get() = if (durationMinutes > 0.0 && distanceKm > 0.0) {
+                distanceKm / (durationMinutes / 60.0)
+            } else {
+                null
+            }
+    }
+
     data class Route(
         val distanceKm: Double,
         val durationMinutes: Double,
         val points: List<Point>,
         val attribution: String?,
+        val sections: List<Section> = emptyList(),
     ) {
+        /** The road this route spends most of its length on, for telling two of them apart. */
+        val viaLabel: String?
+            get() = sections.filter { !it.road.isNullOrBlank() }
+                .maxByOrNull { it.distanceKm }?.road
+
         /** Cumulative climb and descent, the only part of the profile a model needs. */
         val ascentMetres: Double? get() = elevationSplit()?.first
         val descentMetres: Double? get() = elevationSplit()?.second
@@ -88,7 +113,9 @@ object OrsDirections {
         val body = JsonObject().apply {
             add("coordinates", coordinates)
             addProperty("elevation", true)
-            addProperty("instructions", false)
+            // CP-049 needs the road ahead broken into sections with a duration each, and the
+            // steps are where that lives. The geometry still dwarfs them.
+            addProperty("instructions", true)
             addProperty("units", "km")
         }
         if (alternatives > 1) {
@@ -116,6 +143,37 @@ object OrsDirections {
         features.mapNotNull { element ->
             (element as? JsonObject)?.let { feature(it, attribution) }
         }
+    }.getOrDefault(emptyList())
+
+    /**
+     * The steps, flattened, and only the ones that describe driving somewhere.
+     *
+     * A missing or malformed step list yields an empty list rather than a failed parse: the
+     * route is still a route without it, and only the what-if loses its input.
+     */
+    private fun sections(feature: JsonObject): List<Section> = runCatching {
+        val segments = feature.getAsJsonObject("properties")?.getAsJsonArray("segments")
+            ?: return emptyList()
+        val out = ArrayList<Section>()
+        for (segment in segments) {
+            val steps = (segment as? JsonObject)?.getAsJsonArray("steps") ?: continue
+            for (element in steps) {
+                val step = element as? JsonObject ?: continue
+                val distanceKm = step.get("distance")?.asDouble ?: continue
+                val durationSeconds = step.get("duration")?.asDouble ?: continue
+                if (!distanceKm.isFinite() || !durationSeconds.isFinite()) continue
+                if (distanceKm <= 0.0 || durationSeconds <= 0.0) continue
+                out.add(
+                    Section(
+                        distanceKm = distanceKm,
+                        durationMinutes = durationSeconds / 60.0,
+                        road = step.get("name")?.takeIf { it.isJsonPrimitive }?.asString
+                            ?.takeIf { it.isNotBlank() && it != "-" },
+                    )
+                )
+            }
+        }
+        out
     }.getOrDefault(emptyList())
 
     private fun feature(feature: JsonObject, attribution: String?): Route? {
@@ -152,6 +210,7 @@ object OrsDirections {
             durationMinutes = durationSeconds / 60.0,
             points = points,
             attribution = attribution,
+            sections = sections(feature),
         )
     }
 }

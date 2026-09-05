@@ -6,6 +6,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **"If you drive at 110 you will not need to charge" — with the twenty minutes it costs.**
+  The charge-stop screen now says what driving differently would change on the route it just
+  planned. Where the road ahead is fast — which comes from the router's own duration over its
+  own distance, not from a speed-limit dataset — it shows what 130, 120, 110, 100 and 90 km/h
+  would save and what each would cost in delay, and puts first the mildest slowdown that
+  removes the charging stop altogether. A saving is never shown without its delay: that would
+  be advice, and this app does not give advice. Consumption comes from the same fitted model as
+  the post-trip comparison, so the two screens cannot disagree, and outside its trained
+  envelope this refuses rather than inventing a number. The same request also brings back a
+  second road, compared on distance, time and charge. ORS bills one request either way, so the
+  alternative costs the driver's quota nothing.
+
 - **"Do I need to charge on this trip, and in how many kilometres" — the sentence this app was
   described by, now on a screen.** Type a destination while parked, choose which of the answers
   you meant, and the app plans to a reserve rather than to zero: either the charge left on

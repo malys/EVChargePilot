@@ -16,6 +16,7 @@ import com.evsuite.chargepilot.route.OpenChargeMap
 import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
 import com.evsuite.chargepilot.route.RouteGeometry
+import com.evsuite.chargepilot.route.RouteWhatIf
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
@@ -26,6 +27,7 @@ import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.RouteGrade
 import com.evsuite.hardware.telemetry.SocRate
 import com.evsuite.hardware.telemetry.SocRateEstimator
+import com.evsuite.hardware.telemetry.model.EnergyModel
 import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.util.Locale
@@ -73,6 +75,10 @@ class ChargeStopActivity : AppCompatActivity() {
 
     @Volatile
     private var rate: SocRate? = null
+
+    /** CP-032's fit, reused rather than rewritten. Null on a firmware that never trained one. */
+    @Volatile
+    private var model: EnergyModel? = null
 
     private var places: List<OrsGeocode.Place> = emptyList()
 
@@ -163,9 +169,16 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun loadRate() {
         val generation = FirmwareInfo.getGeneration()
         val trips = runCatching {
-            EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).readSummaries()
+            EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
         }.getOrDefault(emptyList())
-        rate = SocRateEstimator.fromTrips(trips, generation)
+        rate = SocRateEstimator.fromTrips(trips.map { it.summary }, generation)
+        // The same fit the post-trip comparison uses, so the two screens can never disagree
+        // about what 110 km/h costs.
+        model = LocalEnergyModel.loadOrTrain(
+            filesDir,
+            trips,
+            trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence },
+        )
     }
 
     private fun search() {
@@ -242,10 +255,12 @@ class ChargeStopActivity : AppCompatActivity() {
             val body = OrsDirections.requestBody(
                 OrsDirections.Point(origin.longitude, origin.latitude, origin.altitudeMetres),
                 OrsDirections.Point(place.longitude, place.latitude, null),
+                alternatives = ALTERNATIVES,
             )
             val result = directions.post(credentials, OrsDirections.PATH, body)
-            val route = (result as? RoutingTransport.Result.Ok)
-                ?.let { OrsDirections.parse(it.body).firstOrNull() }
+            val routes = (result as? RoutingTransport.Result.Ok)
+                ?.let { OrsDirections.parse(it.body) }.orEmpty()
+            val route = routes.firstOrNull()
             // The road ahead, which is the only elevation a forecast can use: CP-031 refused
             // the altitude behind the car and that refusal stands.
             val grade = route?.let { RouteGrade.of(it.ascentMetres, it.descentMetres, PACK) }
@@ -258,9 +273,26 @@ class ChargeStopActivity : AppCompatActivity() {
             } else {
                 null
             }
+            // Arithmetic over what already came back — no second request, and on the worker
+            // thread the route arrived on.
+            val whatIf = route?.let {
+                RouteWhatIf.slower(
+                    it.sections,
+                    model,
+                    snapshot?.outsideTempCelsius?.toDouble(),
+                    PACK,
+                    // Only a plan that has a stop can have it removed. Without the guard the
+                    // headline would announce a stop avoided on a route that never had one.
+                ) { saved ->
+                    stop != null && removesStop(socPercent, saved, it.distanceKm, effective, grade)
+                }
+            }
+            val alternative = route?.let { best ->
+                routes.getOrNull(1)?.let { RouteWhatIf.alternative(best, it, effective, PACK) }
+            }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(place, route, plan, effective, charger, grade)
+                render(place, route, plan, effective, charger, grade, whatIf, alternative)
                 announce(
                     when {
                         result is RoutingTransport.Result.Refused -> refusal(result)
@@ -270,6 +302,24 @@ class ChargeStopActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    /**
+     * Would this much charge, freed by slowing down, remove the stop.
+     *
+     * The planner answers it rather than the what-if: the reserve, the band and the refusal
+     * rules live in one place, and a second implementation of them would drift.
+     */
+    private fun removesStop(
+        socPercent: Double?,
+        savedPercent: Double,
+        routeKm: Double,
+        rate: SocRate?,
+        grade: RouteGrade.Cost?,
+    ): Boolean {
+        if (socPercent == null) return false
+        val freed = (socPercent + savedPercent).coerceAtMost(100.0)
+        return ChargeStopPlan.of(freed, routeKm, rate, grade = grade) is ChargeStopPlan.Plan.NoStop
     }
 
     /**
@@ -319,6 +369,8 @@ class ChargeStopActivity : AppCompatActivity() {
         rate: SocRate?,
         charger: Found?,
         grade: RouteGrade.Cost?,
+        whatIf: RouteWhatIf.Result?,
+        alternative: RouteWhatIf.Alternative?,
     ) {
         if (route == null || plan == null) {
             binding.chargeStopPlan.visibility = View.GONE
@@ -326,6 +378,7 @@ class ChargeStopActivity : AppCompatActivity() {
             binding.chargeStopAttribution.visibility = View.GONE
             binding.chargerPlace.visibility = View.GONE
             binding.chargerSource.visibility = View.GONE
+            binding.routeWhatIf.visibility = View.GONE
             return
         }
         binding.chargeStopPlan.visibility = View.VISIBLE
@@ -372,11 +425,83 @@ class ChargeStopActivity : AppCompatActivity() {
         binding.chargeStopDetail.text = listOfNotNull(detail, gradeLine).joinToString("\n")
 
         renderCharger(plan, charger)
+        renderWhatIf(whatIf, alternative)
 
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
         binding.chargeStopAttribution.visibility =
             if (route.attribution == null) View.GONE else View.VISIBLE
         binding.chargeStopAttribution.text = route.attribution
+    }
+
+    /**
+     * What driving differently would change, with its price attached.
+     *
+     * One card, and never a saving on its own: a row that said "saves 6 %" without the twenty
+     * minutes it costs would be advice, and this screen does not give advice. The headline goes
+     * first because it is the only line that changes a decision — everything under it is the
+     * table it came from.
+     */
+    private fun renderWhatIf(whatIf: RouteWhatIf.Result?, alternative: RouteWhatIf.Alternative?) {
+        val lines = ArrayList<String>()
+        when (whatIf) {
+            null -> Unit
+            is RouteWhatIf.Result.Unavailable -> lines.add(
+                getString(
+                    when (whatIf.reason) {
+                        SpeedWhatIfUnavailable.MODEL_NOT_TRAINED ->
+                            R.string.route_what_if_unavailable_model
+                        SpeedWhatIfUnavailable.NO_REFERENCE_SPEED_IN_ENVELOPE ->
+                            R.string.route_what_if_unavailable_envelope
+                        SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION ->
+                            R.string.route_what_if_unavailable_road
+                        // The remaining reasons are the post-trip comparison's, and reading
+                        // them as a missing temperature is what they amount to here.
+                        else -> R.string.route_what_if_unavailable_temperature
+                    }
+                )
+            )
+            is RouteWhatIf.Result.Ready -> {
+                whatIf.headline?.let {
+                    lines.add(
+                        getString(
+                            R.string.route_what_if_headline,
+                            it.speedKmh,
+                            it.delayMinutes.toInt(),
+                        )
+                    )
+                }
+                whatIf.options.mapTo(lines) {
+                    getString(
+                        R.string.route_what_if_row,
+                        it.speedKmh,
+                        format(it.affectedKm, "%.0f"),
+                        it.delayMinutes.toInt(),
+                        format(it.savedPercentLow, "%+.1f"),
+                        format(it.savedPercentHigh, "%+.1f"),
+                    )
+                }
+            }
+        }
+        alternative?.let {
+            val distance = format(it.distanceDeltaKm, "%+.0f")
+            val delay = format(it.delayMinutes, "%+.0f")
+            val low = format(it.savedPercentLow, "%+.1f")
+            val high = format(it.savedPercentHigh, "%+.1f")
+            lines.add(
+                it.viaLabel?.let { road ->
+                    getString(R.string.route_what_if_alternative, road, distance, delay, low, high)
+                } ?: getString(
+                    R.string.route_what_if_alternative_unnamed, distance, delay, low, high
+                )
+            )
+        }
+        // CP-005: nothing here was measured, and the card says so under the figures rather
+        // than repeating it on every row.
+        if (whatIf is RouteWhatIf.Result.Ready || alternative != null) {
+            lines.add(getString(R.string.route_what_if_source))
+        }
+        binding.routeWhatIf.visibility = if (lines.isEmpty()) View.GONE else View.VISIBLE
+        binding.routeWhatIf.text = lines.joinToString("\n")
     }
 
     /**
@@ -496,6 +621,12 @@ class ChargeStopActivity : AppCompatActivity() {
 
     private companion object {
         const val HISTORY_FILE = "trips.json"
+
+        /**
+         * How many routes to ask ORS for. One request either way, so the second road costs the
+         * driver's quota nothing; only the first is ever planned on.
+         */
+        const val ALTERNATIVES = 2
 
         /**
          * Below this a mid-route stop is not a stop, it is an overnight. Not a driver setting

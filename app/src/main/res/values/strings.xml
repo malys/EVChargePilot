@@ -248,6 +248,16 @@ This charge reaches about %4$s at that rate</string>
 %2$s km · %3$d min · climb %4$s m · descent %5$s m
 Spending %6$s %% per km</string>
     <string name="charge_stop_grade">Climb and descent: an estimated %1$s %% of charge, ± %2$s. Modelled from the route profile, never measured.</string>
+    <!-- CP-049. Every saving is stated with the delay it costs, in the same sentence. -->
+    <string name="route_what_if_headline">At %1$d km/h you would not need to charge, for about %2$d min more on the road.</string>
+    <string name="route_what_if_row">%1$d km/h over %2$s km · +%3$d min · saves an estimated %4$s to %5$s %% of charge</string>
+    <string name="route_what_if_alternative">Via %1$s: %2$s km, %3$s min, an estimated %4$s to %5$s %% of charge.</string>
+    <string name="route_what_if_alternative_unnamed">Another road: %1$s km, %2$s min, an estimated %3$s to %4$s %% of charge.</string>
+    <string name="route_what_if_unavailable_model">Slowing down: no comparison. This firmware has never trained a consumption model.</string>
+    <string name="route_what_if_unavailable_temperature">Slowing down: no comparison. No usable outside-temperature reading.</string>
+    <string name="route_what_if_unavailable_road">Slowing down: no comparison. Nothing on this route is driven fast enough to slow down from.</string>
+    <string name="route_what_if_unavailable_envelope">Slowing down: no comparison. The speeds on this route sit outside the trained envelope.</string>
+    <string name="route_what_if_source">ESTIMATED · modelled from the planned route and the fitted consumption model, never measured. Times are the router’s, driven at the stated speed.</string>
     <string name="routing_title">Routing key</string>
     <string name="routing_hint_key">OpenRouteService API key</string>
     <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>

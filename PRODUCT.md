@@ -56,6 +56,9 @@ controls are parked-only. On-vehicle validation remains required for every firmw
 - Explicitly estimated adaptive range; no estimate is rendered as a vehicle measurement.
 - App-private CSV/JSON trip export and parked-only bounded diagnostic export to removable USB.
 - Stable and unstable packages install side by side; neither contains an updater.
+- On a planned route, the consequences of driving differently: what each of 130, 120, 110,
+  100 and 90 km/h would save in charge and cost in minutes, and the same pair of numbers for
+  an alternative road. Never a recommended speed, and never one number without the other.
 - Arrival charge is answered from the head unit's own guidance and the driver's recorded
   trips, offline. Charger routing and energy-source attribution stay out of the MVP.
 - A parked-only charging-stop screen answers whether a typed destination needs a stop and in

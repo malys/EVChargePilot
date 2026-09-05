@@ -54,6 +54,10 @@ It does not write to the vehicle and does not contain network or update code.
 - A parked-only charging-stop plan: type a destination, and the app answers whether the trip
   needs a charging stop and in how many kilometres. It needs an OpenRouteService key you supply
   (see [Configuration](#configuration)); without one, every other screen still works.
+- On that same plan: what slowing down would change. Where the road ahead is fast, the app
+  shows what 130, 120, 110, 100 and 90 km/h would save in charge and cost in minutes, and
+  names the mildest slowdown that removes the charging stop. A second road comes back with the
+  same request and is compared on distance, time and charge. It never recommends a speed.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
 never zero. Charger data and energy-source attribution remain outside this initial milestone.

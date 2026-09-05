@@ -151,6 +151,19 @@
                 android:textAppearance="@style/Text.EV.Secondary"
                 android:visibility="gone" />
 
+            <!-- CP-049. Its own card, under the plan rather than inside it: what the driver
+                 would gain by driving differently is not what the plan says will happen. -->
+            <TextView
+                android:id="@+id/routeWhatIf"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:lineSpacingExtra="6dp"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/chargeStopAttribution"
                 android:layout_width="1400dp"

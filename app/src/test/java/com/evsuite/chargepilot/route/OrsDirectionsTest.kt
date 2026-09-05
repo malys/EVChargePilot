@@ -77,6 +77,50 @@ class OrsDirectionsTest {
     }
 
     @Test
+    fun `the steps become sections with the pace the router expects on them`() {
+        val body = """
+            {
+              "type": "FeatureCollection",
+              "metadata": { "attribution": "openrouteservice.org" },
+              "features": [
+                {
+                  "type": "Feature",
+                  "properties": {
+                    "summary": { "distance": 130.0, "duration": 4200.0 },
+                    "segments": [
+                      {
+                        "steps": [
+                          { "distance": 120.0, "duration": 3600.0, "name": "A7" },
+                          { "distance": 10.0, "duration": 600.0, "name": "-" },
+                          { "distance": 0.0, "duration": 0.0, "name": "Arrivée" }
+                        ]
+                      }
+                    ]
+                  },
+                  "geometry": {
+                    "type": "LineString",
+                    "coordinates": [ [4.0, 45.0, 100.0], [4.0, 45.5, 100.0] ]
+                  }
+                }
+              ]
+            }
+        """.trimIndent()
+
+        val route = OrsDirections.parse(body).first()
+        assertEquals(2, route.sections.size)
+        assertEquals(120.0, route.sections.first().impliedSpeedKmh!!, 1e-9)
+        assertEquals(60.0, route.sections[1].impliedSpeedKmh!!, 1e-9)
+        // "-" is ORS for a road with no name, and a road with no name is not a label.
+        assertNull(route.sections[1].road)
+        assertEquals("A7", route.viaLabel)
+
+        // A route parsed without steps is still a route; only the what-if loses its input.
+        val stepless = OrsDirections.parse(response).first()
+        assertTrue(stepless.sections.isEmpty())
+        assertNull(stepless.viaLabel)
+    }
+
+    @Test
     fun `terrain noise is not a mountain`() {
         // A flat road sampled by a terrain model wobbles a metre or two at every point. Summed
         // naively that is 60 m of climb over 30 points, and a forecast that believes it will
@@ -137,13 +181,13 @@ class OrsDirectionsTest {
     }
 
     @Test
-    fun `the request asks for elevation and no turn instructions`() {
+    fun `the request asks for elevation and for the steps, in kilometres`() {
         val body = OrsDirections.requestBody(
             OrsDirections.Point(4.8357, 45.7640, null),
             OrsDirections.Point(5.3698, 43.2965, null),
         )
         assertTrue(body.contains("\"elevation\":true"))
-        assertTrue(body.contains("\"instructions\":false"))
+        assertTrue(body.contains("\"instructions\":true"))
         assertTrue(body.contains("\"units\":\"km\""))
         assertTrue(body.contains("[[4.8357,45.764],[5.3698,43.2965]]"))
         assertTrue("alternatives cost parsing, so they are opt-in", !body.contains("alternative"))
