@@ -47,6 +47,10 @@ echo "sdk.dir=$ANDROID_HOME" > local.properties
 description = "Build the stable debug APK"
 run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME assembleStableDebug'
 
+[tasks.build-unstable]
+description = "Build the unstable debug APK — the channel the validation drive runs on"
+run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME assembleUnstableDebug'
+
 [tasks.test]
 description = "Run application and EVHardware JVM tests"
 run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME testStableDebugUnitTest testUnstableDebugUnitTest :evhardware:testDebugUnitTest'
@@ -176,6 +180,24 @@ echo "Installing $APK"
 "$ADB" shell am start -n \
   "com.evsuite.chargepilot/com.evsuite.chargepilot.MainActivity"
 echo "EVChargePilot launched."
+'''
+
+[tasks.run-unstable]
+description = "Install and launch the unstable channel — probes, evidence capture, CP-055"
+depends = ["build-unstable"]
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+if [ -z "$($ADB devices | sed '1d' | grep -w device || true)" ]; then
+  echo "No device connected. Start emulator-car/emulator-screen or connect the vehicle." >&2
+  exit 1
+fi
+APK=$(ls -t app/build/outputs/apk/unstable/debug/*.apk | head -1)
+echo "Installing $APK"
+"$ADB" install -r -g "$APK"
+"$ADB" shell am start -n \
+  "com.evsuite.chargepilot.unstable/com.evsuite.chargepilot.MainActivity"
+echo "EVChargePilot (unstable) launched."
 '''
 
 [tasks.logs]

@@ -30,4 +30,8 @@
     <string name="nav_probe_save_failed">The trace could not be saved.</string>
     <string name="nav_probe_open">Guidance probe</string>
     <string name="nav_probe_undecoded">Armed · traffic seen, none decoded</string>
+    <string name="validation_arm">Arm validation drive</string>
+    <string name="validation_disarm">Disarm validation drive</string>
+    <string name="validation_on">Validation mode on. Every open question records itself; export to USB when you are back.</string>
+    <string name="validation_off">Validation mode off. Nothing is recorded until it is armed.</string>
 </resources>

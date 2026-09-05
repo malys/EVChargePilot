@@ -6,6 +6,21 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **One drive answers eight questions, on the unstable channel only.** Eleven tickets ended
+  "verified on a laptop, never on the car", and each named a different question; answered one
+  at a time they would cost eight evenings. There is now one toggle on the evidence screen
+  that arms every remaining question at once, and each of them records itself from the
+  decision it is about — the permission result, the routing response and its sections, the
+  charger search, the what-if rows or its refusal, the model fit, and the car's own navigation
+  transactions. Nothing needs a tap while driving, because an instrument that needs one at
+  130 km/h is a hazard. The diagnostic export carries a single `validation-*.json` in which
+  every question has a named block, including the questions nothing was recorded for: those
+  say what would have made them fire, since "no chargers came back" and "the search never ran"
+  close different tickets. The file carries no API key, no typed destination and no origin
+  coordinate; it does carry road names and the navigation parcel bytes, and it says so in its
+  own notes. `analysis/CP-055_validation_drive.md` is the checklist, written to be followed by
+  someone who has not read the source. Stable contains none of it.
+
 - **The car's numbers are the driver's now, not a specification sheet's.** Usable capacity when
   new, state of health, the charger power floor and the reserve to arrive with were constants in
   the source, each with a comment admitting it should not be. There is a parked-only screen for

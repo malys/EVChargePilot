@@ -101,7 +101,12 @@ class ChargeStopActivity : AppCompatActivity() {
         // The result map is not the answer: on this platform a permission from an already held
         // group can be granted without a prompt, and a coarse-only grant is a refusal of what
         // was asked for. What counts is whether fine location is held now.
-        if (place != null && LocationSource.hasPrecise(this)) route(place) else render()
+        val granted = LocationSource.hasPrecise(this)
+        ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+            "permission result: fine=$granted, and the request " +
+                if (place != null) "continues the route that asked for it" else "had nothing waiting"
+        }
+        if (place != null && granted) route(place) else render()
     }
 
     private val connection = object : ServiceConnection {
@@ -183,8 +188,23 @@ class ChargeStopActivity : AppCompatActivity() {
         // power and the kWh model therefore never trains on it (CP-052). Refitted on each
         // load rather than stored: it is a few thousand samples of arithmetic on a worker
         // thread, and a cache would only add a way for the two to disagree.
-        model = (SocConsumptionFitter().fit(trips, generation) as? SocConsumptionFitResult.Ready)
-            ?.model
+        val fit = SocConsumptionFitter().fit(trips, generation)
+        model = (fit as? SocConsumptionFitResult.Ready)?.model
+        ValidationProbe.record(ValidationQuestion.SOC_SEGMENTS) {
+            val head = "trips=${trips.size} samples=${trips.sumOf { it.samples?.size ?: 0 }} " +
+                "rate=${rate?.let { r -> probeFormat(r.percentPerKm, "%.3f") + " %/km" } ?: "none"}"
+            when (fit) {
+                is SocConsumptionFitResult.Ready -> fit.model.let { m ->
+                    "$head fit=ready segments=${m.segmentCount} " +
+                        "speed=${probeFormat(m.envelope.minSpeedKmh, "%.0f")}..${
+                            probeFormat(m.envelope.maxSpeedKmh, "%.0f")} km/h " +
+                        "temp=${probeFormat(m.envelope.minOutsideTempCelsius, "%.0f")}..${
+                            probeFormat(m.envelope.maxOutsideTempCelsius, "%.0f")} C " +
+                        "rmse=${probeFormat(m.residualRmsePercentPer100Km, "%.2f")} %/100 km"
+                }
+                is SocConsumptionFitResult.Unavailable -> "$head fit=unavailable(${fit.reason})"
+            }
+        }
     }
 
     private fun search() {
@@ -237,6 +257,9 @@ class ChargeStopActivity : AppCompatActivity() {
             return
         }
         if (!LocationSource.hasPrecise(this)) {
+            ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+                "route asked without a fine grant: the prompt is being requested"
+            }
             pending = place
             locationPermission.launch(
                 arrayOf(
@@ -247,6 +270,12 @@ class ChargeStopActivity : AppCompatActivity() {
             return
         }
         val origin = LocationSource.lastKnown(this)
+        ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+            // Age and altitude, never the position itself: this file leaves the car.
+            origin?.let {
+                "fix held: age=${it.ageMs / 1000}s altitude=${it.altitudeMetres != null}"
+            } ?: "fine grant held but no fix within ${LocationSource.MAX_AGE_MS / 1000}s: refused"
+        }
         if (origin == null) {
             announce(getString(R.string.charge_stop_no_position))
             return
@@ -270,6 +299,23 @@ class ChargeStopActivity : AppCompatActivity() {
             val routes = (result as? RoutingTransport.Result.Ok)
                 ?.let { OrsDirections.parse(it.body) }.orEmpty()
             val route = routes.firstOrNull()
+            ValidationProbe.record(ValidationQuestion.ROUTE_ALTERNATIVES) {
+                "asked alternatives=$ALTERNATIVES, " + when (result) {
+                    is RoutingTransport.Result.Ok ->
+                        "answered ${result.body.length} chars, parsed ${routes.size} route(s)"
+                    is RoutingTransport.Result.Refused -> "refused(${result.reason})"
+                }
+            }
+            ValidationProbe.record(ValidationQuestion.ROUTE_SECTIONS) {
+                route?.let { r ->
+                    "route ${probeFormat(r.distanceKm, "%.1f")} km in " +
+                        "${probeFormat(r.durationMinutes, "%.0f")} min, ${r.sections.size} section(s): " +
+                        r.sections.take(VALIDATION_SECTIONS).joinToString(" | ") { section ->
+                            "${section.road ?: "unnamed"} ${probeFormat(section.distanceKm, "%.1f")} km " +
+                                "@${section.impliedSpeedKmh?.let { v -> probeFormat(v, "%.0f") } ?: "?"}"
+                        }
+                } ?: "no route parsed"
+            }
             // The road ahead, which is the only elevation a forecast can use: CP-031 refused
             // the altitude behind the car and that refusal stands.
             val grade = route?.let {
@@ -308,6 +354,21 @@ class ChargeStopActivity : AppCompatActivity() {
                 routes.getOrNull(1)?.let {
                     RouteWhatIf.alternative(best, it, effective, settings.pack)
                 }
+            }
+            ValidationProbe.record(ValidationQuestion.WHAT_IF) {
+                val body = when (whatIf) {
+                    null -> "no route, so no what-if"
+                    is RouteWhatIf.Result.Unavailable -> "unavailable(${whatIf.reason})"
+                    is RouteWhatIf.Result.Ready -> "ready rows=${whatIf.options.size} " +
+                        "headline=${whatIf.headline?.speedKmh?.toString() ?: "none"} " +
+                        whatIf.options.joinToString(" | ") { option ->
+                            "${option.speedKmh}: ${probeFormat(option.affectedKm, "%.0f")} km " +
+                                "${probeFormat(option.delayMinutes, "%.0f")} min " +
+                                "${probeFormat(option.savedPercentLow, "%.1f")}..${
+                                    probeFormat(option.savedPercentHigh, "%.1f")} %"
+                        }
+                }
+                "$body | second road=${alternative?.viaLabel ?: "none"}"
             }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
@@ -358,16 +419,41 @@ class ChargeStopActivity : AppCompatActivity() {
         rate: SocRate?,
         settings: VehicleSettings.Values,
     ): Found? {
-        val credentials = RoutingCredentials.readCharger(this) ?: return null
+        val credentials = RoutingCredentials.readCharger(this) ?: run {
+            ValidationProbe.record(ValidationQuestion.CHARGERS) { "no charger key configured" }
+            return null
+        }
         val window = RouteGeometry.window(
             route.points,
             (afterKm - OpenChargeMap.WINDOW_KM).coerceAtLeast(0.0),
             afterKm,
         )
-        if (window.size < 2) return null
+        if (window.size < 2) {
+            ValidationProbe.record(ValidationQuestion.CHARGERS) {
+                "the ${OpenChargeMap.WINDOW_KM} km window before km " +
+                    "${probeFormat(afterKm, "%.0f")} held ${window.size} route point(s): no search"
+            }
+            return null
+        }
         val result = chargers.get(credentials, OpenChargeMap.PATH, OpenChargeMap.query(window))
-        val body = (result as? RoutingTransport.Result.Ok)?.body ?: return null
-        return OpenChargeMap.parse(body, settings.minChargerPowerKw)
+        val body = (result as? RoutingTransport.Result.Ok)?.body ?: run {
+            ValidationProbe.record(ValidationQuestion.CHARGERS) {
+                "search refused(${(result as? RoutingTransport.Result.Refused)?.reason})"
+            }
+            return null
+        }
+        val found = OpenChargeMap.parse(body, settings.minChargerPowerKw)
+        ValidationProbe.record(ValidationQuestion.CHARGERS) {
+            val powers = found.mapNotNull { it.powerKw }
+            "window ends at km ${probeFormat(afterKm, "%.0f")}, " +
+                "min ${probeFormat(settings.minChargerPowerKw, "%.0f")} kW: " +
+                "${found.size} charger(s), power " +
+                (powers.minOrNull()?.let { low ->
+                    "${probeFormat(low, "%.0f")}..${probeFormat(powers.max(), "%.0f")} kW"
+                } ?: "unpublished") +
+                ", operational=${found.count { it.operational == true }}"
+        }
+        return found
             .mapNotNull { charger ->
                 val alongKm = RouteGeometry.distanceAlongKm(
                     route.points,
@@ -636,6 +722,10 @@ class ChargeStopActivity : AppCompatActivity() {
         message = null
     }
 
+    /** Probe text is read at a desk, not by a driver: point decimals, whatever the locale. */
+    private fun probeFormat(value: Double, pattern: String): String =
+        String.format(Locale.ROOT, pattern, value)
+
     private fun format(value: Double, pattern: String): String =
         String.format(Locale.getDefault(), pattern, value)
 
@@ -655,5 +745,7 @@ class ChargeStopActivity : AppCompatActivity() {
          */
         const val ALTERNATIVES = 2
 
+        /** Enough sections for a validation line to show the shape of a route, not all of it. */
+        const val VALIDATION_SECTIONS = 8
     }
 }

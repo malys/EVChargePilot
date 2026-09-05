@@ -55,7 +55,21 @@ class EvidenceCaptureActivity : AppCompatActivity() {
         binding.navProbeAction.setOnClickListener {
             startActivity(Intent(this, NavGuidanceProbeActivity::class.java))
         }
+        // The one toggle CP-055 asked for. Not parked-gated, unlike the capture above: it
+        // writes no file and samples nothing, and refusing it because the car is already
+        // moving would lose the drive the evidence is being collected on.
+        binding.validationAction.setOnClickListener {
+            ValidationProbe.setEnabled(this, !ValidationProbe.isEnabled)
+            renderValidation()
+        }
+        renderValidation()
         render(CaptureViewState.empty())
+    }
+
+    private fun renderValidation() {
+        val on = ValidationProbe.isEnabled
+        binding.validationAction.setText(if (on) R.string.validation_disarm else R.string.validation_arm)
+        binding.validationStatus.setText(if (on) R.string.validation_on else R.string.validation_off)
     }
 
     override fun onStart() {

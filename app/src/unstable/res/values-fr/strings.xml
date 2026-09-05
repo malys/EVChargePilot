@@ -30,4 +30,8 @@
     <string name="nav_probe_save_failed">La trace n’a pas pu être enregistrée.</string>
     <string name="nav_probe_open">Sonde de guidage</string>
     <string name="nav_probe_undecoded">Armée · trafic vu, rien de décodé</string>
+    <string name="validation_arm">Armer le trajet de validation</string>
+    <string name="validation_disarm">Désarmer le trajet de validation</string>
+    <string name="validation_on">Mode validation actif. Chaque question ouverte s’enregistre seule ; exportez vers l’USB au retour.</string>
+    <string name="validation_off">Mode validation inactif. Rien n’est enregistré tant qu’il n’est pas armé.</string>
 </resources>

@@ -23,6 +23,9 @@ object EvidenceCaptureHook {
      * tick, and it is read-only.
      */
     fun startProbes(context: Context) {
+        // First, because question 2 — "was fine location granted without a prompt" — stops
+        // being observable the moment any screen of this process asks for it.
+        ValidationProbe.arm(context)
         NavGuidanceRecorder.start(context)
         SignalEvidenceRecorder.start(context)
     }
@@ -37,6 +40,7 @@ object EvidenceCaptureHook {
     fun saveProbeArtifacts(context: Context) {
         // A late arm is better than none: the app may have started before the vehicle
         // services were up, and an export is a good moment to find out.
+        ValidationProbe.arm(context)
         NavGuidanceRecorder.start(context)
         SignalEvidenceRecorder.start(context)
         val firmware = FirmwareInfo.getGeneration().name
@@ -52,6 +56,13 @@ object EvidenceCaptureHook {
         store.write(
             TripHistoryArtifact.of(context).toJson(),
             TripHistoryArtifact.KIND,
+            firmware,
+        )
+        // Written even when validation mode is off: "the toggle was never on" is the answer to
+        // every empty block in it, and a bundle that simply lacks the file says nothing.
+        store.write(
+            ValidationProbe.artifact(context).toBoundedJson(),
+            ValidationArtifact.KIND,
             firmware,
         )
     }

@@ -93,7 +93,11 @@ internal object NavGuidanceRecorder {
         override fun run() {
             // readNow() polls the synchronous getters and folds in whatever the listener has
             // already seen, so a car standing still with a guidance running still reports.
-            record(SaicNavGuidance.readNow())
+            val guidance = SaicNavGuidance.readNow()
+            record(guidance)
+            // The car is guiding, which is the one moment CP-051's destination transactions
+            // can be asked with a destination set. The probe fires once and off this thread.
+            if (guidance.events > 0) ValidationProbe.onGuidanceHeard()
             ticker.postDelayed(this, TICK_MS)
         }
     }
