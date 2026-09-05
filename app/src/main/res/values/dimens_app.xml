@@ -3,5 +3,11 @@
     <!-- Fixed instrument rail: app-specific because it balances live readouts against
          one parked-only action on the 1920×720 MG4 panel. -->
     <dimen name="chargepilot_rail_width">420dp</dimen>
+    <!-- The state of charge is the one Display element on this screen and now the only
+         thing at the top of it: the title bar that used to sit above it is gone. 32sp is
+         the suite size for a Display sharing a screen with a bar and a status line; with
+         both removed the anchor is scaled to the field it anchors. The suite token
+         text_display is untouched, and no second element on this screen uses this size. -->
+    <dimen name="chargepilot_text_soc">56sp</dimen>
 </resources>
 

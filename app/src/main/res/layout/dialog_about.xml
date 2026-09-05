@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="760dp"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/ev_surface"
+    app:cardCornerRadius="@dimen/ev_corner"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/ev_outline"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_md"
+            android:text="@string/about_title"
+            android:textAppearance="@style/Text.EV.SectionHeader" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/ev_outline" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_lg">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/spacing_lg"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
+                    android:background="@drawable/about_logo_tile"
+                    android:contentDescription="@string/about_logo_description"
+                    android:padding="@dimen/spacing_sm"
+                    android:src="@drawable/ic_launcher_foreground" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/Text.EV.Title" />
+
+                <TextView
+                    android:id="@+id/aboutVersion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:lineSpacingMultiplier="1.25"
+                    android:text="@string/about_attribution"
+                    android:textAppearance="@style/Text.EV.Body" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/spacing_lg"
+                android:background="@color/ev_outline" />
+
+            <LinearLayout
+                android:layout_width="264dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <!-- The head unit has no keyboard and no browser worth the name, so the way
+                     out of this screen is the phone in the driver's pocket. Encoded on the
+                     device: nothing here reaches the network. -->
+                <ImageView
+                    android:id="@+id/aboutQrCode"
+                    android:layout_width="208dp"
+                    android:layout_height="208dp"
+                    android:background="#FFFFFFFF"
+                    android:contentDescription="@string/about_qr_description"
+                    android:padding="@dimen/spacing_sm"
+                    android:scaleType="fitCenter" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:gravity="center"
+                    android:text="@string/about_repository"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/ev_outline" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_lg">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/about_made_with_love"
+                android:textAppearance="@style/Text.EV.Body" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/aboutClose"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target"
+                android:text="@string/about_close" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

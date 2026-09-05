@@ -5,8 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.IBinder
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +32,8 @@ import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.Provenanced
 import com.evsuite.hardware.telemetry.TripDetector
 import com.evsuite.hardware.telemetry.UnavailableReason
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -106,6 +111,8 @@ class MainActivity : AppCompatActivity() {
         binding.chargeStopAction.setOnClickListener {
             startActivity(Intent(this, ChargeStopActivity::class.java))
         }
+        binding.aboutAction.text = getString(R.string.about_version_badge, appVersion())
+        binding.aboutAction.setOnClickListener { showAbout() }
         renderUnavailable()
         requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
@@ -188,10 +195,7 @@ class MainActivity : AppCompatActivity() {
         renderReadings(readings, value.firmware)
 
         val hasVehicleData = value.hasVehicleData
-        binding.dataStatus.text = getString(
-            if (hasVehicleData) R.string.status_vehicle_connected else R.string.status_waiting_for_vehicle
-        )
-        binding.dataStatus.setTextColor(getColor(if (hasVehicleData) R.color.ev_ok else R.color.ev_warn))
+        renderDataStatus(hasVehicleData)
 
         // Recording controls are for a parked driver. Live values remain passive and readable
         // while moving; the app never presents an overlay or asks for attention.
@@ -417,11 +421,51 @@ class MainActivity : AppCompatActivity() {
         view.contentDescription = provenance.describe(getString(label), value, rendered)
     }
 
+    /**
+     * The screen carries no status banner: when the car answers, this line says where the
+     * number above it comes from, and when it does not, the same line says so in red. Text
+     * and colour together, because a driver reads the word faster than the hue and roughly
+     * one in twelve cannot separate the hues at all.
+     */
+    private fun renderDataStatus(hasVehicleData: Boolean) {
+        binding.dataStatus.setText(
+            if (hasVehicleData) R.string.soc_vehicle_reported else R.string.status_waiting_for_vehicle
+        )
+        binding.dataStatus.setTextColor(
+            getColor(if (hasVehicleData) R.color.ev_text_secondary else R.color.ev_error)
+        )
+    }
+
+    /** What the driver can read back down a phone line, build suffix and all. */
+    private fun appVersion(): String = runCatching {
+        packageManager.getPackageInfo(packageName, 0).versionName
+    }.getOrNull() ?: getString(R.string.about_version_unknown)
+
+    /**
+     * Version, authorship and the repository as a QR. The address is not a link: this head
+     * unit has no browser to hand it to, and a tap that does nothing is worse than a code
+     * the phone in the driver's pocket can read off the glass.
+     */
+    private fun showAbout() {
+        val content = layoutInflater.inflate(R.layout.dialog_about, null)
+        content.findViewById<TextView>(R.id.aboutVersion).text =
+            getString(R.string.about_version, appVersion())
+        QrCode.generate(REPOSITORY_URL, QR_SIZE_PX)?.let {
+            content.findViewById<ImageView>(R.id.aboutQrCode).setImageBitmap(it)
+        }
+        val dialog = MaterialAlertDialogBuilder(this).setView(content).create()
+        content.findViewById<MaterialButton>(R.id.aboutClose).setOnClickListener { dialog.dismiss() }
+        dialog.show()
+        // The card draws its own surface, outline and radius; the dialog window must not
+        // draw a second one behind it.
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
     private fun renderUnavailable() {
         latestReadings = DashboardReadings.empty()
         consumption.reset()
         renderReadings(latestReadings)
-        binding.dataStatus.text = getString(R.string.status_waiting_for_vehicle)
+        renderDataStatus(false)
         binding.tripAction.isEnabled = false
         binding.automaticDetection.isEnabled = false
         val automatic = TripRecordingService.isAutomaticDetectionEnabled(this)
@@ -766,6 +810,9 @@ class MainActivity : AppCompatActivity() {
         const val MAX_LOG_SECTION_BYTES = 32 * 1_024
         const val MAX_INVENTORY_FILES = 64
         const val DASH = "—"
+        const val REPOSITORY_URL = "https://github.com/malys/EVChargePilot"
+        /** Encoded once at this size, then scaled down into a 208dp view. */
+        const val QR_SIZE_PX = 416
         // The unit-bearing fields keep their unit while unavailable so the layout does not
         // shift the moment the vehicle starts answering.
         const val SOC_UNAVAILABLE = "— %"

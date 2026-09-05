@@ -4,7 +4,6 @@
     <string name="value_unavailable" translatable="false">—</string>
     <string name="value_soc_unavailable" translatable="false">— %</string>
     <string name="value_power_unavailable" translatable="false">— kW</string>
-    <string name="status_vehicle_connected">Vehicle data available</string>
     <string name="status_waiting_for_vehicle">Waiting for vehicle data</string>
     <string name="label_battery">BATTERY</string>
     <string name="soc_vehicle_reported">Vehicle-reported state of charge</string>
@@ -327,4 +326,17 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_charger_source">%1$s · last confirmed %2$s. This is a record, not a promise: it may be gone, busy or broken.</string>
     <string name="charge_stop_charger_source_undated">%1$s · no confirmation date. This is a record, not a promise: it may be gone, busy or broken.</string>
     <string name="charge_stop_charger_not_operational">The record says this one is not working.</string>
+
+    <!-- About: reached from the version on the trip rail, since the screen has no title bar. -->
+    <string name="about_action">About EVChargePilot</string>
+    <string name="about_title">About EVChargePilot</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_version_badge">v%1$s</string>
+    <string name="about_version_unknown">unknown</string>
+    <string name="about_attribution">Author and maintainer: malys</string>
+    <string name="about_repository">github.com/malys/EVChargePilot</string>
+    <string name="about_made_with_love">Made with ❤ by malys</string>
+    <string name="about_logo_description">EVChargePilot logo</string>
+    <string name="about_qr_description">QR code for the project repository</string>
+    <string name="about_close">Close</string>
 </resources>

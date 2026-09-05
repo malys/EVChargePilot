@@ -106,6 +106,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **The dashboard stopped introducing itself and started reading larger.** The top bar spent
+  80dp of a 720dp screen on the app's own name — which the driver had just tapped to get here —
+  and on a permanent "vehicle data available", a line that said what the numbers underneath
+  were already saying. Both are gone. The state of charge, the one Display element on this
+  screen, is now 56sp instead of 32sp, and every value on it moved up a step of the type scale;
+  the battery card grew with them. When the car stops answering, the line under the state of
+  charge says so in red instead of a banner saying it in orange all day: text and colour
+  together, in the place where the missing number is, and nothing appears, moves or asks for a
+  tap while driving. Sub-screens keep their title bars, where a title and a way back are the
+  point of the bar.
+
+- **The app says which version it is, and how to find its source from a car with no keyboard.**
+  A version badge sits at the top of the trip rail, where the app's name used to be in the bar,
+  and opens an About with the version, the author and the repository as a QR code — encoded on
+  the device, no network involved, modelled on EVTasker's. The address is deliberately not a
+  link: this head unit has no browser to hand it to, and a tap that does nothing is worse than
+  a code a phone can read off the glass.
+
 - **"Works offline" stopped being true in one direction only, and the documents say so.**
   Network and location were approved for route planning, which retires the first line of this
   app's safety argument — an app that cannot open a socket cannot exfiltrate a trip history, and

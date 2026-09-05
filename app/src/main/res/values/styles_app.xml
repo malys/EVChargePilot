@@ -55,4 +55,7 @@
         <item name="android:textColor">@color/ev_on_accent</item>
         <item name="backgroundTint">@color/ev_error</item>
     </style>
+    <style name="Text.EVChargePilot.Soc" parent="Text.EV.Display">
+        <item name="android:textSize">@dimen/chargepilot_text_soc</item>
+    </style>
 </resources>

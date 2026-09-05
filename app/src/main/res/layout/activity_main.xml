@@ -17,31 +17,6 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@drawable/bg_topbar"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/spacing_lg"
-        android:paddingEnd="@dimen/spacing_lg">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/app_name"
-            android:textAppearance="@style/Text.EV.Title" />
-
-        <TextView
-            android:id="@+id/dataStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawablePadding="@dimen/spacing_sm"
-            android:text="@string/status_waiting_for_vehicle"
-            android:textAppearance="@style/Text.EV.Body" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:baselineAligned="false"
@@ -56,7 +31,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="190dp"
+                android:layout_height="220dp"
                 android:background="@drawable/bg_card"
                 android:baselineAligned="false"
                 android:gravity="center_vertical"
@@ -82,9 +57,13 @@
                         android:layout_marginTop="@dimen/spacing_sm"
                         android:fontFeatureSettings="tnum"
                         android:text="@string/value_soc_unavailable"
-                        android:textAppearance="@style/Text.EV.Display" />
+                        android:textAppearance="@style/Text.EVChargePilot.Soc" />
 
+                    <!-- One line with one job: where this number comes from, or in red
+                         that it comes from nowhere. The old top bar announced "vehicle data
+                         available" all day to say what the numbers were already saying. -->
                     <TextView
+                        android:id="@+id/dataStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_xs"
@@ -112,7 +91,7 @@
                         android:layout_marginTop="@dimen/spacing_sm"
                         android:fontFeatureSettings="tnum"
                         android:text="@string/value_power_unavailable"
-                        android:textAppearance="@style/Text.EV.Body" />
+                        android:textAppearance="@style/Text.EV.Title" />
 
                     <TextView
                         android:id="@+id/powerState"
@@ -165,10 +144,11 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_md"
                             android:layout_weight="1"
                             android:orientation="vertical">
-                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_range" />
-                            <TextView android:id="@+id/rangeValue" style="@style/Text.EV.TripValue" />
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:minLines="2" android:text="@string/label_range" />
+                            <TextView android:id="@+id/rangeValue" style="@style/Text.EV.ReadoutValue" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -176,8 +156,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
-                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_adaptive_range" />
-                            <TextView android:id="@+id/adaptiveRangeValue" style="@style/Text.EV.TripValue" />
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:minLines="2" android:text="@string/label_adaptive_range" />
+                            <TextView android:id="@+id/adaptiveRangeValue" style="@style/Text.EV.ReadoutValue" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -193,7 +173,7 @@
                         android:layout_weight="1"
                         android:layout_marginStart="@dimen/spacing_sm"
                         android:layout_marginEnd="@dimen/spacing_sm">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_speed" />
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:minLines="2" android:text="@string/label_speed" />
                         <TextView android:id="@+id/speedValue" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
 
@@ -214,10 +194,11 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_md"
                             android:layout_weight="1"
                             android:orientation="vertical">
-                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_instant_consumption" />
-                            <TextView android:id="@+id/instantConsumptionValue" style="@style/Text.EV.TripValue" />
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:minLines="2" android:text="@string/label_instant_consumption" />
+                            <TextView android:id="@+id/instantConsumptionValue" style="@style/Text.EV.ReadoutValue" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -225,8 +206,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
-                            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_trip_average_consumption" />
-                            <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.TripValue" />
+                            <TextView style="@style/Text.EV.ReadoutLabel" android:minLines="2" android:text="@string/label_trip_average_consumption" />
+                            <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.ReadoutValue" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -336,11 +317,38 @@
             android:orientation="vertical"
             android:padding="@dimen/spacing_md">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_current_trip"
-                android:textAppearance="@style/Text.EV.Title" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/label_current_trip"
+                    android:textAppearance="@style/Text.EV.Title" />
+
+                <!-- The only place the app still names its own version, and the way into
+                     About. Small text, full-height target: 17sp is not a 17dp button. -->
+                <TextView
+                    android:id="@+id/aboutAction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:contentDescription="@string/about_action"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minWidth="@dimen/touch_target"
+                    android:paddingStart="@dimen/spacing_sm"
+                    android:paddingEnd="@dimen/spacing_sm"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/Text.EV.Secondary"
+                    android:textColor="@color/ev_accent" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tripHint"
@@ -371,7 +379,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_marginTop="@dimen/spacing_sm"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
@@ -413,6 +421,31 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/arrivalForecastAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_weight="1"
+                    android:text="@string/action_arrival_forecast" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/chargeStopAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:text="@string/action_charge_stop" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/diagnosticsAction"
                     style="@style/Widget.EV.Button.Outlined"
                     android:layout_width="0dp"
@@ -429,22 +462,6 @@
                     android:layout_weight="1"
                     android:text="@string/action_trip_history" />
             </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/arrivalForecastAction"
-                style="@style/Widget.EV.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/action_arrival_forecast" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/chargeStopAction"
-                style="@style/Widget.EV.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/action_charge_stop" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

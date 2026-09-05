@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">EVChargePilot</string>
-    <string name="status_vehicle_connected">Données véhicule disponibles</string>
     <string name="status_waiting_for_vehicle">En attente des données véhicule</string>
     <string name="label_battery">BATTERIE</string>
     <string name="soc_vehicle_reported">État de charge rapporté par le véhicule</string>
@@ -322,4 +321,16 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_charger_source">%1$s · dernière confirmation %2$s. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
     <string name="charge_stop_charger_source_undated">%1$s · aucune date de confirmation. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
     <string name="charge_stop_charger_not_operational">L\u2019enregistrement indique que cette borne ne fonctionne pas.</string>
+
+    <string name="about_action">À propos de EVChargePilot</string>
+    <string name="about_title">À propos de EVChargePilot</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_version_badge">v%1$s</string>
+    <string name="about_version_unknown">inconnue</string>
+    <string name="about_attribution">Auteur et mainteneur : malys</string>
+    <string name="about_repository">github.com/malys/EVChargePilot</string>
+    <string name="about_made_with_love">Fait avec ❤ par malys</string>
+    <string name="about_logo_description">Logo de EVChargePilot</string>
+    <string name="about_qr_description">QR code du dépôt du projet</string>
+    <string name="about_close">Fermer</string>
 </resources>

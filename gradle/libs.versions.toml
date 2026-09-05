@@ -6,6 +6,7 @@ constraintlayout = "2.1.4"
 material = "1.12.0"
 gson = "2.10.1"
 securityCrypto = "1.1.0-alpha06"
+zxing = "3.5.3"
 junit = "4.13.2"
 
 [libraries]
@@ -15,6 +16,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
