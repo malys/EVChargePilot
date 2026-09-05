@@ -147,6 +147,15 @@
                     android:text="@string/routing_action_import" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/routingExportAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:text="@string/routing_action_export" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/routingClearAction"
                     style="@style/Widget.EVChargePilot.Button.Danger"
                     android:layout_width="0dp"

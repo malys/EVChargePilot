@@ -166,6 +166,12 @@ and no query. The default is HeiGIT's own host: `api.openrouteservice.org` was d
 config file still naming it will stop working. The key is stored encrypted through the Android keystore, is never displayed
 again, never written to a log, and never included in a diagnostic export.
 
+**Export to USB** writes that same file back out, as `evchargepilot-routing.txt` on the first
+writable USB stick — for a second car, after a factory reset, or for the unstable channel, which
+keeps its own separate configuration. It is the one way the key leaves the car, it happens only
+when you ask for it while parked, and the file holds your keys in clear text: from then on the
+stick is the secret. The file says so in its own header.
+
 Free-tier allowances, as published by ORS: 2000 directions requests a day and 40 in any rolling
 60 seconds, counted from your first request rather than from midnight. The app counts its own
 requests and refuses before the server does, and every request follows a driver action — nothing

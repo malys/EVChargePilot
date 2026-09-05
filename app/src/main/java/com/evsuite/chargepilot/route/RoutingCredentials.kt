@@ -14,9 +14,10 @@ import com.evsuite.hardware.AppLogger
  * matters more than the encryption: a head unit with a broken keystore must end up with a
  * working app, not a crash in a car.
  *
- * **The key never leaves this file.** Not into `AppLogger`, not into a diagnostic export, not
- * into the USB bundle. `DiagnosticExporter` reads nothing from here and must keep not reading
- * anything from here.
+ * **The key never leaves this file on its own.** Not into `AppLogger`, not into a diagnostic
+ * export, not into the USB bundle. `DiagnosticExporter` reads nothing from here and must keep
+ * not reading anything from here. The single way out is [snapshot], and only a driver who is
+ * parked and taps *Export to USB* asks for it.
  */
 object RoutingCredentials {
 
@@ -86,6 +87,23 @@ object RoutingCredentials {
         val base = prefs.getString(KEY_CHARGER_BASE_URL, null)?.trim().orEmpty()
             .ifEmpty { OpenChargeMap.DEFAULT_BASE_URL }
         return Values(key, base, OpenChargeMap.HEADER)
+    }
+
+    /**
+     * Everything stored, for the driver's own export and nothing else. This is the one call that
+     * hands the keys to a caller that is not building a request: it must not be logged, shown or
+     * put in a diagnostic bundle. Unset values stay null, so exporting and importing back is not
+     * a way to write defaults over a self-hosted address.
+     */
+    fun snapshot(context: Context): RoutingConfig {
+        val prefs = preferences(context)
+        fun value(key: String): String? = prefs.getString(key, null)?.trim()?.ifEmpty { null }
+        return RoutingConfig(
+            apiKey = value(KEY_API_KEY),
+            baseUrl = value(KEY_BASE_URL),
+            chargerApiKey = value(KEY_CHARGER_API_KEY),
+            chargerBaseUrl = value(KEY_CHARGER_BASE_URL),
+        )
     }
 
     fun isConfigured(context: Context): Boolean = read(context) != null

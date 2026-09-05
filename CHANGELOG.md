@@ -6,6 +6,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The routing key goes back onto the stick it came from.** Configuring this car meant a key on
+  a USB stick, because typing sixty characters on this head unit is not something anyone does
+  twice — and there was no way back out, so a second car, a factory reset or the unstable
+  channel, which is a separate app with its own storage, meant typing it anyway. *Export to USB*
+  writes the same `key = value` file *Import from USB* reads, under one fixed name so a stale
+  export cannot be picked up later, and to a removable volume only: the keys are not copied into
+  a second unencrypted place on the car. The file carries them in clear text, which is what a
+  file this app can import has to be — so the file says so in its own header, and the screen says
+  so when the export lands. Parked only, like everything else on that screen.
+
 - **One drive answers eight questions, on the unstable channel only.** Eleven tickets ended
   "verified on a laptop, never on the car", and each named a different question; answered one
   at a time they would cost eight evenings. There is now one toggle on the evidence screen

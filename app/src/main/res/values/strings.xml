@@ -292,6 +292,7 @@ Spending %6$s %% per km</string>
     <string name="routing_helper_base_url">Leave as it is for HeiGIT’s hosted service, or point it at your own instance.</string>
     <string name="routing_action_save">Save</string>
     <string name="routing_action_import">Import from USB</string>
+    <string name="routing_action_export">Export to USB</string>
     <string name="routing_action_clear">Remove</string>
     <string name="routing_configured">Configured · %1$s</string>
     <string name="routing_absent">Not configured. Enter a key, or import one from a USB stick.</string>
@@ -303,6 +304,9 @@ Spending %6$s %% per km</string>
     <string name="routing_base_url_refused">Address refused: %1$s. It must be https, with no credentials and no query.</string>
     <string name="routing_import_none">No configuration file found. Put one on a USB stick with a line reading ors_api_key = your-key.</string>
     <string name="routing_import_done">Imported from %1$s.</string>
+    <string name="routing_export_empty">Nothing to export yet. Enter a key first.</string>
+    <string name="routing_export_failed">No USB stick that can be written to. Insert one and try again.</string>
+    <string name="routing_export_done">Exported to %1$s on the USB stick. That file holds your keys in clear text: keep the stick as you would keep them.</string>
     <string name="routing_privacy">Only the destination you type, the car’s position and the road profile ever leave the car. No trip, charge, speed, diagnostic bundle or identifier is sent anywhere. The key is stored encrypted, never written to a log and never included in a diagnostic export.</string>
     <string name="routing_refused_busy">A request is already in flight. Wait for it.</string>
     <string name="routing_refused_quota_minute">Too many requests just now. Try again in %1$s s.</string>

@@ -287,6 +287,7 @@ Consommation %6$s %% par km</string>
     <string name="routing_helper_base_url">Laissez tel quel pour le service hébergé par HeiGIT, ou pointez vers votre propre instance.</string>
     <string name="routing_action_save">Enregistrer</string>
     <string name="routing_action_import">Importer depuis USB</string>
+    <string name="routing_action_export">Exporter vers USB</string>
     <string name="routing_action_clear">Supprimer</string>
     <string name="routing_configured">Configuré · %1$s</string>
     <string name="routing_absent">Non configuré. Saisissez une clé ou importez-la depuis une clé USB.</string>
@@ -298,6 +299,9 @@ Consommation %6$s %% par km</string>
     <string name="routing_base_url_refused">Adresse refusée : %1$s. Elle doit être en https, sans identifiants ni paramètres.</string>
     <string name="routing_import_none">Aucun fichier de configuration trouvé. Placez sur une clé USB un fichier contenant la ligne ors_api_key = votre-clé.</string>
     <string name="routing_import_done">Importé depuis %1$s.</string>
+    <string name="routing_export_empty">Rien à exporter pour l’instant. Saisissez d’abord une clé.</string>
+    <string name="routing_export_failed">Aucune clé USB accessible en écriture. Insérez-en une et réessayez.</string>
+    <string name="routing_export_done">Exporté vers %1$s sur la clé USB. Ce fichier contient vos clés d’API en clair : gardez la clé USB comme vous garderiez ces clés.</string>
     <string name="routing_privacy">Seuls la destination saisie, la position du véhicule et le profil de la route sortent de la voiture. Aucun trajet, aucune charge, aucune vitesse, aucun rapport de diagnostic ni identifiant n’est transmis. La clé est stockée chiffrée, n’est jamais journalisée et n’apparaît dans aucun export de diagnostic.</string>
     <string name="routing_refused_busy">Une requête est déjà en cours. Attendez sa réponse.</string>
     <string name="routing_refused_quota_minute">Trop de requêtes en peu de temps. Réessayez dans %1$s s.</string>

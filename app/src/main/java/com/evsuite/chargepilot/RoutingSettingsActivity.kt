@@ -9,6 +9,7 @@ import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
+import com.evsuite.chargepilot.route.RoutingConfigExport
 import com.evsuite.chargepilot.route.RoutingConfigImport
 import com.evsuite.chargepilot.route.RoutingCredentials
 import java.util.concurrent.Executors
@@ -24,7 +25,8 @@ import java.util.concurrent.Executors
  * **The key is never displayed back.** The field starts empty even when a key is stored, the
  * status line says configured or not and never shows a value, and nothing here reaches
  * `AppLogger` or the diagnostic export. A screen that can show a secret is a screen that shows
- * it to a passenger with a phone camera.
+ * it to a passenger with a phone camera. The one copy that leaves is the export, which the
+ * driver asks for by hand and which lands on their own stick, never on this screen.
  *
  * Parked-only, like every other driver action in this app: entering a key means a keyboard.
  * Clearing one does not, which is why it stays available — a driver who wants their key off the
@@ -77,6 +79,7 @@ class RoutingSettingsActivity : AppCompatActivity() {
         binding.backAction.setOnClickListener { finish() }
         binding.routingSaveAction.setOnClickListener { save() }
         binding.routingImportAction.setOnClickListener { import() }
+        binding.routingExportAction.setOnClickListener { export() }
         binding.routingClearAction.setOnClickListener { clear() }
         binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
         render()
@@ -164,6 +167,37 @@ class RoutingSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * The same file back out, so a second car — or the unstable channel, which is a separate
+     * application id with its own preferences — does not mean typing the key again.
+     *
+     * A removable volume only: writing the keys into this app's private folder would be a second
+     * unencrypted copy nobody asked for and nobody could reach. The stick then carries the keys
+     * in clear text, which is what the announcement says.
+     */
+    private fun export() {
+        val config = RoutingCredentials.snapshot(this)
+        if (config.isEmpty()) {
+            announce(getString(R.string.routing_export_empty))
+            return
+        }
+        val roots = DiagnosticUsbStorage.roots(this)
+        disk.execute {
+            val written = roots.firstNotNullOfOrNull { root ->
+                DiagnosticUsbStorage.writableTarget(this, root)
+                    ?.let { RoutingConfigExport.write(it, config) }
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (written == null) {
+                    announce(getString(R.string.routing_export_failed))
+                } else {
+                    announce(getString(R.string.routing_export_done, written.name))
+                }
+            }
+        }
+    }
+
     private fun clear() {
         RoutingCredentials.clear(this)
         binding.routingKeyInput.text?.clear()
@@ -191,6 +225,7 @@ class RoutingSettingsActivity : AppCompatActivity() {
         binding.routingBaseUrlLayout.isEnabled = editable
         binding.routingSaveAction.isEnabled = editable
         binding.routingImportAction.isEnabled = editable
+        binding.routingExportAction.isEnabled = editable
 
         binding.routingStatus.text = message ?: when (gate) {
             ParkedDeletionGate.MOVING -> getString(R.string.routing_moving)
