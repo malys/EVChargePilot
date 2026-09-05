@@ -30,3 +30,9 @@
 -keep class com.evsuite.chargepilot.TripHistoryArtifact { *; }
 -keep class com.evsuite.chargepilot.SpeedScaleCheck$Result { *; }
 -keep class com.evsuite.chargepilot.SpeedScaleCheck$Verdict { *; }
+
+# CP-055's own artifact, added after the rules above and left out of them: the drive of
+# 2026-09-05 exported a validation file whose every key was a single letter, in the same bundle
+# where the capture and the trip history read fine. A validation drive costs a drive.
+-keep class com.evsuite.chargepilot.ValidationArtifact { *; }
+-keep class com.evsuite.chargepilot.ValidationArtifact$Answer { *; }
