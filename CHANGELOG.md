@@ -6,6 +6,20 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The unstable build arms its own validation.** Two drives came back with
+  `validationModeOn=false` — eleven questions still open, because the toggle sits three taps
+  from the dashboard and a driver about to leave has no reason to go looking for it. An unstable
+  build exists to answer those questions, so it now arms itself and the driver's decision is the
+  one that turns it *off*. The stable channel is unchanged: none of this is compiled into it.
+
+- **Q9: does anything on this head unit accept a destination?** The route this app plans is
+  copied into MG4 Navigator by hand, which is where the feature gets abandoned and, worse, where
+  it gets silently wrong — a plan the car is not following still displays an arrival charge. The
+  probe resolves the three shapes of Android navigation intent and records which packages claim
+  them. It sends nothing, needs no drive and no network, and it aims at a public landmark in
+  another city rather than anywhere the driver has been, because the answer leaves the car on a
+  USB stick.
+
 - **The destination probe now fires on the firmware it was written for.** CP-051's question —
   do IMapService transactions 38 and 39 carry the destination — is worth asking at exactly one
   moment: while the car is guiding to somewhere. That moment was detected by counting guidance

@@ -2,7 +2,9 @@ package com.evsuite.chargepilot
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.core.content.ContextCompat
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.SaicNav
@@ -20,8 +22,16 @@ import java.util.concurrent.Executors
  * than from a screen, and they all land in the diagnostic bundle the export already writes.
  *
  * **One toggle.** The only question a driver should have to ask on returning is "did I turn it
- * on", and there is exactly one thing to have turned on. It is off by default and persists, so
- * turning it on before a drive covers the whole drive including the process restarts in it.
+ * on", and there is exactly one thing to have turned on. It persists, so setting it before a
+ * drive covers the whole drive including the process restarts in it.
+ *
+ * **Armed by default on this channel.** The bundles of 2026-09-04 and 2026-09-05 both came back
+ * with `validationModeOn=false`: two drives spent, eleven questions still open, because the
+ * toggle is on a screen three taps from the dashboard and a driver about to leave has no reason
+ * to go looking for it. An unstable build exists to answer those questions, so it now arms
+ * itself and the driver's decision is the one that turns it *off*. A build that ships to a
+ * driver who did not ask for this is the stable one, where [IS_SUPPORTED] is false and none of
+ * this is compiled in.
  *
  * **Cost when off.** [record] returns before its lambda is called, so a disarmed unstable
  * build does not even build the strings; nothing binds, nothing polls, nothing is written.
@@ -31,6 +41,9 @@ object ValidationProbe {
 
     private const val PREFERENCES = "chargepilot_validation"
     private const val KEY_ENABLED = "enabled"
+
+    /** Armed unless the driver said otherwise; see the note on the channel above. */
+    private const val ENABLED_BY_DEFAULT = true
 
     /** Enough lines for every route request of a long drive, and bounded against a loop. */
     private const val LINES_PER_QUESTION = 24
@@ -75,7 +88,7 @@ object ValidationProbe {
         val app = context.applicationContext
         appContext = app
         enabled = app.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
-            .getBoolean(KEY_ENABLED, false)
+            .getBoolean(KEY_ENABLED, ENABLED_BY_DEFAULT)
         if (!enabled || armedAtMs != null) return
         armedAtMs = System.currentTimeMillis()
         record(ValidationQuestion.LOCATION_GRANT) {
@@ -84,7 +97,35 @@ object ValidationProbe {
                 "coarse=${granted(app, Manifest.permission.ACCESS_COARSE_LOCATION)}, " +
                 "firmware=${FirmwareInfo.getGeneration().name}"
         }
+        recordNavigationHandoff(app)
         probeDestinationLater(app, "at process start, before any guidance was heard")
+    }
+
+    /**
+     * Who, if anyone, would accept a destination from this app.
+     *
+     * The route this app plans is currently copied into the car's navigation by hand, which is
+     * the part of the feature a driver about to leave will skip. Whether it can be handed over
+     * instead has one cheap half and one expensive half, and this is the cheap half: resolving
+     * an intent costs no drive, no network and no destination, so it is read at process start.
+     *
+     * Nothing is sent. `queryIntentActivities` asks the package manager who *would* answer, and
+     * the coordinates are a public landmark in another city rather than anywhere the driver has
+     * been. Package visibility filtering starts at API 30 and this head unit is API 28, so an
+     * empty list here means nothing is registered rather than that we were not allowed to look.
+     */
+    private fun recordNavigationHandoff(context: Context) {
+        val manager = context.packageManager
+        NAVIGATION_INTENTS.forEach { uri ->
+            val handlers = runCatching {
+                manager.queryIntentActivities(Intent(Intent.ACTION_VIEW, Uri.parse(uri)), 0)
+                    .map { it.activityInfo.packageName }
+                    .distinct()
+            }.getOrElse { listOf("query failed: ${it.javaClass.simpleName}") }
+            record(ValidationQuestion.NAVIGATION_HANDOFF) {
+                "$uri -> ${handlers.ifEmpty { listOf("nothing") }.joinToString(", ")}"
+            }
+        }
     }
 
     /** The one toggle. Turning it on arms everything; turning it off keeps what was recorded. */
@@ -172,6 +213,18 @@ object ValidationProbe {
             record(ValidationQuestion.DESTINATION) { SaicNav.probeTransaction(code) }
         }
     }
+
+    /**
+     * The three shapes an Android navigation handoff takes, aimed at a public landmark.
+     *
+     * Notre-Dame de Paris, because a probe that resolves an intent for the driver's own next
+     * destination would put that destination in a file that leaves the car on a USB stick.
+     */
+    private val NAVIGATION_INTENTS = listOf(
+        "geo:48.8530,2.3499",
+        "geo:0,0?q=48.8530,2.3499(Charge stop)",
+        "google.navigation:q=48.8530,2.3499",
+    )
 
     private fun granted(context: Context, permission: String): Boolean =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED

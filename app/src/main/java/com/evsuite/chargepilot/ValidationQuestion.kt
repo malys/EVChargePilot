@@ -62,6 +62,13 @@ enum class ValidationQuestion(
         "Does the route what-if produce rows on this firmware, or a refusal?",
         "a route comes back and the what-if is computed from it",
     ),
+    NAVIGATION_HANDOFF(
+        "Q9",
+        "CP-056",
+        "Does anything on this head unit answer a navigation intent, so a chosen route " +
+            "could be handed to the car's own navigation instead of copied by hand?",
+        "the application starts; the intents are resolved, never sent",
+    ),
     LOCATION_FALLBACK(
         "Q8",
         "CP-046",
