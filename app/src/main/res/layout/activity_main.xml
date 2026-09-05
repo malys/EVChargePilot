@@ -29,6 +29,23 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- CP-058. The whole companion, on one line. It is first because it is the only
+                 thing on this screen that stops being true while the car is moving; it is one
+                 line because a driver at 130 gets a glance, not a screen; and it is a TextView
+                 rather than a banner, a dialog or a sound because none of those can be ignored
+                 and all of them ask for a decision this app has no business asking for. -->
+            <TextView
+                android:id="@+id/driftLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:minHeight="@dimen/touch_target"
+                android:gravity="center_vertical"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="220dp"

@@ -69,6 +69,13 @@ enum class ValidationQuestion(
             "could be handed to the car's own navigation instead of copied by hand?",
         "the application starts; the intents are resolved, never sent",
     ),
+    PLAN_DRIFT(
+        "Q10",
+        "CP-058",
+        "Does the adapter's odometer move during a drive, and does the car keep answering a " +
+            "remaining distance for a destination another app handed it?",
+        "a plan is being followed, once a minute, whatever the verdict on it",
+    ),
     LOCATION_FALLBACK(
         "Q8",
         "CP-046",

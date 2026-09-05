@@ -351,6 +351,25 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_navigate_none">Nothing on this head unit accepted a destination. The route stays here; enter it in the car\u2019s navigation yourself.</string>
     <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>
     <string name="charge_stop_navigate_bad_place">That place has no usable coordinates, so nothing was sent.</string>
+
+    <!-- CP-058 the drift companion. One line, a consequence, never an instruction. The
+         driver chose their speed; this says what it costs, and what would give it back. -->
+    <string name="drift_holding">Plan holding \u00b7 about %1$s %% left on arrival (\u00b1 %2$s) \u00b7 %3$s km to go</string>
+    <string name="drift_short_restore">Spending as now: %1$s %% on arrival, %2$s under your reserve \u00b7 %3$d km/h over the %4$s km of fast road ahead gives it back, for %5$s min</string>
+    <string name="drift_short_none">Spending as now: %1$s %% on arrival, %2$s under your reserve \u00b7 %3$s</string>
+    <string name="drift_restore_no_route">no speed offered: the route was not kept</string>
+    <string name="drift_restore_not_loaded">no speed offered yet: the model is still loading</string>
+    <string name="drift_restore_no_model">no speed offered: not enough recorded trips to model consumption</string>
+    <string name="drift_restore_no_road">no speed offered: no fast road left ahead</string>
+    <string name="drift_restore_envelope">no speed offered: outside what the recorded trips cover</string>
+    <string name="drift_restore_no_temperature">no speed offered: the outside temperature is unreadable</string>
+    <string name="drift_restore_not_enough">no speed on the road ahead gives it back</string>
+    <string name="drift_too_soon">Plan set \u00b7 the companion answers after %1$s km of driving</string>
+    <string name="drift_no_distance">Plan set \u00b7 the odometer is unreadable, so nothing can measure the drive against it</string>
+    <string name="drift_no_charge">Plan set \u00b7 the charge gauge is unreadable</string>
+    <string name="drift_charged">Plan set \u00b7 the car has charged since departure, so the starting figure no longer applies</string>
+    <string name="drift_forget_hint">\nParked \u00b7 tap to forget this plan</string>
+    <string name="drift_forgotten">Plan forgotten.</string>
     <string name="charge_stop_charger_arrival">About %1$s %% left on arrival there.</string>
     <string name="charge_stop_charger_source">%1$s · last confirmed %2$s. This is a record, not a promise: it may be gone, busy or broken.</string>
     <string name="charge_stop_charger_source_undated">%1$s · no confirmation date. This is a record, not a promise: it may be gone, busy or broken.</string>

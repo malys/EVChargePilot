@@ -345,6 +345,24 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_navigate_none">Rien sur cette tête de série n\u2019a accepté de destination. L\u2019itinéraire reste ici ; saisissez-le vous-même dans la navigation de la voiture.</string>
     <string name="charge_stop_navigate_sent">Envoyé à la navigation de la voiture.</string>
     <string name="charge_stop_navigate_bad_place">Ce lieu n\u2019a pas de coordonnées utilisables : rien n\u2019a été envoyé.</string>
+
+    <!-- CP-058 le compagnon de dérive. Une ligne, une conséquence, jamais une consigne. -->
+    <string name="drift_holding">Plan tenu \u00b7 environ %1$s %% \u00e0 l\u2019arriv\u00e9e (\u00b1 %2$s) \u00b7 %3$s km restants</string>
+    <string name="drift_short_restore">Au rythme actuel : %1$s %% \u00e0 l\u2019arriv\u00e9e, %2$s sous votre r\u00e9serve \u00b7 %3$d km/h sur les %4$s km de voie rapide restants le rendent, pour %5$s min</string>
+    <string name="drift_short_none">Au rythme actuel : %1$s %% \u00e0 l\u2019arriv\u00e9e, %2$s sous votre r\u00e9serve \u00b7 %3$s</string>
+    <string name="drift_restore_no_route">aucune vitesse propos\u00e9e : l\u2019itin\u00e9raire n\u2019a pas \u00e9t\u00e9 conserv\u00e9</string>
+    <string name="drift_restore_not_loaded">aucune vitesse propos\u00e9e pour l\u2019instant : le mod\u00e8le charge encore</string>
+    <string name="drift_restore_no_model">aucune vitesse propos\u00e9e : trop peu de trajets enregistr\u00e9s pour mod\u00e9liser la consommation</string>
+    <string name="drift_restore_no_road">aucune vitesse propos\u00e9e : plus de voie rapide devant</string>
+    <string name="drift_restore_envelope">aucune vitesse propos\u00e9e : hors de ce que couvrent les trajets enregistr\u00e9s</string>
+    <string name="drift_restore_no_temperature">aucune vitesse propos\u00e9e : la temp\u00e9rature ext\u00e9rieure est illisible</string>
+    <string name="drift_restore_not_enough">aucune vitesse sur la route restante ne le rend</string>
+    <string name="drift_too_soon">Plan enregistr\u00e9 \u00b7 le compagnon r\u00e9pond apr\u00e8s %1$s km de route</string>
+    <string name="drift_no_distance">Plan enregistr\u00e9 \u00b7 le compteur kilom\u00e9trique est illisible : rien ne peut mesurer le trajet</string>
+    <string name="drift_no_charge">Plan enregistr\u00e9 \u00b7 la jauge de charge est illisible</string>
+    <string name="drift_charged">Plan enregistr\u00e9 \u00b7 la voiture a recharg\u00e9 depuis le d\u00e9part : la valeur de d\u00e9part ne s\u2019applique plus</string>
+    <string name="drift_forget_hint">\nGar\u00e9 \u00b7 touchez pour oublier ce plan</string>
+    <string name="drift_forgotten">Plan oubli\u00e9.</string>
     <string name="charge_stop_charger_arrival">Environ %1$s %% restants à l\u2019arrivée sur place.</string>
     <string name="charge_stop_charger_source">%1$s · dernière confirmation %2$s. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
     <string name="charge_stop_charger_source_undated">%1$s · aucune date de confirmation. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>

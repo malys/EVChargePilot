@@ -22,9 +22,11 @@ import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.NavigationHandoff
+import com.evsuite.hardware.saic.SaicNav
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.PlanDrift
 import com.evsuite.hardware.telemetry.RouteGrade
 import com.evsuite.hardware.telemetry.SocRate
 import com.evsuite.hardware.telemetry.SocRateEstimator
@@ -95,6 +97,13 @@ class ChargeStopActivity : AppCompatActivity() {
 
     /** The plan the handoff button would send, set by the render that offered it. */
     private var handoff: Handoff? = null
+
+    /**
+     * CP-058's plan, assembled by the render that offered the button and written down by the
+     * tap. Null whenever the drive it describes could not be followed — no route, no rate, or a
+     * stop with no charger found, which is a plan that already says it does not work.
+     */
+    private var followed: FollowedPlan.Values? = null
 
     private val gateExpiry = Runnable { render() }
 
@@ -612,7 +621,7 @@ class ChargeStopActivity : AppCompatActivity() {
         renderCharger(plan, charger)
         renderWhatIf(whatIf, alternative)
         renderChoices(route, plan, charger, whatIf, motorwayFree, routeRequests)
-        renderHandoff(place, plan, charger)
+        renderHandoff(place, plan, charger, route, rate, grade)
 
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
         binding.chargeStopAttribution.visibility =
@@ -821,6 +830,9 @@ class ChargeStopActivity : AppCompatActivity() {
         place: OrsGeocode.Place,
         plan: ChargeStopPlan.Plan,
         charger: Found?,
+        route: OrsDirections.Route,
+        rate: SocRate?,
+        grade: RouteGrade.Cost?,
     ) {
         val stop = (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }
         val target = if (stop != null) {
@@ -829,6 +841,7 @@ class ChargeStopActivity : AppCompatActivity() {
             Handoff(place.latitude, place.longitude, place.label, toStop = false)
         }
         handoff = target
+        followed = follow(plan, charger, route, rate, grade)
         binding.navigateAction.visibility = View.VISIBLE
         binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(
@@ -836,6 +849,58 @@ class ChargeStopActivity : AppCompatActivity() {
             else R.string.charge_stop_navigate_destination
         )
         render()
+    }
+
+    /**
+     * CP-058's frozen plan: the leg about to be driven, and nothing that identifies it.
+     *
+     * **The leg, not the route.** Where a charging stop was found the leg ends at the charger,
+     * because arriving under the reserve at a destination the plan says to charge before is the
+     * plan working, not the plan failing. A `Stop` with no charger found produces nothing at all:
+     * that plan already says the trip does not work, and watching it drift adds nothing.
+     *
+     * The rate carries the climb, folded by the planner's own [ChargeStopPlan.effectiveRate], so
+     * the comparison on the road is against the rate that actually planned rather than a second
+     * arithmetic that would slowly disagree with it.
+     *
+     * The odometer is the adapter's, because `PERF_ODOMETER` answers nothing on this car
+     * (CP-003). Without it there is no distance to measure a drive against, and the companion
+     * says so rather than guessing from a trip that may not have been started.
+     */
+    private fun follow(
+        plan: ChargeStopPlan.Plan,
+        charger: Found?,
+        route: OrsDirections.Route,
+        rate: SocRate?,
+        grade: RouteGrade.Cost?,
+    ): FollowedPlan.Values? {
+        val soc = snapshot?.socPercent?.toDouble() ?: return null
+        val base = rate ?: return null
+        val legKm = when (plan) {
+            is ChargeStopPlan.Plan.NoStop -> route.distanceKm
+            is ChargeStopPlan.Plan.Stop -> charger?.alongKm ?: return null
+            is ChargeStopPlan.Plan.Refused -> return null
+        }
+        if (!legKm.isFinite() || legKm <= 0.0) return null
+        val effective = ChargeStopPlan.effectiveRate(base, route.distanceKm, grade)
+        SaicNav.connect(this)
+        val odometer = runCatching { SaicNav.totalMileageKm() }.getOrNull()?.toDouble()
+            ?: snapshot?.odometerKm?.toDouble()
+            ?: return null
+        val settings = VehicleSettings.read(this)
+        return FollowedPlan.Values(
+            committedAtMs = System.currentTimeMillis(),
+            odometerAtDepartureKm = odometer,
+            drift = PlanDrift.Followed(
+                legKm = legKm,
+                socAtDeparturePercent = soc,
+                plannedRatePercentPerKm = effective.percentPerKm,
+                plannedUncertaintyPercentPerKm = effective.uncertaintyPercentPerKm,
+                reservePercent = settings.reservePercent,
+            ),
+            sections = route.sections,
+            toStop = charger != null && plan is ChargeStopPlan.Plan.Stop,
+        )
     }
 
     /**
@@ -863,6 +928,11 @@ class ChargeStopActivity : AppCompatActivity() {
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             "driver tapped the handoff, to=${if (target.toStop) "charging stop" else "destination"}"
         }
+        // Written down on the tap and not on the render: this is the one unambiguous "I am
+        // driving this" the app ever gets, and a plan merely looked at is not one being driven.
+        // Recorded whether or not anything accepted the intent — the driver still chose it.
+        followed?.let { FollowedPlan.write(this, it.copy(committedAtMs = System.currentTimeMillis())) }
+            ?: FollowedPlan.clear(this)
         val sent = runCatching { startActivity(intent) }.isSuccess
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             if (sent) "accepted by something" else "nothing accepted ACTION_VIEW geo:"

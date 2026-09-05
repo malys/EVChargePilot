@@ -6,6 +6,37 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A companion that notices the plan stopped being true.** CP-058. A plan chosen at the kerb is
+  a prediction, and predictions go wrong on the road — a headwind, a cold pack, traffic, a driver
+  going faster than the row they picked. The dashboard now carries one line: what the drive is
+  actually spending, what that leaves on arrival, and the mildest speed on the road ahead that
+  gives the shortfall back.
+
+  **It costs nothing.** Charge and the odometer are already read once a second and the chosen plan
+  was written down when the driver tapped *Y aller*, so detecting drift is a division — no request,
+  no quota, no network. Only a re-proposal costs a request and that stayed where it was, on the
+  charge-stop screen, behind a tap, parked. The proof is structural rather than a promise: neither
+  the calculator nor the companion imports a transport, so neither can reach one.
+
+  **The alarm is hard to trip on purpose.** Both instruments quantise — a gauge that steps a whole
+  percent, an odometer that answers whole kilometres — so the measured rate arrives with a band of
+  its own, and drift is that band failing to overlap the plan's. On top of that the arrival has to
+  actually fall under the reserve: a driver going faster than the row they chose and still arriving
+  at 30 % does not need telling, and a companion that speaks then is one nobody reads when it
+  matters. Under 15 km of road it says nothing at all, because the gauge's own step is a third of
+  what this car spends over that distance.
+
+  **One line, stating a consequence.** No dialog, no sound, no countdown, nothing that wants a
+  decision at 130 km/h. "You arrive at 4 %, 6 under your reserve; 110 km/h over the 140 km of fast
+  road ahead gives it back, for 12 minutes" is a fact about the road. "Slow down" is an
+  instruction, and this app does not give them. Parked, the same line offers to forget the plan.
+
+  What is watched is the **leg**, not the route: where the plan has a charging stop the comparison
+  ends at the charger, because arriving under the reserve at a destination the plan says to charge
+  before is the plan working. And what is stored is a distance, a charge, two rates and a list of
+  number pairs — no destination, no coordinate, no place name, no road name. The plan expires by
+  itself after twelve hours.
+
 - **Three ways to get there, on one card.** CP-057. Every part of the answer to "how should I
   drive to Alès" was already computed and none of it was a choice: the plan, the charging stop,
   the speed what-if and the road profile sat on four cards and the driver did the comparison in

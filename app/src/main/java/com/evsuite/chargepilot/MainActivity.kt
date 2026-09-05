@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.IBinder
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -44,6 +45,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var provenance: ProvenanceText
     private val consumption = ConsumptionCalculator()
     private val rangeEstimator = AdaptiveRangeEstimator()
+
+    /**
+     * CP-058. Costs no request; the line it produces is the whole of it on this screen.
+     *
+     * Lazy because an activity has no application context until it is attached, and a field
+     * initialiser runs before that.
+     */
+    private val drift by lazy { DriftCompanion(this) }
     /** Bounded history parsing and diagnostics I/O never run on the main thread. */
     private val background = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-background")
@@ -111,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         binding.chargeStopAction.setOnClickListener {
             startActivity(Intent(this, ChargeStopActivity::class.java))
         }
+        binding.driftLine.setOnClickListener { forgetPlan() }
         binding.aboutAction.text = getString(R.string.about_version_badge, appVersion())
         binding.aboutAction.setOnClickListener { showAbout() }
         renderUnavailable()
@@ -139,6 +149,9 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         loadRecentTrips()
+        // The consumption fit reads the whole trip history, so it happens once per visit to
+        // this screen and only when there is actually a plan being followed.
+        background.execute { runCatching { drift.load() } }
         bindService(
             Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE
         )
@@ -209,6 +222,36 @@ class MainActivity : AppCompatActivity() {
             if (EnergyTripSession.isRecording) R.string.action_stop_trip else R.string.action_start_trip
         )
         binding.tripHint.text = tripHint(value, parked, automatic)
+        renderDrift(value, parked)
+    }
+
+    /**
+     * One line, and only the line.
+     *
+     * The companion decides whether there is anything to say and gates its own recomputation to
+     * once a minute; this renders whatever comes back. Nothing here interrupts: no dialog, no
+     * sound, no colour carrying the meaning on its own. A driver at 130 km/h gets a glance.
+     *
+     * Forgetting the plan is offered only when the car is stopped, and the offer is a line of
+     * text rather than a button, because a button on this line would be a target to miss at
+     * speed. The tap itself re-checks the gate.
+     */
+    private fun renderDrift(value: EnergySnapshot, parked: Boolean) {
+        val line = drift.line(value, value.timestampMs)
+        binding.driftLine.visibility = if (line == null) View.GONE else View.VISIBLE
+        if (line == null) return
+        binding.driftLine.text =
+            if (parked) line + getString(R.string.drift_forget_hint) else line
+        binding.driftLine.isClickable = parked
+    }
+
+    /** Parked only, and re-checked here rather than trusted from the last frame. */
+    private fun forgetPlan() {
+        val speed = latestSnapshot?.speedKmh
+        if (speed == null || speed > 0.1f) return
+        drift.forget()
+        binding.driftLine.visibility = View.GONE
+        Toast.makeText(this, R.string.drift_forgotten, Toast.LENGTH_SHORT).show()
     }
 
     private fun tripHint(value: EnergySnapshot, parked: Boolean, automatic: Boolean): String {

@@ -3,7 +3,7 @@
 Date written: 2026-09-05
 Status: instrument built, drive not yet done
 
-One drive answers eight questions. They accumulated because eleven tickets could be finished
+One drive answers nine questions. They accumulated because eleven tickets could be finished
 on a laptop and verified nowhere else, and answering them one at a time would cost eight
 evenings and eight parking spaces. Everything below is armed before departure and records
 itself; nothing on this page asks anyone to operate a screen while the car is moving.
@@ -54,7 +54,10 @@ work six weeks from now.
 
    If it worked, step 4 is already done — the car has a destination, which is all question 1
    needs.
-7. Note the charge percentage and the outside temperature the dashboard shows. Two lines in a
+7. Go back to the dashboard. If *Y aller* worked, a line has appeared at the top of it. Read it
+   once before setting off — it will say *the companion answers after 15 km of driving*, or it
+   will say the odometer is unreadable, which is question 10 answered before you have moved.
+8. Note the charge percentage and the outside temperature the dashboard shows. Two lines in a
    notebook are worth an hour of guessing later.
 
 **Choose a destination you are willing to share.** The bundle records the names of the roads on
@@ -76,6 +79,13 @@ The shape matters more than the exact roads:
 While driving, do nothing. The screen can be off. Every probe is already armed, and none of
 them needs a tap.
 
+The one thing worth a glance, when it is safe to take one: the line at the top of the dashboard.
+It is the only thing in this app that changes while the car moves, and what it says is question
+10's answer. It will read one of three ways — *plan holding*, with a charge on arrival; or *at
+the current rate you arrive at N %, M under your reserve*, with a speed that gives it back; or a
+line saying the odometer is unreadable. Any of the three closes CP-058. It updates once a minute
+and never asks for anything.
+
 ## On arrival, parked
 
 1. Open **Charging stop** once more and search the same destination again. This is what refits
@@ -88,7 +98,7 @@ them needs a tap.
 
 ## What lands on the stick
 
-One zip. Inside it, `evidence/validation-SWI68-…json` is this drive's answers: eight blocks,
+One zip. Inside it, `evidence/validation-SWI68-…json` is this drive's answers: ten blocks,
 one per question, each naming the ticket it belongs to. Alongside it are the guidance trace,
 the signal statistics and the trip record, which the export has always carried.
 
@@ -112,6 +122,7 @@ where the car was. It does contain road names and the destination bytes describe
 | 7 | CP-049 | Does the route what-if produce rows on this firmware, or a refusal? |
 | 8 | CP-046 | Is a refused or missing location survivable from end to end? |
 | 9 | CP-056 | Does anything on this head unit accept a destination from another app? |
+| 10 | CP-058 | Does the adapter's odometer move during a drive, and does the car keep answering a remaining distance for a destination another app handed it? |
 
 ## Afterwards
 

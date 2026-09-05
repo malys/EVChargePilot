@@ -35,6 +35,20 @@ Its bounds, all of which are testable:
 - **No coordinates in any log or probe.** The validation artifact records that a handoff was
   tapped and whether anything accepted it. Never where to.
 
+### What the followed plan keeps
+
+CP-058 freezes the chosen plan on that same tap so the drive can be compared against it later. It
+is stored in app-private preferences and describes no particular journey: a leg distance, the
+charge and odometer at departure, two rates, a reserve, and the route's sections as
+distance-and-duration pairs. **No destination, no coordinate, no place name, no road name** — none
+of it is needed by the arithmetic, and all of it would be an itinerary sitting on disk. The file
+expires twelve hours after it is written, is cleared by the driver from the dashboard while
+parked, and is never exported: no diagnostic bundle, USB export or log line reads it.
+
+Watching it costs no network. The comparison is a division over the charge gauge and the odometer,
+both of which are already being read, and the speed that would restore the plan comes from the
+sections stored above and a model fitted from trips already on disk.
+
 ## Reporting
 
 Do not open a public issue for a vulnerability that could affect a vehicle. Use GitHub's
