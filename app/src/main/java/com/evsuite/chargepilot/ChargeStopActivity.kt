@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
@@ -20,6 +21,7 @@ import com.evsuite.chargepilot.route.RouteWhatIf
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.saic.NavigationHandoff
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -91,6 +93,9 @@ class ChargeStopActivity : AppCompatActivity() {
 
     private var message: String? = null
 
+    /** The plan the handoff button would send, set by the render that offered it. */
+    private var handoff: Handoff? = null
+
     private val gateExpiry = Runnable { render() }
 
     private val locationPermission = registerForActivityResult(
@@ -146,6 +151,7 @@ class ChargeStopActivity : AppCompatActivity() {
             startActivity(Intent(this, VehicleSettingsActivity::class.java))
         }
         binding.searchAction.setOnClickListener { search() }
+        binding.navigateAction.setOnClickListener { navigate() }
         worker.execute { loadRate() }
         render()
     }
@@ -492,6 +498,9 @@ class ChargeStopActivity : AppCompatActivity() {
             binding.chargerPlace.visibility = View.GONE
             binding.chargerSource.visibility = View.GONE
             binding.routeWhatIf.visibility = View.GONE
+            binding.navigateAction.visibility = View.GONE
+            binding.navigateNote.visibility = View.GONE
+            handoff = null
             return
         }
         binding.chargeStopPlan.visibility = View.VISIBLE
@@ -539,6 +548,7 @@ class ChargeStopActivity : AppCompatActivity() {
 
         renderCharger(plan, charger)
         renderWhatIf(whatIf, alternative)
+        renderHandoff(place, plan, charger)
 
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
         binding.chargeStopAttribution.visibility =
@@ -624,6 +634,77 @@ class ChargeStopActivity : AppCompatActivity() {
      * confirmed are on their own line under it, because a dataset is wrong the day it is
      * published and the driver is the one who finds out.
      */
+    /**
+     * Offers to hand the plan to the car's navigation, and says what that hand-off cannot do.
+     *
+     * **The charging stop wins over the destination when there is one.** `geo:` carries a single
+     * point, so a route planned *through* somewhere cannot be pinned by sending its endpoint —
+     * the car would pick its own road and every figure on this screen would quietly become a
+     * figure about a different trip. Sending the stop pins the leg the forecast is actually
+     * about, and the driver sets the rest after charging. A stop with no charger found has no
+     * coordinates, so that case falls back to the destination and says so.
+     *
+     * The caveat is a separate line, never the button's label. A button is read as a promise and
+     * this one cannot make it: nothing here can stop the car choosing another road.
+     */
+    private fun renderHandoff(
+        place: OrsGeocode.Place,
+        plan: ChargeStopPlan.Plan,
+        charger: Found?,
+    ) {
+        val stop = (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }
+        val target = if (stop != null) {
+            Handoff(stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true)
+        } else {
+            Handoff(place.latitude, place.longitude, place.label, toStop = false)
+        }
+        handoff = target
+        binding.navigateAction.visibility = View.VISIBLE
+        binding.navigateNote.visibility = View.VISIBLE
+        binding.navigateNote.setText(
+            if (target.toStop) R.string.charge_stop_navigate_stop
+            else R.string.charge_stop_navigate_destination
+        )
+        render()
+    }
+
+    /**
+     * Sends it. The first thing this application asks a vehicle system to do rather than tell it.
+     *
+     * Parked, on a tap, once. The gate is re-read here and not trusted from [render]: the button
+     * was enabled at some earlier moment and the car may have moved since, and a navigation
+     * screen changing under someone at 110 is the hazard this whole screen is arranged around.
+     */
+    private fun navigate() {
+        val target = handoff ?: return
+        if (ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
+            != ParkedDeletionGate.PARKED
+        ) {
+            announce(getString(R.string.charge_stop_moving))
+            return
+        }
+        val uri = NavigationHandoff.geoUri(target.latitude, target.longitude, target.label)
+            ?: run {
+                announce(getString(R.string.charge_stop_navigate_bad_place))
+                return
+            }
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        // No coordinates in the probe line: this file leaves the car on a USB stick.
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            "driver tapped the handoff, to=${if (target.toStop) "charging stop" else "destination"}"
+        }
+        val sent = runCatching { startActivity(intent) }.isSuccess
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            if (sent) "accepted by something" else "nothing accepted ACTION_VIEW geo:"
+        }
+        announce(
+            getString(
+                if (sent) R.string.charge_stop_navigate_sent
+                else R.string.charge_stop_navigate_none
+            )
+        )
+    }
+
     private fun renderCharger(plan: ChargeStopPlan.Plan, charger: Found?) {
         if (plan !is ChargeStopPlan.Plan.Stop) {
             binding.chargerPlace.visibility = View.GONE
@@ -710,6 +791,7 @@ class ChargeStopActivity : AppCompatActivity() {
         for (index in 0 until binding.destinationResults.childCount) {
             binding.destinationResults.getChildAt(index).isEnabled = usable
         }
+        binding.navigateAction.isEnabled = usable
 
         binding.chargeStopStatus.text = message ?: when (gate) {
             ParkedDeletionGate.MOVING -> getString(R.string.charge_stop_moving)
@@ -730,6 +812,14 @@ class ChargeStopActivity : AppCompatActivity() {
         String.format(Locale.getDefault(), pattern, value)
 
     /** A charger, where it falls on this route, and the charge left on reaching it. */
+    /** What the button would send, held between the render that offered it and the tap. */
+    private data class Handoff(
+        val latitude: Double,
+        val longitude: Double,
+        val label: String?,
+        val toStop: Boolean,
+    )
+
     private data class Found(
         val charger: OpenChargeMap.Charger,
         val alongKm: Double,

@@ -321,6 +321,14 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
     <string name="charge_stop_charger_absent">Ajoutez une clé Open Charge Map pour savoir où vous arrêter.</string>
     <string name="charge_stop_charger">%1$s\u2009· à %2$s km · %3$s kW · %4$s</string>
+    <!-- CP-056. Le passage de relais. La note n’est jamais repliée dans le libellé du bouton :
+         un conducteur lit un bouton comme une promesse, et « geo: » ne porte qu’un point. -->
+    <string name="charge_stop_navigate">Y aller</string>
+    <string name="charge_stop_navigate_stop">Envoie l\u2019arrêt de recharge à la navigation de la voiture. Elle choisit sa route : suivez-la et ce plan décrit le même trajet, prenez-en une autre et les chiffres ci-dessus ne parlent plus de lui. Redonnez la destination finale après la recharge.</string>
+    <string name="charge_stop_navigate_destination">Envoie la destination à la navigation de la voiture. Elle choisit sa route : les chiffres ci-dessus décrivent ce plan, pas forcément ce que la voiture fera.</string>
+    <string name="charge_stop_navigate_none">Rien sur cette tête de série n\u2019a accepté de destination. L\u2019itinéraire reste ici ; saisissez-le vous-même dans la navigation de la voiture.</string>
+    <string name="charge_stop_navigate_sent">Envoyé à la navigation de la voiture.</string>
+    <string name="charge_stop_navigate_bad_place">Ce lieu n\u2019a pas de coordonnées utilisables : rien n\u2019a été envoyé.</string>
     <string name="charge_stop_charger_arrival">Environ %1$s %% restants à l\u2019arrivée sur place.</string>
     <string name="charge_stop_charger_source">%1$s · dernière confirmation %2$s. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>
     <string name="charge_stop_charger_source_undated">%1$s · aucune date de confirmation. C\u2019est un enregistrement, pas une promesse : la borne peut avoir disparu, être occupée ou en panne.</string>

@@ -6,6 +6,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The plan can go to the car's navigation instead of being retyped.** CP-056. A route worked
+  out here used to end on this screen: the driver turned to MG4 Navigator and entered it again,
+  which is where the feature gets abandoned and, worse, where it goes wrong without saying so —
+  a plan the car is not following still shows an arrival charge. One button, while parked, sends
+  a `geo:` destination to whatever navigation app answers.
+
+  **It sends the charging stop, not the destination, whenever there is one.** `geo:` carries a
+  single point and no waypoints, so a route planned *through* somewhere cannot be pinned by its
+  endpoint. The stop is the leg the forecast is about; the driver sets the rest after charging.
+  The screen says which one went, and says plainly that the car picks its own road — a caveat on
+  its own line, never inside the button's label, because a button is read as a promise.
+
+  **This is the first thing EVChargePilot asks a vehicle system to do rather than tell it**, and
+  the boundary that used to say "read-only" now says so with its exception written out. Parked
+  gate re-read at the tap rather than trusted from the render. One method, one tap, one
+  destination. `stopNav`, `goHome` and `setFastestRoute` are not called anywhere in the tree.
+  Nothing about where the driver is going reaches a log or the USB bundle.
+
 - **The unstable build arms its own validation.** Two drives came back with
   `validationModeOn=false` — eleven questions still open, because the toggle sits three taps
   from the dashboard and a driver about to leave has no reason to go looking for it. An unstable

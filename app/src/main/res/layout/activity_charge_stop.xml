@@ -172,6 +172,26 @@
                 android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone" />
 
+            <!-- CP-056. The action that ends this screen: the plan stops being something the
+                 driver has to copy. Its caveat is a sibling and never the button's own label,
+                 because a driver reads a button as a promise and this one cannot make it. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/navigateAction"
+                style="@style/Widget.EVChargePilot.Button"
+                android:layout_width="1400dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/charge_stop_navigate"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/navigateNote"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/chargeStopAttribution"
                 android:layout_width="1400dp"

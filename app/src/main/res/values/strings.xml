@@ -326,6 +326,15 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_charger_none">No usable charger found on that stretch of road. Charge before it.</string>
     <string name="charge_stop_charger_absent">Add an Open Charge Map key to be told where to stop.</string>
     <string name="charge_stop_charger">%1$s\u2009· %2$s km along · %3$s kW · %4$s</string>
+    <!-- CP-056. The handoff. Its note is never folded into the button label: a driver reads a
+         button as a promise, and "geo:" carries one point, so a route planned through a charging
+         stop cannot be pinned by its endpoint. -->
+    <string name="charge_stop_navigate">Navigate to this</string>
+    <string name="charge_stop_navigate_stop">Sends the charging stop to the car\u2019s navigation. It picks its own road, so drive it and this plan describes the same trip; go another way and the figures above stop being about it. Set the final destination again after charging.</string>
+    <string name="charge_stop_navigate_destination">Sends the destination to the car\u2019s navigation. It picks its own road, so the figures above describe this plan, not necessarily what the car will do.</string>
+    <string name="charge_stop_navigate_none">Nothing on this head unit accepted a destination. The route stays here; enter it in the car\u2019s navigation yourself.</string>
+    <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>
+    <string name="charge_stop_navigate_bad_place">That place has no usable coordinates, so nothing was sent.</string>
     <string name="charge_stop_charger_arrival">About %1$s %% left on arrival there.</string>
     <string name="charge_stop_charger_source">%1$s · last confirmed %2$s. This is a record, not a promise: it may be gone, busy or broken.</string>
     <string name="charge_stop_charger_source_undated">%1$s · no confirmation date. This is a record, not a promise: it may be gone, busy or broken.</string>
