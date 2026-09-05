@@ -110,6 +110,7 @@
     <string name="reason_insufficient_samples">pas encore assez d\'échantillons</string>
     <string name="reason_speed_too_low">la vitesse est trop faible pour une consommation stable rapportée à la distance</string>
     <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
+    <string name="reason_power_never_published">ce véhicule ne publie jamais la puissance batterie</string>
     <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
     <string name="label_soc">État de charge</string>
     <string name="notification_channel_recording">Détection et enregistrement des trajets</string>
@@ -145,6 +146,7 @@
     <string name="energy_breakdown_unavailable_title">Bilan indisponible</string>
     <string name="energy_breakdown_model_unavailable">Aucun modèle local validé ne peut encore produire ce bilan. Aucune estimation de remplacement n’est affichée.</string>
     <string name="energy_breakdown_missing_power">Ce trajet ne possède pas toutes les preuves de puissance conservées nécessaires au bilan. Les totaux enregistrés restent inchangés.</string>
+    <string name="power_never_published">Ce véhicule ne publie jamais la puissance batterie ; rien ici ne peut en être déduit, ni maintenant ni plus tard. La planification de recharge utilise l\'état de charge à la place.</string>
     <string name="energy_breakdown_consumed">CONSOMMÉE</string>
     <string name="energy_breakdown_regenerated">RÉCUPÉRÉE</string>
     <string name="energy_breakdown_net">ÉNERGIE BATTERIE NETTE</string>

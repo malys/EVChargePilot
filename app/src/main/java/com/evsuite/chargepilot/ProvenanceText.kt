@@ -1,6 +1,8 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import com.evsuite.hardware.CarPropertyEvidence
+import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.Provenance
 import com.evsuite.hardware.telemetry.Provenanced
 import com.evsuite.hardware.telemetry.UnavailableReason
@@ -76,3 +78,15 @@ class ProvenanceText(private val context: Context) {
         const val DASH = "—"
     }
 }
+
+/**
+ * True where this generation declares battery power and has never been seen publishing it.
+ *
+ * A screen that needs battery power has two different silences to report, and only one of them
+ * is a wait. "Not validated yet" invites a driver to keep coming back to a screen that will
+ * never fill in; CP-003's evidence already knows the difference, so the screens say it.
+ */
+fun batteryPowerNeverPublished(): Boolean = CarPropertyEvidence.isNeverPublished(
+    CarPropertyEvidence.Signal.BATTERY_POWER_KW,
+    FirmwareInfo.getGeneration(),
+)

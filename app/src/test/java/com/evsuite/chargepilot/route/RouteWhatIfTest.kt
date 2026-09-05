@@ -1,12 +1,12 @@
 package com.evsuite.chargepilot.route
 
 import com.evsuite.chargepilot.SpeedWhatIfUnavailable
-import com.evsuite.hardware.BatteryPowerEvidence
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.VehicleSpeedEvidence
 import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.SocRate
-import com.evsuite.hardware.telemetry.model.EnergyModel
 import com.evsuite.hardware.telemetry.model.EnergyModelEnvelope
+import com.evsuite.hardware.telemetry.model.SocConsumptionModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -17,16 +17,18 @@ class RouteWhatIfTest {
 
     private val pack = BatteryCapacityConfig(61.7, 100.0)
 
-    private val model = EnergyModel(
-        evidence = BatteryPowerEvidence(
+    // Percent of charge per 100 km, which is what CP-052 fits: about 13 % at 90 km/h and
+    // 18 % at 130, near enough to an MG4 on a mild day.
+    private val model = SocConsumptionModel(
+        speedEvidence = VehicleSpeedEvidence(
             FirmwareInfo.Gen.SWI68,
-            BatteryPowerEvidence.OUTPUT_POSITIVE_MW_V1,
+            VehicleSpeedEvidence.CURRENT,
         ),
-        rollingKwhPer100Km = 8.0,
-        aeroKwhPer100KmPerSpeedSquared = 0.0006,
-        thermalKwhPer100KmPerDegree = 0.1,
-        residualRmseKwhPer100Km = 0.5,
-        sampleCount = 200,
+        rollingPercentPer100Km = 8.0,
+        aeroPercentPer100KmPerSpeedSquared = 0.0006,
+        thermalPercentPer100KmPerDegree = 0.1,
+        residualRmsePercentPer100Km = 0.5,
+        segmentCount = 200,
         envelope = EnergyModelEnvelope(60.0, 140.0, -10.0, 40.0),
     )
 
@@ -40,7 +42,6 @@ class RouteWhatIfTest {
             listOf(section(200.0, 130.0)),
             model,
             outsideTempCelsius = 20.0,
-            pack = pack,
         )
         assertTrue(result is RouteWhatIf.Result.Ready)
         val options = (result as RouteWhatIf.Result.Ready).options
@@ -66,7 +67,6 @@ class RouteWhatIfTest {
             listOf(section(300.0, 80.0, "D986")),
             model,
             outsideTempCelsius = 20.0,
-            pack = pack,
         )
         assertEquals(
             RouteWhatIf.Result.Unavailable(SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION),
@@ -80,7 +80,6 @@ class RouteWhatIfTest {
             listOf(section(100.0, 130.0), section(80.0, 75.0, "D6")),
             model,
             outsideTempCelsius = 20.0,
-            pack = pack,
         ) as RouteWhatIf.Result.Ready
         assertEquals(100.0, result.options.first { it.speedKmh == 110 }.affectedKm, 1e-9)
     }
@@ -91,7 +90,6 @@ class RouteWhatIfTest {
             listOf(section(300.0, 130.0)),
             model,
             outsideTempCelsius = 20.0,
-            pack = pack,
             // A stop disappears once about 4 points of charge are freed.
             removesStop = { saved -> saved >= 4.0 },
         ) as RouteWhatIf.Result.Ready
@@ -109,7 +107,6 @@ class RouteWhatIfTest {
             listOf(section(200.0, 130.0)),
             model,
             outsideTempCelsius = 20.0,
-            pack = pack,
         ) as RouteWhatIf.Result.Ready
         assertNull(result.headline)
     }
@@ -118,20 +115,20 @@ class RouteWhatIfTest {
     fun `outside the trained envelope, and without a model, it refuses visibly`() {
         assertEquals(
             RouteWhatIf.Result.Unavailable(SpeedWhatIfUnavailable.MODEL_NOT_TRAINED),
-            RouteWhatIf.slower(listOf(section(200.0, 130.0)), null, 20.0, pack),
+            RouteWhatIf.slower(listOf(section(200.0, 130.0)), null, 20.0),
         )
         assertEquals(
             RouteWhatIf.Result.Unavailable(
                 SpeedWhatIfUnavailable.MOTORWAY_TEMPERATURE_UNAVAILABLE,
             ),
-            RouteWhatIf.slower(listOf(section(200.0, 130.0)), model, null, pack),
+            RouteWhatIf.slower(listOf(section(200.0, 130.0)), model, null),
         )
         // 35 °C is inside this fit; -30 °C is a winter the model has never seen.
         assertEquals(
             RouteWhatIf.Result.Unavailable(
                 SpeedWhatIfUnavailable.NO_REFERENCE_SPEED_IN_ENVELOPE,
             ),
-            RouteWhatIf.slower(listOf(section(200.0, 130.0)), model, -30.0, pack),
+            RouteWhatIf.slower(listOf(section(200.0, 130.0)), model, -30.0),
         )
     }
 

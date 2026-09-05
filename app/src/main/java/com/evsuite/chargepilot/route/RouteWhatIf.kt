@@ -4,7 +4,7 @@ import com.evsuite.chargepilot.SpeedWhatIfUnavailable
 import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.RouteGrade
 import com.evsuite.hardware.telemetry.SocRate
-import com.evsuite.hardware.telemetry.model.EnergyModel
+import com.evsuite.hardware.telemetry.model.SocConsumptionModel
 
 /**
  * What slowing down, or going the other way, would cost and save on the road ahead.
@@ -20,9 +20,13 @@ import com.evsuite.hardware.telemetry.model.EnergyModel
  * consulted to know that. It also means an urban section, a hill and a bad junction all look
  * like what they are — slow — without anything having to model them.
  *
- * Consumption comes from CP-032's fitted model and nowhere else. Outside its trained envelope
+ * Consumption comes from CP-052's fitted model and nowhere else. Outside its trained envelope
  * this refuses, exactly as the post-trip comparison does: the whole point of an envelope is
  * that the fit says nothing beyond it, and a number produced there would be invention.
+ *
+ * The model speaks in percent of charge per 100 km, so a saving is a saving in the same unit
+ * the plan, the reserve and the driver's own gauge are in. No pack capacity is consulted on
+ * this path, which is why it works on a car that publishes no battery power.
  */
 object RouteWhatIf {
 
@@ -74,18 +78,16 @@ object RouteWhatIf {
 
     /**
      * @param sections the road ahead, from [OrsDirections.Route.sections].
-     * @param model CP-032's fit, or null when this firmware never trained one.
+     * @param model CP-052's fit, or null when there is not enough history to have one.
      * @param outsideTempCelsius the vehicle's own reading; the fit is a function of it.
-     * @param pack what the energy is a percentage of.
      * @param removesStop asked with the pessimistic edge of a saving: would the plan still
      *   need a stop if the driver gained this much charge. The planner answers it, so this
      *   file never learns what a reserve is.
      */
     fun slower(
         sections: List<OrsDirections.Section>,
-        model: EnergyModel?,
+        model: SocConsumptionModel?,
         outsideTempCelsius: Double?,
-        pack: BatteryCapacityConfig,
         removesStop: (Double) -> Boolean = { false },
     ): Result {
         if (model == null) {
@@ -100,7 +102,7 @@ object RouteWhatIf {
         }
 
         val attempts = SPEEDS_KMH.map { speed ->
-            at(speed, fast, model, outsideTempCelsius, pack, removesStop)
+            at(speed, fast, model, outsideTempCelsius, removesStop)
         }
         // A speed with no road to apply it to is not an option: "130 km/h · 0 min · 0 %" is a
         // row that says nothing, on a screen where every row has to earn its line.
@@ -131,15 +133,14 @@ object RouteWhatIf {
     private fun at(
         speedKmh: Int,
         sections: List<OrsDirections.Section>,
-        model: EnergyModel,
+        model: SocConsumptionModel,
         outsideTempCelsius: Double,
-        pack: BatteryCapacityConfig,
         removesStop: (Double) -> Boolean,
     ): Attempt {
         var affectedKm = 0.0
         var delayMinutes = 0.0
-        var savedLowKwh = 0.0
-        var savedHighKwh = 0.0
+        var savedLow = 0.0
+        var savedHigh = 0.0
         for (section in sections) {
             val implied = section.impliedSpeedKmh ?: continue
             // Nothing to choose: this road is already being driven at or below the candidate.
@@ -156,23 +157,21 @@ object RouteWhatIf {
             // is the safe direction — a saving that looks smaller than it is — and the honest
             // alternative would need a covariance this model does not carry.
             val per100 = section.distanceKm / 100.0
-            savedLowKwh += ((nowValue - nowBand) - (slowedValue + slowedBand)) * per100
-            savedHighKwh += ((nowValue + nowBand) - (slowedValue - slowedBand)) * per100
+            savedLow += ((nowValue - nowBand) - (slowedValue + slowedBand)) * per100
+            savedHigh += ((nowValue + nowBand) - (slowedValue - slowedBand)) * per100
             delayMinutes += section.distanceKm / speedKmh * 60.0 - section.durationMinutes
             affectedKm += section.distanceKm
         }
         if (affectedKm < MIN_AFFECTED_KM) return Attempt.NoRoad
 
-        val low = pack.socPercentForEnergy(savedLowKwh).value ?: return Attempt.OutsideEnvelope
-        val high = pack.socPercentForEnergy(savedHighKwh).value ?: return Attempt.OutsideEnvelope
         return Attempt.Ok(
             Slower(
                 speedKmh = speedKmh,
                 affectedKm = affectedKm,
                 delayMinutes = delayMinutes,
-                savedPercentLow = low,
-                savedPercentHigh = high,
-                removesStop = removesStop(low),
+                savedPercentLow = savedLow,
+                savedPercentHigh = savedHigh,
+                removesStop = removesStop(savedLow),
             )
         )
     }

@@ -65,12 +65,14 @@ class EnergyBreakdownActivity : AppCompatActivity() {
             binding.breakdownContent.visibility = View.GONE
             binding.emptyState.visibility = View.VISIBLE
             binding.emptyReason.setText(
-                if (result is EnergyAttributionResult.Unavailable &&
-                    result.reason == com.evsuite.hardware.telemetry.UnavailableReason.INSUFFICIENT_SAMPLES
-                ) {
-                    R.string.energy_breakdown_missing_power
-                } else {
-                    R.string.energy_breakdown_model_unavailable
+                when {
+                    // Said first, because on this car it is the whole answer: no capture will
+                    // ever produce the power this breakdown is made of.
+                    batteryPowerNeverPublished() -> R.string.power_never_published
+                    result is EnergyAttributionResult.Unavailable &&
+                        result.reason == com.evsuite.hardware.telemetry.UnavailableReason.INSUFFICIENT_SAMPLES ->
+                        R.string.energy_breakdown_missing_power
+                    else -> R.string.energy_breakdown_model_unavailable
                 },
             )
             return

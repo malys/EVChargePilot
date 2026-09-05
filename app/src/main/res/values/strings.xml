@@ -114,6 +114,7 @@
     <string name="reason_insufficient_samples">not enough samples yet</string>
     <string name="reason_speed_too_low">vehicle speed is too low for stable distance-normalized consumption</string>
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
+    <string name="reason_power_never_published">this vehicle never publishes battery power</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>
     <string name="notification_channel_recording">Trip detection and recording</string>
@@ -149,6 +150,7 @@
     <string name="energy_breakdown_unavailable_title">Breakdown unavailable</string>
     <string name="energy_breakdown_model_unavailable">No validated local model can produce this breakdown yet. No estimate is substituted.</string>
     <string name="energy_breakdown_missing_power">This trip has no complete retained power evidence for a breakdown. Recorded totals remain unchanged.</string>
+    <string name="power_never_published">This vehicle never publishes battery power, so nothing here can be worked out from it — now or later. Charge planning uses state of charge instead.</string>
     <string name="energy_breakdown_consumed">CONSUMED</string>
     <string name="energy_breakdown_regenerated">REGENERATED</string>
     <string name="energy_breakdown_net">NET BATTERY ENERGY</string>

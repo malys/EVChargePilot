@@ -268,16 +268,24 @@ class TripHistoryActivity : AppCompatActivity() {
             is EnergyAttributionResult.Unavailable -> getString(
                 R.string.trip_attribution_unavailable,
                 getString(
-                    if (result.reason == com.evsuite.hardware.telemetry.UnavailableReason.MODEL_NOT_TRAINED) {
-                        R.string.reason_model_not_trained
-                    } else {
-                        R.string.reason_insufficient_samples
+                    when {
+                        batteryPowerNeverPublished() -> R.string.reason_power_never_published
+                        result.reason ==
+                            com.evsuite.hardware.telemetry.UnavailableReason.MODEL_NOT_TRAINED ->
+                            R.string.reason_model_not_trained
+                        else -> R.string.reason_insufficient_samples
                     },
                 ),
             )
             null -> getString(
                 R.string.trip_attribution_unavailable,
-                getString(R.string.reason_model_not_trained),
+                getString(
+                    if (batteryPowerNeverPublished()) {
+                        R.string.reason_power_never_published
+                    } else {
+                        R.string.reason_model_not_trained
+                    }
+                ),
             )
         }
         binding.detailAttribution.contentDescription = binding.detailAttribution.text

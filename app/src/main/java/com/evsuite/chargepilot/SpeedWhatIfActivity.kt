@@ -153,7 +153,14 @@ class SpeedWhatIfActivity : AppCompatActivity() {
     }
 
     private fun reason(reason: SpeedWhatIfUnavailable): Int = when (reason) {
-        SpeedWhatIfUnavailable.MODEL_NOT_TRAINED -> R.string.reason_model_not_trained
+        // This comparison is fitted from battery power, and on a car that never publishes it
+        // the honest reason is the car, not a fit that has not happened yet.
+        SpeedWhatIfUnavailable.MODEL_NOT_TRAINED ->
+            if (batteryPowerNeverPublished()) {
+                R.string.power_never_published
+            } else {
+                R.string.reason_model_not_trained
+            }
         SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION -> R.string.speed_what_if_no_motorway
         SpeedWhatIfUnavailable.MOTORWAY_ENERGY_UNAVAILABLE ->
             R.string.speed_what_if_energy_unavailable

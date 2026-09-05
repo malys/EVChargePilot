@@ -27,7 +27,9 @@ import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.RouteGrade
 import com.evsuite.hardware.telemetry.SocRate
 import com.evsuite.hardware.telemetry.SocRateEstimator
-import com.evsuite.hardware.telemetry.model.EnergyModel
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitResult
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
+import com.evsuite.hardware.telemetry.model.SocConsumptionModel
 import com.google.android.material.button.MaterialButton
 import java.io.File
 import java.util.Locale
@@ -76,9 +78,12 @@ class ChargeStopActivity : AppCompatActivity() {
     @Volatile
     private var rate: SocRate? = null
 
-    /** CP-032's fit, reused rather than rewritten. Null on a firmware that never trained one. */
+    /**
+     * CP-052's fit, in percent of charge per 100 km. Null until enough of the driver's own
+     * road has been recorded to determine one.
+     */
     @Volatile
-    private var model: EnergyModel? = null
+    private var model: SocConsumptionModel? = null
 
     private var places: List<OrsGeocode.Place> = emptyList()
 
@@ -172,13 +177,12 @@ class ChargeStopActivity : AppCompatActivity() {
             EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
         }.getOrDefault(emptyList())
         rate = SocRateEstimator.fromTrips(trips.map { it.summary }, generation)
-        // The same fit the post-trip comparison uses, so the two screens can never disagree
-        // about what 110 km/h costs.
-        model = LocalEnergyModel.loadOrTrain(
-            filesDir,
-            trips,
-            trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence },
-        )
+        // Fitted from the charge gauge and the speed, because this car publishes no battery
+        // power and the kWh model therefore never trains on it (CP-052). Refitted on each
+        // load rather than stored: it is a few thousand samples of arithmetic on a worker
+        // thread, and a cache would only add a way for the two to disagree.
+        model = (SocConsumptionFitter().fit(trips, generation) as? SocConsumptionFitResult.Ready)
+            ?.model
     }
 
     private fun search() {
@@ -280,7 +284,6 @@ class ChargeStopActivity : AppCompatActivity() {
                     it.sections,
                     model,
                     snapshot?.outsideTempCelsius?.toDouble(),
-                    PACK,
                     // Only a plan that has a stop can have it removed. Without the guard the
                     // headline would announce a stop avoided on a route that never had one.
                 ) { saved ->

@@ -6,6 +6,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The speed what-if now works on the car it was written for.** This MG4 declares battery power
+  and never publishes it — three diagnostic bundles, 51 samples, not one reading — so the kWh
+  model behind the what-if was never going to train, and the screen would have said "not yet"
+  forever. Consumption is now fitted in percent of charge per 100 km straight from the gauge and
+  the speed, which needs no battery power and no pack capacity from a specification sheet. The
+  saving comes out in the unit the driver's own gauge is in.
+
+- **The two screens that stay blank now say why, and stop promising.** Battery power is what the
+  energy breakdown and the post-trip speed comparison are made of, and this vehicle never sends
+  it. They said "not validated yet", which invites coming back to a screen that will never fill
+  in. They now say the vehicle does not publish it, now or later.
+
 - **"If you drive at 110 you will not need to charge" — with the twenty minutes it costs.**
   The charge-stop screen now says what driving differently would change on the route it just
   planned. Where the road ahead is fast — which comes from the router's own duration over its
