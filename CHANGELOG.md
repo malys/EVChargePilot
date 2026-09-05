@@ -6,6 +6,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The car's numbers are the driver's now, not a specification sheet's.** Usable capacity when
+  new, state of health, the charger power floor and the reserve to arrive with were constants in
+  the source, each with a comment admitting it should not be. There is a parked-only screen for
+  all four: the climb cost, which chargers are offered and where the stop lands all follow what
+  is entered there. The defaults are unchanged and still the MG4 Long Range sheet — the
+  difference is that the screen says so, instead of a 61,7 kWh assumption sitting invisibly
+  inside every forecast.
+
 - **"On your trip of 12 March, 110 km/h would have saved about 4 % of charge."** The post-trip
   speed comparison used to integrate battery power, so on this car it had nothing to integrate.
   Where a trip carries no power it is now measured on the gauge the driver watched fall: the

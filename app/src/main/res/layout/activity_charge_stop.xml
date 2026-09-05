@@ -30,6 +30,14 @@
             android:textAppearance="@style/Text.EV.Title" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/vehicleSettingsAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="200dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:text="@string/charge_stop_action_vehicle" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/routingSettingsAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="240dp"

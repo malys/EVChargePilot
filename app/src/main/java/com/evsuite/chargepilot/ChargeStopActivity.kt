@@ -20,7 +20,6 @@ import com.evsuite.chargepilot.route.RouteWhatIf
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
-import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -138,6 +137,9 @@ class ChargeStopActivity : AppCompatActivity() {
         binding.routingSettingsAction.setOnClickListener {
             startActivity(Intent(this, RoutingSettingsActivity::class.java))
         }
+        binding.vehicleSettingsAction.setOnClickListener {
+            startActivity(Intent(this, VehicleSettingsActivity::class.java))
+        }
         binding.searchAction.setOnClickListener { search() }
         worker.execute { loadRate() }
         render()
@@ -250,6 +252,9 @@ class ChargeStopActivity : AppCompatActivity() {
             return
         }
         val socPercent = snapshot?.socPercent?.toDouble()
+        // The driver's own figures (CP-054), read on the main thread because they are four
+        // numbers in a preferences file and the worker below must not race the settings screen.
+        val settings = VehicleSettings.read(this)
         val effective = rate ?: SocRateEstimator.fromVehicleRange(
             socPercent,
             snapshot?.rangeKm?.toDouble(),
@@ -267,13 +272,21 @@ class ChargeStopActivity : AppCompatActivity() {
             val route = routes.firstOrNull()
             // The road ahead, which is the only elevation a forecast can use: CP-031 refused
             // the altitude behind the car and that refusal stands.
-            val grade = route?.let { RouteGrade.of(it.ascentMetres, it.descentMetres, PACK) }
+            val grade = route?.let {
+                RouteGrade.of(it.ascentMetres, it.descentMetres, settings.pack)
+            }
             val plan = route?.let {
-                ChargeStopPlan.of(socPercent, it.distanceKm, effective, grade = grade)
+                ChargeStopPlan.of(
+                    socPercent,
+                    it.distanceKm,
+                    effective,
+                    settings.reservePercent,
+                    grade,
+                )
             }
             val stop = plan as? ChargeStopPlan.Plan.Stop
             val charger = if (route != null && stop != null) {
-                findCharger(route, stop.afterKm, socPercent, effective)
+                findCharger(route, stop.afterKm, socPercent, effective, settings)
             } else {
                 null
             }
@@ -287,11 +300,14 @@ class ChargeStopActivity : AppCompatActivity() {
                     // Only a plan that has a stop can have it removed. Without the guard the
                     // headline would announce a stop avoided on a route that never had one.
                 ) { saved ->
-                    stop != null && removesStop(socPercent, saved, it.distanceKm, effective, grade)
+                    stop != null &&
+                        removesStop(socPercent, saved, it.distanceKm, effective, grade, settings)
                 }
             }
             val alternative = route?.let { best ->
-                routes.getOrNull(1)?.let { RouteWhatIf.alternative(best, it, effective, PACK) }
+                routes.getOrNull(1)?.let {
+                    RouteWhatIf.alternative(best, it, effective, settings.pack)
+                }
             }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
@@ -319,10 +335,12 @@ class ChargeStopActivity : AppCompatActivity() {
         routeKm: Double,
         rate: SocRate?,
         grade: RouteGrade.Cost?,
+        settings: VehicleSettings.Values,
     ): Boolean {
         if (socPercent == null) return false
         val freed = (socPercent + savedPercent).coerceAtMost(100.0)
-        return ChargeStopPlan.of(freed, routeKm, rate, grade = grade) is ChargeStopPlan.Plan.NoStop
+        return ChargeStopPlan.of(freed, routeKm, rate, settings.reservePercent, grade) is
+            ChargeStopPlan.Plan.NoStop
     }
 
     /**
@@ -338,6 +356,7 @@ class ChargeStopActivity : AppCompatActivity() {
         afterKm: Double,
         socPercent: Double?,
         rate: SocRate?,
+        settings: VehicleSettings.Values,
     ): Found? {
         val credentials = RoutingCredentials.readCharger(this) ?: return null
         val window = RouteGeometry.window(
@@ -348,7 +367,7 @@ class ChargeStopActivity : AppCompatActivity() {
         if (window.size < 2) return null
         val result = chargers.get(credentials, OpenChargeMap.PATH, OpenChargeMap.query(window))
         val body = (result as? RoutingTransport.Result.Ok)?.body ?: return null
-        return OpenChargeMap.parse(body, MIN_POWER_KW)
+        return OpenChargeMap.parse(body, settings.minChargerPowerKw)
             .mapNotNull { charger ->
                 val alongKm = RouteGeometry.distanceAlongKm(
                     route.points,
@@ -357,7 +376,12 @@ class ChargeStopActivity : AppCompatActivity() {
                     OpenChargeMap.CORRIDOR_KM,
                 ) ?: return@mapNotNull null
                 if (alongKm > afterKm) return@mapNotNull null
-                val arrival = ChargeStopPlan.of(socPercent, alongKm, rate) as? ChargeStopPlan.Plan.NoStop
+                val arrival = ChargeStopPlan.of(
+                    socPercent,
+                    alongKm,
+                    rate,
+                    settings.reservePercent,
+                ) as? ChargeStopPlan.Plan.NoStop
                 Found(charger, alongKm, arrival?.arrivalPercent)
             }
             // The last one before the floor, not the nearest: the nearest wastes the range the
@@ -631,24 +655,5 @@ class ChargeStopActivity : AppCompatActivity() {
          */
         const val ALTERNATIVES = 2
 
-        /**
-         * Below this a mid-route stop is not a stop, it is an overnight. Not a driver setting
-         * yet — CP-048 asked for one and this is the constant standing in for it.
-         */
-        const val MIN_POWER_KW = 22.0
-
-        /**
-         * The pack the grade term is a percentage of.
-         *
-         * MG4 Long Range usable capacity, 61,7 kWh, from EVKX's specification sheet by way of
-         * `AGENTS.md` — a figure describing the model, not this car, and health assumed intact
-         * because nothing here has measured it. Both assumptions sit inside
-         * [RouteGrade.RELATIVE_UNCERTAINTY], and like [MIN_POWER_KW] this is a constant
-         * standing in for a driver-declared setting.
-         */
-        val PACK = BatteryCapacityConfig(
-            usableCapacityKwhWhenNew = 61.7,
-            stateOfHealthPercent = 100.0,
-        )
     }
 }
