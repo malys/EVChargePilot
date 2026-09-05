@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.gson)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.jsr305)
     // Encodes the About QR locally; the same version EVTasker ships.
     implementation(libs.zxing.core)
     testImplementation(libs.junit)
