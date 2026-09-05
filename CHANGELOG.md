@@ -6,6 +6,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **"Navigate to this" never opened MG4 Navigator.** The 2026-09-05 drive recorded no handler
+  for `geo:` or `google.navigation:` on this head unit, so `startActivity` had nothing to reach
+  and the button announced a failure. EVTasker's `NAVIGATE_TO` works on the same car by falling
+  back to an explicit component — `ACTION_MAIN` + `CATEGORY_HOME` on the vendor's navigation
+  package, which is what the head unit's own launcher sends — and `MapApps` now does the same
+  here. The destination does not travel on that path: the map opens where it is, and the screen
+  says so and prints the coordinates to type. A handoff that carried the destination and a map
+  merely brought to the foreground are announced, and recorded in the CP-056 probe, as the
+  different things they are.
 - **Importing and exporting the routing configuration found no USB stick.** Storage discovery
   demanded positive proof that a volume was removable — `Environment.isExternalStorageRemovable`,
   `StorageVolume.isRemovable`, or a mount name matching `XXXX-XXXX`/`usb`/`udisk`. This head unit

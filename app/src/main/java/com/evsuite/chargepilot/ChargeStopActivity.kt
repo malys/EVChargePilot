@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
@@ -923,25 +922,36 @@ class ChargeStopActivity : AppCompatActivity() {
                 announce(getString(R.string.charge_stop_navigate_bad_place))
                 return
             }
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-        // No coordinates in the probe line: this file leaves the car on a USB stick.
+        // No coordinates in the probe line: this file leaves the car on a USB stick. The map
+        // package is a package name, which identifies the car's software and not the driver.
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
-            "driver tapped the handoff, to=${if (target.toStop) "charging stop" else "destination"}"
+            "driver tapped the handoff, to=${if (target.toStop) "charging stop" else "destination"}" +
+                ", map=${MapApps.installedPackage(this) ?: "none installed"}"
         }
         // Written down on the tap and not on the render: this is the one unambiguous "I am
         // driving this" the app ever gets, and a plan merely looked at is not one being driven.
         // Recorded whether or not anything accepted the intent — the driver still chose it.
         followed?.let { FollowedPlan.write(this, it.copy(committedAtMs = System.currentTimeMillis())) }
             ?: FollowedPlan.clear(this)
-        val sent = runCatching { startActivity(intent) }.isSuccess
+        val outcome = MapApps.open(this, uri, target.latitude, target.longitude)
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
-            if (sent) "accepted by something" else "nothing accepted ACTION_VIEW geo:"
+            when (outcome) {
+                MapApps.Outcome.SENT -> "accepted by something, with the destination"
+                MapApps.Outcome.MAP_ONLY -> "map opened by component, destination not carried"
+                MapApps.Outcome.NONE -> "nothing accepted geo: and no map component is installed"
+            }
         }
         announce(
-            getString(
-                if (sent) R.string.charge_stop_navigate_sent
-                else R.string.charge_stop_navigate_none
-            )
+            when (outcome) {
+                MapApps.Outcome.SENT -> getString(R.string.charge_stop_navigate_sent)
+                // The place the driver now has to type, in the one notation a search field
+                // takes: a French head unit would render 43,5 and the comma is the separator.
+                MapApps.Outcome.MAP_ONLY -> getString(
+                    R.string.charge_stop_navigate_map_only,
+                    String.format(Locale.ROOT, "%.5f, %.5f", target.latitude, target.longitude),
+                )
+                MapApps.Outcome.NONE -> getString(R.string.charge_stop_navigate_none)
+            }
         )
     }
 

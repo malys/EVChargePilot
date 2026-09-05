@@ -350,6 +350,7 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_navigate_destination">Sends the destination to the car\u2019s navigation. It picks its own road, so the figures above describe this plan, not necessarily what the car will do.</string>
     <string name="charge_stop_navigate_none">Nothing on this head unit accepted a destination. The route stays here; enter it in the car\u2019s navigation yourself.</string>
     <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>
+    <string name="charge_stop_navigate_map_only">The map is open, but this car takes no destination from another app. Enter it there: %1$s</string>
     <string name="charge_stop_navigate_bad_place">That place has no usable coordinates, so nothing was sent.</string>
 
     <!-- CP-058 the drift companion. One line, a consequence, never an instruction. The

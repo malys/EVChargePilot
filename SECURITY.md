@@ -33,7 +33,12 @@ Its bounds, all of which are testable:
   is labelled on screen as exactly that: the car picks its own road, and the plan's figures stop
   describing the drive if it picks a different one.
 - **No coordinates in any log or probe.** The validation artifact records that a handoff was
-  tapped and whether anything accepted it. Never where to.
+  tapped, whether anything accepted it, and the package name of the map installed on the car.
+  Never where to.
+- **The fallback carries nothing.** When no app answers the URI — which is this head unit —
+  `MapApps` starts the vendor's navigation package with `ACTION_MAIN`, the intent its own
+  launcher sends. It contains no destination and no data of any kind; the map opens where it
+  already was, and the coordinates are printed on this app's screen for the driver to type.
 
 ### What the followed plan keeps
 

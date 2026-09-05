@@ -344,6 +344,7 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_navigate_destination">Envoie la destination à la navigation de la voiture. Elle choisit sa route : les chiffres ci-dessus décrivent ce plan, pas forcément ce que la voiture fera.</string>
     <string name="charge_stop_navigate_none">Rien sur cette tête de série n\u2019a accepté de destination. L\u2019itinéraire reste ici ; saisissez-le vous-même dans la navigation de la voiture.</string>
     <string name="charge_stop_navigate_sent">Envoyé à la navigation de la voiture.</string>
+    <string name="charge_stop_navigate_map_only">La carte est ouverte, mais cette voiture n\u2019accepte pas de destination venant d\u2019une autre application. Saisissez-la : %1$s</string>
     <string name="charge_stop_navigate_bad_place">Ce lieu n\u2019a pas de coordonnées utilisables : rien n\u2019a été envoyé.</string>
 
     <!-- CP-058 le compagnon de dérive. Une ligne, une conséquence, jamais une consigne. -->
