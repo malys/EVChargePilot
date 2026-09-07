@@ -160,6 +160,16 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         binding.searchAction.setOnClickListener { search() }
         binding.navigateAction.setOnClickListener { navigate() }
+        // Two vehicle sessions came back with Q3 to Q8 and Q10 blank, and the bundle could not
+        // say why: every one of them fires downstream of a route, and no route was ever asked
+        // for. This line fires where the driver arrives, so the next bundle names what was
+        // missing instead of being silent about it. Booleans only — never a key, never a place.
+        ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+            "charge-stop screen opened: fine=${LocationSource.hasPrecise(this)}" +
+                ", fix=${LocationSource.lastKnown(this) != null}" +
+                ", routing key=${RoutingCredentials.isConfigured(this)}" +
+                ", charger key=${RoutingCredentials.isChargerConfigured(this)}"
+        }
         worker.execute { loadRate() }
         render()
     }

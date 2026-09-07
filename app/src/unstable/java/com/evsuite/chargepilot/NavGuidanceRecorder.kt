@@ -164,6 +164,7 @@ internal object NavGuidanceRecorder {
             listenerRegistered = SaicNavGuidance.isListening,
             callbacks = SaicNavGuidance.latest().events,
             census = SaicNavGuidance.census(),
+            censusPayloadBytes = SaicNavGuidance.censusPayloadBytes(),
             censusBeyondCeiling = SaicNavGuidance.censusBeyondCeiling(),
             trace = trace(),
             traceComplete = isTraceComplete,

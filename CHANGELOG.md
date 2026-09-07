@@ -32,6 +32,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The charge-stop screen says, in the artifact, what it was missing.** Two vehicle sessions
+  came back with Q3 to Q8 and Q10 blank and no way to tell why: every one of those probes fires
+  downstream of a route request, and no route was ever asked for. Opening the screen now records
+  the fine grant, whether a position is held, and whether each key is configured — four booleans,
+  never a key and never a place — so the next bundle names the blocker instead of being silent.
+- **The guidance capture carries the size of the last parcel on each transaction code.** The
+  2026-09-07 capture had the car's own navigation guiding, and still decoded a remaining distance
+  and a remaining time of zero, while an undecoded code 11 carried 98 callbacks in the same
+  window. A size tells a genuine zero from a payload this build reads as the wrong shape.
 - **A companion that notices the plan stopped being true.** CP-058. A plan chosen at the kerb is
   a prediction, and predictions go wrong on the road — a headwind, a cold pack, traffic, a driver
   going faster than the row they picked. The dashboard now carries one line: what the drive is

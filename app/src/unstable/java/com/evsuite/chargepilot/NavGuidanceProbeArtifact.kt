@@ -21,6 +21,8 @@ internal data class NavGuidanceProbeArtifact(
     val callbacks: Int,
     /** Transaction code to count, exactly as the census saw it. */
     val census: Map<Int, Int>,
+    /** Transaction code to the size of the last parcel it carried. A byte count, never a place. */
+    val censusPayloadBytes: Map<Int, Int>,
     /** Codes the R69 transaction map does not name: the signal that the map is shifted. */
     val undecodedCodes: List<Int>,
     val censusBeyondCeiling: Int,
@@ -76,6 +78,9 @@ internal data class NavGuidanceProbeArtifact(
         private val NOTES = listOf(
             "dist and turn are raw callback values; their unit is unproven. State it by " +
                 "comparing against a distance known independently before using any of this.",
+            "censusPayloadBytes is the size of the last parcel on each code. A decoded code " +
+                "reading zero while its parcel is larger than the descriptor plus four bytes is " +
+                "this build reading the wrong shape, not the car answering zero.",
             "The transaction map was read from an R69 build. Traffic on undecoded codes, or " +
                 "silence on the decoded ones while guidance is clearly running, means this " +
                 "firmware numbers the interface differently and every reading is off by the " +
@@ -89,6 +94,7 @@ internal data class NavGuidanceProbeArtifact(
             listenerRegistered: Boolean,
             callbacks: Int,
             census: Map<Int, Int>,
+            censusPayloadBytes: Map<Int, Int>,
             censusBeyondCeiling: Int,
             trace: List<String>,
             traceComplete: Boolean,
@@ -99,6 +105,7 @@ internal data class NavGuidanceProbeArtifact(
             listenerRegistered = listenerRegistered,
             callbacks = callbacks,
             census = census.toSortedMap(),
+            censusPayloadBytes = censusPayloadBytes.toSortedMap(),
             undecodedCodes = census.keys
                 .filterNot { it in NavGuidanceReducer.KNOWN_TRANSACTIONS }
                 .sorted(),

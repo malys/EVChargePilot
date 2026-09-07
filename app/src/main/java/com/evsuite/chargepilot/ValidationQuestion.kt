@@ -80,6 +80,7 @@ enum class ValidationQuestion(
         "Q8",
         "CP-046",
         "Is a location refusal survivable from end to end?",
-        "a route is asked for while the fine grant or the position is missing",
+        "the charge-stop screen opens, and again when a route is asked for while the fine " +
+            "grant or the position is missing",
     ),
 }
