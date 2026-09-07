@@ -589,13 +589,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Browsed, not listed: the bundle lands in the folder the driver will go looking in. */
     private fun chooseDiagnosticDestination(roots: List<File>) {
-        val labels = roots.map(File::getAbsolutePath).toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle(R.string.diagnostics_export_pick_usb)
-            .setItems(labels) { _, which -> writeDiagnostic(roots[which]) }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
+        StorageBrowserDialog.pickFolder(this, roots, R.string.diagnostics_export_pick_usb) {
+            writeDiagnostic(it)
+        }
     }
 
     private fun writeDiagnostic(directory: File) {

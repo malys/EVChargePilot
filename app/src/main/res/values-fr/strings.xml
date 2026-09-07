@@ -297,9 +297,12 @@ Consommation %6$s %% par km</string>
     <string name="routing_cleared">Clé supprimée de ce véhicule.</string>
     <string name="routing_key_missing">Saisissez une clé, ou importez-la depuis une clé USB.</string>
     <string name="routing_base_url_refused">Adresse refusée : %1$s. Elle doit être en https, sans identifiants ni paramètres.</string>
+    <string name="browser_up">⬆ Dossier parent</string>
+    <string name="browser_use_folder">Enregistrer ici</string>
     <string name="routing_import_pick">Choisir le stockage USB</string>
     <string name="routing_import_none">Aucun fichier de configuration trouvé. Placez sur une clé USB un fichier contenant la ligne ors_api_key = votre-clé.</string>
     <string name="routing_import_done">Importé depuis %1$s.</string>
+    <string name="routing_import_unusable">%1$s ne contient aucune clé. Choisissez le fichier contenant la ligne ors_api_key = votre-clé.</string>
     <string name="routing_export_empty">Rien à exporter pour l’instant. Saisissez d’abord une clé.</string>
     <string name="routing_export_pick">Choisir le stockage USB</string>
     <string name="routing_export_failed">Aucune clé USB accessible en écriture. Insérez-en une et réessayez.</string>

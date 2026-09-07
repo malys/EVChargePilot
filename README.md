@@ -160,7 +160,8 @@ ors_api_key  = your-key-here
 ors_base_url = https://api.heigit.org
 ```
 
-The file may have any name; it is found by its contents. `ors_base_url` is optional and exists
+Import browses the stick — pick the volume, walk into folders, tap the file. The file may have
+any name; it is read by its contents, not by its name. `ors_base_url` is optional and exists
 so a self-hosted instance works without a code change — it must be `https`, with no credentials
 and no query. The default is HeiGIT's own host: `api.openrouteservice.org` was deprecated on
 2026-04-28, cut to a tenth of its quota on 2026-08-27 and switches off on 2026-09-28, so a

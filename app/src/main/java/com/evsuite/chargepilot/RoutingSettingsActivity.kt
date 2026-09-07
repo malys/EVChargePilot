@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
@@ -144,52 +143,42 @@ class RoutingSettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * The USB stick first and this app's own folders with it, because on this head unit the
-     * system picker answers "no apps can perform this action" and there is nothing to fall back
-     * to. Discovery is off the main thread: a stick can be slow, and a scan that blocks is a
-     * frozen car. A picker between discovery and the read, same as the diagnostic export's, so a
-     * car with more than one volume mounted does not have the driver's stick guessed at.
+     * The driver browses the stick and taps the file, because on this head unit the system picker
+     * answers "no apps can perform this action" and there is nothing to fall back to. Volume
+     * discovery is off the main thread: a stick can be slow, and a scan that blocks is a frozen
+     * car. The browser then starts at the volume root, so a file put anywhere on the stick is
+     * reachable instead of only the folders a scan happened to look in.
      */
     private fun import() {
         disk.execute {
-            val directories = buildList {
-                addAll(getExternalFilesDirs(null).filterNotNull())
-                addAll(DiagnosticUsbStorage.roots(this@RoutingSettingsActivity))
-            }
+            val roots = DiagnosticUsbStorage.roots(this)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (directories.isEmpty()) {
+                if (roots.isEmpty()) {
                     announce(getString(R.string.routing_import_none))
                 } else {
-                    chooseImportSource(directories)
+                    StorageBrowserDialog.pickFile(this, roots, R.string.routing_import_pick) {
+                        importFile(it)
+                    }
                 }
             }
         }
     }
 
-    private fun chooseImportSource(directories: List<File>) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.routing_import_pick)
-            .setItems(directories.map(File::getAbsolutePath).toTypedArray()) { _, which ->
-                importFrom(directories[which])
-            }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
-    }
-
-    private fun importFrom(directory: File) {
+    private fun importFile(file: File) {
         disk.execute {
-            val found = RoutingConfigImport.search(listOf(directory))
+            val config = RoutingConfigImport.read(file)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (found == null) {
-                    announce(getString(R.string.routing_import_none))
+                if (config.isEmpty()) {
+                    // The path they chose, so "this one is not it" is the answer, not silence.
+                    announce(getString(R.string.routing_import_unusable, file.name))
                     return@runOnUiThread
                 }
-                RoutingCredentials.apply(this, found.config)
+                RoutingCredentials.apply(this, config)
                 binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
                 // The file name, never its contents: the contents are the key.
-                announce(getString(R.string.routing_import_done, found.file.name))
+                announce(getString(R.string.routing_import_done, file.name))
             }
         }
     }
@@ -200,9 +189,9 @@ class RoutingSettingsActivity : AppCompatActivity() {
      *
      * A removable volume only: writing the keys into this app's private folder would be a second
      * unencrypted copy nobody asked for and nobody could reach. The stick then carries the keys
-     * in clear text, which is what the announcement says. A picker between discovery and the
-     * write, same as the diagnostic export's, so a car with more than one volume mounted does not
-     * have the driver's stick guessed at.
+     * in clear text, which is what the announcement says. The driver browses to the folder, same
+     * as the diagnostic export's, so a car with more than one volume mounted does not have the
+     * driver's stick guessed at and the file lands where they will look for it.
      */
     private fun export() {
         val config = RoutingCredentials.snapshot(this)
@@ -217,25 +206,17 @@ class RoutingSettingsActivity : AppCompatActivity() {
                 if (roots.isEmpty()) {
                     announce(getString(R.string.routing_export_failed))
                 } else {
-                    chooseExportDestination(roots, config)
+                    StorageBrowserDialog.pickFolder(this, roots, R.string.routing_export_pick) {
+                        writeExport(it, config)
+                    }
                 }
             }
         }
     }
 
-    private fun chooseExportDestination(roots: List<File>, config: RoutingConfig) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.routing_export_pick)
-            .setItems(roots.map(File::getAbsolutePath).toTypedArray()) { _, which ->
-                writeExport(roots[which], config)
-            }
-            .setNegativeButton(R.string.action_cancel, null)
-            .show()
-    }
-
-    private fun writeExport(root: File, config: RoutingConfig) {
+    private fun writeExport(directory: File, config: RoutingConfig) {
         disk.execute {
-            val written = DiagnosticUsbStorage.writableTarget(this, root)
+            val written = DiagnosticUsbStorage.writableTarget(this, directory)
                 ?.let { RoutingConfigExport.write(it, config) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread

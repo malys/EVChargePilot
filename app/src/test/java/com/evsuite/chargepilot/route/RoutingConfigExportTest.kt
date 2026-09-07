@@ -23,8 +23,7 @@ class RoutingConfigExportTest {
         val written = RoutingConfigExport.write(directory, config)
 
         assertEquals(RoutingConfigExport.FILE_NAME, written?.name)
-        val found = RoutingConfigImport.search(listOf(directory))
-        assertEquals(config, found?.config)
+        assertEquals(config, RoutingConfigImport.read(File(directory, RoutingConfigExport.FILE_NAME)))
     }
 
     @Test
@@ -44,7 +43,10 @@ class RoutingConfigExportTest {
         RoutingConfigExport.write(directory, RoutingConfig(apiKey = "new"))
 
         assertEquals(1, directory.listFiles()?.size)
-        assertEquals("new", RoutingConfigImport.search(listOf(directory))?.config?.apiKey)
+        assertEquals(
+            "new",
+            RoutingConfigImport.read(File(directory, RoutingConfigExport.FILE_NAME)).apiKey,
+        )
     }
 
     @Test

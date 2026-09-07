@@ -157,6 +157,22 @@ class DiagnosticExporterTest {
         )
     }
 
+    @Test fun `browsing a volume lists folders first and every file kind`() {
+        val volume = tempDirectory()
+        File(volume, "zzz-folder").mkdirs()
+        File(volume, "Backup").mkdirs()
+        File(volume, "ors.conf").writeText("ors_api_key = abc")
+        File(volume, "a-photo.jpg").writeText("binary")
+        File(volume, ".hidden").writeText("skipped")
+
+        assertEquals(
+            listOf("Backup", "zzz-folder", "a-photo.jpg", "ors.conf"),
+            DiagnosticUsbStorage.children(volume).map(File::getName),
+        )
+        // An unplugged stick lists nothing rather than throwing at the browser.
+        assertEquals(emptyList<File>(), DiagnosticUsbStorage.children(File(volume, "gone")))
+    }
+
     @Test fun `diagnostic export gate requires a fresh readable parked speed`() {
         val now = 10_000L
 

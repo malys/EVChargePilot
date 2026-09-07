@@ -26,9 +26,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   way round — primary emulated storage is excluded outright, so neither the keys nor a diagnostic
   bundle can land in storage the driver cannot unplug. `writableTarget` no longer refuses a
   directory just because discovery had not listed it.
-- **The routing configuration was only looked for at the top of the stick.** A file dropped in
-  `Download/` — where this head unit's own file manager puts things — was never found. The scan
-  now goes one folder deep, files before folders, so a config at the top still wins.
+- **The routing configuration was guessed at instead of chosen.** Import scanned the stick and
+  offered a list of volume paths — including this app's own `Android/data/…` folder on the stick,
+  which is not where a driver puts a file — and a config any deeper than one folder was never
+  found at all. Import and export now browse, the way EVTasker has on this car for a year: pick
+  the stick at its root, walk into folders, tap the file to import or **Save here** for an
+  export. The file is still identified by parsing it and not by its name, and the diagnostic
+  bundle uses the same browser, so it lands in the folder the driver will go looking in.
 
 ### Added
 

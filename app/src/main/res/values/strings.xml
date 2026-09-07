@@ -302,9 +302,12 @@ Spending %6$s %% per km</string>
     <string name="routing_cleared">Key removed from this car.</string>
     <string name="routing_key_missing">Enter a key, or import one from a USB stick.</string>
     <string name="routing_base_url_refused">Address refused: %1$s. It must be https, with no credentials and no query.</string>
+    <string name="browser_up">⬆ Up one level</string>
+    <string name="browser_use_folder">Save here</string>
     <string name="routing_import_pick">Choose USB storage</string>
     <string name="routing_import_none">No configuration file found. Put one on a USB stick with a line reading ors_api_key = your-key.</string>
     <string name="routing_import_done">Imported from %1$s.</string>
+    <string name="routing_import_unusable">%1$s holds no key. Choose the file with a line reading ors_api_key = your-key.</string>
     <string name="routing_export_empty">Nothing to export yet. Enter a key first.</string>
     <string name="routing_export_pick">Choose USB storage</string>
     <string name="routing_export_failed">No USB stick that can be written to. Insert one and try again.</string>

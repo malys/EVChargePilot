@@ -61,6 +61,20 @@ object DiagnosticUsbStorage {
     }
 
     /**
+     * What one directory holds, for [StorageBrowserDialog]: directories first, then files, each
+     * alphabetically — the order a driver scans with their eyes on a moving list.
+     *
+     * Every readable entry is offered, filtered by no name rule: a configuration file is
+     * recognised by parsing it, so hiding `ors.conf` because it is not `.txt` would hide the
+     * file the driver came for. An unreadable directory lists nothing rather than failing — on
+     * a stick this car mounted itself, an opaque folder is a normal outcome, not an error.
+     */
+    fun children(directory: File): List<File> =
+        runCatching { directory.listFiles() }.getOrNull().orEmpty()
+            .filter { !it.isHidden && it.canRead() }
+            .sortedWith(compareByDescending<File> { it.isDirectory }.thenBy { it.name.lowercase() })
+
+    /**
      * Prefer the chosen directory. If its root is read-only, use this app's private folder on
      * the same removable volume; the report still lands on the USB stick without extra rights.
      */
