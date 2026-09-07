@@ -6,12 +6,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingConfigExport
 import com.evsuite.chargepilot.route.RoutingConfigImport
 import com.evsuite.chargepilot.route.RoutingCredentials
+import java.io.File
 import java.util.concurrent.Executors
 
 /**
@@ -144,15 +146,40 @@ class RoutingSettingsActivity : AppCompatActivity() {
     /**
      * The USB stick first and this app's own folders with it, because on this head unit the
      * system picker answers "no apps can perform this action" and there is nothing to fall back
-     * to. Off the main thread: a stick can be slow, and a scan that blocks is a frozen car.
+     * to. Discovery is off the main thread: a stick can be slow, and a scan that blocks is a
+     * frozen car. A picker between discovery and the read, same as the diagnostic export's, so a
+     * car with more than one volume mounted does not have the driver's stick guessed at.
      */
     private fun import() {
-        val directories = buildList {
-            addAll(getExternalFilesDirs(null).filterNotNull())
-            addAll(DiagnosticUsbStorage.roots(this@RoutingSettingsActivity))
-        }
         disk.execute {
-            val found = RoutingConfigImport.search(directories)
+            val directories = buildList {
+                addAll(getExternalFilesDirs(null).filterNotNull())
+                addAll(DiagnosticUsbStorage.roots(this@RoutingSettingsActivity))
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (directories.isEmpty()) {
+                    announce(getString(R.string.routing_import_none))
+                } else {
+                    chooseImportSource(directories)
+                }
+            }
+        }
+    }
+
+    private fun chooseImportSource(directories: List<File>) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.routing_import_pick)
+            .setItems(directories.map(File::getAbsolutePath).toTypedArray()) { _, which ->
+                importFrom(directories[which])
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    private fun importFrom(directory: File) {
+        disk.execute {
+            val found = RoutingConfigImport.search(listOf(directory))
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (found == null) {
@@ -173,7 +200,9 @@ class RoutingSettingsActivity : AppCompatActivity() {
      *
      * A removable volume only: writing the keys into this app's private folder would be a second
      * unencrypted copy nobody asked for and nobody could reach. The stick then carries the keys
-     * in clear text, which is what the announcement says.
+     * in clear text, which is what the announcement says. A picker between discovery and the
+     * write, same as the diagnostic export's, so a car with more than one volume mounted does not
+     * have the driver's stick guessed at.
      */
     private fun export() {
         val config = RoutingCredentials.snapshot(this)
@@ -181,12 +210,33 @@ class RoutingSettingsActivity : AppCompatActivity() {
             announce(getString(R.string.routing_export_empty))
             return
         }
-        val roots = DiagnosticUsbStorage.roots(this)
         disk.execute {
-            val written = roots.firstNotNullOfOrNull { root ->
-                DiagnosticUsbStorage.writableTarget(this, root)
-                    ?.let { RoutingConfigExport.write(it, config) }
+            val roots = DiagnosticUsbStorage.roots(this)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (roots.isEmpty()) {
+                    announce(getString(R.string.routing_export_failed))
+                } else {
+                    chooseExportDestination(roots, config)
+                }
             }
+        }
+    }
+
+    private fun chooseExportDestination(roots: List<File>, config: RoutingConfig) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.routing_export_pick)
+            .setItems(roots.map(File::getAbsolutePath).toTypedArray()) { _, which ->
+                writeExport(roots[which], config)
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    private fun writeExport(root: File, config: RoutingConfig) {
+        disk.execute {
+            val written = DiagnosticUsbStorage.writableTarget(this, root)
+                ?.let { RoutingConfigExport.write(it, config) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (written == null) {
