@@ -4,7 +4,12 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.ContextCompat
 
 /**
@@ -29,11 +34,29 @@ import androidx.core.content.ContextCompat
  * Read on demand, never subscribed: this app must not be why the head unit's GPS stays hot. The
  * last known fix is what a route origin needs, and a fix older than [MAX_AGE_MS] is refused
  * rather than used, because a stale origin routes from where the car was.
+ *
+ * **A cache nobody fills is empty.** The 2026-09-07 session recorded the consequence fifteen
+ * times over: the driver granted fine location, and every route then refused with "no fix within
+ * 120s". EVTasker's `CarLocation` had already written down why — *"`getLastKnownLocation` is
+ * whatever some other app happened to leave behind, which on a head unit with no other GPS
+ * client is nothing at all"*. So [requestCurrent] asks the GPS itself, once, for as long as
+ * [FIX_TIMEOUT_MS] and no longer, and only when a driver has asked for a route. That is still
+ * "on demand": the subscription is removed on the first fix or on the timeout, whichever comes
+ * first, and nothing here holds the receiver on between routes.
  */
 object LocationSource {
 
     /** Older than this and it is a place the car has left, not a place it is. */
     const val MAX_AGE_MS = 2 * 60 * 1000L
+
+    /**
+     * How long [requestCurrent] keeps the GPS on before giving up.
+     *
+     * A driver who has just typed a destination is waiting at the kerb and will wait a few
+     * seconds; a cold receiver under a carport may need most of this. Longer than this is a
+     * screen that looks broken, so the refusal is said out loud instead.
+     */
+    const val FIX_TIMEOUT_MS = 20 * 1000L
 
     data class Fix(
         val longitude: Double,
@@ -64,14 +87,64 @@ object LocationSource {
         }.maxByOrNull { it.time } ?: return null
         val age = nowMs - best.time
         if (age < 0 || age > MAX_AGE_MS) return null
-        return Fix(
-            longitude = best.longitude,
-            latitude = best.latitude,
-            // hasAltitude is false on a fix that carries none; 0.0 would read as sea level.
-            altitudeMetres = if (best.hasAltitude()) best.altitude else null,
-            ageMs = age,
-        )
+        return fix(best, nowMs)
     }
+
+    /**
+     * One fix from the receiver itself, then the subscription is dropped.
+     *
+     * Copied from EVTasker's `CarLocation.requestCurrent`, which is the version that works on
+     * this head unit. [callback] runs on the main thread exactly once: with the first fix that
+     * arrives, or with whatever the cache holds by [timeoutMs], or with null.
+     */
+    // Same guard as [lastKnown]: lint cannot follow it through [hasPrecise].
+    @SuppressLint("MissingPermission")
+    fun requestCurrent(
+        context: Context,
+        timeoutMs: Long = FIX_TIMEOUT_MS,
+        callback: (Fix?) -> Unit,
+    ) {
+        if (!hasPrecise(context)) return callback(null)
+        val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            ?: return callback(null)
+        val main = Handler(Looper.getMainLooper())
+        var delivered = false
+        lateinit var listener: LocationListener
+        fun finish(location: Location?) {
+            if (delivered) return
+            delivered = true
+            runCatching { manager.removeUpdates(listener) }
+            callback(location?.let { fix(it, System.currentTimeMillis()) } ?: lastKnown(context))
+        }
+        listener = object : LocationListener {
+            override fun onLocationChanged(location: Location) = finish(location)
+
+            // Deprecated on new platforms, abstract on API 28: omitting them does not compile.
+            @Deprecated("Required by the API 28 interface")
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+
+            override fun onProviderEnabled(provider: String) = Unit
+            override fun onProviderDisabled(provider: String) = finish(null)
+        }
+        val enabled = PROVIDERS.filter {
+            runCatching { manager.isProviderEnabled(it) }.getOrDefault(false)
+        }
+        if (enabled.isEmpty()) return finish(null)
+        runCatching {
+            enabled.forEach { provider ->
+                manager.requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
+            }
+        }.onFailure { return finish(null) }
+        main.postDelayed({ finish(null) }, timeoutMs)
+    }
+
+    private fun fix(location: Location, nowMs: Long): Fix = Fix(
+        longitude = location.longitude,
+        latitude = location.latitude,
+        // hasAltitude is false on a fix that carries none; 0.0 would read as sea level.
+        altitudeMetres = if (location.hasAltitude()) location.altitude else null,
+        ageMs = (nowMs - location.time).coerceAtLeast(0L),
+    )
 
     private val PROVIDERS = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
 }

@@ -92,6 +92,9 @@ class ChargeStopActivity : AppCompatActivity() {
     /** The place waiting for a location grant, so a granted prompt continues what was asked. */
     private var pending: OrsGeocode.Place? = null
 
+    /** True while the receiver is being asked for a fix, so a second tap does not ask again. */
+    private var locating = false
+
     private var message: String? = null
 
     /** The plan the handoff button would send, set by the render that offered it. */
@@ -293,17 +296,43 @@ class ChargeStopActivity : AppCompatActivity() {
             )
             return
         }
-        val origin = LocationSource.lastKnown(this)
-        ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
-            // Age and altitude, never the position itself: this file leaves the car.
-            origin?.let {
-                "fix held: age=${it.ageMs / 1000}s altitude=${it.altitudeMetres != null}"
-            } ?: "fine grant held but no fix within ${LocationSource.MAX_AGE_MS / 1000}s: refused"
-        }
-        if (origin == null) {
-            announce(getString(R.string.charge_stop_no_position))
+        val cached = LocationSource.lastKnown(this)
+        if (cached != null) {
+            ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+                // Age and altitude, never the position itself: this file leaves the car.
+                "fix held: age=${cached.ageMs / 1000}s altitude=${cached.altitudeMetres != null}"
+            }
+            routeFrom(place, credentials, cached)
             return
         }
+        // One request at a time. The 2026-09-07 session recorded fifteen refusals in eighteen
+        // seconds — a driver tapping a screen that had told them nothing was happening.
+        if (locating) return
+        locating = true
+        ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+            "no cached fix within ${LocationSource.MAX_AGE_MS / 1000}s: the GPS is being asked"
+        }
+        announce(getString(R.string.charge_stop_locating))
+        LocationSource.requestCurrent(this) { fix ->
+            locating = false
+            if (isFinishing || isDestroyed) return@requestCurrent
+            ValidationProbe.record(ValidationQuestion.LOCATION_FALLBACK) {
+                fix?.let {
+                    "fix from the receiver: age=${it.ageMs / 1000}s " +
+                        "altitude=${it.altitudeMetres != null}"
+                } ?: "nothing after ${LocationSource.FIX_TIMEOUT_MS / 1000}s of receiver: refused"
+            }
+            if (fix == null) announce(getString(R.string.charge_stop_no_position))
+            else routeFrom(place, credentials, fix)
+        }
+    }
+
+    /** The route itself, once there is somewhere to start from. */
+    private fun routeFrom(
+        place: OrsGeocode.Place,
+        credentials: RoutingCredentials.Values,
+        origin: LocationSource.Fix,
+    ) {
         val socPercent = snapshot?.socPercent?.toDouble()
         // The driver's own figures (CP-054), read on the main thread because they are four
         // numbers in a preferences file and the worker below must not race the settings screen.

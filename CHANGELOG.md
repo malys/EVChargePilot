@@ -6,6 +6,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Every route refused with "no recent position", even with location granted.** The vehicle
+  session of 2026-09-07 recorded it fifteen times in eighteen seconds: the driver granted fine
+  location at the prompt, and the origin was refused anyway. `LocationSource` read
+  `getLastKnownLocation` and nothing else, and on a head unit where no other app subscribes to
+  the receiver that cache is empty — EVTasker's `CarLocation` had the same failure and the same
+  note about it. `requestCurrent` now asks the receiver itself, on every enabled provider, and
+  drops the subscription on the first fix or after twenty seconds. The screen says it is looking,
+  a second tap no longer starts a second search, and the refusal, when it comes, says the
+  receiver was asked rather than blaming a two-minute-old cache.
+
 - **"Navigate to this" never opened MG4 Navigator.** The 2026-09-05 drive recorded no handler
   for `geo:` or `google.navigation:` on this head unit, so `startActivity` had nothing to reach
   and the button announced a failure. EVTasker's `NAVIGATE_TO` works on the same car by falling
