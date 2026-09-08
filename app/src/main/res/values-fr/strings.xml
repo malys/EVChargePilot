@@ -235,6 +235,23 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_searching">Recherche du lieu…</string>
     <string name="charge_stop_no_results">Aucun lieu trouvé. Une adresse plus complète aboutit généralement.</string>
     <string name="charge_stop_choose">Choisissez celui que vous vouliez.</string>
+    <string name="charge_stop_favorites_title">Favoris</string>
+    <string name="charge_stop_favorites_hint">Touchez pour y aller. Appui long sur un résultat ci-dessus pour l’enregistrer, appui long sur un favori pour le retirer.</string>
+    <string name="charge_stop_favorites_empty">Aucun favori enregistré pour l’instant. Appui long sur un résultat ci-dessus pour en enregistrer un.</string>
+    <string name="charge_stop_favorites_saved">Enregistré comme favori.</string>
+    <string name="charge_stop_favorites_save_failed">Impossible d’enregistrer : la liste contient déjà %1$d favoris.</string>
+    <string name="charge_stop_favorites_removed">Favori retiré.</string>
+    <string name="charge_stop_favorites_import">Importer depuis l’USB</string>
+    <string name="charge_stop_favorites_export">Exporter vers l’USB</string>
+    <string name="charge_stop_favorites_import_pick">Choisir le stockage USB</string>
+    <string name="charge_stop_favorites_import_none">Aucun fichier de favoris trouvé. Placez sur une clé USB des lignes contenant nom = longitude,latitude.</string>
+    <string name="charge_stop_favorites_import_done">%1$d favori(s) importé(s) depuis %2$s.</string>
+    <string name="charge_stop_favorites_import_partial">%1$d favori(s) importé(s) sur %2$d. La liste en contient %3$d au maximum : supprimez-en avant de réimporter.</string>
+    <string name="charge_stop_favorites_import_unusable">%1$s ne contient aucun favori. Choisissez le fichier exporté depuis cet écran.</string>
+    <string name="charge_stop_favorites_export_empty">Rien à exporter pour l’instant. Enregistrez d’abord un favori.</string>
+    <string name="charge_stop_favorites_export_pick">Choisir le stockage USB</string>
+    <string name="charge_stop_favorites_export_failed">Aucune clé USB accessible en écriture. Insérez-en une et réessayez.</string>
+    <string name="charge_stop_favorites_export_done">Exporté vers %1$s sur la clé USB.</string>
     <string name="charge_stop_routing">Demande de l’itinéraire…</string>
     <string name="charge_stop_ready">Itinéraire reçu.</string>
     <string name="charge_stop_no_route">Aucun itinéraire exploitable. Rien n’est affiché plutôt qu’un demi-itinéraire.</string>

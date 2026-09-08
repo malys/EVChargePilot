@@ -52,6 +52,20 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Favourite destinations, importable and exportable on a USB stick.** A place searched once had
+  to be typed again on every trip, on a head unit whose keyboard makes that the reason the screen
+  gets abandoned. Long-pressing a search result keeps it; a favourite is one tap to route to, and
+  a long press to forget. The list travels as `label = longitude,latitude` in
+  `evchargepilot-destinations.txt`, browsed to with the same picker the routing key already uses,
+  so a second car or a factory reset does not mean researching every address again. The `=`
+  separator is what lets a label carry its own commas — an address usually does.
+
+  **It is not synchronised with MG4 Navigator, and cannot be.** CP-056's drive on SWI68 found no
+  activity on this head unit declaring a navigation intent, and the SAIC map app publishes no
+  provider for its own favourites either — EVTasker's `PlaceStore` hit the same wall first. There
+  is no channel to read that list from or write to it, so this is EVChargePilot's own list and
+  the file is how it moves between cars.
+
 - **The drift companion says at the tap whether it armed.** CP-058's probe line only appeared
   once fifteen kilometres had been driven, so a drive that stopped short left it blank — which
   reads the same as a companion that never armed at all. The handoff now records the leg, the

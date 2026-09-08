@@ -116,6 +116,53 @@
                 android:layout_marginTop="@dimen/spacing_md"
                 android:orientation="vertical" />
 
+            <!-- Favourite destinations: EVChargePilot's own list — MG4 Navigator publishes no
+                 provider and no intent for its own, so there is nothing to sync with (CP-056).
+                 Long-pressing a result above saves it here; a favourite tap routes straight to it. -->
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/charge_stop_favorites_title"
+                    android:textAppearance="@style/Text.EV.Body" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/favoritesImportAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="260dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginEnd="@dimen/spacing_md"
+                    android:text="@string/charge_stop_favorites_import" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/favoritesExportAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="260dp"
+                    android:layout_height="@dimen/touch_target"
+                    android:text="@string/charge_stop_favorites_export" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/destinationFavoritesHint"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
+            <LinearLayout
+                android:id="@+id/destinationFavorites"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:orientation="vertical" />
+
             <TextView
                 android:id="@+id/chargeStopPlan"
                 android:layout_width="1400dp"

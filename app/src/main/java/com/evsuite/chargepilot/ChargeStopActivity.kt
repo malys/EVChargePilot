@@ -356,9 +356,20 @@ class ChargeStopActivity : AppCompatActivity() {
                     announce(getString(R.string.charge_stop_favorites_import_unusable, file.name))
                     return@runOnUiThread
                 }
-                favorites.forEach { DestinationFavorites.save(this, it) }
+                // What was stored, not what was read: a list already at its cap refuses the
+                // rest, and a count that included them would report a favourite that is not there.
+                val saved = favorites.count { DestinationFavorites.save(this, it) }
                 showFavorites()
-                announce(getString(R.string.charge_stop_favorites_import_done, favorites.size, file.name))
+                announce(
+                    if (saved == favorites.size) {
+                        getString(R.string.charge_stop_favorites_import_done, saved, file.name)
+                    } else {
+                        getString(
+                            R.string.charge_stop_favorites_import_partial,
+                            saved, favorites.size, DestinationFavorites.MAX_FAVORITES,
+                        )
+                    }
+                )
             }
         }
     }
