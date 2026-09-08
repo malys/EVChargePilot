@@ -52,6 +52,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The drift companion says at the tap whether it armed.** CP-058's probe line only appeared
+  once fifteen kilometres had been driven, so a drive that stopped short left it blank — which
+  reads the same as a companion that never armed at all. The handoff now records the leg, the
+  planned rate and the section count the moment the plan is frozen, or the reason there was
+  nothing to freeze. Distances and charges only, as before.
+
 - **The charge-stop screen says, in the artifact, what it was missing.** Two vehicle sessions
   came back with Q3 to Q8 and Q10 blank and no way to tell why: every one of those probes fires
   downstream of a route request, and no route was ever asked for. Opening the screen now records

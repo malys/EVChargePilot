@@ -11,6 +11,9 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityChargeStopBinding
+import com.evsuite.chargepilot.route.DestinationFavorites
+import com.evsuite.chargepilot.route.DestinationFavoritesExport
+import com.evsuite.chargepilot.route.DestinationFavoritesImport
 import com.evsuite.chargepilot.route.LocationSource
 import com.evsuite.chargepilot.route.OpenChargeMap
 import com.evsuite.chargepilot.route.OrsDirections
@@ -171,6 +174,9 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         binding.searchAction.setOnClickListener { search() }
         binding.navigateAction.setOnClickListener { navigate() }
+        binding.favoritesImportAction.setOnClickListener { importFavorites() }
+        binding.favoritesExportAction.setOnClickListener { exportFavorites() }
+        showFavorites()
         // Two vehicle sessions came back with Q3 to Q8 and Q10 blank, and the bundle could not
         // say why: every one of them fires downstream of a route, and no route was ever asked
         // for. This line fires where the driver arrives, so the next bundle names what was
@@ -282,7 +288,114 @@ class ChargeStopActivity : AppCompatActivity() {
             ) as MaterialButton
             button.text = place.label
             button.setOnClickListener { route(place) }
+            // Tap routes there now; long-press keeps it for next time without spending a plan.
+            button.setOnLongClickListener { saveFavorite(place); true }
             binding.destinationResults.addView(button)
+        }
+    }
+
+    private fun saveFavorite(place: OrsGeocode.Place) {
+        val saved = DestinationFavorites.save(this, place)
+        announce(
+            if (saved) getString(R.string.charge_stop_favorites_saved)
+            else getString(R.string.charge_stop_favorites_save_failed, DestinationFavorites.MAX_FAVORITES)
+        )
+        showFavorites()
+    }
+
+    /** One button per saved place; a long-press removes it rather than routing there by mistake. */
+    private fun showFavorites() {
+        val favorites = DestinationFavorites.all(this)
+        binding.destinationFavoritesHint.setText(
+            if (favorites.isEmpty()) R.string.charge_stop_favorites_empty
+            else R.string.charge_stop_favorites_hint
+        )
+        binding.destinationFavorites.removeAllViews()
+        favorites.forEach { place ->
+            val button = layoutInflater.inflate(
+                R.layout.row_destination_result, binding.destinationFavorites, false
+            ) as MaterialButton
+            button.text = place.label
+            button.setOnClickListener { route(place) }
+            button.setOnLongClickListener {
+                DestinationFavorites.remove(this, place.label)
+                showFavorites()
+                announce(getString(R.string.charge_stop_favorites_removed))
+                true
+            }
+            binding.destinationFavorites.addView(button)
+        }
+    }
+
+    /**
+     * Browsed, not listed, same as [RoutingSettingsActivity]'s import: this head unit's system
+     * picker answers "no apps can perform this action".
+     */
+    private fun importFavorites() {
+        worker.execute {
+            val roots = DiagnosticUsbStorage.roots(this)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (roots.isEmpty()) {
+                    announce(getString(R.string.charge_stop_favorites_import_none))
+                } else {
+                    StorageBrowserDialog.pickFile(
+                        this, roots, R.string.charge_stop_favorites_import_pick
+                    ) { importFavoritesFile(it) }
+                }
+            }
+        }
+    }
+
+    private fun importFavoritesFile(file: File) {
+        worker.execute {
+            val favorites = DestinationFavoritesImport.read(file)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (favorites.isEmpty()) {
+                    announce(getString(R.string.charge_stop_favorites_import_unusable, file.name))
+                    return@runOnUiThread
+                }
+                favorites.forEach { DestinationFavorites.save(this, it) }
+                showFavorites()
+                announce(getString(R.string.charge_stop_favorites_import_done, favorites.size, file.name))
+            }
+        }
+    }
+
+    private fun exportFavorites() {
+        val favorites = DestinationFavorites.all(this)
+        if (favorites.isEmpty()) {
+            announce(getString(R.string.charge_stop_favorites_export_empty))
+            return
+        }
+        worker.execute {
+            val roots = DiagnosticUsbStorage.roots(this)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (roots.isEmpty()) {
+                    announce(getString(R.string.charge_stop_favorites_export_failed))
+                } else {
+                    StorageBrowserDialog.pickFolder(
+                        this, roots, R.string.charge_stop_favorites_export_pick
+                    ) { writeFavoritesExport(it, favorites) }
+                }
+            }
+        }
+    }
+
+    private fun writeFavoritesExport(directory: File, favorites: List<OrsGeocode.Place>) {
+        worker.execute {
+            val written = DiagnosticUsbStorage.writableTarget(this, directory)
+                ?.let { DestinationFavoritesExport.write(it, favorites) }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (written == null) {
+                    announce(getString(R.string.charge_stop_favorites_export_failed))
+                } else {
+                    announce(getString(R.string.charge_stop_favorites_export_done, written.name))
+                }
+            }
         }
     }
 
@@ -980,6 +1093,15 @@ class ChargeStopActivity : AppCompatActivity() {
         // Recorded whether or not anything accepted the intent — the driver still chose it.
         followed?.let { FollowedPlan.write(this, it.copy(committedAtMs = System.currentTimeMillis())) }
             ?: FollowedPlan.clear(this)
+        // Q10 otherwise says nothing until fifteen kilometres have been driven, and a drive cut
+        // short then leaves it blank — indistinguishable from a companion that never armed.
+        ValidationProbe.record(ValidationQuestion.PLAN_DRIFT) {
+            followed?.let {
+                "armed by the tap: leg=${String.format(Locale.ROOT, "%.0f", it.drift.legKm)} km, " +
+                    "rate=${String.format(Locale.ROOT, "%.3f", it.drift.plannedRatePercentPerKm)} %/km, " +
+                    "odometer=known, sections=${it.sections.size}"
+            } ?: "not armed: no rate, no odometer, or a stop with no charger found"
+        }
         val outcome = MapApps.open(this, uri, target.latitude, target.longitude)
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             when (outcome) {
@@ -1088,6 +1210,12 @@ class ChargeStopActivity : AppCompatActivity() {
         for (index in 0 until binding.destinationResults.childCount) {
             binding.destinationResults.getChildAt(index).isEnabled = usable
         }
+        binding.destinationFavorites.isEnabled = usable
+        for (index in 0 until binding.destinationFavorites.childCount) {
+            binding.destinationFavorites.getChildAt(index).isEnabled = usable
+        }
+        binding.favoritesImportAction.isEnabled = usable
+        binding.favoritesExportAction.isEnabled = usable
         binding.navigateAction.isEnabled = usable
 
         binding.chargeStopStatus.text = message ?: when (gate) {
