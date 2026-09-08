@@ -6,6 +6,25 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **"Naviguer vers" now hands over the route, not just the map.** The read-only rule was scoped
+  by the owner to the car's driving and safety settings — the same boundary `VehicleWriteGate`
+  already draws in code, where AEB, ELK, ACC/TJA and the drive mode are gated on standstill and
+  the comfort writes are exempt. A destination is on the exempt side of it, so the adapter path
+  CP-056 left as an open question is now built: `IGeneralService` transaction 48,
+  `startNavFromEVRout(pathway, destination)`, on the same `GeneralService` this app already binds
+  for guidance. It is a call *in* — the adapter forwards to `MapService`, which fans the points
+  out to whichever navigation app registered — not a registration on the channel the head unit
+  uses to command that app. And it has a waypoint list, so the plan goes over as it was planned:
+  the destination, with the charging stop on the way to it, instead of the one-or-the-other a
+  `geo:` URI forced. The `geo:` path stays behind it, unchanged, for a car whose adapter is not
+  there or refuses.
+
+  **It says what it did and not more.** `MapService` swallows whatever a listener throws while
+  fanning out, so an app that refused the points looks like one that followed them. The screen
+  announces that the route was handed over and asks the driver to check the map picked it up.
+  The call runs on the screen's worker thread, because the transaction is not `oneway` and the
+  adapter fans out synchronously under a lock. (CP-060)
+
 - **Two files to carry on a stick, and each of them half a working app.** The owner's report:
   *« Import et l'export des favoris de navigation ne sont pas un fichier à part mais inclus dans
   un seul fichier de configuration »*. The saved destinations now travel as

@@ -22,6 +22,7 @@ import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.NavigationHandoff
 import com.evsuite.hardware.saic.SaicNav
+import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -184,6 +185,10 @@ class ChargeStopActivity : AppCompatActivity() {
             destination.launch(DestinationActivity.intent(this))
         }
         binding.navigateAction.setOnClickListener { navigate() }
+        // Bound here rather than at the tap: the bind is asynchronous, and a driver who plans a
+        // route and hands it over has given it the whole of that time to come up. Read-only
+        // until the tap — nothing registers a listener on this screen.
+        SaicNavGuidance.connect(applicationContext)
         // Two vehicle sessions came back with Q3 to Q8 and Q10 blank, and the bundle could not
         // say why: every one of them fires downstream of a route, and no route was ever asked
         // for. This line fires where the driver arrives, so the next bundle names what was
@@ -850,10 +855,27 @@ class ChargeStopActivity : AppCompatActivity() {
         grade: RouteGrade.Cost?,
     ) {
         val stop = (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }
+        // The adapter takes the plan as it was planned: the destination, and the stop on the way
+        // to it. A point that fails validation drops out of the list rather than out of the plan —
+        // the geo: fallback below still has somewhere to go.
+        val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
+        val pathway = NavigationHandoff.pathway(
+            listOfNotNull(
+                stop?.let {
+                    NavigationHandoff.poi(it.charger.latitude, it.charger.longitude, it.charger.name)
+                }
+            )
+        )
         val target = if (stop != null) {
-            Handoff(stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true)
+            Handoff(
+                stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true,
+                destination = destination, pathway = pathway,
+            )
         } else {
-            Handoff(place.latitude, place.longitude, place.label, toStop = false)
+            Handoff(
+                place.latitude, place.longitude, place.label, toStop = false,
+                destination = destination, pathway = pathway,
+            )
         }
         handoff = target
         followed = follow(plan, charger, route, rate, grade)
@@ -966,6 +988,45 @@ class ChargeStopActivity : AppCompatActivity() {
                     "odometer=known, sections=${it.sections.size}"
             } ?: "not armed: no rate, no odometer, or a stop with no charger found"
         }
+        announce(getString(R.string.charge_stop_navigate_sending))
+        // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
+        // and it fans out to every registered listener while holding the lock on its callback
+        // list, so this call waits for the navigation app to come back.
+        worker.execute {
+            val route = target.destination?.let {
+                runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
+                    .getOrDefault(false)
+            } ?: false
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (route) sentAsRoute(target) else sendAsPoint(target, uri)
+            }
+        }
+    }
+
+    /**
+     * The adapter took the route. What it does not tell us is whether the map drew it.
+     *
+     * `MapService` fans the points out and swallows whatever a listener throws, so a navigation
+     * app that refused them looks exactly like one that followed them. The screen therefore says
+     * what was sent, not what happened — and still prints the point, so a driver looking at a map
+     * that did not move has something to type.
+     */
+    private fun sentAsRoute(target: Handoff) {
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            "adapter took the route: pathway=${target.pathway.size} point(s), destination=1; " +
+                "whether the map drew it is what the driver has to say"
+        }
+        announce(
+            getString(
+                if (target.pathway.isEmpty()) R.string.charge_stop_navigate_route
+                else R.string.charge_stop_navigate_route_via
+            )
+        )
+    }
+
+    /** The adapter refused or is not there: the platform's own channel, one point, as before. */
+    private fun sendAsPoint(target: Handoff, uri: String) {
         val outcome = MapApps.open(this, uri, target.latitude, target.longitude)
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             when (outcome) {
@@ -1098,12 +1159,22 @@ class ChargeStopActivity : AppCompatActivity() {
         val plan: ChargeStopPlan.Plan,
     )
 
-    /** What the button would send, held between the render that offered it and the tap. */
+    /**
+     * What the button would send, held between the render that offered it and the tap.
+     *
+     * Two shapes of the same plan, because the car has two channels and only one of them takes
+     * a route. [latitude], [longitude] and [label] are the single point a `geo:` URI can carry —
+     * the charging stop when there is one, since that is the leg the forecast is about.
+     * [destination] and [pathway] are the whole plan, for the adapter, which has a waypoint list
+     * and therefore needs no such choice.
+     */
     private data class Handoff(
         val latitude: Double,
         val longitude: Double,
         val label: String?,
         val toStop: Boolean,
+        val destination: NavigationHandoff.Poi?,
+        val pathway: List<NavigationHandoff.Poi>,
     )
 
     private data class Found(
