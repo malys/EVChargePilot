@@ -1,0 +1,6 @@
+# EVChargePilot favourite destinations.
+# label = longitude,latitude
+# Import it with 'Import from USB' on the charging-stop screen.
+Home = 5.4474,43.5297
+Office, 12 Rue de la Paix = 3.8767,43.6108
+Chargeur Ikea Vitrolles = 5.2447,43.4392
