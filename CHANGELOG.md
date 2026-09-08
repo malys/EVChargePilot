@@ -36,6 +36,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   way round — primary emulated storage is excluded outright, so neither the keys nor a diagnostic
   bundle can land in storage the driver cannot unplug. `writableTarget` no longer refuses a
   directory just because discovery had not listed it.
+- **Tapping a destination did nothing when location was refused.** The search listed the places,
+  and the tap that should have routed to one asked for the fine-location grant and stopped there:
+  a refusal — or this head unit answering without ever showing a dialog, which it does when
+  another permission in the `LOCATION` group is already held — landed in a branch that only
+  re-rendered the screen. Nothing on it changed, so a missing grant read as a dead button. That
+  branch now says what is missing and where to grant it.
 - **The routing configuration was guessed at instead of chosen.** Import scanned the stick and
   offered a list of volume paths — including this app's own `Android/data/…` folder on the stick,
   which is not where a driver puts a file — and a config any deeper than one folder was never

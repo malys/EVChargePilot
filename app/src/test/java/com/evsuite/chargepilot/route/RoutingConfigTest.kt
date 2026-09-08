@@ -21,6 +21,24 @@ class RoutingConfigTest {
         assertEquals("https://api.openrouteservice.org", config.baseUrl)
     }
 
+    /** A base64-shaped key ends in `=`; splitting on the last separator would eat it. */
+    @Test
+    fun `both services are configured by one file, key padding and all`() {
+        val config = RoutingConfig.parse(
+            """
+            # EVChargePilot routing
+            ors_api_key  = 5b3ce3597851110001cf6248abc=
+            ors_base_url = https://api.heigit.org
+            ocm_api_key  = 0a1b2c3d
+            ocm_base_url = https://api.openchargemap.io
+            """.trimIndent()
+        )
+        assertEquals("5b3ce3597851110001cf6248abc=", config.apiKey)
+        assertEquals("https://api.heigit.org", config.baseUrl)
+        assertEquals("0a1b2c3d", config.chargerApiKey)
+        assertEquals("https://api.openchargemap.io", config.chargerBaseUrl)
+    }
+
     @Test
     fun `a file with only a key leaves a self-hosted base url alone`() {
         val config = RoutingConfig.parse("ors_api_key = abc")

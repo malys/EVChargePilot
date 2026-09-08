@@ -243,6 +243,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_ready">Route received.</string>
     <string name="charge_stop_no_route">No usable route came back. Nothing is shown rather than half a route.</string>
     <string name="charge_stop_locating">Asking the car\u2019s receiver where it is\u2026</string>
+    <string name="charge_stop_location_refused">Precise location is refused, and a route needs the car\u2019s own starting point. Grant it under Android settings › Apps › EVChargePilot › Permissions, then tap the destination again.</string>
     <string name="charge_stop_no_position">No position. The car\u2019s receiver was asked and answered nothing. Try again where the sky is clear.</string>
     <string name="charge_stop_plan_none">No stop needed · about %1$s %% left on arrival, %2$s %% above the reserve</string>
     <string name="charge_stop_plan_stop">Charge after about %1$s km (± %2$s km)</string>

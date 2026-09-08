@@ -239,6 +239,7 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_ready">Itinéraire reçu.</string>
     <string name="charge_stop_no_route">Aucun itinéraire exploitable. Rien n’est affiché plutôt qu’un demi-itinéraire.</string>
     <string name="charge_stop_locating">Recherche de la position de la voiture\u2026</string>
+    <string name="charge_stop_location_refused">La localisation précise est refusée, et un itinéraire a besoin du point de départ de la voiture. Accordez-la dans Réglages Android › Applications › EVChargePilot › Autorisations, puis retouchez la destination.</string>
     <string name="charge_stop_no_position">Aucune position. Le récepteur de la voiture a été interrogé et n’a rien répondu. Réessayez à ciel dégagé.</string>
     <string name="charge_stop_plan_none">Aucun arrêt nécessaire · environ %1$s %% à l’arrivée, %2$s %% au-dessus de la réserve</string>
     <string name="charge_stop_plan_stop">Recharger après environ %1$s km (± %2$s km)</string>

@@ -122,7 +122,15 @@ class ChargeStopActivity : AppCompatActivity() {
             "permission result: fine=$granted, and the request " +
                 if (place != null) "continues the route that asked for it" else "had nothing waiting"
         }
-        if (place != null && granted) route(place) else render()
+        when {
+            place == null -> render()
+            granted -> route(place)
+            // A refusal — or a system that answered without ever showing a dialog, which this
+            // head unit does when another permission in the LOCATION group is already held —
+            // used to end here in silence. The driver tapped a destination and nothing at all
+            // happened, which reads as a broken button rather than as a missing grant.
+            else -> announce(getString(R.string.charge_stop_location_refused))
+        }
     }
 
     private val connection = object : ServiceConnection {
