@@ -11,8 +11,8 @@ import java.util.Locale
  * this head unit declaring a navigation intent, and EVTasker's own [com.evsuite.tasker.store]
  * package records the same finding — the SAIC map app publishes no provider and no intent for
  * its favourites, so there is nothing to read or write. This is EVChargePilot's own list, the
- * same shape EVTasker keeps one of, made portable by [DestinationFavoritesExport] and
- * [DestinationFavoritesImport] instead.
+ * same shape EVTasker keeps one of, made portable by [RoutingConfigExport] and
+ * [RoutingConfigImport]: one stick, one file, keys and destinations together.
  *
  * Plain preferences, unlike [RoutingCredentials]: a saved address is not a secret the way an
  * API key is. Stored as `label` -> "longitude,latitude", the coordinate order [OrsGeocode.Place]
@@ -22,8 +22,8 @@ object DestinationFavorites {
 
     private const val PREFS = "chargepilot_destination_favorites"
 
-    /** Enough for a driver's own list; an imported file cannot grow it past this. */
-    const val MAX_FAVORITES = 100
+    /** The file format's cap, so what a stick can carry and what this can hold are one number. */
+    const val MAX_FAVORITES = RoutingConfig.MAX_DESTINATIONS
 
     /** Every saved place, alphabetical so the list on screen does not reorder itself. */
     fun all(context: Context): List<OrsGeocode.Place> =

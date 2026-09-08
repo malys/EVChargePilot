@@ -6,6 +6,31 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Two files to carry on a stick, and each of them half a working app.** The owner's report:
+  *« Import et l'export des favoris de navigation ne sont pas un fichier à part mais inclus dans
+  un seul fichier de configuration »*. The saved destinations now travel as
+  `destination.<label> = longitude,latitude` lines inside `evchargepilot-routing.txt`, beside the
+  four keys, and `DestinationFavoritesExport`/`DestinationFavoritesImport` are deleted rather than
+  kept as a second path. Both screens that import the file apply all of it — the routing key
+  screen saves the destinations, the destination screen applies the keys — so one file and one
+  import configure a car. `RoutingConfig.parse` is the trust boundary the hand-editable format
+  needs: a coordinate that is not finite, is outside ±180/±90, or has no label to tap is skipped
+  one line at a time and the rest of the file still loads, and a file longer than
+  `MAX_DESTINATIONS` is truncated rather than refused. **The file carries the API keys in clear
+  text** — it has to, to be importable back — so the export announcement on both screens says so
+  in the same words. (CP-059)
+
+- **"Naviguer vers" opened MG4 Navigator without the destination.** The 2026-09-08 drive: the map
+  came to the foreground and the driver still typed the address in. The map on this car turned out
+  to be `com.telenav.app.arp`, not `com.saicmotor.navigation` — the package list copied from
+  EVTasker was right, the assumption about which entry would match was not. An explicit-component
+  `ACTION_VIEW` carrying the `geo:` URI is now attempted before the `ACTION_MAIN`/`CATEGORY_HOME`
+  fallback: an explicit component skips the intent-filter matching that stopped every implicit
+  send, so if that activity reads its `Intent` data the destination arrives. It is still reported
+  as `MAP_ONLY`, and the screen now says that whether the map took the destination is what the
+  driver has to say, because nothing on this car reports it back — a driver reading *sent* would
+  stop looking. (CP-056)
+
 - **Every route refused with "no recent position", even with location granted.** The vehicle
   session of 2026-09-07 recorded it fifteen times in eighteen seconds: the driver granted fine
   location at the prompt, and the origin was refused anyway. `LocationSource` read
@@ -52,12 +77,29 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Choosing a destination is its own screen, and it uses the whole panel.** The owner's report
+  after the 2026-09-08 drive: *« La sélection de la destination se fait dans une liste en bas trop
+  petite (pas ergonomique) »*. It was a text field and two short lists stacked under the charging
+  plan, on a panel 1920 dp wide and about 648 dp tall, so the results landed below the fold of a
+  screen whose top half was a plan that did not exist yet. `DestinationActivity` now gets the
+  panel: searched on the left, saved on the right, each column scrolling on its own, import,
+  export and back on the top bar. The charge-stop screen keeps one button whose label becomes the
+  chosen place, and plans as soon as the screen returns one — coming back without a choice plans
+  nothing, because three requests are not spent on a driver who went to look. (CP-059)
+
+- **The map's exported activities are recorded on the Q9 probe line.** Two drives have now proved
+  that no destination reaches this car through a published intent filter, and guessing a vendor
+  action from a laptop is how a build ships a button that does nothing. An exported activity is
+  the only thing another app can start, so `MapApps.entryPoints` lists their class names — a
+  `SearchResultActivity` is a lead where `MainActivity` is not. Class names only: no coordinate,
+  no place, no key. (CP-056)
+
 - **Favourite destinations, importable and exportable on a USB stick.** A place searched once had
   to be typed again on every trip, on a head unit whose keyboard makes that the reason the screen
   gets abandoned. Long-pressing a search result keeps it; a favourite is one tap to route to, and
-  a long press to forget. The list travels as `label = longitude,latitude` in
-  `evchargepilot-destinations.txt`, browsed to with the same picker the routing key already uses,
-  so a second car or a factory reset does not mean researching every address again. The `=`
+  a long press to forget. The list travels as `destination.<label> = longitude,latitude` lines
+  inside `evchargepilot-routing.txt`, browsed to with the same picker the routing key already
+  uses, so a second car or a factory reset does not mean researching every address again. The `=`
   separator is what lets a label carry its own commas — an address usually does.
 
   **It is not synchronised with MG4 Navigator, and cannot be.** CP-056's drive on SWI68 found no

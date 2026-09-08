@@ -120,6 +120,11 @@
             android:screenOrientation="landscape" />
 
         <activity
+            android:name=".DestinationActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+
+        <activity
             android:name=".RoutingSettingsActivity"
             android:exported="false"
             android:screenOrientation="landscape" />

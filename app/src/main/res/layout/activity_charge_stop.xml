@@ -74,94 +74,16 @@
                 android:gravity="center"
                 android:textAppearance="@style/Text.EV.Body" />
 
-            <LinearLayout
+            <!-- CP-044. Choosing where you are going is its own screen: it needs a keyboard,
+                 two lists and the whole panel, and it used to be a strip below this line. The
+                 button carries the chosen place, so the plan below always says what it is about. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chooseDestinationAction"
+                style="@style/Widget.EVChargePilot.Button"
                 android:layout_width="1400dp"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/touch_target"
                 android:layout_marginTop="@dimen/spacing_md"
-                android:orientation="horizontal">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/destinationLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/charge_stop_hint_destination"
-                    app:helperText="@string/charge_stop_helper_destination"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/destinationInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:imeOptions="actionSearch"
-                        android:inputType="text"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/searchAction"
-                    style="@style/Widget.EVChargePilot.Button"
-                    android:layout_width="280dp"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginStart="@dimen/spacing_md"
-                    android:text="@string/charge_stop_action_search" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/destinationResults"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:orientation="vertical" />
-
-            <!-- Favourite destinations: EVChargePilot's own list — MG4 Navigator publishes no
-                 provider and no intent for its own, so there is nothing to sync with (CP-056).
-                 Long-pressing a result above saves it here; a favourite tap routes straight to it. -->
-            <LinearLayout
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="@string/charge_stop_favorites_title"
-                    android:textAppearance="@style/Text.EV.Body" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/favoritesImportAction"
-                    style="@style/Widget.EV.Button.Outlined"
-                    android:layout_width="260dp"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginEnd="@dimen/spacing_md"
-                    android:text="@string/charge_stop_favorites_import" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/favoritesExportAction"
-                    style="@style/Widget.EV.Button.Outlined"
-                    android:layout_width="260dp"
-                    android:layout_height="@dimen/touch_target"
-                    android:text="@string/charge_stop_favorites_export" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/destinationFavoritesHint"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary" />
-
-            <LinearLayout
-                android:id="@+id/destinationFavorites"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:orientation="vertical" />
+                android:text="@string/charge_stop_action_destination" />
 
             <TextView
                 android:id="@+id/chargeStopPlan"

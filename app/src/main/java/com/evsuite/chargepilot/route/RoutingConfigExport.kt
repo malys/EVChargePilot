@@ -25,6 +25,9 @@ object RoutingConfigExport {
      * `key = value` in the spelling [RoutingConfig.parse] reads first, with a comment header a
      * driver reading the stick on a laptop cannot miss. Absent values are left out rather than
      * written empty, so importing this file back cannot blank a key it never carried.
+     *
+     * The saved destinations go in the same file, under `destination.<label>`. A label carrying
+     * an `=` would come back cut at it, so it is written without one.
      */
     fun format(config: RoutingConfig): String = buildString {
         appendLine("# EVChargePilot routing configuration.")
@@ -34,6 +37,17 @@ object RoutingConfigExport {
         config.baseUrl?.let { appendLine("ors_base_url = $it") }
         config.chargerApiKey?.let { appendLine("ocm_api_key  = $it") }
         config.chargerBaseUrl?.let { appendLine("ocm_base_url = $it") }
+        if (config.favorites.isEmpty()) return@buildString
+        appendLine("# Saved destinations: destination.<label> = longitude,latitude")
+        config.favorites.forEach { place ->
+            val label = place.label.replace('=', ' ').trim()
+            if (label.isNotEmpty()) {
+                appendLine(
+                    "${RoutingConfig.DESTINATION_PREFIX}$label = " +
+                        "${place.longitude},${place.latitude}"
+                )
+            }
+        }
     }
 
     /**

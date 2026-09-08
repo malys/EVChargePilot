@@ -18,11 +18,16 @@ import java.util.Locale
  * ors_api_key  = 5b3ce35...
  * ors_base_url = https://api.heigit.org
  * ocm_api_key  = 0a1b2c3...
+ * destination.Home = 5.4474,43.5297
  * ```
  *
  * Two keys, two services, two sign-ups: the second one names where the charging stop is
  * (CP-048) and is optional. Without it the app still says *stop in N kilometres*; it just
  * cannot say where.
+ *
+ * The saved destinations live in this same file rather than one of their own: a driver
+ * configuring a second car plugs in one stick and browses to one file, and two files meant two
+ * chances to carry only half of what makes the app usable.
  *
  * Every field is nullable: the caller applies what the file set and leaves the rest alone, so a
  * file carrying only a key does not silently reset a self-hosted base URL.
@@ -32,11 +37,13 @@ data class RoutingConfig(
     val baseUrl: String? = null,
     val chargerApiKey: String? = null,
     val chargerBaseUrl: String? = null,
+    val favorites: List<OrsGeocode.Place> = emptyList(),
 ) {
 
     /** Nothing usable in it — an empty file, or a file that was never a config. */
     fun isEmpty(): Boolean =
-        apiKey == null && baseUrl == null && chargerApiKey == null && chargerBaseUrl == null
+        apiKey == null && baseUrl == null && chargerApiKey == null && chargerBaseUrl == null &&
+            favorites.isEmpty()
 
     companion object {
 
@@ -52,19 +59,31 @@ data class RoutingConfig(
          */
         val DEFAULT_BASE_URL = "https://api.heigit.org"
 
+        /** What marks a line as a saved destination rather than a setting. */
+        const val DESTINATION_PREFIX = "destination."
+
         fun parse(text: String): RoutingConfig {
             var apiKey: String? = null
             var baseUrl: String? = null
             var chargerApiKey: String? = null
             var chargerBaseUrl: String? = null
+            val favorites = mutableListOf<OrsGeocode.Place>()
             for (raw in text.lineSequence()) {
                 val line = raw.trim()
                 if (line.isEmpty() || line.startsWith("#")) continue
                 val separator = line.indexOf('=')
                 if (separator <= 0) continue
-                val key = line.substring(0, separator).trim().lowercase(Locale.US)
+                val name = line.substring(0, separator).trim()
+                val key = name.lowercase(Locale.US)
                 val value = line.substring(separator + 1).trim()
                 if (value.isEmpty()) continue
+                if (key.startsWith(DESTINATION_PREFIX)) {
+                    // The label keeps the case it was written in — it is what the driver reads on
+                    // the button — so it comes off the untouched name, not off the lowered key.
+                    place(name.substring(DESTINATION_PREFIX.length).trim(), value)
+                        ?.let { favorites += it }
+                    continue
+                }
                 when (key) {
                     "ors_api_key", "api_key", "apikey" -> apiKey = value
                     "ors_base_url", "base_url", "url" -> baseUrl = validBaseUrl(value)
@@ -75,7 +94,32 @@ data class RoutingConfig(
                     // several apps, and a future key must not break an older build.
                 }
             }
-            return RoutingConfig(apiKey, baseUrl, chargerApiKey, chargerBaseUrl)
+            return RoutingConfig(
+                apiKey, baseUrl, chargerApiKey, chargerBaseUrl,
+                favorites.take(MAX_DESTINATIONS),
+            )
+        }
+
+        /** Enough for a driver's own list; an imported file cannot grow it past this. */
+        const val MAX_DESTINATIONS = 100
+
+        /**
+         * One `destination.<label> = longitude,latitude` line, or null when it is not one.
+         *
+         * The coordinate order [OrsGeocode.Place] already returns, and the same bounds
+         * [OrsGeocode.parse] holds its own answers to. This file is hand-editable, so it is the
+         * trust boundary the rest of the app relies on: "NaN" and "999" both parse as doubles,
+         * and a route request would carry them off the planet.
+         */
+        private fun place(label: String, value: String): OrsGeocode.Place? {
+            if (label.isEmpty()) return null
+            val point = value.split(",")
+            if (point.size != 2) return null
+            val longitude = point[0].trim().toDoubleOrNull() ?: return null
+            val latitude = point[1].trim().toDoubleOrNull() ?: return null
+            if (!longitude.isFinite() || longitude !in -180.0..180.0) return null
+            if (!latitude.isFinite() || latitude !in -90.0..90.0) return null
+            return OrsGeocode.Place(label, longitude, latitude)
         }
 
         /**

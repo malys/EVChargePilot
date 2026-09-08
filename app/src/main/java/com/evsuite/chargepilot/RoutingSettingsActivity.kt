@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
+import com.evsuite.chargepilot.route.DestinationFavorites
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingConfigExport
 import com.evsuite.chargepilot.route.RoutingConfigImport
@@ -176,6 +177,9 @@ class RoutingSettingsActivity : AppCompatActivity() {
                     return@runOnUiThread
                 }
                 RoutingCredentials.apply(this, config)
+                // The saved destinations ride in the same file (CP-044): a driver setting up a
+                // second car imports once and has both, rather than half the app.
+                config.favorites.forEach { DestinationFavorites.save(this, it) }
                 binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
                 // The file name, never its contents: the contents are the key.
                 announce(getString(R.string.routing_import_done, file.name))
@@ -195,6 +199,7 @@ class RoutingSettingsActivity : AppCompatActivity() {
      */
     private fun export() {
         val config = RoutingCredentials.snapshot(this)
+            .copy(favorites = DestinationFavorites.all(this))
         if (config.isEmpty()) {
             announce(getString(R.string.routing_export_empty))
             return

@@ -57,4 +57,31 @@ class RoutingConfigExportTest {
 
         assertEquals(0, directory.listFiles()?.size)
     }
+
+    @Test
+    fun `the destinations go out in the same file, and come back from it`() {
+        val config = RoutingConfig(
+            apiKey = "abc",
+            favorites = listOf(
+                OrsGeocode.Place("Home", 5.4474, 43.5297),
+                OrsGeocode.Place("Office, 12 Rue de la Paix", 3.8767, 43.6108),
+            ),
+        )
+        val directory = stick()
+
+        RoutingConfigExport.write(directory, config)
+
+        // One file on the stick, holding both, and it parses back to what went in.
+        assertEquals(1, directory.listFiles()?.size)
+        assertEquals(config, RoutingConfigImport.read(File(directory, RoutingConfigExport.FILE_NAME)))
+    }
+
+    @Test
+    fun `a label carrying an equals sign cannot come back cut at it`() {
+        val text = RoutingConfigExport.format(
+            RoutingConfig(favorites = listOf(OrsGeocode.Place("A = B", 1.0, 43.0)))
+        )
+
+        assertEquals("A   B", RoutingConfig.parse(text).favorites.single().label)
+    }
 }

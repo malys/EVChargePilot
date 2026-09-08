@@ -3,6 +3,7 @@ package com.evsuite.chargepilot
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 
 /**
@@ -51,10 +52,19 @@ object MapApps {
         for (intent in carrying) {
             if (runCatching { context.startActivity(intent) }.isSuccess) return Outcome.SENT
         }
+        val component = installedComponent(context) ?: return Outcome.NONE
+        // The same URI, but addressed rather than resolved. A missing intent filter is what
+        // stopped the implicit intents, and an explicit component skips filter matching
+        // entirely — the activity still has to read the data, which is exactly what is unknown.
+        // So it is attempted, and it is still reported as MAP_ONLY: this build cannot see
+        // whether the map took the destination, and a driver reading "sent" would stop looking.
+        val addressed = Intent(Intent.ACTION_VIEW, Uri.parse(geoUri))
+            .setComponent(component)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(addressed) }.isSuccess) return Outcome.MAP_ONLY
         // MAIN/HOME rather than a bare component: it is what the vendor launcher sends, and the
         // navigation app treats it as "come to the foreground" instead of starting a second copy
         // of itself on top of a running guidance session.
-        val component = installedComponent(context) ?: return Outcome.NONE
         val toForeground = Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_HOME)
             .setComponent(component)
@@ -68,6 +78,31 @@ object MapApps {
 
     /** The map package this car actually has, for the Q9 probe line. A package name, never a place. */
     fun installedPackage(context: Context): String? = installedComponent(context)?.packageName
+
+    /**
+     * The map's own exported activities, for the Q9 probe line.
+     *
+     * Two drives have now proved that no destination reaches this car through a published intent
+     * filter, and guessing a vendor-specific action from a laptop is how a build ships a button
+     * that does nothing. An exported activity is the only thing another app can start, so their
+     * names are the list of everything that could ever be tried — and a name like
+     * `SearchResultActivity` is a lead where `MainActivity` is not.
+     *
+     * Class names only. Nothing here is a coordinate, a place or a key.
+     */
+    fun entryPoints(context: Context): List<String> {
+        val pkg = installedPackage(context) ?: return emptyList()
+        val info = runCatching {
+            context.packageManager.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES)
+        }.getOrNull() ?: return emptyList()
+        return info.activities.orEmpty()
+            .filter { it.exported }
+            .map { it.name.removePrefix(pkg) }
+            .take(MAX_ENTRY_POINTS)
+    }
+
+    /** A probe line is read on a laptop, not scrolled: enough to spot a lead, not a manifest dump. */
+    private const val MAX_ENTRY_POINTS = 24
 
     private fun installedComponent(context: Context): ComponentName? =
         COMPONENTS.firstNotNullOfOrNull { (pkg, cls) ->
