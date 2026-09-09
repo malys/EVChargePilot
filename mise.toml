@@ -142,6 +142,8 @@ for attempt in $(seq 1 120); do
   [ "$attempt" -eq 120 ] && { echo "Automotive emulator boot timed out." >&2; exit 1; }
   sleep 1
 done
+# AVD hardware config owns geometry; discard stale overrides from older 1920x720 profiles.
+"$ADB" shell wm size reset
 echo "Automotive emulator ready."
 '''
 
@@ -158,6 +160,7 @@ for attempt in $(seq 1 120); do
   [ "$attempt" -eq 120 ] && { echo "Screen emulator boot timed out." >&2; exit 1; }
   sleep 1
 done
+"$ADB" shell wm size reset
 echo "Screen emulator ready."
 '''
 
