@@ -993,23 +993,32 @@ class ChargeStopActivity : AppCompatActivity() {
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
         worker.execute {
-            // The command that makes the car drive there comes first. The route handoff went
-            // second on the last drive and the map showed the destination without ever guiding
-            // to it, which is the whole reason `goTo` is above it now: a route drawn and not
-            // driven is a driver reading coordinates off a screen.
-            val guided = target.point?.let {
+            // A route already running would read true whatever this tap does, so it is read
+            // first: after that, `isMapNavigating` can no longer prove anything about us.
+            val wasGuiding = SaicNavGuidance.isMapNavigating() == true
+            // `goTo` first — it is the command that drives, where the route handoff only drew.
+            val goTo = target.point?.let {
                 runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
-            val route = !guided && (
-                target.destination?.let {
-                    runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
-                        .getOrDefault(false)
-                } ?: false
-                )
+            val guided = goTo && !wasGuiding && carStartedGuiding()
+            val route = if (guided) false else target.destination?.let {
+                runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
+                    .getOrDefault(false)
+            } ?: false
+            val routeGuided = route && !wasGuiding && carStartedGuiding()
+            // Every rung in one line, so a drive that ends with nothing happening still says
+            // which rung refused rather than leaving the next build to guess again.
+            ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+                "channels: adapter=${SaicNavGuidance.isAvailable}, guiding before=$wasGuiding, " +
+                    "goTo taken=$goTo guiding=$guided, route taken=$route guiding=$routeGuided"
+            }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 when {
-                    guided -> guidanceAsked(target)
+                    guided || routeGuided -> guidanceRunning(target, viaRoute = routeGuided)
+                    // Accepted, and the car cannot say what came of it because it was already
+                    // guiding when the tap happened. Reported as asked, never as started.
+                    wasGuiding && (goTo || route) -> guidanceAsked(target, goTo)
                     route -> sentAsRoute(target)
                     else -> sendAsPoint(target, uri)
                 }
@@ -1018,14 +1027,46 @@ class ChargeStopActivity : AppCompatActivity() {
     }
 
     /**
-     * The adapter took the guidance command. Whether the car pulled away is still the driver's
-     * to say — `MapService.goToPoi` fans out and swallows what the navigation app throws, exactly
-     * as the route handoff does.
+     * Waits for the navigation app to say it is guiding, and gives up saying nothing happened.
+     *
+     * The flag comes back through `MapService` from the navigation app itself, so this is the map
+     * answering rather than this app hoping. The wait exists because a destination has to be
+     * routed before guidance begins, and that takes seconds on a head unit; it runs on the worker
+     * and the screen stays on *Transmission…* meanwhile.
      */
-    private fun guidanceAsked(target: Handoff) {
+    private fun carStartedGuiding(): Boolean {
+        repeat(GUIDANCE_POLLS) {
+            Thread.sleep(GUIDANCE_POLL_MS)
+            if (SaicNavGuidance.isMapNavigating() == true) return true
+        }
+        return false
+    }
+
+    /** The map says it is guiding, and it was not before the tap. The one unambiguous outcome. */
+    private fun guidanceRunning(target: Handoff, viaRoute: Boolean) {
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
-            "adapter took goTo: to=${if (target.toStop) "charging stop" else "destination"}; " +
-                "whether guidance started is what the driver has to say"
+            "the car is guiding: channel=${if (viaRoute) "startNavFromEVRout" else "goTo"}" +
+                ", to=${if (target.toStop) "charging stop" else "destination"}" +
+                ", confirmed by isMapNavigating"
+        }
+        announce(
+            getString(
+                if (target.toStop) R.string.charge_stop_navigate_guiding_on_stop
+                else R.string.charge_stop_navigate_guiding_on
+            )
+        )
+    }
+
+    /**
+     * The adapter took the command while a route was already running, which is the one case the
+     * car cannot answer: `isMapNavigating` was true before the tap and stays true after it,
+     * whatever the navigation app did with the new destination. Said as asked, never as started.
+     */
+    private fun guidanceAsked(target: Handoff, viaGoTo: Boolean) {
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            "adapter took ${if (viaGoTo) "goTo" else "startNavFromEVRout"}: " +
+                "to=${if (target.toStop) "charging stop" else "destination"}; " +
+                "already guiding before the tap, so the car cannot say what came of it"
         }
         announce(
             getString(
@@ -1036,17 +1077,15 @@ class ChargeStopActivity : AppCompatActivity() {
     }
 
     /**
-     * The adapter took the route. What it does not tell us is whether the map drew it.
-     *
-     * `MapService` fans the points out and swallows whatever a listener throws, so a navigation
-     * app that refused them looks exactly like one that followed them. The screen therefore says
-     * what was sent, not what happened — and still prints the point, so a driver looking at a map
-     * that did not move has something to type.
+     * The route went over and the car is not guiding. That is what the drive of 2026-09-09 saw:
+     * MG4 Navigator showed the destination and stayed put, and the flag now says as much instead
+     * of leaving it to the driver to notice. The map has the route; starting it is a tap on the
+     * map, and the screen says so rather than pretending the trip is under way.
      */
     private fun sentAsRoute(target: Handoff) {
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             "adapter took the route: pathway=${target.pathway.size} point(s), destination=1; " +
-                "whether the map drew it is what the driver has to say"
+                "goTo did not start guidance and neither did this — isMapNavigating stayed false"
         }
         announce(
             getString(
@@ -1228,5 +1267,13 @@ class ChargeStopActivity : AppCompatActivity() {
 
         /** Enough sections for a validation line to show the shape of a route, not all of it. */
         const val VALIDATION_SECTIONS = 8
+
+        /**
+         * How long to let the navigation app route a destination before calling a channel dead.
+         * Four seconds is longer than a head unit needs to plan a road it already has offline,
+         * and short enough that trying both channels leaves a parked driver waiting eight.
+         */
+        const val GUIDANCE_POLLS = 8
+        const val GUIDANCE_POLL_MS = 500L
     }
 }

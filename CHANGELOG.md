@@ -6,6 +6,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The screen no longer claims a handoff worked when it did not.** `goTo` was accepted and MG4
+  Navigator still did not guide, so the tap now asks the car instead of the driver:
+  `IGeneralService` transaction 18 returns a flag the navigation app sets itself, and the ladder
+  sends a channel, waits up to four seconds for that flag, and moves to the next one if it stays
+  false. What the screen says is what the car answered — *guiding*, *handed over and not guiding
+  yet, start it on the map*, or the `geo:` fallback's *type it in there*. One probe line records
+  every rung, so a drive where nothing happens still says which rung refused. A route already
+  running before the tap is the one case that cannot be judged, and it is reported as asked
+  rather than as started.
+
 - **The car is now asked to drive there, not only to draw it.** The route handoff reached MG4
   Navigator on the third drive and stopped half-way: the destination appeared on the map and no
   guidance ever started. `IGeneralService` transaction 23, `goTo(address, latitude, longitude)`,
