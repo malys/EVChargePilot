@@ -6,6 +6,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The car is now asked to drive there, not only to draw it.** The route handoff reached MG4
+  Navigator on the third drive and stopped half-way: the destination appeared on the map and no
+  guidance ever started. `IGeneralService` transaction 23, `goTo(address, latitude, longitude)`,
+  is the other command — `GeneralService` turns it into `MapService.goToPoi`, which is what the
+  head unit's own voice assistant calls when someone says "take me there". The tap now sends
+  that first and falls back to the route handoff, then to `geo:`, so a car that refuses one still
+  gets the next. It carries a single point, so a plan with a charging stop guides to the stop —
+  the leg this screen forecasts — and the screen says the final destination is set after
+  charging.
+
 - **"Naviguer vers" now hands over the route, not just the map.** The read-only rule was scoped
   by the owner to the car's driving and safety settings — the same boundary `VehicleWriteGate`
   already draws in code, where AEB, ELK, ACC/TJA and the drive mode are gated on standstill and

@@ -869,12 +869,12 @@ class ChargeStopActivity : AppCompatActivity() {
         val target = if (stop != null) {
             Handoff(
                 stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true,
-                destination = destination, pathway = pathway,
+                point = pathway.firstOrNull(), destination = destination, pathway = pathway,
             )
         } else {
             Handoff(
                 place.latitude, place.longitude, place.label, toStop = false,
-                destination = destination, pathway = pathway,
+                point = destination, destination = destination, pathway = pathway,
             )
         }
         handoff = target
@@ -993,15 +993,46 @@ class ChargeStopActivity : AppCompatActivity() {
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
         worker.execute {
-            val route = target.destination?.let {
-                runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
-                    .getOrDefault(false)
+            // The command that makes the car drive there comes first. The route handoff went
+            // second on the last drive and the map showed the destination without ever guiding
+            // to it, which is the whole reason `goTo` is above it now: a route drawn and not
+            // driven is a driver reading coordinates off a screen.
+            val guided = target.point?.let {
+                runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
+            val route = !guided && (
+                target.destination?.let {
+                    runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
+                        .getOrDefault(false)
+                } ?: false
+                )
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (route) sentAsRoute(target) else sendAsPoint(target, uri)
+                when {
+                    guided -> guidanceAsked(target)
+                    route -> sentAsRoute(target)
+                    else -> sendAsPoint(target, uri)
+                }
             }
         }
+    }
+
+    /**
+     * The adapter took the guidance command. Whether the car pulled away is still the driver's
+     * to say — `MapService.goToPoi` fans out and swallows what the navigation app throws, exactly
+     * as the route handoff does.
+     */
+    private fun guidanceAsked(target: Handoff) {
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            "adapter took goTo: to=${if (target.toStop) "charging stop" else "destination"}; " +
+                "whether guidance started is what the driver has to say"
+        }
+        announce(
+            getString(
+                if (target.toStop) R.string.charge_stop_navigate_guiding_stop
+                else R.string.charge_stop_navigate_guiding
+            )
+        )
     }
 
     /**
@@ -1162,17 +1193,20 @@ class ChargeStopActivity : AppCompatActivity() {
     /**
      * What the button would send, held between the render that offered it and the tap.
      *
-     * Two shapes of the same plan, because the car has two channels and only one of them takes
-     * a route. [latitude], [longitude] and [label] are the single point a `geo:` URI can carry —
-     * the charging stop when there is one, since that is the leg the forecast is about.
-     * [destination] and [pathway] are the whole plan, for the adapter, which has a waypoint list
-     * and therefore needs no such choice.
+     * Three shapes of the same plan, because the car has three channels and each takes a
+     * different amount of it. [latitude], [longitude] and [label] are the single point a `geo:`
+     * URI can carry — the charging stop when there is one, since that is the leg the forecast is
+     * about. [point] is that same leg target validated for the adapter's `goTo`, the command that
+     * starts guidance. [destination] and [pathway] are the whole plan, for the route handoff,
+     * which has a waypoint list and therefore needs no such choice — and which, on the car, drew
+     * the route without ever driving it.
      */
     private data class Handoff(
         val latitude: Double,
         val longitude: Double,
         val label: String?,
         val toStop: Boolean,
+        val point: NavigationHandoff.Poi?,
         val destination: NavigationHandoff.Poi?,
         val pathway: List<NavigationHandoff.Poi>,
     )
