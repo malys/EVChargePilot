@@ -16,6 +16,8 @@ import com.evsuite.hardware.telemetry.model.EnergyAttributionResult
 import com.evsuite.hardware.telemetry.model.ResidualAttribution
 import com.evsuite.hardware.telemetry.model.ResidualContext
 import com.evsuite.hardware.telemetry.model.ResidualFinding
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitResult
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -52,34 +54,119 @@ class EnergyBreakdownActivity : AppCompatActivity() {
             val evidence = trip?.summary?.batteryPowerEvidence
             val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
             val result = trip?.let { EnergyAttributionCalculator.calculate(it, model) }
+            // Only where the kilowatt-hour split cannot be made. The two are never blended: a
+            // kWh integrated from power and a percent read off the gauge are different
+            // measurements, and a screen mixing them would be read as one quantity twice.
+            val charge = if (result is EnergyAttributionResult.Ready) {
+                null
+            } else {
+                trip?.let {
+                    ChargeAttributionCalculator.calculate(
+                        it,
+                        (SocConsumptionFitter().fit(trips) as? SocConsumptionFitResult.Ready)
+                            ?.model,
+                    )
+                }
+            }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(result)
+                render(result, charge)
             }
         }
     }
 
-    private fun render(result: EnergyAttributionResult?) {
+    private fun render(result: EnergyAttributionResult?, charge: ChargeAttributionResult?) {
         binding.loadingState.visibility = View.GONE
-        if (result !is EnergyAttributionResult.Ready) {
-            binding.breakdownContent.visibility = View.GONE
-            binding.emptyState.visibility = View.VISIBLE
-            binding.emptyReason.setText(
-                when {
-                    // Said first, because on this car it is the whole answer: no capture will
-                    // ever produce the power this breakdown is made of.
-                    batteryPowerNeverPublished() -> R.string.power_never_published
-                    result is EnergyAttributionResult.Unavailable &&
-                        result.reason == com.evsuite.hardware.telemetry.UnavailableReason.INSUFFICIENT_SAMPLES ->
-                        R.string.energy_breakdown_missing_power
-                    else -> R.string.energy_breakdown_model_unavailable
-                },
-            )
+        if (result is EnergyAttributionResult.Ready) {
+            binding.emptyState.visibility = View.GONE
+            binding.breakdownContent.visibility = View.VISIBLE
+            renderReady(result.attribution)
             return
         }
-        binding.emptyState.visibility = View.GONE
-        binding.breakdownContent.visibility = View.VISIBLE
-        renderReady(result.attribution)
+        if (charge is ChargeAttributionResult.Ready) {
+            binding.emptyState.visibility = View.GONE
+            binding.breakdownContent.visibility = View.VISIBLE
+            renderCharge(charge.attribution)
+            return
+        }
+        binding.breakdownContent.visibility = View.GONE
+        binding.emptyState.visibility = View.VISIBLE
+        binding.emptyReason.setText(
+            when {
+                // On a car that publishes no power, the charge path is the only one that will
+                // ever answer, so its reason is the one the driver can act on.
+                charge is ChargeAttributionResult.Unavailable && batteryPowerNeverPublished() ->
+                    chargeReason(charge.reason)
+                result is EnergyAttributionResult.Unavailable &&
+                    result.reason == com.evsuite.hardware.telemetry.UnavailableReason.INSUFFICIENT_SAMPLES ->
+                    R.string.energy_breakdown_missing_power
+                else -> R.string.energy_breakdown_model_unavailable
+            },
+        )
+    }
+
+    private fun chargeReason(reason: ChargeAttributionUnavailable): Int = when (reason) {
+        ChargeAttributionUnavailable.MODEL_NOT_TRAINED ->
+            R.string.energy_breakdown_charge_untrained
+        ChargeAttributionUnavailable.NO_MODELLED_INTERVAL ->
+            R.string.energy_breakdown_charge_no_interval
+        ChargeAttributionUnavailable.CHARGE_DROP_TOO_SMALL ->
+            R.string.energy_breakdown_charge_too_small
+    }
+
+    /**
+     * The same ledger, measured on the gauge instead of on the power line.
+     *
+     * The rows keep their places — what the car said on the left, what the model claims on the
+     * right — so a driver who has seen the kWh screen on another car reads this one the same
+     * way. Only the unit and the claims change, and the summary says what a residual means
+     * here, because a fit trained on this driver's own trips already contains their usual
+     * climate load.
+     */
+    private fun renderCharge(value: ChargeAttribution) {
+        binding.breakdownSummary.text = getString(
+            R.string.energy_breakdown_charge_summary,
+            chargeVerdict(value.residuals),
+        )
+        binding.measuredRows.removeAllViews()
+        binding.estimatedRows.removeAllViews()
+        addRow(
+            binding.measuredRows,
+            R.string.energy_breakdown_charge_used,
+            R.string.energy_breakdown_claim_derived_charge,
+            percent(value.measuredDropPercent),
+        )
+        addRow(
+            binding.measuredRows,
+            R.string.energy_breakdown_charge_distance,
+            R.string.energy_breakdown_claim_derived_distance,
+            String.format(Locale.getDefault(), "%.1f km", value.distanceKm),
+        )
+        addRow(
+            binding.measuredRows,
+            R.string.energy_breakdown_discrepancy,
+            R.string.energy_breakdown_claim_charge_uncovered,
+            percent(value.uncoveredDropPercent),
+        )
+
+        addRow(
+            binding.estimatedRows,
+            R.string.energy_breakdown_driving,
+            R.string.energy_breakdown_claim_charge_estimated,
+            chargeBand(value.modelledDriving),
+        )
+        value.residuals.forEach { residual ->
+            addRow(
+                binding.estimatedRows,
+                residualLabel(residual.context),
+                R.string.energy_breakdown_claim_charge_residual,
+                chargeResidualValue(residual),
+            )
+        }
+        binding.reconciliation.text = getString(
+            R.string.energy_breakdown_charge_rate,
+            1.0 / value.percentPerKm,
+        )
     }
 
     private fun renderReady(value: EnergyAttribution) {
@@ -175,8 +262,47 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         else -> getString(R.string.energy_breakdown_summary_other)
     }
 
+    private fun chargeResidualValue(value: ChargeResidual): String = when (value.finding) {
+        ResidualFinding.DISTINGUISHABLE -> chargeBand(value.estimate)
+        ResidualFinding.NOT_DISTINGUISHABLE_FROM_ZERO -> getString(
+            R.string.energy_breakdown_indistinguishable,
+            chargeBand(value.estimate),
+        )
+        ResidualFinding.NEGATIVE_MODEL_ERROR -> getString(
+            R.string.energy_breakdown_negative_error,
+            chargeBand(value.estimate),
+        )
+    }
+
+    /**
+     * The same four verdicts as the kWh path, worded in charge: nothing here was measured in
+     * kilowatt-hours, and a sentence about measured energy on a screen of percentages reads as
+     * a different quantity than the one the rows show.
+     */
+    private fun chargeVerdict(residuals: List<ChargeResidual>): String = when {
+        residuals.any { it.finding == ResidualFinding.NEGATIVE_MODEL_ERROR } ->
+            getString(R.string.energy_breakdown_charge_verdict_negative)
+        residuals.none { it.finding == ResidualFinding.DISTINGUISHABLE } ->
+            getString(R.string.energy_breakdown_charge_verdict_noise)
+        residuals.any {
+            it.context == ResidualContext.CLIMATE_ACTIVE &&
+                it.finding == ResidualFinding.DISTINGUISHABLE
+        } -> getString(R.string.energy_breakdown_charge_verdict_climate)
+        else -> getString(R.string.energy_breakdown_charge_verdict_other)
+    }
+
     private fun energy(value: Double): String =
         String.format(Locale.getDefault(), "%.2f kWh", value)
+
+    private fun percent(value: Double): String =
+        String.format(Locale.getDefault(), "%.1f %%", value)
+
+    private fun chargeBand(value: ChargeEstimate): String = String.format(
+        Locale.getDefault(),
+        "≈ %.1f–%.1f %%",
+        value.bandLowPercent,
+        value.bandHighPercent,
+    )
 
     private fun band(value: AttributedEnergyEstimate): String = String.format(
         Locale.getDefault(),
