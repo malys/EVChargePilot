@@ -10,22 +10,20 @@ import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingCredentials
-import java.io.File
-import java.util.concurrent.Executors
 
 /**
- * Where the driver's own routing key is entered, imported or removed.
+ * Where the driver's own routing key is entered or removed.
  *
  * CP-043 refused to ship a key inside the APK: a published APK is a zip, and a key in a zip is
  * not a secret. That decision only works if configuring one is realistic, which on this head
- * unit means a `key = value` file on a USB stick — the same file format EVABRPUploader already
- * uses, so a driver who configured that app knows this one.
+ * unit means typing it here or importing it from a USB stick — and the stick carries every
+ * setting at once, so that import belongs to the configuration page, not to this sheet.
  *
  * **The key is never displayed back.** The field starts empty even when a key is stored, the
  * status line says configured or not and never shows a value, and nothing here reaches
  * `AppLogger` or the diagnostic export. A screen that can show a secret is a screen that shows
- * it to a passenger with a phone camera. The one copy that leaves is the export, which the
- * driver asks for by hand and which lands on their own stick, never on this screen.
+ * it to a passenger with a phone camera. The one copy that leaves is the configuration export,
+ * which the driver asks for by hand and which lands on their own stick, never on this screen.
  *
  * Parked-only, like every other driver action in this app: entering a key means a keyboard.
  * Clearing one does not, which is why it stays available — a driver who wants their key off the
@@ -34,10 +32,6 @@ import java.util.concurrent.Executors
 class RoutingSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRoutingSettingsBinding
-
-    private val disk = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "chargepilot-routing-config")
-    }
 
     private var recorder: TripRecordingService? = null
     private var bound = false
@@ -77,8 +71,6 @@ class RoutingSettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.backAction.setOnClickListener { finish() }
         binding.routingSaveAction.setOnClickListener { save() }
-        binding.routingImportAction.setOnClickListener { import() }
-        binding.routingExportAction.setOnClickListener { export() }
         binding.routingClearAction.setOnClickListener { clear() }
         binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
         render()
@@ -108,11 +100,6 @@ class RoutingSettingsActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    override fun onDestroy() {
-        disk.shutdownNow()
-        super.onDestroy()
-    }
-
     private fun save() {
         val key = binding.routingKeyInput.text?.toString()?.trim().orEmpty()
         val chargerKey = binding.chargerKeyInput.text?.toString()?.trim().orEmpty()
@@ -138,98 +125,6 @@ class RoutingSettingsActivity : AppCompatActivity() {
         binding.routingKeyInput.text?.clear()
         binding.chargerKeyInput.text?.clear()
         announce(getString(R.string.routing_saved))
-    }
-
-    /**
-     * The driver browses the stick and taps the file, because on this head unit the system picker
-     * answers "no apps can perform this action" and there is nothing to fall back to. Volume
-     * discovery is off the main thread: a stick can be slow, and a scan that blocks is a frozen
-     * car. The browser then starts at the volume root, so a file put anywhere on the stick is
-     * reachable instead of only the folders a scan happened to look in.
-     */
-    private fun import() {
-        disk.execute {
-            val roots = DiagnosticUsbStorage.roots(this)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (roots.isEmpty()) {
-                    announce(getString(R.string.routing_import_none))
-                } else {
-                    StorageBrowserDialog.pickFile(this, roots, R.string.routing_import_pick) {
-                        importFile(it)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun importFile(file: File) {
-        disk.execute {
-            val settings = SettingsTransfer.read(file)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (settings.isEmpty()) {
-                    // The path they chose, so "this one is not it" is the answer, not silence.
-                    announce(getString(R.string.routing_import_unusable, file.name))
-                    return@runOnUiThread
-                }
-                // Keys, saved destinations and the car's own figures ride in the same file: a
-                // driver setting up a second car imports once and has the app, not half of it.
-                SettingsTransfer.apply(this, settings)
-                binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
-                // The file name, never its contents: the contents are the keys.
-                announce(getString(R.string.routing_import_done, file.name))
-            }
-        }
-    }
-
-    /**
-     * The same file back out, so a second car — or the unstable channel, which is a separate
-     * application id with its own preferences — does not mean typing the key again.
-     *
-     * One JSON file with everything the driver owns — keys, base URLs, saved destinations and
-     * the car's own figures — so a second car is one import rather than four screens.
-     *
-     * A removable volume only: writing the keys into this app's private folder would be a second
-     * unencrypted copy nobody asked for and nobody could reach. The stick then carries the keys
-     * in clear text, which is what the announcement says. The driver browses to the folder, same
-     * as the diagnostic export's, so a car with more than one volume mounted does not have the
-     * driver's stick guessed at and the file lands where they will look for it.
-     */
-    private fun export() {
-        val settings = SettingsTransfer.snapshot(this)
-        if (settings.isEmpty()) {
-            announce(getString(R.string.routing_export_empty))
-            return
-        }
-        disk.execute {
-            val roots = DiagnosticUsbStorage.roots(this)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (roots.isEmpty()) {
-                    announce(getString(R.string.routing_export_failed))
-                } else {
-                    StorageBrowserDialog.pickFolder(this, roots, R.string.routing_export_pick) {
-                        writeExport(it, settings)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun writeExport(directory: File, settings: SettingsTransfer.Settings) {
-        disk.execute {
-            val written = DiagnosticUsbStorage.writableTarget(this, directory)
-                ?.let { SettingsTransfer.write(it, settings) }
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (written == null) {
-                    announce(getString(R.string.routing_export_failed))
-                } else {
-                    announce(getString(R.string.routing_export_done, written.name))
-                }
-            }
-        }
     }
 
     private fun clear() {
@@ -258,8 +153,6 @@ class RoutingSettingsActivity : AppCompatActivity() {
         binding.chargerKeyLayout.isEnabled = editable
         binding.routingBaseUrlLayout.isEnabled = editable
         binding.routingSaveAction.isEnabled = editable
-        binding.routingImportAction.isEnabled = editable
-        binding.routingExportAction.isEnabled = editable
 
         binding.routingStatus.text = message ?: when (gate) {
             ParkedDeletionGate.MOVING -> getString(R.string.routing_moving)

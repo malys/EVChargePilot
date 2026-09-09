@@ -9,5 +9,6 @@
          both removed the anchor is scaled to the field it anchors. The suite token
          text_display is untouched, and no second element on this screen uses this size. -->
     <dimen name="chargepilot_text_soc">56sp</dimen>
+    <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
+    <dimen name="chargepilot_swipe_threshold">96dp</dimen>
 </resources>
-

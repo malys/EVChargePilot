@@ -3,8 +3,8 @@
   THESIS: one sentence a driver acts on — charge in N km, or arrive with this much left.
   OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
   STORY: where are you going, which of these did you mean, then the stop and why it is uncertain.
-  FIRST VIEWPORT: fixed top context and Back action; the plan owns the centre once it exists.
-  FORM: parked planning sheet over the arrival forecast; the route is the only thing added.
+  FIRST VIEWPORT: fixed destination strip; the plan owns the centre once it exists.
+  FORM: parked planning sheet opened by choosing a destination; Back returns to the dashboard.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,7 +15,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="@dimen/touch_target"
         android:background="@drawable/bg_topbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -28,22 +28,6 @@
             android:layout_weight="1"
             android:text="@string/charge_stop_title"
             android:textAppearance="@style/Text.EV.Title" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/vehicleSettingsAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="200dp"
-            android:layout_height="@dimen/touch_target"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:text="@string/charge_stop_action_vehicle" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/routingSettingsAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="240dp"
-            android:layout_height="@dimen/touch_target"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:text="@string/charge_stop_action_settings" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/backAction"

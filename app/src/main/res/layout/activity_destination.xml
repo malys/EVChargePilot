@@ -30,22 +30,6 @@
             android:textAppearance="@style/Text.EV.Title" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/favoritesImportAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="260dp"
-            android:layout_height="@dimen/touch_target"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:text="@string/charge_stop_favorites_import" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/favoritesExportAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="260dp"
-            android:layout_height="@dimen/touch_target"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:text="@string/charge_stop_favorites_export" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/backAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="180dp"

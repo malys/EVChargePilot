@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -30,7 +29,8 @@ import java.util.Locale
 import java.util.concurrent.Executors
 
 /** Reverse-chronological trip ledger with one selected record kept open beside it. */
-class TripHistoryActivity : AppCompatActivity() {
+class TripHistoryActivity : PrimaryNavigationActivity() {
+    override val primaryPage = PrimaryPage.TRIPS
 
     private lateinit var binding: ActivityTripHistoryBinding
     private lateinit var store: EnergyTripHistoryStore
@@ -80,7 +80,6 @@ class TripHistoryActivity : AppCompatActivity() {
             adapter.notifyDataSetChanged()
             renderSelected()
         }
-        binding.backAction.setOnClickListener { finish() }
         binding.deleteAllAction.setOnClickListener {
             startActivity(TripDeleteConfirmationActivity.all(this))
         }

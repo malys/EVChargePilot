@@ -241,7 +241,7 @@ profiles. Neither replaces testing on every supported vehicle firmware:
 ```bash
 mise run emulator-setup   # one-time image download and AVD creation
 mise run emulator-car     # API 33 Automotive: car-service lifecycle
-mise run emulator-screen  # API 28, 1920x720: target OS and driver layout
+mise run emulator-screen  # API 28, 1920x1080 panel: target 1920x720 app viewport
 mise run run              # build, install and launch on the connected device
 mise run logs             # focused application and EVHardware logs
 mise run emulator-stop

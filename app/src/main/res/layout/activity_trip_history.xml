@@ -15,27 +15,19 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="@dimen/touch_target"
         android:background="@drawable/bg_topbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_lg"
         android:paddingEnd="@dimen/spacing_lg">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/backAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="140dp"
-            android:layout_height="@dimen/touch_target"
-            android:text="@string/action_back" />
+        <include layout="@layout/view_primary_navigation" />
 
-        <TextView
+        <Space
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_lg"
-            android:layout_weight="1"
-            android:text="@string/trip_history_title"
-            android:textAppearance="@style/Text.EV.Title" />
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/exportAllAction"

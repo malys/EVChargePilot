@@ -12,7 +12,6 @@ import com.evsuite.chargepilot.route.OrsGeocode
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.google.android.material.button.MaterialButton
-import java.io.File
 import java.util.concurrent.Executors
 
 /**
@@ -26,7 +25,8 @@ import java.util.concurrent.Executors
  *
  * It plans nothing and asks for no position. It answers one question, hands the place back to
  * [ChargeStopActivity] and closes, which is also why it needs no vehicle binding: nothing here
- * depends on the car being parked, only on someone typing.
+ * depends on the car being parked, only on someone typing. Favourites travel on the USB stick
+ * with every other setting, and that transfer is [SettingsActivity]'s: one file, one door.
  */
 class DestinationActivity : AppCompatActivity() {
 
@@ -46,8 +46,6 @@ class DestinationActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.backAction.setOnClickListener { finish() }
         binding.searchAction.setOnClickListener { search() }
-        binding.favoritesImportAction.setOnClickListener { importConfig() }
-        binding.favoritesExportAction.setOnClickListener { exportConfig() }
         showFavorites()
         announce(getString(R.string.destination_prompt))
     }
@@ -133,13 +131,7 @@ class DestinationActivity : AppCompatActivity() {
 
     /** The one thing this screen answers: the place goes back to the caller and it closes. */
     private fun choose(place: OrsGeocode.Place) {
-        setResult(
-            Activity.RESULT_OK,
-            Intent()
-                .putExtra(EXTRA_LABEL, place.label)
-                .putExtra(EXTRA_LONGITUDE, place.longitude)
-                .putExtra(EXTRA_LATITUDE, place.latitude),
-        )
+        setResult(Activity.RESULT_OK, carry(Intent(), place))
         finish()
     }
 
@@ -152,107 +144,6 @@ class DestinationActivity : AppCompatActivity() {
             )
         )
         showFavorites()
-    }
-
-    /**
-     * Browsed, not listed, same as [RoutingSettingsActivity]'s import: this head unit's system
-     * picker answers "no apps can perform this action".
-     *
-     * One file, the same one the routing key screen writes: a driver setting up a second car
-     * plugs in one stick and browses to one file. Two files meant two chances to carry only half
-     * of what makes the app usable.
-     */
-    private fun importConfig() {
-        worker.execute {
-            val roots = DiagnosticUsbStorage.roots(this)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (roots.isEmpty()) {
-                    announce(getString(R.string.charge_stop_favorites_import_none))
-                } else {
-                    StorageBrowserDialog.pickFile(
-                        this, roots, R.string.charge_stop_favorites_import_pick
-                    ) { importFile(it) }
-                }
-            }
-        }
-    }
-
-    private fun importFile(file: File) {
-        worker.execute {
-            val settings = SettingsTransfer.read(file)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (settings.isEmpty()) {
-                    // The path they chose, so "this one is not it" is the answer, not silence.
-                    announce(getString(R.string.charge_stop_favorites_import_unusable, file.name))
-                    return@runOnUiThread
-                }
-                // The keys and the car's figures in the same file are applied too, so importing
-                // on this screen configures the car exactly as the routing key screen does.
-                // The count is what was stored, not what was read: a list already at its cap
-                // refuses the rest, and counting those would report a favourite that is not there.
-                val saved = SettingsTransfer.apply(this, settings)
-                val carried = settings.routing.favorites.size
-                showFavorites()
-                announce(
-                    when {
-                        carried == 0 ->
-                            getString(R.string.charge_stop_favorites_import_keys, file.name)
-                        saved == carried ->
-                            getString(R.string.charge_stop_favorites_import_done, saved, file.name)
-                        else -> getString(
-                            R.string.charge_stop_favorites_import_partial,
-                            saved, carried, DestinationFavorites.MAX_FAVORITES,
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    /**
-     * The keys, the destinations and the car's own figures, in one file, on a removable volume
-     * only.
-     *
-     * The file carries the keys in clear text — that is what a file this app can import back has
-     * to be — so the announcement says so on this screen as well as on the routing key screen.
-     */
-    private fun exportConfig() {
-        val settings = SettingsTransfer.snapshot(this)
-        if (settings.isEmpty()) {
-            announce(getString(R.string.charge_stop_favorites_export_empty))
-            return
-        }
-        worker.execute {
-            val roots = DiagnosticUsbStorage.roots(this)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (roots.isEmpty()) {
-                    announce(getString(R.string.charge_stop_favorites_export_failed))
-                } else {
-                    StorageBrowserDialog.pickFolder(
-                        this, roots, R.string.charge_stop_favorites_export_pick
-                    ) { writeExport(it, settings) }
-                }
-            }
-        }
-    }
-
-    private fun writeExport(directory: File, settings: SettingsTransfer.Settings) {
-        worker.execute {
-            val written = DiagnosticUsbStorage.writableTarget(this, directory)
-                ?.let { SettingsTransfer.write(it, settings) }
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                if (written == null) {
-                    announce(getString(R.string.charge_stop_favorites_export_failed))
-                } else {
-                    // The file name, never its contents: the contents are the keys.
-                    announce(getString(R.string.charge_stop_favorites_export_done, written.name))
-                }
-            }
-        }
     }
 
     /**
@@ -292,6 +183,15 @@ class DestinationActivity : AppCompatActivity() {
             if (!longitude.isFinite() || !latitude.isFinite()) return null
             return OrsGeocode.Place(label, longitude, latitude)
         }
+
+        /**
+         * The chosen place on an intent: this screen's own result, and the plan screen's input
+         * when the dashboard opens it with a destination already chosen.
+         */
+        fun carry(intent: Intent, place: OrsGeocode.Place): Intent = intent
+            .putExtra(EXTRA_LABEL, place.label)
+            .putExtra(EXTRA_LONGITUDE, place.longitude)
+            .putExtra(EXTRA_LATITUDE, place.latitude)
 
         fun intent(context: Context): Intent = Intent(context, DestinationActivity::class.java)
     }

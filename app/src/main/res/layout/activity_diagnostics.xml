@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THESIS: what the app read, what it derived, and why a missing figure is missing.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
+  STORY: say what the report is, show it in full, then offer the parked export that writes it.
+  FIRST VIEWPORT: the navigation bar and the first section of the report; the actions sit under it.
+  FORM: one reading pane over the page bar; the report is the page, not a dialog over another one.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_target"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <include layout="@layout/view_primary_navigation" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="1720dp"
+            android:layout_height="wrap_content"
+            android:text="@string/diagnostics_intro"
+            android:textAppearance="@style/Text.EV.Secondary" />
+
+        <ScrollView
+            android:layout_width="1720dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:padding="@dimen/spacing_lg">
+
+            <!-- Monospace because the report is read in columns: a key, an equals sign, a value. -->
+            <TextView
+                android:id="@+id/diagnosticsReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:accessibilityLiveRegion="polite"
+                android:fontFamily="monospace"
+                android:text="@string/diagnostics_building"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:textIsSelectable="true" />
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="1720dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/diagnosticsExportAction"
+                style="@style/Widget.EVChargePilot.Button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_weight="1"
+                android:text="@string/diagnostics_export_usb" />
+
+            <!-- Development instrument: absent from the stable APK, so absent from this row. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/diagnosticsEvidenceAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:text="@string/diagnostics_open_evidence"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

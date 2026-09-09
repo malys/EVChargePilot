@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityArrivalForecastBinding
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.SaicNavGuidance
@@ -38,7 +37,8 @@ import java.util.concurrent.TimeUnit
  * Everything happens on [worker]: the vehicle binder calls, the trip file, and the arithmetic.
  * The dashboard's own sampling must not wait on any of it.
  */
-class ArrivalForecastActivity : AppCompatActivity() {
+class ArrivalForecastActivity : PrimaryNavigationActivity() {
+    override val primaryPage = PrimaryPage.ARRIVAL
 
     private lateinit var binding: ActivityArrivalForecastBinding
     private lateinit var provenance: ProvenanceText
@@ -80,7 +80,6 @@ class ArrivalForecastActivity : AppCompatActivity() {
         binding = ActivityArrivalForecastBinding.inflate(layoutInflater)
         setContentView(binding.root)
         provenance = ProvenanceText(this)
-        binding.backAction.setOnClickListener { finish() }
         worker.execute {
             SaicNavGuidance.connect(applicationContext)
             loadRate()

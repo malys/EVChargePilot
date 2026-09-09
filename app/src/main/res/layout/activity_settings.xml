@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  THESIS: everything this app is configured with, in one place a driver can find twice.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
+  STORY: say what this page holds, then one card per subject, each naming what it decides.
+  FIRST VIEWPORT: the navigation bar and all three cards; nothing here scrolls out of reach.
+  FORM: parked configuration index; the sheets it opens keep their own Back action.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_target"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <include layout="@layout/view_primary_navigation" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg">
+
+            <TextView
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_intro"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_lg">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_vehicle_hint"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/vehicleSettingsAction"
+                    style="@style/Widget.EVChargePilot.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/vehicle_title" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_lg">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_routing_hint"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/routingSettingsAction"
+                    style="@style/Widget.EVChargePilot.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/routing_title" />
+            </LinearLayout>
+
+            <!-- The transfer file carries keys, addresses, destinations and vehicle figures: it
+                 is the whole app's configuration, so it is this page's action and not one of the
+                 sheets'. It used to be offered from the routing key screen and the destination
+                 screen at once, which was two doors to one file. -->
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_lg">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_transfer_hint"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <TextView
+                    android:id="@+id/settingsTransferStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:accessibilityLiveRegion="polite"
+                    android:textAppearance="@style/Text.EV.Body" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/settingsImportAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_weight="1"
+                        android:text="@string/settings_action_import" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/settingsExportAction"
+                        style="@style/Widget.EV.Button.Outlined"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:layout_weight="1"
+                        android:text="@string/settings_action_export" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

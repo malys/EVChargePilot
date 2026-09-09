@@ -8,6 +8,16 @@ import com.evsuite.hardware.telemetry.Provenanced
 import com.evsuite.hardware.telemetry.UnavailableReason
 import java.util.Locale
 
+// The unit belongs to the value, not to the screen: the dashboard and the diagnostics report
+// print the same figure the same way.
+internal const val PATTERN_SOC = "%.1f %%"
+internal const val PATTERN_SPEED = "%.0f km/h"
+internal const val PATTERN_POWER = "%+.1f kW"
+internal const val PATTERN_TEMP = "%.0f °C"
+internal const val PATTERN_DISTANCE = "%.1f km"
+internal const val PATTERN_ENERGY = "%.2f kWh"
+internal const val PATTERN_CONSUMPTION = "%.1f kWh/100 km"
+
 /**
  * Draws a [Provenanced] value so its kind is visible without a legend.
  *
@@ -60,6 +70,65 @@ class ProvenanceText(private val context: Context) {
         } else {
             context.getString(R.string.provenance_description_missing, label, kind, reason)
         }
+    }
+
+    /** Every reading of a frame, described: what it is, and when it is missing, why. */
+    fun describeAll(readings: DashboardReadings): List<String> {
+        val numeric = listOf(
+            Triple(R.string.label_soc, readings.soc, PATTERN_SOC),
+            Triple(R.string.label_range, readings.range, PATTERN_DISTANCE),
+            Triple(R.string.label_adaptive_range, readings.adaptiveRange, PATTERN_DISTANCE),
+            Triple(R.string.label_speed, readings.speed, PATTERN_SPEED),
+            Triple(R.string.label_power, readings.power, PATTERN_POWER),
+            Triple(R.string.label_outside_temp, readings.climate.outsideTemp, PATTERN_TEMP),
+            Triple(R.string.label_cabin_temp, readings.climate.cabinTemp, PATTERN_TEMP),
+            Triple(R.string.label_battery_temp, readings.climate.batteryTemp, PATTERN_TEMP),
+            Triple(
+                R.string.label_climate_driver_target,
+                readings.climate.driverTarget,
+                PATTERN_TEMP,
+            ),
+            Triple(
+                R.string.label_climate_passenger_target,
+                readings.climate.passengerTarget,
+                PATTERN_TEMP,
+            ),
+            Triple(
+                R.string.label_instant_consumption,
+                readings.instantConsumption,
+                PATTERN_CONSUMPTION,
+            ),
+            Triple(R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE),
+            Triple(R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY),
+            Triple(R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY),
+            Triple(
+                R.string.label_trip_average_consumption,
+                readings.tripConsumption,
+                PATTERN_CONSUMPTION,
+            ),
+        ).map { (label, value, pattern) ->
+            describe(context.getString(label), value, render(value, pattern))
+        }
+        val states = listOf(
+            R.string.label_climate_power to readings.climate.hvacOn,
+            R.string.label_climate_ac to readings.climate.acOn,
+            R.string.label_climate_auto to readings.climate.autoOn,
+            R.string.label_climate_econ to readings.climate.econOn,
+            R.string.label_climate_recirculation to readings.climate.recirculationOn,
+        ).map { (label, value) ->
+            val rendered = renderWith(value) {
+                context.getString(if (it) R.string.state_on else R.string.state_off)
+            }
+            describe(context.getString(label), value, rendered)
+        }
+        val fan = renderWith(readings.climate.fan) {
+            context.getString(R.string.climate_fan_value, it.level, it.maximum)
+        }
+        return numeric + states + describe(
+            context.getString(R.string.label_climate_fan),
+            readings.climate.fan,
+            fan,
+        )
     }
 
     private fun reasonRes(reason: UnavailableReason): Int = when (reason) {

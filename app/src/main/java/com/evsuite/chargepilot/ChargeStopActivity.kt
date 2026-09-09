@@ -174,13 +174,6 @@ class ChargeStopActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityChargeStopBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.backAction.setOnClickListener { finish() }
-        binding.routingSettingsAction.setOnClickListener {
-            startActivity(Intent(this, RoutingSettingsActivity::class.java))
-        }
-        binding.vehicleSettingsAction.setOnClickListener {
-            startActivity(Intent(this, VehicleSettingsActivity::class.java))
-        }
         binding.chooseDestinationAction.setOnClickListener {
             // The drive of 2026-09-09 came back with "nothing at all happens and it loops back
             // to the destination window". This line is how the next bundle tells the two
@@ -195,6 +188,7 @@ class ChargeStopActivity : AppCompatActivity() {
             }
             destination.launch(DestinationActivity.intent(this))
         }
+        binding.backAction.setOnClickListener { finish() }
         binding.navigateAction.setOnClickListener { navigate() }
         // Bound here rather than at the tap: the bind is asynchronous, and a driver who plans a
         // route and hands it over has given it the whole of that time to come up. Read-only
@@ -212,6 +206,13 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         worker.execute { loadRate() }
         render()
+        // CP-062. This screen is no longer a page of its own: the driver asks for a destination
+        // on the dashboard, and the plan for that destination is what opens. The chooser stays
+        // in the top bar, so a second destination does not mean going back first.
+        DestinationActivity.place(intent)?.let { place ->
+            binding.chooseDestinationAction.text = place.label
+            route(place)
+        }
     }
 
     override fun onStart() {
