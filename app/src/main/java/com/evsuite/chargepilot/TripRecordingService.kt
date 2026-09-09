@@ -290,6 +290,11 @@ class TripRecordingService : Service() {
             main.post { updateNotification() }
         }
         main.post { listener?.onSample(recordable) }
+        // A plan handed over leg by leg needs somewhere to be watched from, and this is already
+        // a worker thread waking once a second with nothing else to do. Cheap when no chain is
+        // armed, and it must not run on the main thread: the adapter's fan-out holds a lock.
+        runCatching { NavLegs.tick() }
+            .onFailure { AppLogger.w(TAG, "leg chain tick failed: ${it.message}") }
     }
 
     /** No dashboard, recording, or automatic monitor: sampling has no consumer to keep. */

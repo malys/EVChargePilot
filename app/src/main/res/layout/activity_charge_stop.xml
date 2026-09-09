@@ -154,26 +154,6 @@
                 android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone" />
 
-            <!-- CP-056. The action that ends this screen: the plan stops being something the
-                 driver has to copy. Its caveat is a sibling and never the button's own label,
-                 because a driver reads a button as a promise and this one cannot make it. -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/navigateAction"
-                style="@style/Widget.EVChargePilot.Button"
-                android:layout_width="1400dp"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:text="@string/charge_stop_navigate"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/navigateNote"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:visibility="gone" />
-
             <TextView
                 android:id="@+id/chargeStopAttribution"
                 android:layout_width="1400dp"
@@ -183,4 +163,42 @@
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
+
+    <!-- CP-056, moved out of the scroller on 2026-09-09. The action that ends this screen: the
+         plan stops being something the driver has to copy. It used to sit under seven cards,
+         which on this panel put it some four hundred dp below the fold: the driver saw a plan
+         and one button, and that button was the destination chooser. Tapping it reopened the
+         chooser, which is exactly what the car reported. An action a driver cannot see is an
+         action that does not exist, so it is pinned here and the cards scroll behind it.
+
+         Its caveat rides beside it and never becomes the button's own label, because a driver
+         reads a button as a promise and this one cannot make it. -->
+    <LinearLayout
+        android:id="@+id/navigateBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_md"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/navigateNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/spacing_lg"
+            android:textAppearance="@style/Text.EV.Secondary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/navigateAction"
+            style="@style/Widget.EVChargePilot.Button"
+            android:layout_width="700dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/charge_stop_navigate" />
+    </LinearLayout>
 </LinearLayout>

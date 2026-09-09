@@ -4,7 +4,27 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **A plan with a charging stop is now driven all the way, one leg at a time.** The command that
+  starts guidance on this head unit carries a single point, so the tap sends the charging stop and
+  the destination used to be the driver's problem again. It no longer is: the trip is held in
+  memory as an ordered list of legs, and when the car's own guidance flag goes false after having
+  been true — the stop reached — the next point goes out on its own, and so on to the end. Nothing
+  is written to disk: legs are place names and coordinates, and the followed-plan store on the
+  other side of this trip deliberately keeps neither. A leg whose guidance never starts is
+  abandoned rather than chained onto, so a refused handoff cannot send the car onward from a
+  charger it is still standing at.
+
 ### Fixed
+
+- **The button that starts the drive was below the fold, and the one the driver could see reopened
+  the destination chooser.** On the vehicle the tap "did nothing at all and looped back to the
+  destination window", which is exactly what happens when the plan renders seven cards above an
+  action that sits some four hundred dp past the bottom of a 648 dp panel: the only button in
+  sight was the destination chooser, and tapping it reopens the chooser. The action and its caveat
+  are now pinned in a bar at the bottom of the screen and the cards scroll behind them, so the one
+  thing the screen exists to offer is the one thing that is always on it.
 
 - **The screen no longer claims a handoff worked when it did not.** `goTo` was accepted and MG4
   Navigator still did not guide, so the tap now asks the car instead of the driver:

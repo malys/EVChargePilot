@@ -380,9 +380,9 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>
     <string name="charge_stop_navigate_sending">Handing the route to the car\u2019s navigation\u2026</string>
     <string name="charge_stop_navigate_guiding_on">The car is guiding to the destination.</string>
-    <string name="charge_stop_navigate_guiding_on_stop">The car is guiding to the charging stop. Set the final destination after charging.</string>
+    <string name="charge_stop_navigate_guiding_on_stop">The car is guiding to the charging stop. The final destination follows on arrival.</string>
     <string name="charge_stop_navigate_guiding">Guidance asked of the car\u2019s navigation. Check it started.</string>
-    <string name="charge_stop_navigate_guiding_stop">Guidance asked as far as the charging stop. Set the final destination after charging.</string>
+    <string name="charge_stop_navigate_guiding_stop">Guidance asked as far as the charging stop. The final destination follows on arrival.</string>
     <string name="charge_stop_navigate_route">Route handed over, and the car is not guiding yet. Start it on the map.</string>
     <string name="charge_stop_navigate_route_via">Route handed over with the charging stop, and the car is not guiding yet. Start it on the map.</string>
     <string name="charge_stop_navigate_map_only">The map is open, but this car takes no destination from another app. Enter it there: %1$s</string>

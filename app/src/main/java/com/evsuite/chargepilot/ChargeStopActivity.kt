@@ -182,6 +182,17 @@ class ChargeStopActivity : AppCompatActivity() {
             startActivity(Intent(this, VehicleSettingsActivity::class.java))
         }
         binding.chooseDestinationAction.setOnClickListener {
+            // The drive of 2026-09-09 came back with "nothing at all happens and it loops back
+            // to the destination window". This line is how the next bundle tells the two
+            // readings apart: a driver reaching for guidance and hitting the chooser instead,
+            // or a tap on the handoff that really did nothing. It fires only when a plan was
+            // on screen — choosing a second destination before planning one is not the bug.
+            if (handoff != null) {
+                ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+                    "the destination chooser was tapped while a plan and its handoff were on " +
+                        "screen: the chooser reopens and no handoff is sent"
+                }
+            }
             destination.launch(DestinationActivity.intent(this))
         }
         binding.navigateAction.setOnClickListener { navigate() }
@@ -590,8 +601,7 @@ class ChargeStopActivity : AppCompatActivity() {
             binding.chargerSource.visibility = View.GONE
             binding.routeWhatIf.visibility = View.GONE
             binding.routeChoices.visibility = View.GONE
-            binding.navigateAction.visibility = View.GONE
-            binding.navigateNote.visibility = View.GONE
+            binding.navigateBar.visibility = View.GONE
             handoff = null
             return
         }
@@ -866,21 +876,25 @@ class ChargeStopActivity : AppCompatActivity() {
                 }
             )
         )
+        // The stop first and the destination after it: that is the order they are driven in, and
+        // the order the chain hands them over in once each leg's guidance ends.
+        val legs = pathway + listOfNotNull(destination)
         val target = if (stop != null) {
             Handoff(
                 stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true,
                 point = pathway.firstOrNull(), destination = destination, pathway = pathway,
+                legs = legs,
             )
         } else {
             Handoff(
                 place.latitude, place.longitude, place.label, toStop = false,
                 point = destination, destination = destination, pathway = pathway,
+                legs = listOfNotNull(destination),
             )
         }
         handoff = target
         followed = follow(plan, charger, route, rate, grade)
-        binding.navigateAction.visibility = View.VISIBLE
-        binding.navigateNote.visibility = View.VISIBLE
+        binding.navigateBar.visibility = View.VISIBLE
         binding.navigateNote.setText(
             if (target.toStop) R.string.charge_stop_navigate_stop
             else R.string.charge_stop_navigate_destination
@@ -989,6 +1003,8 @@ class ChargeStopActivity : AppCompatActivity() {
             } ?: "not armed: no rate, no odometer, or a stop with no charger found"
         }
         announce(getString(R.string.charge_stop_navigate_sending))
+        // Whatever the previous tap left running stops being the plan the moment this one starts.
+        NavLegs.disarm()
         // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
@@ -1012,6 +1028,11 @@ class ChargeStopActivity : AppCompatActivity() {
                 "channels: adapter=${SaicNavGuidance.isAvailable}, guiding before=$wasGuiding, " +
                     "goTo taken=$goTo guiding=$guided, route taken=$route guiding=$routeGuided"
             }
+            // A plan with a charging stop is two legs, because `goTo` carries one point: the car
+            // has been sent to the stop, and the destination follows when that leg is over. Armed
+            // only behind `goTo` — the route handoff carries the pathway itself, and chaining
+            // onto it would send a second destination over a route that already has one.
+            if (goTo) NavLegs.arm(target.legs) else NavLegs.disarm()
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 when {
@@ -1248,6 +1269,11 @@ class ChargeStopActivity : AppCompatActivity() {
         val point: NavigationHandoff.Poi?,
         val destination: NavigationHandoff.Poi?,
         val pathway: List<NavigationHandoff.Poi>,
+        /**
+         * The trip in order, first leg first, for the chain that drives it one point at a time.
+         * The leg the tap sends is in it: the chain counts from the leg already handed over.
+         */
+        val legs: List<NavigationHandoff.Poi>,
     )
 
     private data class Found(

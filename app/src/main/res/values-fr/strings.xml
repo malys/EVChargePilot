@@ -374,9 +374,9 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_navigate_sent">Envoyé à la navigation de la voiture.</string>
     <string name="charge_stop_navigate_sending">Transmission de l\u2019itin\u00e9raire \u00e0 la navigation du v\u00e9hicule\u2026</string>
     <string name="charge_stop_navigate_guiding_on">Le v\u00e9hicule guide vers la destination.</string>
-    <string name="charge_stop_navigate_guiding_on_stop">Le v\u00e9hicule guide vers l\u2019arr\u00eat de charge. R\u00e9glez la destination finale apr\u00e8s la charge.</string>
+    <string name="charge_stop_navigate_guiding_on_stop">Le v\u00e9hicule guide vers l\u2019arr\u00eat de charge. La destination finale suit \u00e0 l\u2019arriv\u00e9e.</string>
     <string name="charge_stop_navigate_guiding">Guidage demand\u00e9 \u00e0 la navigation du v\u00e9hicule. V\u00e9rifiez qu\u2019il a d\u00e9marr\u00e9.</string>
-    <string name="charge_stop_navigate_guiding_stop">Guidage demand\u00e9 jusqu\u2019\u00e0 l\u2019arr\u00eat de charge. R\u00e9glez la destination finale apr\u00e8s la charge.</string>
+    <string name="charge_stop_navigate_guiding_stop">Guidage demand\u00e9 jusqu\u2019\u00e0 l\u2019arr\u00eat de charge. La destination finale suit \u00e0 l\u2019arriv\u00e9e.</string>
     <string name="charge_stop_navigate_route">Itin\u00e9raire transmis, le v\u00e9hicule ne guide pas encore. D\u00e9marrez-le sur la carte.</string>
     <string name="charge_stop_navigate_route_via">Itin\u00e9raire transmis avec l\u2019arr\u00eat de charge, le v\u00e9hicule ne guide pas encore. D\u00e9marrez-le sur la carte.</string>
     <string name="charge_stop_navigate_map_only">La carte est ouverte, mais cette voiture n\u2019accepte pas de destination venant d\u2019une autre application. Saisissez-la : %1$s</string>
