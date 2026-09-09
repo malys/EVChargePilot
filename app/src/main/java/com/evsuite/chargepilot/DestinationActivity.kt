@@ -9,9 +9,6 @@ import com.evsuite.chargepilot.databinding.ActivityDestinationBinding
 import com.evsuite.chargepilot.route.DestinationFavorites
 import com.evsuite.chargepilot.route.LocationSource
 import com.evsuite.chargepilot.route.OrsGeocode
-import com.evsuite.chargepilot.route.RoutingConfig
-import com.evsuite.chargepilot.route.RoutingConfigExport
-import com.evsuite.chargepilot.route.RoutingConfigImport
 import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.google.android.material.button.MaterialButton
@@ -183,30 +180,30 @@ class DestinationActivity : AppCompatActivity() {
 
     private fun importFile(file: File) {
         worker.execute {
-            val config = RoutingConfigImport.read(file)
+            val settings = SettingsTransfer.read(file)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (config.isEmpty()) {
+                if (settings.isEmpty()) {
                     // The path they chose, so "this one is not it" is the answer, not silence.
                     announce(getString(R.string.charge_stop_favorites_import_unusable, file.name))
                     return@runOnUiThread
                 }
-                // The keys in the same file are applied too, so importing on this screen
-                // configures the car exactly as importing on the routing key screen does.
-                RoutingCredentials.apply(this, config)
-                // What was stored, not what was read: a list already at its cap refuses the
-                // rest, and a count that included them would report a favourite that is not there.
-                val saved = config.favorites.count { DestinationFavorites.save(this, it) }
+                // The keys and the car's figures in the same file are applied too, so importing
+                // on this screen configures the car exactly as the routing key screen does.
+                // The count is what was stored, not what was read: a list already at its cap
+                // refuses the rest, and counting those would report a favourite that is not there.
+                val saved = SettingsTransfer.apply(this, settings)
+                val carried = settings.routing.favorites.size
                 showFavorites()
                 announce(
                     when {
-                        config.favorites.isEmpty() ->
+                        carried == 0 ->
                             getString(R.string.charge_stop_favorites_import_keys, file.name)
-                        saved == config.favorites.size ->
+                        saved == carried ->
                             getString(R.string.charge_stop_favorites_import_done, saved, file.name)
                         else -> getString(
                             R.string.charge_stop_favorites_import_partial,
-                            saved, config.favorites.size, DestinationFavorites.MAX_FAVORITES,
+                            saved, carried, DestinationFavorites.MAX_FAVORITES,
                         )
                     }
                 )
@@ -215,15 +212,15 @@ class DestinationActivity : AppCompatActivity() {
     }
 
     /**
-     * The keys and the destinations, in one file, on a removable volume only.
+     * The keys, the destinations and the car's own figures, in one file, on a removable volume
+     * only.
      *
      * The file carries the keys in clear text — that is what a file this app can import back has
      * to be — so the announcement says so on this screen as well as on the routing key screen.
      */
     private fun exportConfig() {
-        val config = RoutingCredentials.snapshot(this)
-            .copy(favorites = DestinationFavorites.all(this))
-        if (config.isEmpty()) {
+        val settings = SettingsTransfer.snapshot(this)
+        if (settings.isEmpty()) {
             announce(getString(R.string.charge_stop_favorites_export_empty))
             return
         }
@@ -236,16 +233,16 @@ class DestinationActivity : AppCompatActivity() {
                 } else {
                     StorageBrowserDialog.pickFolder(
                         this, roots, R.string.charge_stop_favorites_export_pick
-                    ) { writeExport(it, config) }
+                    ) { writeExport(it, settings) }
                 }
             }
         }
     }
 
-    private fun writeExport(directory: File, config: RoutingConfig) {
+    private fun writeExport(directory: File, settings: SettingsTransfer.Settings) {
         worker.execute {
             val written = DiagnosticUsbStorage.writableTarget(this, directory)
-                ?.let { RoutingConfigExport.write(it, config) }
+                ?.let { SettingsTransfer.write(it, settings) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (written == null) {

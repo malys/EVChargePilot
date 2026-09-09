@@ -82,19 +82,25 @@ object VehicleSettings {
             minChargerPowerKw = prefs.getFloat(KEY_MIN_POWER, Float.NaN).toDouble(),
             reservePercent = prefs.getFloat(KEY_RESERVE, Float.NaN).toDouble(),
         )
-        // A stored value out of bounds is a value from an older build or a corrupt file, and
-        // the documented default is a better answer than a plan built on it.
-        return Values(
-            usableCapacityKwhWhenNew = stored.usableCapacityKwhWhenNew
-                .takeIf { it in CAPACITY_RANGE } ?: DEFAULT_CAPACITY_KWH,
-            stateOfHealthPercent = stored.stateOfHealthPercent
-                .takeIf { it in HEALTH_RANGE } ?: DEFAULT_HEALTH_PERCENT,
-            minChargerPowerKw = stored.minChargerPowerKw
-                .takeIf { it in MIN_POWER_RANGE } ?: DEFAULT_MIN_POWER_KW,
-            reservePercent = stored.reservePercent
-                .takeIf { it in RESERVE_RANGE } ?: DEFAULT_RESERVE_PERCENT,
-        )
+        return sanitized(stored)
     }
+
+    /**
+     * The same figures with anything out of bounds replaced by its documented default.
+     *
+     * A value out of bounds comes from an older build, a corrupt preferences file or a
+     * hand-edited settings file, and the default is a better answer than a plan built on it.
+     */
+    fun sanitized(values: Values): Values = Values(
+        usableCapacityKwhWhenNew = values.usableCapacityKwhWhenNew
+            .takeIf { it in CAPACITY_RANGE } ?: DEFAULT_CAPACITY_KWH,
+        stateOfHealthPercent = values.stateOfHealthPercent
+            .takeIf { it in HEALTH_RANGE } ?: DEFAULT_HEALTH_PERCENT,
+        minChargerPowerKw = values.minChargerPowerKw
+            .takeIf { it in MIN_POWER_RANGE } ?: DEFAULT_MIN_POWER_KW,
+        reservePercent = values.reservePercent
+            .takeIf { it in RESERVE_RANGE } ?: DEFAULT_RESERVE_PERCENT,
+    )
 
     fun write(context: Context, values: Values) {
         context.applicationContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)

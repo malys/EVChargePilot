@@ -107,16 +107,25 @@ data class RoutingConfig(
          * One `destination.<label> = longitude,latitude` line, or null when it is not one.
          *
          * The coordinate order [OrsGeocode.Place] already returns, and the same bounds
-         * [OrsGeocode.parse] holds its own answers to. This file is hand-editable, so it is the
-         * trust boundary the rest of the app relies on: "NaN" and "999" both parse as doubles,
-         * and a route request would carry them off the planet.
+         * [OrsGeocode.parse] holds its own answers to.
          */
         private fun place(label: String, value: String): OrsGeocode.Place? {
-            if (label.isEmpty()) return null
             val point = value.split(",")
             if (point.size != 2) return null
             val longitude = point[0].trim().toDoubleOrNull() ?: return null
             val latitude = point[1].trim().toDoubleOrNull() ?: return null
+            return place(label, longitude, latitude)
+        }
+
+        /**
+         * A saved destination, or null when it is not a place on Earth.
+         *
+         * The trust boundary both file formats share: the legacy `key = value` lines and
+         * [com.evsuite.chargepilot.SettingsTransfer]'s JSON are both hand-editable, and "NaN"
+         * and "999" are both numbers a route request would carry off the planet.
+         */
+        fun place(label: String, longitude: Double, latitude: Double): OrsGeocode.Place? {
+            if (label.isEmpty()) return null
             if (!longitude.isFinite() || longitude !in -180.0..180.0) return null
             if (!latitude.isFinite() || latitude !in -90.0..90.0) return null
             return OrsGeocode.Place(label, longitude, latitude)

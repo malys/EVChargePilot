@@ -18,6 +18,27 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   before it counts as over. Every change of that flag after a handoff is now recorded, so the
   next drive says whether it can be trusted for a whole route rather than leaving it assumed.
 
+### Changed
+
+- **Every setting the driver owns now travels as one JSON file.** Import and export wrote
+  `key = value` text carrying the two API keys, their base URLs and the saved destinations; the
+  car's own figures — usable capacity when new, state of health, minimum charger power, reserve —
+  travelled nowhere, so a second car or the unstable channel meant retyping them on a head unit
+  keyboard. Both screens now read and write `evchargepilot-settings.json`, which carries all of
+  it under `routing`, `vehicle` and `destinations`, and both go through the same apply, so
+  neither can configure half the car. Sections the file leaves out are left alone rather than
+  reset: a file carrying only a key does not blank a self-hosted base URL, and a car still on the
+  specification-sheet defaults exports no `vehicle` section rather than writing the sheet over a
+  pack that has been measured. The file is still identified by its contents rather than its name,
+  and the `key = value` file earlier versions exported is still imported, because the sticks
+  carrying it are in gloveboxes already. It still holds the keys in clear text — that is what a
+  file this app can import back has to be — so the file says so in a `note` field a driver
+  opening it on a laptop cannot miss, and both screens say so when they write it. Decoding is
+  read field by field rather than mapped by reflection, and every value goes through the checks
+  the app already relied on: `https` with no credentials and no query for a base URL, finite
+  coordinates within ±180/±90 and a label to tap for a destination, and the same clamp the
+  vehicle preferences already applied for the four figures.
+
 ### Fixed
 
 - **The car is asked to drive there through the channel that drives.** The vehicle answered on

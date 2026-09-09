@@ -242,7 +242,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="destination_title">Destination</string>
     <string name="destination_prompt">Type where you are going, or take one you have saved.</string>
     <string name="charge_stop_action_destination">Choose a destination</string>
-    <string name="charge_stop_favorites_import_keys">Keys imported from %1$s. It carried no saved destination.</string>
+    <string name="charge_stop_favorites_import_keys">Settings imported from %1$s. It carried no saved destination.</string>
     <string name="charge_stop_favorites_title">Favourites</string>
     <string name="charge_stop_favorites_hint">Tap to choose it. Long-press a result on the left to save it, long-press a favourite to remove it.</string>
     <string name="charge_stop_favorites_empty">No favourites saved yet. Long-press a result on the left to save one.</string>
@@ -252,14 +252,14 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_favorites_import">Import from USB</string>
     <string name="charge_stop_favorites_export">Export to USB</string>
     <string name="charge_stop_favorites_import_pick">Choose USB storage</string>
-    <string name="charge_stop_favorites_import_none">No USB stick found. Put the configuration file this app exports on one.</string>
+    <string name="charge_stop_favorites_import_none">No USB stick found. Put the evchargepilot-settings.json file this app exports on one.</string>
     <string name="charge_stop_favorites_import_done">Imported %1$d favourite(s) from %2$s.</string>
     <string name="charge_stop_favorites_import_partial">Imported %1$d of %2$d favourite(s). The list holds %3$d at most; remove some and import again.</string>
-    <string name="charge_stop_favorites_import_unusable">%1$s carries neither a key nor a destination. Choose the file this app exported.</string>
-    <string name="charge_stop_favorites_export_empty">Nothing to export yet. Save a favourite, or enter a routing key first.</string>
+    <string name="charge_stop_favorites_import_unusable">%1$s holds none of this app’s settings. Choose the evchargepilot-settings.json file this app exported.</string>
+    <string name="charge_stop_favorites_export_empty">Nothing to export yet. Save a favourite, enter a routing key or set your vehicle figures first.</string>
     <string name="charge_stop_favorites_export_pick">Choose USB storage</string>
     <string name="charge_stop_favorites_export_failed">No USB stick that can be written to. Insert one and try again.</string>
-    <string name="charge_stop_favorites_export_done">Exported to %1$s on the USB stick. It carries your API keys in clear text: that stick is now a secret.</string>
+    <string name="charge_stop_favorites_export_done">Keys, destinations and vehicle figures exported to %1$s on the USB stick. It carries your API keys in clear text: that stick is now a secret.</string>
     <string name="charge_stop_routing">Asking for the route…</string>
     <string name="charge_stop_ready">Route received.</string>
     <string name="charge_stop_no_route">No usable route came back. Nothing is shown rather than half a route.</string>
@@ -328,13 +328,13 @@ Spending %6$s %% per km</string>
     <string name="browser_up">⬆ Up one level</string>
     <string name="browser_use_folder">Save here</string>
     <string name="routing_import_pick">Choose USB storage</string>
-    <string name="routing_import_none">No configuration file found. Put one on a USB stick with a line reading ors_api_key = your-key.</string>
-    <string name="routing_import_done">Imported from %1$s.</string>
-    <string name="routing_import_unusable">%1$s holds no key. Choose the file with a line reading ors_api_key = your-key.</string>
-    <string name="routing_export_empty">Nothing to export yet. Enter a key first.</string>
+    <string name="routing_import_none">No USB stick found. Put the evchargepilot-settings.json file this app exports on one.</string>
+    <string name="routing_import_done">Settings imported from %1$s.</string>
+    <string name="routing_import_unusable">%1$s holds none of this app’s settings. Choose the evchargepilot-settings.json file this app exported.</string>
+    <string name="routing_export_empty">Nothing to export yet. Enter a key, save a favourite or set your vehicle figures first.</string>
     <string name="routing_export_pick">Choose USB storage</string>
     <string name="routing_export_failed">No USB stick that can be written to. Insert one and try again.</string>
-    <string name="routing_export_done">Exported to %1$s on the USB stick. That file holds your keys in clear text: keep the stick as you would keep them.</string>
+    <string name="routing_export_done">Keys, destinations and vehicle figures exported to %1$s on the USB stick. That file holds your keys in clear text: keep the stick as you would keep them.</string>
     <string name="routing_privacy">Only the destination you type, the car’s position and the road profile ever leave the car. No trip, charge, speed, diagnostic bundle or identifier is sent anywhere. The key is stored encrypted, never written to a log and never included in a diagnostic export.</string>
     <string name="routing_refused_busy">A request is already in flight. Wait for it.</string>
     <string name="routing_refused_quota_minute">Too many requests just now. Try again in %1$s s.</string>

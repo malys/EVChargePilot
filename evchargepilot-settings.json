@@ -1,0 +1,22 @@
+{
+  "format": "evchargepilot-settings",
+  "version": 1,
+  "note": "EVChargePilot settings, API keys in clear text included: this USB stick is now a secret. Import it with 'Import from USB' on the routing key screen or the charging-stop screen.",
+  "routing": {
+    "ors_api_key": "your-openrouteservice-key",
+    "ors_base_url": "https://api.heigit.org",
+    "ocm_api_key": "your-openchargemap-key",
+    "ocm_base_url": "https://api.openchargemap.io"
+  },
+  "vehicle": {
+    "usable_capacity_kwh_when_new": 61.7,
+    "state_of_health_percent": 92.0,
+    "min_charger_power_kw": 22.0,
+    "reserve_percent": 10.0
+  },
+  "destinations": [
+    { "label": "Home", "longitude": 5.4474, "latitude": 43.5297 },
+    { "label": "Office, 12 Rue de la Paix", "longitude": 3.8767, "latitude": 43.6108 },
+    { "label": "Chargeur Ikea Vitrolles", "longitude": 5.2447, "latitude": 43.4392 }
+  ]
+}

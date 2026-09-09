@@ -8,10 +8,7 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityRoutingSettingsBinding
-import com.evsuite.chargepilot.route.DestinationFavorites
 import com.evsuite.chargepilot.route.RoutingConfig
-import com.evsuite.chargepilot.route.RoutingConfigExport
-import com.evsuite.chargepilot.route.RoutingConfigImport
 import com.evsuite.chargepilot.route.RoutingCredentials
 import java.io.File
 import java.util.concurrent.Executors
@@ -168,20 +165,19 @@ class RoutingSettingsActivity : AppCompatActivity() {
 
     private fun importFile(file: File) {
         disk.execute {
-            val config = RoutingConfigImport.read(file)
+            val settings = SettingsTransfer.read(file)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (config.isEmpty()) {
+                if (settings.isEmpty()) {
                     // The path they chose, so "this one is not it" is the answer, not silence.
                     announce(getString(R.string.routing_import_unusable, file.name))
                     return@runOnUiThread
                 }
-                RoutingCredentials.apply(this, config)
-                // The saved destinations ride in the same file (CP-044): a driver setting up a
-                // second car imports once and has both, rather than half the app.
-                config.favorites.forEach { DestinationFavorites.save(this, it) }
+                // Keys, saved destinations and the car's own figures ride in the same file: a
+                // driver setting up a second car imports once and has the app, not half of it.
+                SettingsTransfer.apply(this, settings)
                 binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
-                // The file name, never its contents: the contents are the key.
+                // The file name, never its contents: the contents are the keys.
                 announce(getString(R.string.routing_import_done, file.name))
             }
         }
@@ -191,6 +187,9 @@ class RoutingSettingsActivity : AppCompatActivity() {
      * The same file back out, so a second car — or the unstable channel, which is a separate
      * application id with its own preferences — does not mean typing the key again.
      *
+     * One JSON file with everything the driver owns — keys, base URLs, saved destinations and
+     * the car's own figures — so a second car is one import rather than four screens.
+     *
      * A removable volume only: writing the keys into this app's private folder would be a second
      * unencrypted copy nobody asked for and nobody could reach. The stick then carries the keys
      * in clear text, which is what the announcement says. The driver browses to the folder, same
@@ -198,9 +197,8 @@ class RoutingSettingsActivity : AppCompatActivity() {
      * driver's stick guessed at and the file lands where they will look for it.
      */
     private fun export() {
-        val config = RoutingCredentials.snapshot(this)
-            .copy(favorites = DestinationFavorites.all(this))
-        if (config.isEmpty()) {
+        val settings = SettingsTransfer.snapshot(this)
+        if (settings.isEmpty()) {
             announce(getString(R.string.routing_export_empty))
             return
         }
@@ -212,17 +210,17 @@ class RoutingSettingsActivity : AppCompatActivity() {
                     announce(getString(R.string.routing_export_failed))
                 } else {
                     StorageBrowserDialog.pickFolder(this, roots, R.string.routing_export_pick) {
-                        writeExport(it, config)
+                        writeExport(it, settings)
                     }
                 }
             }
         }
     }
 
-    private fun writeExport(directory: File, config: RoutingConfig) {
+    private fun writeExport(directory: File, settings: SettingsTransfer.Settings) {
         disk.execute {
             val written = DiagnosticUsbStorage.writableTarget(this, directory)
-                ?.let { RoutingConfigExport.write(it, config) }
+                ?.let { SettingsTransfer.write(it, settings) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (written == null) {

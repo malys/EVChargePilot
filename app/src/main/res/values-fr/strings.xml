@@ -238,7 +238,7 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="destination_title">Destination</string>
     <string name="destination_prompt">Saisissez où vous allez, ou reprenez une destination enregistrée.</string>
     <string name="charge_stop_action_destination">Choisir une destination</string>
-    <string name="charge_stop_favorites_import_keys">Clés importées depuis %1$s. Le fichier ne portait aucune destination enregistrée.</string>
+    <string name="charge_stop_favorites_import_keys">Paramètres importés depuis %1$s. Le fichier ne portait aucune destination enregistrée.</string>
     <string name="charge_stop_favorites_title">Favoris</string>
     <string name="charge_stop_favorites_hint">Touchez pour la choisir. Appui long sur un résultat à gauche pour l’enregistrer, appui long sur un favori pour le retirer.</string>
     <string name="charge_stop_favorites_empty">Aucun favori enregistré. Appui long sur un résultat à gauche pour en garder un.</string>
@@ -248,14 +248,14 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_favorites_import">Importer depuis USB</string>
     <string name="charge_stop_favorites_export">Exporter vers USB</string>
     <string name="charge_stop_favorites_import_pick">Choisir le stockage USB</string>
-    <string name="charge_stop_favorites_import_none">Aucune clé USB trouvée. Placez-y le fichier de configuration exporté par cette application.</string>
+    <string name="charge_stop_favorites_import_none">Aucune clé USB trouvée. Placez-y le fichier evchargepilot-settings.json exporté par cette application.</string>
     <string name="charge_stop_favorites_import_done">%1$d favori(s) importé(s) depuis %2$s.</string>
     <string name="charge_stop_favorites_import_partial">%1$d favori(s) importé(s) sur %2$d. La liste en contient %3$d au maximum : supprimez-en avant de réimporter.</string>
-    <string name="charge_stop_favorites_import_unusable">%1$s ne porte ni clé ni destination. Choisissez le fichier exporté par cette application.</string>
-    <string name="charge_stop_favorites_export_empty">Rien à exporter pour l’instant. Enregistrez un favori ou saisissez d’abord une clé.</string>
+    <string name="charge_stop_favorites_import_unusable">%1$s ne contient aucun paramètre de cette application. Choisissez le fichier evchargepilot-settings.json exporté par cette application.</string>
+    <string name="charge_stop_favorites_export_empty">Rien à exporter pour l’instant. Enregistrez un favori, saisissez une clé ou renseignez les caractéristiques du véhicule.</string>
     <string name="charge_stop_favorites_export_pick">Choisir le stockage USB</string>
     <string name="charge_stop_favorites_export_failed">Aucune clé USB accessible en écriture. Insérez-en une et réessayez.</string>
-    <string name="charge_stop_favorites_export_done">Exporté vers %1$s sur la clé USB. Le fichier contient vos clés d’API en clair : cette clé USB est désormais un secret.</string>
+    <string name="charge_stop_favorites_export_done">Clés, destinations et caractéristiques du véhicule exportées vers %1$s sur la clé USB. Le fichier contient vos clés d’API en clair : cette clé USB est désormais un secret.</string>
     <string name="charge_stop_routing">Demande de l’itinéraire…</string>
     <string name="charge_stop_ready">Itinéraire reçu.</string>
     <string name="charge_stop_no_route">Aucun itinéraire exploitable. Rien n’est affiché plutôt qu’un demi-itinéraire.</string>
@@ -323,13 +323,13 @@ Consommation %6$s %% par km</string>
     <string name="browser_up">⬆ Dossier parent</string>
     <string name="browser_use_folder">Enregistrer ici</string>
     <string name="routing_import_pick">Choisir le stockage USB</string>
-    <string name="routing_import_none">Aucun fichier de configuration trouvé. Placez sur une clé USB un fichier contenant la ligne ors_api_key = votre-clé.</string>
-    <string name="routing_import_done">Importé depuis %1$s.</string>
-    <string name="routing_import_unusable">%1$s ne contient aucune clé. Choisissez le fichier contenant la ligne ors_api_key = votre-clé.</string>
-    <string name="routing_export_empty">Rien à exporter pour l’instant. Saisissez d’abord une clé.</string>
+    <string name="routing_import_none">Aucune clé USB trouvée. Placez-y le fichier evchargepilot-settings.json exporté par cette application.</string>
+    <string name="routing_import_done">Paramètres importés depuis %1$s.</string>
+    <string name="routing_import_unusable">%1$s ne contient aucun paramètre de cette application. Choisissez le fichier evchargepilot-settings.json exporté par cette application.</string>
+    <string name="routing_export_empty">Rien à exporter pour l’instant. Saisissez une clé, enregistrez un favori ou renseignez les caractéristiques du véhicule.</string>
     <string name="routing_export_pick">Choisir le stockage USB</string>
     <string name="routing_export_failed">Aucune clé USB accessible en écriture. Insérez-en une et réessayez.</string>
-    <string name="routing_export_done">Exporté vers %1$s sur la clé USB. Ce fichier contient vos clés d’API en clair : gardez la clé USB comme vous garderiez ces clés.</string>
+    <string name="routing_export_done">Clés, destinations et caractéristiques du véhicule exportées vers %1$s sur la clé USB. Ce fichier contient vos clés d’API en clair : gardez la clé USB comme vous garderiez ces clés.</string>
     <string name="routing_privacy">Seuls la destination saisie, la position du véhicule et le profil de la route sortent de la voiture. Aucun trajet, aucune charge, aucune vitesse, aucun rapport de diagnostic ni identifiant n’est transmis. La clé est stockée chiffrée, n’est jamais journalisée et n’apparaît dans aucun export de diagnostic.</string>
     <string name="routing_refused_busy">Une requête est déjà en cours. Attendez sa réponse.</string>
     <string name="routing_refused_quota_minute">Trop de requêtes en peu de temps. Réessayez dans %1$s s.</string>

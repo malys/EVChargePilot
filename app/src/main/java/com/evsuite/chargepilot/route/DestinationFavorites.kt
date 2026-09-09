@@ -11,8 +11,8 @@ import java.util.Locale
  * this head unit declaring a navigation intent, and EVTasker's own [com.evsuite.tasker.store]
  * package records the same finding — the SAIC map app publishes no provider and no intent for
  * its favourites, so there is nothing to read or write. This is EVChargePilot's own list, the
- * same shape EVTasker keeps one of, made portable by [RoutingConfigExport] and
- * [RoutingConfigImport]: one stick, one file, keys and destinations together.
+ * same shape EVTasker keeps one of, made portable by
+ * [com.evsuite.chargepilot.SettingsTransfer]: one stick, one file, every setting together.
  *
  * Plain preferences, unlike [RoutingCredentials]: a saved address is not a secret the way an
  * API key is. Stored as `label` -> "longitude,latitude", the coordinate order [OrsGeocode.Place]

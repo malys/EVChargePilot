@@ -152,27 +152,38 @@ fail closed and the dashboard explains why.
 The charging-stop screen needs a routing service, and **no key ships inside the APK** — a
 published APK is a zip, so a key in it is not a secret. Get a free key from
 [openrouteservice.org](https://openrouteservice.org/), then either type it under
-**Charging stop → Routing key**, or drop a text file on a USB stick and use **Import from USB**:
+**Charging stop → Routing key**, or drop `evchargepilot-settings.json` on a USB stick and use
+**Import from USB**:
 
-```
-# EVChargePilot routing
-ors_api_key  = your-key-here
-ors_base_url = https://api.heigit.org
+```json
+{
+  "format": "evchargepilot-settings",
+  "version": 1,
+  "routing": {
+    "ors_api_key": "your-key-here",
+    "ors_base_url": "https://api.heigit.org"
+  }
+}
 ```
 
 Import browses the stick — pick the volume, walk into folders, tap the file. The file may have
-any name; it is read by its contents, not by its name. `ors_base_url` is optional and exists
+any name; it is read by its contents, not by its name, and the `key = value` file earlier
+versions exported is still read, so a stick already in the glovebox keeps working. `ors_base_url` is optional and exists
 so a self-hosted instance works without a code change — it must be `https`, with no credentials
 and no query. The default is HeiGIT's own host: `api.openrouteservice.org` was deprecated on
 2026-04-28, cut to a tenth of its quota on 2026-08-27 and switches off on 2026-09-28, so a
 config file still naming it will stop working. The key is stored encrypted through the Android keystore, is never displayed
 again, never written to a log, and never included in a diagnostic export.
 
-**Export to USB** writes that same file back out, as `evchargepilot-routing.txt` on the first
-writable USB stick — for a second car, after a factory reset, or for the unstable channel, which
-keeps its own separate configuration. It is the one way the key leaves the car, it happens only
-when you ask for it while parked, and the file holds your keys in clear text: from then on the
-stick is the secret. The file says so in its own header.
+**Export to USB** writes every setting you own back out, as `evchargepilot-settings.json` on the
+USB folder you browse to — for a second car, after a factory reset, or for the unstable channel,
+which keeps its own separate configuration. One file carries the API keys and base URLs, your
+saved destinations, and your vehicle and battery figures, so setting a second car up is one
+import rather than four screens. Sections the file leaves out are left alone rather than reset,
+so importing a file that carries only a key does not blank a self-hosted base URL or a measured
+pack. It is the one way the keys leave the car, it happens only when you ask for it while
+parked, and the file holds them in clear text: from then on the stick is the secret. The file
+says so in its own `note` field.
 
 Free-tier allowances, as published by ORS: 2000 directions requests a day and 40 in any rolling
 60 seconds, counted from your first request rather than from midnight. The app counts its own
