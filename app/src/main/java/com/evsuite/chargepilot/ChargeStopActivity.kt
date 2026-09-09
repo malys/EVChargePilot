@@ -1012,34 +1012,39 @@ class ChargeStopActivity : AppCompatActivity() {
             // A route already running would read true whatever this tap does, so it is read
             // first: after that, `isMapNavigating` can no longer prove anything about us.
             val wasGuiding = SaicNavGuidance.isMapNavigating() == true
-            // `goTo` first — it is the command that drives, where the route handoff only drew.
-            val goTo = target.point?.let {
-                runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
-            } ?: false
-            val guided = goTo && !wasGuiding && carStartedGuiding()
-            val route = if (guided) false else target.destination?.let {
+            // The route handoff first, since the drive of 2026-09-09 16:34 settled which channel
+            // drives: `route taken=true guiding=true`, against `goTo taken=true guiding=false` on
+            // the same tap and on the tap before it. Telenav takes transaction 23 and does nothing
+            // with it. `goTo` stays below as the rung for a head unit that behaves otherwise —
+            // it costs nothing on a tap that already worked, because it is not reached.
+            val route = target.destination?.let {
                 runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
                     .getOrDefault(false)
             } ?: false
             val routeGuided = route && !wasGuiding && carStartedGuiding()
+            val goTo = if (routeGuided) false else target.point?.let {
+                runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
+            } ?: false
+            val guided = goTo && !wasGuiding && carStartedGuiding()
             // Every rung in one line, so a drive that ends with nothing happening still says
             // which rung refused rather than leaving the next build to guess again.
             ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
                 "channels: adapter=${SaicNavGuidance.isAvailable}, guiding before=$wasGuiding, " +
                     "goTo taken=$goTo guiding=$guided, route taken=$route guiding=$routeGuided"
             }
-            // A plan with a charging stop is two legs, because `goTo` carries one point: the car
-            // has been sent to the stop, and the destination follows when that leg is over. Armed
-            // only behind `goTo` — the route handoff carries the pathway itself, and chaining
-            // onto it would send a second destination over a route that already has one.
-            if (goTo) NavLegs.arm(target.legs) else NavLegs.disarm()
+            // A plan with a charging stop is two legs, and the chain hands the second one over
+            // when the first is done. Armed behind whichever channel the adapter took, `goTo` or
+            // the route: the route carries a pathway, but nothing on this car has yet shown that
+            // Telenav drives through it, and the chain is harmless if it does — guidance simply
+            // stays on to the end and the chain finishes without sending anything.
+            if (route || goTo) NavLegs.arm(target.legs) else NavLegs.disarm()
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 when {
                     guided || routeGuided -> guidanceRunning(target, viaRoute = routeGuided)
                     // Accepted, and the car cannot say what came of it because it was already
                     // guiding when the tap happened. Reported as asked, never as started.
-                    wasGuiding && (goTo || route) -> guidanceAsked(target, goTo)
+                    wasGuiding && (route || goTo) -> guidanceAsked(target, viaGoTo = goTo)
                     route -> sentAsRoute(target)
                     else -> sendAsPoint(target, uri)
                 }

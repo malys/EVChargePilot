@@ -14,9 +14,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   is written to disk: legs are place names and coordinates, and the followed-plan store on the
   other side of this trip deliberately keeps neither. A leg whose guidance never starts is
   abandoned rather than chained onto, so a refused handoff cannot send the car onward from a
-  charger it is still standing at.
+  charger it is still standing at, and a leg needs three consecutive readings of "not guiding"
+  before it counts as over. Every change of that flag after a handoff is now recorded, so the
+  next drive says whether it can be trusted for a whole route rather than leaving it assumed.
 
 ### Fixed
+
+- **The car is asked to drive there through the channel that drives.** The vehicle answered on
+  2026-09-09: `goTo taken=true guiding=false, route taken=true guiding=true`, and the navigation
+  app's own flag confirmed the second one. Telenav takes `IGeneralService` transaction 23 and does
+  nothing with it, and transaction 48 is what starts guidance. The tap now sends the route first
+  and keeps `goTo` and `geo:` as the rungs below, which cost nothing on a tap that works because
+  they are never reached. The leg chain sends through the same ladder in the same order.
 
 - **The button that starts the drive was below the fold, and the one the driver could see reopened
   the destination chooser.** On the vehicle the tap "did nothing at all and looped back to the

@@ -8,11 +8,11 @@ import com.evsuite.hardware.saic.SaicNavGuidance
 /**
  * The plan the car is currently being driven through, leg by leg.
  *
- * **Why the app holds this at all.** `goTo` is the one command on this head unit seen to start
- * guidance, and it carries a single point. A plan with a charging stop on the way is therefore
- * two handovers, not one: the stop while it is being driven to, then the destination once it has
- * been reached. [NavLegChain] decides *when*; this decides where the reading comes from and where
- * the command goes.
+ * **Why the app holds this at all.** A plan with a charging stop is a stop and then a destination,
+ * and nothing on this head unit has been seen to drive both from one handover. So it is two
+ * handovers: the stop while it is being driven to, then the destination once it has been reached.
+ * [NavLegChain] decides *when*; this decides where the reading comes from and where the command
+ * goes.
  *
  * **In memory, for the length of the drive.** Legs are place names and coordinates. Nothing here
  * touches a file: the followed-plan store on the other side of this trip deliberately keeps no
@@ -30,6 +30,21 @@ object NavLegs {
     @Volatile
     private var chain: NavLegChain? = null
 
+    /**
+     * Whether a handoff of ours is out there, chain or no chain.
+     *
+     * A trip with one leg arms no chain and still needs watching: the question the drive of
+     * 2026-09-09 left open is whether `isMapNavigating` stays true for a whole route handed over
+     * through `startNavFromEVRout`, when the adapter's remaining distance went to nothing seven
+     * minutes in and its notification listener heard nothing at all. If that flag is as shaky as
+     * its siblings the chain cannot be built on it, and one destination-only drive says so.
+     */
+    @Volatile
+    private var watching = false
+
+    /** The last flag reading, so only a change is written down rather than one line a minute. */
+    private var lastGuiding: Boolean? = null
+
     /** How many sampler ticks since the last chain reading. */
     private var samples = 0
 
@@ -42,6 +57,8 @@ object NavLegs {
      */
     fun arm(legs: List<NavigationHandoff.Poi>) {
         chain = if (legs.size >= 2) NavLegChain(legs) else null
+        watching = legs.isNotEmpty()
+        lastGuiding = null
         samples = 0
         // No name and no coordinate: this line leaves the car on a USB stick. A count of legs
         // is a fact about a plan's shape, not about where anyone is going.
@@ -54,6 +71,8 @@ object NavLegs {
     /** Forgets the chain. A new handoff replaces the old one rather than racing it. */
     fun disarm() {
         chain = null
+        watching = false
+        lastGuiding = null
         samples = 0
     }
 
@@ -63,12 +82,20 @@ object NavLegs {
      * Call from a worker thread. Cheap when nothing is armed: a volatile read and a return.
      */
     fun tick() {
-        val current = chain ?: return
+        if (!watching) return
         if (++samples < TICK_SAMPLES) return
         samples = 0
         // Null is "the adapter did not answer", which is not the same as "not guiding". Passing
         // it on as false would spend the chain's grace against a question that was never asked.
         val guiding = runCatching { SaicNavGuidance.isMapNavigating() }.getOrNull() ?: return
+        if (guiding != lastGuiding) {
+            lastGuiding = guiding
+            ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+                "after the handoff, isMapNavigating=$guiding" +
+                    (chain?.let { " (a chain is armed)" } ?: " (nothing to chain)")
+            }
+        }
+        val current = chain ?: return
         when (val step = current.tick(guiding)) {
             is NavLegChain.Step.Wait -> Unit
             is NavLegChain.Step.Send -> send(step)
@@ -83,12 +110,29 @@ object NavLegs {
         }
     }
 
+    /**
+     * Hands the next leg over through the same ladder the tap uses, in the same order.
+     *
+     * The route handoff first: on 2026-09-09 it is the channel that started guidance on this car,
+     * where `goTo` was accepted and ignored. A single point with an empty pathway is a route with
+     * one end, which is exactly what a leg is. `goTo` stays as the rung below for a head unit that
+     * behaves the other way round — this code runs unattended on a road, and a leg that goes
+     * nowhere strands the driver at a charger with no guidance onward.
+     */
     private fun send(step: NavLegChain.Step.Send) {
-        val sent = runCatching { SaicNavGuidance.goTo(step.poi) }.getOrDefault(false)
-        AppLogger.i(TAG, "leg ${step.number}/${step.count} handed over; accepted=$sent")
+        val route = runCatching {
+            SaicNavGuidance.startNavFromEvRoute(step.poi, emptyList())
+        }.getOrDefault(false)
+        val goTo = if (route) false else runCatching {
+            SaicNavGuidance.goTo(step.poi)
+        }.getOrDefault(false)
+        AppLogger.i(
+            TAG,
+            "leg ${step.number}/${step.count} handed over; route=$route goTo=$goTo",
+        )
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
-            "leg ${step.number} of ${step.count} handed over on arrival at the previous one, " +
-                "adapter accepted=$sent"
+            "leg ${step.number} of ${step.count} handed over on arrival at the previous one: " +
+                "route taken=$route, goTo taken=$goTo"
         }
     }
 
