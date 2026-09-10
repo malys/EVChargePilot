@@ -62,18 +62,28 @@ object MapApps {
             .setComponent(component)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (runCatching { context.startActivity(addressed) }.isSuccess) return Outcome.MAP_ONLY
-        // MAIN/HOME rather than a bare component: it is what the vendor launcher sends, and the
-        // navigation app treats it as "come to the foreground" instead of starting a second copy
-        // of itself on top of a running guidance session.
-        val toForeground = Intent(Intent.ACTION_MAIN)
+        return if (toForeground(context)) Outcome.MAP_ONLY else Outcome.NONE
+    }
+
+    /**
+     * Brings the installed map to the front, carrying nothing.
+     *
+     * For the destination the adapter has already taken: `startNavFromEVRout` and `goTo` hand the
+     * route over on the binder and raise no window, so the drive of 2026-09-10 came back with the
+     * route accepted, guidance running at forty seconds and MG4 Navigator never on screen. This
+     * is the one call that puts it there.
+     *
+     * MAIN/HOME rather than a bare component: it is what the vendor launcher sends, and the
+     * navigation app treats it as "come to the foreground" instead of starting a second copy of
+     * itself on top of a running guidance session.
+     */
+    fun toForeground(context: Context): Boolean {
+        val component = installedComponent(context) ?: return false
+        val intent = Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_HOME)
             .setComponent(component)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return if (runCatching { context.startActivity(toForeground) }.isSuccess) {
-            Outcome.MAP_ONLY
-        } else {
-            Outcome.NONE
-        }
+        return runCatching { context.startActivity(intent) }.isSuccess
     }
 
     /** The map package this car actually has, for the Q9 probe line. A package name, never a place. */

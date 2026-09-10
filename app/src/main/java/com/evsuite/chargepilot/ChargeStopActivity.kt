@@ -1053,10 +1053,16 @@ class ChargeStopActivity : AppCompatActivity() {
                 runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
                     .getOrDefault(false)
             } ?: false
+            // Raised before the wait, not after it: the adapter drives guidance on the binder
+            // and leaves the screen on this app, so the destination went over and the driver
+            // watched a page that says *Transmission…*. The map comes up now and the polling
+            // below only settles what the message will say.
+            if (route) MapApps.toForeground(this)
             val routeGuided = route && !wasGuiding && carStartedGuiding()
             val goTo = if (routeGuided) false else target.point?.let {
                 runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
+            if (goTo && !route) MapApps.toForeground(this)
             val guided = goTo && !wasGuiding && carStartedGuiding()
             // Every rung in one line, so a drive that ends with nothing happening still says
             // which rung refused rather than leaving the next build to guess again.
@@ -1333,10 +1339,14 @@ class ChargeStopActivity : AppCompatActivity() {
 
         /**
          * How long to let the navigation app route a destination before calling a channel dead.
-         * Four seconds is longer than a head unit needs to plan a road it already has offline,
-         * and short enough that trying both channels leaves a parked driver waiting eight.
+         *
+         * Four seconds was measured against a road the head unit already had offline, and the
+         * bundle of 2026-09-10 caught it short: the route was taken at thirty-four seconds and
+         * `isMapNavigating` only turned true at forty, so a channel that worked was recorded as
+         * refused and the second one was tried on top of it. Eight covers the six that were
+         * seen, and the wait is a worker thread — the screen is not blocked on it.
          */
-        const val GUIDANCE_POLLS = 8
+        const val GUIDANCE_POLLS = 16
         const val GUIDANCE_POLL_MS = 500L
     }
 }
