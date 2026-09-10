@@ -262,6 +262,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="destination_title">Destination</string>
     <string name="destination_prompt">Type where you are going, or take one you have saved.</string>
     <string name="charge_stop_action_destination">Choose a destination</string>
+    <string name="charge_stop_action_destination_chosen">Change destination \u2014 %1$s</string>
     <string name="charge_stop_favorites_title">Favourites</string>
     <string name="charge_stop_favorites_hint">Tap to choose it. Long-press a result on the left to save it, long-press a favourite to remove it.</string>
     <string name="charge_stop_favorites_empty">No favourites saved yet. Long-press a result on the left to save one.</string>
@@ -372,6 +373,7 @@ Spending %6$s %% per km</string>
          stop cannot be pinned by its endpoint. -->
     <string name="charge_stop_navigate">Navigate to this</string>
     <string name="charge_stop_navigate_stop">Sends the charging stop to the car\u2019s navigation. It picks its own road, so drive it and this plan describes the same trip; go another way and the figures above stop being about it. Set the final destination again after charging.</string>
+    <string name="charge_stop_navigate_unplanned">No plan came back, so only the destination is sent. The car picks its own road and nothing on this screen describes it.</string>
     <string name="charge_stop_navigate_destination">Sends the destination to the car\u2019s navigation. It picks its own road, so the figures above describe this plan, not necessarily what the car will do.</string>
     <string name="charge_stop_navigate_none">Nothing on this head unit accepted a destination. The route stays here; enter it in the car\u2019s navigation yourself.</string>
     <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>

@@ -117,7 +117,8 @@ class ChargeStopActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val place = DestinationActivity.place(result.data) ?: return@registerForActivityResult
-        binding.chooseDestinationAction.text = place.label
+        binding.chooseDestinationAction.text =
+            getString(R.string.charge_stop_action_destination_chosen, place.label)
         route(place)
     }
 
@@ -210,7 +211,8 @@ class ChargeStopActivity : AppCompatActivity() {
         // on the dashboard, and the plan for that destination is what opens. The chooser stays
         // in the top bar, so a second destination does not mean going back first.
         DestinationActivity.place(intent)?.let { place ->
-            binding.chooseDestinationAction.text = place.label
+            binding.chooseDestinationAction.text =
+                getString(R.string.charge_stop_action_destination_chosen, place.label)
             route(place)
         }
     }
@@ -602,8 +604,7 @@ class ChargeStopActivity : AppCompatActivity() {
             binding.chargerSource.visibility = View.GONE
             binding.routeWhatIf.visibility = View.GONE
             binding.routeChoices.visibility = View.GONE
-            binding.navigateBar.visibility = View.GONE
-            handoff = null
+            renderUnplannedHandoff(place)
             return
         }
         binding.chargeStopPlan.visibility = View.VISIBLE
@@ -843,6 +844,36 @@ class ChargeStopActivity : AppCompatActivity() {
             ChargeStopPlan.Reason.BAND_TOO_WIDE -> R.string.charge_stop_refused_band
         }
     )
+
+    /**
+     * The hand-off a route that never came back still owes the driver.
+     *
+     * Without a route this screen hid the navigate bar, which left exactly one enabled control on
+     * it: the chooser, whose label is the place that was just chosen. A driver reads a button
+     * carrying their destination as the way to go there, taps it, and the chooser reopens — the
+     * loop reported from the car on 2026-09-10, and the same misread the pinned bar was built for
+     * on 2026-09-09. Hiding the only way out of a screen is what made a failed route look like a
+     * broken application.
+     *
+     * It also took back what the fallback of 2026-09-05 promised. A destination that cannot be
+     * planned is still a destination the map can open at, and the map opening is worth more to
+     * someone parked than an explanation of why the routing service said no.
+     *
+     * The destination is all there is to send: no route means no stop to pin and no leg to
+     * follow, so [followed] is cleared rather than left holding a plan for an earlier trip, and
+     * the note says the car is on its own instead of the button implying a plan behind it.
+     */
+    private fun renderUnplannedHandoff(place: OrsGeocode.Place) {
+        val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
+        handoff = Handoff(
+            place.latitude, place.longitude, place.label, toStop = false,
+            point = destination, destination = destination, pathway = emptyList(),
+            legs = listOfNotNull(destination),
+        )
+        followed = null
+        binding.navigateBar.visibility = View.VISIBLE
+        binding.navigateNote.setText(R.string.charge_stop_navigate_unplanned)
+    }
 
     /**
      * Offers to hand the plan to the car's navigation, and says what that hand-off cannot do.
