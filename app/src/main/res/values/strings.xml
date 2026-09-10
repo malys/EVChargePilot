@@ -305,7 +305,6 @@ Spending %6$s %% per km</string>
     <string name="vehicle_hint_reserve">Reserve to keep on arrival (%%)</string>
     <string name="vehicle_helper_reserve">Charge the plan refuses to spend. Leave empty for %1$s %%.</string>
     <string name="vehicle_action_reset">Reset to defaults</string>
-    <string name="vehicle_status">In force: %1$s kWh usable when new · %2$s %% health · chargers from %3$s kW · %4$s %% reserve.</string>
     <string name="vehicle_status_default">These are the defaults, not your figures.</string>
     <string name="vehicle_status_custom">These are your figures.</string>
     <string name="vehicle_saved">Saved. The charge-stop screen uses these from its next search.</string>
@@ -314,7 +313,7 @@ Spending %6$s %% per km</string>
     <string name="vehicle_refused_health">Health refused: it must be a number between 50 and 110 %%.</string>
     <string name="vehicle_refused_min_power">Minimum power refused: it must be a number between 3 and 400 kW.</string>
     <string name="vehicle_refused_reserve">Reserve refused: it must be a number between 0 and 40 %%.</string>
-    <string name="vehicle_assumptions">The defaults are an MG4 Long Range specification sheet — a figure describing the model, not this car — with the pack assumed intact because nothing in this app has measured its age. Capacity and health only convert the route\'s climb into charge; the rest of the forecast comes from what you have actually spent per kilometre.</string>
+    <string name="vehicle_assumptions">The defaults are an MG4 Long Range specification sheet — the model, not this car. Capacity and health only convert the route\'s climb into charge; the rest of the forecast comes from what you have actually spent per kilometre.</string>
     <string name="routing_title">Routing key</string>
     <string name="routing_hint_key">OpenRouteService API key</string>
     <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>
@@ -329,11 +328,10 @@ Spending %6$s %% per km</string>
     <string name="routing_speed_unavailable">Configuration is refused until vehicle speed is readable.</string>
     <string name="routing_saved">Key saved. It is stored encrypted and never shown again.</string>
     <string name="routing_cleared">Key removed from this car.</string>
-    <string name="routing_key_missing">Enter a key, or import one from a USB stick.</string>
     <string name="routing_base_url_refused">Address refused: %1$s. It must be https, with no credentials and no query.</string>
     <string name="browser_up">⬆ Up one level</string>
     <string name="browser_use_folder">Save here</string>
-    <string name="routing_privacy">Only the destination you type, the car’s position and the road profile ever leave the car. No trip, charge, speed, diagnostic bundle or identifier is sent anywhere. The key is stored encrypted, never written to a log and never included in a diagnostic export.</string>
+    <string name="routing_privacy">Only the destination, the car\'s position and the road profile leave the car. The keys are stored encrypted, never logged and never included in a diagnostic export.</string>
     <string name="routing_refused_busy">A request is already in flight. Wait for it.</string>
     <string name="routing_refused_quota_minute">Too many requests just now. Try again in %1$s s.</string>
     <string name="routing_refused_quota_day">Today’s routing allowance is spent. It rolls 24 h after the first request.</string>
@@ -424,13 +422,9 @@ Spending %6$s %% per km</string>
     <string name="about_close">Close</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_intro">Everything this app is configured with, on one page. Each entry opens its own sheet; the vehicle is never written to.</string>
-    <string name="settings_vehicle_hint">Usable capacity, battery health, charge reserve and the minimum power a stop must offer.</string>
-    <string name="settings_routing_hint">The routing and charger service keys, their addresses and saved destinations.</string>
-    <string name="settings_transfer_hint">Every setting this app holds — keys, addresses, saved destinations and vehicle figures — as one file on a USB stick, so a second car is one import.</string>
     <string name="settings_transfer_ready">Parked. Import reads the file back; export writes it, keys in clear text.</string>
-    <string name="settings_action_import">Import from USB</string>
-    <string name="settings_action_export">Export to USB</string>
+    <string name="settings_action_import">Import USB</string>
+    <string name="settings_action_export">Export USB</string>
     <string name="settings_import_pick">Choose USB storage</string>
     <string name="settings_import_none">No USB stick found. Put the evchargepilot-settings.json file this app exports on one.</string>
     <string name="settings_import_done">Settings imported from %1$s.</string>

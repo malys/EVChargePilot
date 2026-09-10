@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  THESIS: everything this app is configured with, in one place a driver can find twice.
+  THESIS: everything this app is configured with, on the page itself, saved by one button.
   OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
-  STORY: say what this page holds, then one card per subject, each naming what it decides.
-  FIRST VIEWPORT: the navigation bar and all three cards; nothing here scrolls out of reach.
-  FORM: parked configuration index; the sheets it opens keep their own Back action.
+  STORY: one status line, then the vehicle's figures and the keys; the USB file is a bar action.
+  FIRST VIEWPORT: the navigation bar with import and export, the status and the vehicle figures; Save is pinned and never scrolls.
+  FORM: parked configuration page; it used to be an index of two sheets, which was two windows for one subject.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -22,6 +23,29 @@
         android:paddingEnd="@dimen/spacing_lg">
 
         <include layout="@layout/view_primary_navigation" />
+
+        <!-- The USB file is the whole page's, not one section's, so it sits beside the tabs
+             rather than in a card of its own: a card holding two buttons and a paragraph was a
+             fourth subject on a page that has three. The bar has the room the tabs leave. -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settingsImportAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="270dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/settings_action_import" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settingsExportAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="270dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:text="@string/settings_action_export" />
     </LinearLayout>
 
     <ScrollView
@@ -37,11 +61,17 @@
             android:orientation="vertical"
             android:padding="@dimen/spacing_lg">
 
+            <!-- One line for the whole page. The three subjects used to be three sheets with a
+                 status each, which said the car was moving three times over. -->
             <TextView
+                android:id="@+id/settingsStatus"
                 android:layout_width="1400dp"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_intro"
-                android:textAppearance="@style/Text.EV.Secondary" />
+                android:accessibilityLiveRegion="polite"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body" />
 
             <LinearLayout
                 android:layout_width="1400dp"
@@ -54,91 +84,227 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_vehicle_hint"
-                    android:textAppearance="@style/Text.EV.Secondary" />
+                    android:text="@string/vehicle_title"
+                    android:textAppearance="@style/Text.EV.Title" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/vehicleSettingsAction"
-                    style="@style/Widget.EVChargePilot.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/vehicle_title" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_lg">
-
+                <!-- Whose figures these are. The values themselves are in the fields below, so
+                     repeating them in prose was a second copy that could disagree. -->
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_routing_hint"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/routingSettingsAction"
-                    style="@style/Widget.EVChargePilot.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/routing_title" />
-            </LinearLayout>
-
-            <!-- The transfer file carries keys, addresses, destinations and vehicle figures: it
-                 is the whole app's configuration, so it is this page's action and not one of the
-                 sheets'. It used to be offered from the routing key screen and the destination
-                 screen at once, which was two doors to one file. -->
-            <LinearLayout
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_lg">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_transfer_hint"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-
-                <TextView
-                    android:id="@+id/settingsTransferStatus"
+                    android:id="@+id/vehicleWhose"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:accessibilityLiveRegion="polite"
-                    android:textAppearance="@style/Text.EV.Body" />
+                    android:textAppearance="@style/Text.EV.Secondary" />
 
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/capacityLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_md"
-                    android:orientation="horizontal">
+                    android:hint="@string/vehicle_hint_capacity"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/settingsImportAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/touch_target"
-                        android:layout_weight="1"
-                        android:text="@string/settings_action_import" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/capacityInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/settingsExportAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/touch_target"
-                        android:layout_marginStart="@dimen/spacing_md"
-                        android:layout_weight="1"
-                        android:text="@string/settings_action_export" />
-                </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/healthLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/vehicle_hint_health"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/healthInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/minPowerLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/vehicle_hint_min_power"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/minPowerInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/reserveLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/vehicle_hint_reserve"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/reserveInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/vehicleResetAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/vehicle_action_reset" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/vehicle_assumptions"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_lg">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/routing_title"
+                    android:textAppearance="@style/Text.EV.Title" />
+
+                <!-- The one thing the fields cannot show: a stored key is never displayed back,
+                     so whether there is one has to be said. -->
+                <TextView
+                    android:id="@+id/routingState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/routingKeyLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/routing_hint_key"
+                    app:endIconContentDescription="@string/routing_desc_toggle_key"
+                    app:endIconMinSize="@dimen/touch_target"
+                    app:endIconMode="password_toggle"
+                    app:helperText="@string/routing_helper_key"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/routingKeyInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/chargerKeyLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/routing_hint_charger_key"
+                    app:endIconContentDescription="@string/routing_desc_toggle_key"
+                    app:endIconMinSize="@dimen/touch_target"
+                    app:endIconMode="password_toggle"
+                    app:helperText="@string/routing_helper_charger_key"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/chargerKeyInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/routingBaseUrlLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:hint="@string/routing_hint_base_url"
+                    app:helperText="@string/routing_helper_base_url"
+                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/routingBaseUrlInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textUri"
+                        android:singleLine="true"
+                        android:textSize="@dimen/text_body" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/routingClearAction"
+                    style="@style/Widget.EVChargePilot.Button.Danger"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/routing_action_clear" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/routing_privacy"
+                    android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <!-- One Save for the page, pinned. Two sheets meant two Save buttons, each below its own
+         fold and each reachable only through a button that opened a window. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_topbar"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_md">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settingsSaveAction"
+            style="@style/Widget.EVChargePilot.Button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/routing_action_save" />
+    </LinearLayout>
 </LinearLayout>

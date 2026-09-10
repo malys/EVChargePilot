@@ -300,7 +300,6 @@ Consommation %6$s %% par km</string>
     <string name="vehicle_hint_reserve">Réserve à conserver à l\'arrivée (%%)</string>
     <string name="vehicle_helper_reserve">Charge que le calcul refuse de dépenser. Vide pour %1$s %%.</string>
     <string name="vehicle_action_reset">Valeurs par défaut</string>
-    <string name="vehicle_status">En vigueur : %1$s kWh utiles à neuf · %2$s %% de santé · bornes à partir de %3$s kW · %4$s %% de réserve.</string>
     <string name="vehicle_status_default">Ce sont les valeurs par défaut, pas les vôtres.</string>
     <string name="vehicle_status_custom">Ce sont vos valeurs.</string>
     <string name="vehicle_saved">Enregistré. L\'écran d\'arrêt recharge les utilise dès la prochaine recherche.</string>
@@ -309,7 +308,7 @@ Consommation %6$s %% par km</string>
     <string name="vehicle_refused_health">Santé refusée : elle doit être un nombre entre 50 et 110 %%.</string>
     <string name="vehicle_refused_min_power">Puissance minimale refusée : elle doit être un nombre entre 3 et 400 kW.</string>
     <string name="vehicle_refused_reserve">Réserve refusée : elle doit être un nombre entre 0 et 40 %%.</string>
-    <string name="vehicle_assumptions">Les valeurs par défaut viennent d\'une fiche technique de MG4 Long Range — un chiffre qui décrit le modèle, pas cette voiture — avec une batterie supposée intacte, car rien dans cette application n\'a mesuré son vieillissement. Capacité et santé ne servent qu\'à convertir le dénivelé du trajet en charge ; le reste de la prévision vient de ce que vous avez réellement dépensé au kilomètre.</string>
+    <string name="vehicle_assumptions">Les valeurs par défaut viennent d\'une fiche technique de MG4 Long Range — le modèle, pas cette voiture. Capacité et santé ne servent qu\'à convertir le dénivelé du trajet en charge ; le reste de la prévision vient de ce que vous avez réellement dépensé au kilomètre.</string>
     <string name="routing_title">Clé de routage</string>
     <string name="routing_hint_key">Clé d’API OpenRouteService</string>
     <string name="routing_helper_key">Votre propre clé, obtenue sur openrouteservice.org. Aucune n’est livrée dans l’application.</string>
@@ -324,11 +323,10 @@ Consommation %6$s %% par km</string>
     <string name="routing_speed_unavailable">La configuration est refusée tant que la vitesse du véhicule est illisible.</string>
     <string name="routing_saved">Clé enregistrée. Elle est stockée chiffrée et n’est plus jamais affichée.</string>
     <string name="routing_cleared">Clé supprimée de ce véhicule.</string>
-    <string name="routing_key_missing">Saisissez une clé, ou importez-la depuis une clé USB.</string>
     <string name="routing_base_url_refused">Adresse refusée : %1$s. Elle doit être en https, sans identifiants ni paramètres.</string>
     <string name="browser_up">⬆ Dossier parent</string>
     <string name="browser_use_folder">Enregistrer ici</string>
-    <string name="routing_privacy">Seuls la destination saisie, la position du véhicule et le profil de la route sortent de la voiture. Aucun trajet, aucune charge, aucune vitesse, aucun rapport de diagnostic ni identifiant n’est transmis. La clé est stockée chiffrée, n’est jamais journalisée et n’apparaît dans aucun export de diagnostic.</string>
+    <string name="routing_privacy">Seuls la destination, la position du véhicule et le profil de la route sortent de la voiture. Les clés sont stockées chiffrées, jamais journalisées et jamais incluses dans un export de diagnostic.</string>
     <string name="routing_refused_busy">Une requête est déjà en cours. Attendez sa réponse.</string>
     <string name="routing_refused_quota_minute">Trop de requêtes en peu de temps. Réessayez dans %1$s s.</string>
     <string name="routing_refused_quota_day">Le quota de routage du jour est épuisé. Il se renouvelle 24 h après la première requête.</string>
@@ -416,13 +414,9 @@ Consommation %6$s %% par km</string>
     <string name="about_close">Fermer</string>
 
     <string name="settings_title">Configuration</string>
-    <string name="settings_intro">Tous les réglages de l’application sur une page. Chaque entrée ouvre sa propre fiche ; le véhicule n’est jamais modifié.</string>
-    <string name="settings_vehicle_hint">Capacité utile, santé de la batterie, réserve de charge et puissance minimale attendue d’un arrêt.</string>
-    <string name="settings_routing_hint">Les clés des services d’itinéraire et de bornes, leurs adresses et les destinations enregistrées.</string>
-    <string name="settings_transfer_hint">Tous les réglages de l’application — clés, adresses, destinations enregistrées et caractéristiques du véhicule — dans un seul fichier sur clé USB : un second véhicule se configure en un import.</string>
     <string name="settings_transfer_ready">À l’arrêt. L’import relit le fichier ; l’export l’écrit, avec les clés en clair.</string>
-    <string name="settings_action_import">Importer depuis USB</string>
-    <string name="settings_action_export">Exporter vers USB</string>
+    <string name="settings_action_import">Importer USB</string>
+    <string name="settings_action_export">Exporter USB</string>
     <string name="settings_import_pick">Choisir le stockage USB</string>
     <string name="settings_import_none">Aucune clé USB trouvée. Placez-y le fichier evchargepilot-settings.json exporté par cette application.</string>
     <string name="settings_import_done">Paramètres importés depuis %1$s.</string>
