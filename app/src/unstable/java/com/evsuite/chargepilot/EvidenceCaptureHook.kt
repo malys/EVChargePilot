@@ -3,6 +3,7 @@ package com.evsuite.chargepilot
 import android.app.Activity
 import android.content.Context
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.probe.RuntimeInterfaceProbe
 import java.io.File
 
 /** Unstable channel: the capture screen exists and is reachable from the dashboard. */
@@ -28,6 +29,11 @@ object EvidenceCaptureHook {
         ValidationProbe.arm(context)
         NavGuidanceRecorder.start(context)
         SignalEvidenceRecorder.start(context)
+        // Binding both hubs is asynchronous, and a survey run before they come up reads every
+        // interface as absent — the one false negative this exercise cannot afford, because it
+        // looks exactly like a head unit that does not publish them. Bound at startup, the
+        // survey on the export path is reading services that have been up for the session.
+        RuntimeInterfaceProbe.connect(context)
     }
 
     /**
@@ -43,6 +49,7 @@ object EvidenceCaptureHook {
         ValidationProbe.arm(context)
         NavGuidanceRecorder.start(context)
         SignalEvidenceRecorder.start(context)
+        RuntimeInterfaceProbe.connect(context)
         val firmware = FirmwareInfo.getGeneration().name
         val store = EvidenceCaptureFileStore(
             File(context.filesDir, NavGuidanceRecorder.EVIDENCE_DIRECTORY)
@@ -63,6 +70,13 @@ object EvidenceCaptureHook {
         store.write(
             ValidationProbe.artifact(context).toBoundedJson(),
             ValidationArtifact.KIND,
+            firmware,
+        )
+        // Last, because it is the slowest: the survey sweeps service codes and hub names, and
+        // each miss costs a binder round trip. Nothing above it waits on that.
+        store.write(
+            RuntimeInterfaceArtifact.of().toJson(),
+            RuntimeInterfaceArtifact.KIND,
             firmware,
         )
     }
