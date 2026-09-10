@@ -11,4 +11,6 @@
     <dimen name="chargepilot_text_soc">56sp</dimen>
     <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
     <dimen name="chargepilot_swipe_threshold">96dp</dimen>
+    <!-- Fixed across primary screens so destination tabs never shift under the driver's hand. -->
+    <dimen name="chargepilot_primary_title_width">300dp</dimen>
 </resources>
