@@ -140,15 +140,15 @@
 
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_duration" />
-                        <TextView android:id="@+id/detailDuration" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailDuration" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_distance" />
-                        <TextView android:id="@+id/detailDistance" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailDistance" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
-                        <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -160,15 +160,15 @@
 
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc_change" />
-                        <TextView android:id="@+id/detailSoc" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailSoc" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_energy_used" />
-                        <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_regenerated" />
-                        <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.TripValue" />
+                        <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
                 </LinearLayout>
 
