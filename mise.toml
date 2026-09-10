@@ -134,7 +134,8 @@ description = "Start the API 33 Automotive emulator"
 run = '''
 set -e
 "$ANDROID_HOME/emulator/emulator" -avd "$EMU_CAR_AVD" \
-  -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim &
+  -skin "${EMU_WIDTH}x${EMU_HEIGHT}" -gpu swiftshader_indirect \
+  -no-snapshot-load -no-snapshot-save -no-boot-anim &
 ADB="$ANDROID_HOME/platform-tools/adb"
 "$ADB" wait-for-device
 for attempt in $(seq 1 120); do
@@ -152,7 +153,8 @@ description = "Start the API 28 1920x1080 panel emulator"
 run = '''
 set -e
 "$ANDROID_HOME/emulator/emulator" -avd "$EMU_SCREEN_AVD" \
-  -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim &
+  -skin "${EMU_WIDTH}x${EMU_HEIGHT}" -gpu swiftshader_indirect \
+  -no-snapshot-load -no-snapshot-save -no-boot-anim &
 ADB="$ANDROID_HOME/platform-tools/adb"
 "$ADB" wait-for-device
 for attempt in $(seq 1 120); do
