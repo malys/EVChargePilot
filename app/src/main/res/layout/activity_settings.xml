@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  THESIS: everything this app is configured with, on the page itself, saved by one button.
+  THESIS: everything this app is configured with, side by side, in one viewport, saved by one button.
   OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or motion.
-  STORY: one status line, then the vehicle's figures and the keys; the USB file is a bar action.
-  FIRST VIEWPORT: the navigation bar with import and export, the status and the vehicle figures; Save is pinned and never scrolls.
-  FORM: parked configuration page; it used to be an index of two sheets, which was two windows for one subject.
+  STORY: one status line, then the vehicle's figures and the keys as two columns; the USB file is a bar action.
+  FIRST VIEWPORT: all of it. The page fits the panel with the keyboard down; the scroll exists only for when it is up.
+  FORM: parked configuration page; it used to be an index of two sheets, then one column too long to read at a glance.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -25,8 +25,7 @@
         <include layout="@layout/view_primary_navigation" />
 
         <!-- The USB file is the whole page's, not one section's, so it sits beside the tabs
-             rather than in a card of its own: a card holding two buttons and a paragraph was a
-             fourth subject on a page that has three. The bar has the room the tabs leave. -->
+             rather than in a card of its own. The bar has the room the tabs leave. -->
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
@@ -48,6 +47,11 @@
             android:text="@string/settings_action_export" />
     </LinearLayout>
 
+    <!-- Reported from the car on 2026-09-10: the page is too long for a vehicle panel. It was one
+         column of seven fields and two paragraphs, which is a scroll on a screen a driver reads
+         in glances. Two columns, no prose and helper lines cut to the figure they name put the
+         whole configuration in one viewport. The scroll stays only for when the soft keyboard is
+         up and takes the bottom half of the panel with it. -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -57,233 +61,227 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="@dimen/spacing_lg">
+            android:padding="@dimen/spacing_md">
 
-            <!-- One line for the whole page. The three subjects used to be three sheets with a
-                 status each, which said the car was moving three times over. -->
+            <!-- One line for the whole page. The subjects used to be sheets with a status each,
+                 which said the car was moving three times over. -->
             <TextView
                 android:id="@+id/settingsStatus"
-                android:layout_width="1400dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:accessibilityLiveRegion="polite"
                 android:background="@drawable/bg_card"
                 android:gravity="center"
-                android:padding="@dimen/spacing_lg"
+                android:padding="@dimen/spacing_md"
                 android:textAppearance="@style/Text.EV.Body" />
 
             <LinearLayout
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_lg">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/vehicle_title"
-                    android:textAppearance="@style/Text.EV.Title" />
-
-                <!-- Whose figures these are. The values themselves are in the fields below, so
-                     repeating them in prose was a second copy that could disagree. -->
-                <TextView
-                    android:id="@+id/vehicleWhose"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/capacityLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/vehicle_hint_capacity"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/capacityInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/healthLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/vehicle_hint_health"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/healthInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/minPowerLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/vehicle_hint_min_power"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/minPowerInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/reserveLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/vehicle_hint_reserve"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/reserveInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/vehicleResetAction"
-                    style="@style/Widget.EV.Button.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/vehicle_action_reset" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/vehicle_assumptions"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="1400dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_lg">
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/routing_title"
-                    android:textAppearance="@style/Text.EV.Title" />
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
 
-                <!-- The one thing the fields cannot show: a stored key is never displayed back,
-                     so whether there is one has to be said. -->
-                <TextView
-                    android:id="@+id/routingState"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/routingKeyLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/routing_hint_key"
-                    app:endIconContentDescription="@string/routing_desc_toggle_key"
-                    app:endIconMinSize="@dimen/touch_target"
-                    app:endIconMode="password_toggle"
-                    app:helperText="@string/routing_helper_key"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/routingKeyInput"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:text="@string/vehicle_title"
+                        android:textAppearance="@style/Text.EV.Title" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/chargerKeyLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/routing_hint_charger_key"
-                    app:endIconContentDescription="@string/routing_desc_toggle_key"
-                    app:endIconMinSize="@dimen/touch_target"
-                    app:endIconMode="password_toggle"
-                    app:helperText="@string/routing_helper_charger_key"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/chargerKeyInput"
+                    <!-- Whose figures these are, and — when they are not the driver's — what the
+                         defaults describe. It is the one honest claim the four fields cannot make
+                         themselves, and it replaces the paragraph that used to make it below. -->
+                    <TextView
+                        android:id="@+id/vehicleWhose"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:textAppearance="@style/Text.EV.Secondary" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/routingBaseUrlLayout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:hint="@string/routing_hint_base_url"
-                    app:helperText="@string/routing_helper_base_url"
-                    app:helperTextTextAppearance="@style/Text.EV.Secondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/routingBaseUrlInput"
+                    <!-- Empty means the documented default, which is what `VehicleSettings.parse`
+                         has always done with a cleared box. So a field the driver has not
+                         overridden starts empty and its helper names the default, and the Reset
+                         button that said the same thing is gone: clearing the boxes is the reset. -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/capacityLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textUri"
-                        android:singleLine="true"
-                        android:textSize="@dimen/text_body" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/vehicle_hint_capacity"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/routingClearAction"
-                    style="@style/Widget.EVChargePilot.Button.Danger"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/touch_target"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/routing_action_clear" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/capacityInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/healthLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/vehicle_hint_health"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/healthInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/minPowerLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/vehicle_hint_min_power"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/minPowerInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/reserveLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/vehicle_hint_reserve"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/reserveInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:text="@string/routing_privacy"
-                    android:textAppearance="@style/Text.EV.Secondary" />
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/routing_title"
+                        android:textAppearance="@style/Text.EV.Title" />
+
+                    <!-- The one thing the fields cannot show: a stored key is never displayed
+                         back, so whether there is one has to be said. -->
+                    <TextView
+                        android:id="@+id/routingState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/routingKeyLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/routing_hint_key"
+                        app:endIconContentDescription="@string/routing_desc_toggle_key"
+                        app:endIconMinSize="@dimen/touch_target"
+                        app:endIconMode="password_toggle"
+                        app:helperText="@string/routing_helper_key"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/routingKeyInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/chargerKeyLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/routing_hint_charger_key"
+                        app:endIconContentDescription="@string/routing_desc_toggle_key"
+                        app:endIconMinSize="@dimen/touch_target"
+                        app:endIconMode="password_toggle"
+                        app:helperText="@string/routing_helper_charger_key"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/chargerKeyInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/routingBaseUrlLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/routing_hint_base_url"
+                        app:helperText="@string/routing_helper_base_url"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/routingBaseUrlInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textUri"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- The page's one destructive action, and the only one that cannot be an
+                         empty field: a stored key is never shown, so clearing the box cannot
+                         mean "remove the key I cannot see". -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/routingClearAction"
+                        style="@style/Widget.EVChargePilot.Button.Danger"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/touch_target"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:text="@string/routing_action_clear" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

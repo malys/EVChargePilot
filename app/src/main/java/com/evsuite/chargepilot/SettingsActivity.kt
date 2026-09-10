@@ -9,6 +9,8 @@ import android.os.IBinder
 import com.evsuite.chargepilot.databinding.ActivitySettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingCredentials
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -24,6 +26,13 @@ import java.util.concurrent.Executors
  * The USB transfer is in the top bar rather than in a card. The file carries keys, addresses,
  * saved destinations and the car's own figures at once, so it belongs to no single section — and
  * a card holding two buttons and a paragraph read as a fourth subject on a page that has three.
+ *
+ * Two columns, and four actions on the whole page: import, export, Save, and one Remove. It was
+ * reported from the car on 2026-09-10 as too long and too many buttons for a vehicle panel, and
+ * the Reset beside the Remove was two words for the same idea. A vehicle field left at its
+ * default is now simply empty, which is what `VehicleSettings.parse` has always read a cleared
+ * box as, so clearing the boxes and saving *is* the reset and the button for it is gone. The
+ * keys keep theirs: a stored key is never shown, so an empty box cannot mean "remove it".
  *
  * Parked only, like every typing screen in this app: four numeric fields and three text ones is a
  * keyboard, and a keyboard at 130 km/h is not a setting, it is a hazard. Browsing a stick is a
@@ -80,7 +89,6 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.settingsSaveAction.setOnClickListener { save() }
-        binding.vehicleResetAction.setOnClickListener { resetVehicle() }
         binding.routingClearAction.setOnClickListener { clearKeys() }
         binding.settingsImportAction.setOnClickListener { import() }
         binding.settingsExportAction.setOnClickListener { export() }
@@ -147,7 +155,10 @@ class SettingsActivity : PrimaryNavigationActivity() {
             return
         }
         val values = (parsed as VehicleSettings.Parsed.Ok).values
-        VehicleSettings.write(this, values)
+        // Four empty boxes is the reset. `parse` has always read a cleared box as the documented
+        // default, so clearing the preferences rather than writing the defaults into them keeps
+        // "the driver never set this" distinguishable from "the driver typed the default".
+        if (values.isDefault) VehicleSettings.clear(this) else VehicleSettings.write(this, values)
         fill(values)
 
         val key = binding.routingKeyInput.text?.toString()?.trim().orEmpty()
@@ -179,12 +190,6 @@ class SettingsActivity : PrimaryNavigationActivity() {
         )
     }
 
-    private fun resetVehicle() {
-        VehicleSettings.clear(this)
-        fill(VehicleSettings.read(this))
-        announce(getString(R.string.vehicle_reset_done))
-    }
-
     private fun clearKeys() {
         RoutingCredentials.clear(this)
         binding.routingKeyInput.text?.clear()
@@ -193,30 +198,49 @@ class SettingsActivity : PrimaryNavigationActivity() {
         announce(getString(R.string.routing_cleared))
     }
 
+    /**
+     * The four boxes, holding what the driver overrode and nothing else.
+     *
+     * A field left at its documented default starts empty, and its helper names that default.
+     * That is `VehicleSettings.parse`'s own rule — a cleared box has always meant the default —
+     * made visible, and it is why this page no longer carries a Reset button beside a Remove
+     * button: clearing the boxes and saving is the reset.
+     */
     private fun fill(values: VehicleSettings.Values) {
-        binding.capacityInput.setText(number(values.usableCapacityKwhWhenNew))
-        binding.healthInput.setText(number(values.stateOfHealthPercent))
-        binding.minPowerInput.setText(number(values.minChargerPowerKw))
-        binding.reserveInput.setText(number(values.reservePercent))
-        binding.capacityLayout.helperText = getString(
+        set(
+            binding.capacityLayout, binding.capacityInput,
+            values.usableCapacityKwhWhenNew, VehicleSettings.DEFAULT_CAPACITY_KWH,
             R.string.vehicle_helper_capacity,
-            number(VehicleSettings.DEFAULT_CAPACITY_KWH),
         )
-        binding.healthLayout.helperText = getString(
+        set(
+            binding.healthLayout, binding.healthInput,
+            values.stateOfHealthPercent, VehicleSettings.DEFAULT_HEALTH_PERCENT,
             R.string.vehicle_helper_health,
-            number(VehicleSettings.DEFAULT_HEALTH_PERCENT),
         )
-        binding.minPowerLayout.helperText = getString(
+        set(
+            binding.minPowerLayout, binding.minPowerInput,
+            values.minChargerPowerKw, VehicleSettings.DEFAULT_MIN_POWER_KW,
             R.string.vehicle_helper_min_power,
-            number(VehicleSettings.DEFAULT_MIN_POWER_KW),
         )
-        binding.reserveLayout.helperText = getString(
+        set(
+            binding.reserveLayout, binding.reserveInput,
+            values.reservePercent, VehicleSettings.DEFAULT_RESERVE_PERCENT,
             R.string.vehicle_helper_reserve,
-            number(VehicleSettings.DEFAULT_RESERVE_PERCENT),
         )
         binding.vehicleWhose.text = getString(
             if (values.isDefault) R.string.vehicle_status_default else R.string.vehicle_status_custom
         )
+    }
+
+    private fun set(
+        layout: TextInputLayout,
+        input: TextInputEditText,
+        value: Double,
+        default: Double,
+        helper: Int,
+    ) {
+        input.setText(if (value == default) "" else number(value))
+        layout.helperText = getString(helper, number(default))
     }
 
     /**
@@ -332,7 +356,6 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.chargerKeyLayout.isEnabled = parked
         binding.routingBaseUrlLayout.isEnabled = parked
         binding.settingsSaveAction.isEnabled = parked
-        binding.vehicleResetAction.isEnabled = parked
         binding.settingsImportAction.isEnabled = parked
         binding.settingsExportAction.isEnabled = parked
 

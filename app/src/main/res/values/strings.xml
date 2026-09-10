@@ -297,33 +297,30 @@ Spending %6$s %% per km</string>
     <string name="route_what_if_source">ESTIMATED · modelled from the planned route and the fitted consumption model, never measured. Times are the router’s, driven at the stated speed.</string>
     <string name="vehicle_title">Vehicle and reserve</string>
     <string name="vehicle_hint_capacity">Usable battery capacity when new (kWh)</string>
-    <string name="vehicle_helper_capacity">What the pack held new, from the specification. Leave empty for %1$s kWh.</string>
-    <string name="vehicle_hint_health">State of health (%%)</string>
-    <string name="vehicle_helper_health">What you believe is left of the pack. Nothing here measures it. Leave empty for %1$s %%.</string>
+    <string name="vehicle_helper_capacity">Empty = %1$s kWh.</string>
+    <string name="vehicle_hint_health">State of health (\u0025)</string>
+    <string name="vehicle_helper_health">Nothing here measures it. Empty = %1$s %%.</string>
     <string name="vehicle_hint_min_power">Minimum charger power (kW)</string>
-    <string name="vehicle_helper_min_power">Slower chargers are not offered as a stop on the way. Leave empty for %1$s kW.</string>
-    <string name="vehicle_hint_reserve">Reserve to keep on arrival (%%)</string>
-    <string name="vehicle_helper_reserve">Charge the plan refuses to spend. Leave empty for %1$s %%.</string>
-    <string name="vehicle_action_reset">Reset to defaults</string>
-    <string name="vehicle_status_default">These are the defaults, not your figures.</string>
+    <string name="vehicle_helper_min_power">Below this, a stop is an overnight. Empty = %1$s kW.</string>
+    <string name="vehicle_hint_reserve">Reserve to keep on arrival (\u0025)</string>
+    <string name="vehicle_helper_reserve">Charge the plan refuses to spend. Empty = %1$s %%.</string>
+    <string name="vehicle_status_default">Defaults: the MG4 Long Range model, not this car.</string>
     <string name="vehicle_status_custom">These are your figures.</string>
     <string name="vehicle_saved">Saved. The charge-stop screen uses these from its next search.</string>
-    <string name="vehicle_reset_done">Back to the documented defaults.</string>
     <string name="vehicle_refused_capacity">Capacity refused: it must be a number between 10 and 200 kWh.</string>
-    <string name="vehicle_refused_health">Health refused: it must be a number between 50 and 110 %%.</string>
+    <string name="vehicle_refused_health">Health refused: it must be a number between 50 and 110 \u0025.</string>
     <string name="vehicle_refused_min_power">Minimum power refused: it must be a number between 3 and 400 kW.</string>
-    <string name="vehicle_refused_reserve">Reserve refused: it must be a number between 0 and 40 %%.</string>
-    <string name="vehicle_assumptions">The defaults are an MG4 Long Range specification sheet — the model, not this car. Capacity and health only convert the route\'s climb into charge; the rest of the forecast comes from what you have actually spent per kilometre.</string>
+    <string name="vehicle_refused_reserve">Reserve refused: it must be a number between 0 and 40 \u0025.</string>
     <string name="routing_title">Routing key</string>
     <string name="routing_hint_key">OpenRouteService API key</string>
-    <string name="routing_helper_key">Your own key, from openrouteservice.org. None is shipped in the app.</string>
+    <string name="routing_helper_key">Your own key, from openrouteservice.org. Stored encrypted, never logged.</string>
     <string name="routing_desc_toggle_key">Show or hide the key</string>
     <string name="routing_hint_base_url">Routing service (https)</string>
-    <string name="routing_helper_base_url">Leave as it is for HeiGIT’s hosted service, or point it at your own instance.</string>
+    <string name="routing_helper_base_url">Leave as it is for HeiGIT, or point it at your own instance.</string>
     <string name="routing_action_save">Save</string>
-    <string name="routing_action_clear">Remove</string>
+    <string name="routing_action_clear">Remove the keys</string>
     <string name="routing_configured">Configured · %1$s</string>
-    <string name="routing_absent">Not configured. Enter a key, or import one from a USB stick.</string>
+    <string name="routing_absent">No routing key.</string>
     <string name="routing_moving">Configuration is refused while the vehicle is moving.</string>
     <string name="routing_speed_unavailable">Configuration is refused until vehicle speed is readable.</string>
     <string name="routing_saved">Key saved. It is stored encrypted and never shown again.</string>
@@ -331,7 +328,6 @@ Spending %6$s %% per km</string>
     <string name="routing_base_url_refused">Address refused: %1$s. It must be https, with no credentials and no query.</string>
     <string name="browser_up">⬆ Up one level</string>
     <string name="browser_use_folder">Save here</string>
-    <string name="routing_privacy">Only the destination, the car\'s position and the road profile leave the car. The keys are stored encrypted, never logged and never included in a diagnostic export.</string>
     <string name="routing_refused_busy">A request is already in flight. Wait for it.</string>
     <string name="routing_refused_quota_minute">Too many requests just now. Try again in %1$s s.</string>
     <string name="routing_refused_quota_day">Today’s routing allowance is spent. It rolls 24 h after the first request.</string>
@@ -343,9 +339,9 @@ Spending %6$s %% per km</string>
 
     <!-- CP-048 charger dataset -->
     <string name="routing_hint_charger_key">Open Charge Map API key (optional)</string>
-    <string name="routing_helper_charger_key">A second free key, from openchargemap.org. Without it the plan says when to stop, not where.</string>
+    <string name="routing_helper_charger_key">A second free key, from openchargemap.org.</string>
     <string name="routing_charger_configured">Charger lookup configured.</string>
-    <string name="routing_charger_absent">No charger key: the plan will say when to stop, not where.</string>
+    <string name="routing_charger_absent">No charger key: when to stop, not where.</string>
     <string name="charge_stop_charger_searching">Looking for a charger on the way\u2026</string>
     <string name="charge_stop_charger_none">No usable charger found on that stretch of road. Charge before it.</string>
     <string name="charge_stop_charger_absent">Add an Open Charge Map key to be told where to stop.</string>

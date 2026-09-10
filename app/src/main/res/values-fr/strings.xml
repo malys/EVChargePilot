@@ -292,33 +292,30 @@ Consommation %6$s %% par km</string>
     <string name="route_what_if_source">ESTIMÉ · modélisé d’après l’itinéraire planifié et le modèle de consommation ajusté, jamais mesuré. Les temps sont ceux du routeur, parcourus à la vitesse indiquée.</string>
     <string name="vehicle_title">Véhicule et réserve</string>
     <string name="vehicle_hint_capacity">Capacité utile à neuf (kWh)</string>
-    <string name="vehicle_helper_capacity">Ce que la batterie contenait à neuf, d\'après la fiche technique. Vide pour %1$s kWh.</string>
-    <string name="vehicle_hint_health">État de santé (%%)</string>
-    <string name="vehicle_helper_health">Ce que vous estimez rester de la batterie. Rien ici ne le mesure. Vide pour %1$s %%.</string>
+    <string name="vehicle_helper_capacity">Vide = %1$s kWh.</string>
+    <string name="vehicle_hint_health">État de santé (\u0025)</string>
+    <string name="vehicle_helper_health">Rien ici ne le mesure. Vide = %1$s %%.</string>
     <string name="vehicle_hint_min_power">Puissance minimale de borne (kW)</string>
-    <string name="vehicle_helper_min_power">Les bornes plus lentes ne sont pas proposées comme arrêt en route. Vide pour %1$s kW.</string>
-    <string name="vehicle_hint_reserve">Réserve à conserver à l\'arrivée (%%)</string>
-    <string name="vehicle_helper_reserve">Charge que le calcul refuse de dépenser. Vide pour %1$s %%.</string>
-    <string name="vehicle_action_reset">Valeurs par défaut</string>
-    <string name="vehicle_status_default">Ce sont les valeurs par défaut, pas les vôtres.</string>
+    <string name="vehicle_helper_min_power">En dessous, un arrêt est une nuit. Vide = %1$s kW.</string>
+    <string name="vehicle_hint_reserve">Réserve à conserver à l\'arrivée (\u0025)</string>
+    <string name="vehicle_helper_reserve">Charge que le calcul refuse de dépenser. Vide = %1$s %%.</string>
+    <string name="vehicle_status_default">Valeurs par défaut : le modèle MG4 Long Range, pas cette voiture.</string>
     <string name="vehicle_status_custom">Ce sont vos valeurs.</string>
     <string name="vehicle_saved">Enregistré. L\'écran d\'arrêt recharge les utilise dès la prochaine recherche.</string>
-    <string name="vehicle_reset_done">Retour aux valeurs par défaut documentées.</string>
     <string name="vehicle_refused_capacity">Capacité refusée : elle doit être un nombre entre 10 et 200 kWh.</string>
-    <string name="vehicle_refused_health">Santé refusée : elle doit être un nombre entre 50 et 110 %%.</string>
+    <string name="vehicle_refused_health">Santé refusée : elle doit être un nombre entre 50 et 110 \u0025.</string>
     <string name="vehicle_refused_min_power">Puissance minimale refusée : elle doit être un nombre entre 3 et 400 kW.</string>
-    <string name="vehicle_refused_reserve">Réserve refusée : elle doit être un nombre entre 0 et 40 %%.</string>
-    <string name="vehicle_assumptions">Les valeurs par défaut viennent d\'une fiche technique de MG4 Long Range — le modèle, pas cette voiture. Capacité et santé ne servent qu\'à convertir le dénivelé du trajet en charge ; le reste de la prévision vient de ce que vous avez réellement dépensé au kilomètre.</string>
+    <string name="vehicle_refused_reserve">Réserve refusée : elle doit être un nombre entre 0 et 40 \u0025.</string>
     <string name="routing_title">Clé de routage</string>
     <string name="routing_hint_key">Clé d’API OpenRouteService</string>
-    <string name="routing_helper_key">Votre propre clé, obtenue sur openrouteservice.org. Aucune n’est livrée dans l’application.</string>
+    <string name="routing_helper_key">Votre propre clé, sur openrouteservice.org. Stockée chiffrée, jamais journalisée.</string>
     <string name="routing_desc_toggle_key">Afficher ou masquer la clé</string>
     <string name="routing_hint_base_url">Service de routage (https)</string>
-    <string name="routing_helper_base_url">Laissez tel quel pour le service hébergé par HeiGIT, ou pointez vers votre propre instance.</string>
+    <string name="routing_helper_base_url">Laissez tel quel pour HeiGIT, ou pointez vers votre instance.</string>
     <string name="routing_action_save">Enregistrer</string>
-    <string name="routing_action_clear">Supprimer</string>
+    <string name="routing_action_clear">Supprimer les clés</string>
     <string name="routing_configured">Configuré · %1$s</string>
-    <string name="routing_absent">Non configuré. Saisissez une clé ou importez-la depuis une clé USB.</string>
+    <string name="routing_absent">Aucune clé de routage.</string>
     <string name="routing_moving">La configuration est refusée pendant que le véhicule roule.</string>
     <string name="routing_speed_unavailable">La configuration est refusée tant que la vitesse du véhicule est illisible.</string>
     <string name="routing_saved">Clé enregistrée. Elle est stockée chiffrée et n’est plus jamais affichée.</string>
@@ -326,7 +323,6 @@ Consommation %6$s %% par km</string>
     <string name="routing_base_url_refused">Adresse refusée : %1$s. Elle doit être en https, sans identifiants ni paramètres.</string>
     <string name="browser_up">⬆ Dossier parent</string>
     <string name="browser_use_folder">Enregistrer ici</string>
-    <string name="routing_privacy">Seuls la destination, la position du véhicule et le profil de la route sortent de la voiture. Les clés sont stockées chiffrées, jamais journalisées et jamais incluses dans un export de diagnostic.</string>
     <string name="routing_refused_busy">Une requête est déjà en cours. Attendez sa réponse.</string>
     <string name="routing_refused_quota_minute">Trop de requêtes en peu de temps. Réessayez dans %1$s s.</string>
     <string name="routing_refused_quota_day">Le quota de routage du jour est épuisé. Il se renouvelle 24 h après la première requête.</string>
@@ -338,9 +334,9 @@ Consommation %6$s %% par km</string>
 
     <!-- CP-048 jeu de données des bornes -->
     <string name="routing_hint_charger_key">Clé d\u2019API Open Charge Map (facultative)</string>
-    <string name="routing_helper_charger_key">Une seconde clé gratuite, obtenue sur openchargemap.org. Sans elle, le plan dit quand s\u2019arrêter, pas où.</string>
+    <string name="routing_helper_charger_key">Une seconde clé gratuite, sur openchargemap.org.</string>
     <string name="routing_charger_configured">Recherche de bornes configurée.</string>
-    <string name="routing_charger_absent">Pas de clé bornes : le plan dira quand s\u2019arrêter, pas où.</string>
+    <string name="routing_charger_absent">Aucune clé bornes : quand s\u2019arrêter, pas où.</string>
     <string name="charge_stop_charger_searching">Recherche d\u2019une borne sur le trajet\u2026</string>
     <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
     <string name="charge_stop_charger_absent">Ajoutez une clé Open Charge Map pour savoir où vous arrêter.</string>
