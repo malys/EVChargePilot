@@ -368,6 +368,7 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_navigate">Navigate to this</string>
     <string name="charge_stop_navigate_stop">Sends the charging stop to the car\u2019s navigation. It picks its own road, so drive it and this plan describes the same trip; go another way and the figures above stop being about it. Set the final destination again after charging.</string>
     <string name="charge_stop_navigate_unplanned">No plan came back, so only the destination is sent. The car picks its own road and nothing on this screen describes it.</string>
+    <string name="charge_stop_navigate_planning">Only the destination is sent while the plan is still being worked out. The car picks its own road either way.</string>
     <string name="charge_stop_navigate_destination">Sends the destination to the car\u2019s navigation. It picks its own road, so the figures above describe this plan, not necessarily what the car will do.</string>
     <string name="charge_stop_navigate_none">Nothing on this head unit accepted a destination. The route stays here; enter it in the car\u2019s navigation yourself.</string>
     <string name="charge_stop_navigate_sent">Sent to the car\u2019s navigation.</string>

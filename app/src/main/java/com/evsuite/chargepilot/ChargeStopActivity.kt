@@ -213,6 +213,12 @@ class ChargeStopActivity : AppCompatActivity() {
         DestinationActivity.place(intent)?.let { place ->
             binding.chooseDestinationAction.text =
                 getString(R.string.charge_stop_action_destination_chosen, place.label)
+            // Before the route, not after it. A destination is already somewhere the map can
+            // open at, and every path in [route] that returns before a route comes back — no
+            // routing key, no fine grant, no fix — used to leave the screen with nothing to
+            // send and the chooser as its only enabled control. The route replaces this
+            // hand-off with the planned one as soon as there is one.
+            renderUnplannedHandoff(place, R.string.charge_stop_navigate_planning)
             route(place)
         }
     }
@@ -863,7 +869,10 @@ class ChargeStopActivity : AppCompatActivity() {
      * follow, so [followed] is cleared rather than left holding a plan for an earlier trip, and
      * the note says the car is on its own instead of the button implying a plan behind it.
      */
-    private fun renderUnplannedHandoff(place: OrsGeocode.Place) {
+    private fun renderUnplannedHandoff(
+        place: OrsGeocode.Place,
+        noteRes: Int = R.string.charge_stop_navigate_unplanned,
+    ) {
         val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
         handoff = Handoff(
             place.latitude, place.longitude, place.label, toStop = false,
@@ -871,8 +880,8 @@ class ChargeStopActivity : AppCompatActivity() {
             legs = listOfNotNull(destination),
         )
         followed = null
-        binding.navigateBar.visibility = View.VISIBLE
-        binding.navigateNote.setText(R.string.charge_stop_navigate_unplanned)
+        binding.navigateNote.visibility = View.VISIBLE
+        binding.navigateNote.setText(noteRes)
     }
 
     /**
@@ -926,7 +935,7 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         handoff = target
         followed = follow(plan, charger, route, rate, grade)
-        binding.navigateBar.visibility = View.VISIBLE
+        binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(
             if (target.toStop) R.string.charge_stop_navigate_stop
             else R.string.charge_stop_navigate_destination
@@ -1266,7 +1275,10 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         val usable = gate == ParkedDeletionGate.PARKED
         binding.chooseDestinationAction.isEnabled = usable
-        binding.navigateAction.isEnabled = usable
+        // Disabled, never hidden: the action stays where the driver last saw it, and a button
+        // that is on screen and grey says "not yet" where an absent one says "this screen has
+        // no way out of it".
+        binding.navigateAction.isEnabled = usable && handoff != null
 
         binding.chargeStopStatus.text = message ?: when (gate) {
             ParkedDeletionGate.MOVING -> getString(R.string.charge_stop_moving)

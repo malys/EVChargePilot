@@ -29,6 +29,25 @@
             android:text="@string/charge_stop_title"
             android:textAppearance="@style/Text.EV.Title" />
 
+        <!-- CP-056, moved into the top bar on 2026-09-11. The action that ends this screen sat
+             in a bar of its own below the scroller, shown only once a route came back. Every
+             path that returns before a route — no routing key, no fine grant, no fix — left the
+             screen with one enabled control, the chooser, whose label is the destination just
+             picked: the driver reads it as the way to go there, taps it, and the chooser
+             reopens. That is the loop reported from the car twice. It now lives in the bar that
+             is always on screen, carries no android:visibility of its own, and is disabled
+             rather than hidden when there is nowhere to send.
+
+             Its caveat rides below, in the scroller, and never becomes the button's own label,
+             because a driver reads a button as a promise and this one cannot make it. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/navigateAction"
+            style="@style/Widget.EVChargePilot.Button"
+            android:layout_width="360dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:text="@string/charge_stop_navigate" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/backAction"
             style="@style/Widget.EV.Button.Outlined"
@@ -68,6 +87,14 @@
                 android:layout_height="@dimen/touch_target"
                 android:layout_marginTop="@dimen/spacing_md"
                 android:text="@string/charge_stop_action_destination" />
+
+            <TextView
+                android:id="@+id/navigateNote"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:textAppearance="@style/Text.EV.Secondary"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/chargeStopPlan"
@@ -147,42 +174,4 @@
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
-
-    <!-- CP-056, moved out of the scroller on 2026-09-09. The action that ends this screen: the
-         plan stops being something the driver has to copy. It used to sit under seven cards,
-         which on this panel put it some four hundred dp below the fold: the driver saw a plan
-         and one button, and that button was the destination chooser. Tapping it reopened the
-         chooser, which is exactly what the car reported. An action a driver cannot see is an
-         action that does not exist, so it is pinned here and the cards scroll behind it.
-
-         Its caveat rides beside it and never becomes the button's own label, because a driver
-         reads a button as a promise and this one cannot make it. -->
-    <LinearLayout
-        android:id="@+id/navigateBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_topbar"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/spacing_lg"
-        android:paddingTop="@dimen/spacing_md"
-        android:paddingEnd="@dimen/spacing_lg"
-        android:paddingBottom="@dimen/spacing_md"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/navigateNote"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/spacing_lg"
-            android:textAppearance="@style/Text.EV.Secondary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/navigateAction"
-            style="@style/Widget.EVChargePilot.Button"
-            android:layout_width="700dp"
-            android:layout_height="@dimen/touch_target"
-            android:text="@string/charge_stop_navigate" />
-    </LinearLayout>
 </LinearLayout>
