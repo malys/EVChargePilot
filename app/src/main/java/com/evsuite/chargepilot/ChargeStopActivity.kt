@@ -402,7 +402,10 @@ class ChargeStopActivity : AppCompatActivity() {
                     // headline would announce a stop avoided on a route that never had one.
                 ) { saved ->
                     stop != null &&
-                        removesStop(socPercent, saved, it.distanceKm, effective, grade, settings)
+                        ChargeStopHandoff.removesStop(
+                            socPercent, saved, it.distanceKm, effective,
+                            settings.reservePercent, grade,
+                        )
                 }
             }
             val alternative = route?.let { best ->
@@ -450,34 +453,6 @@ class ChargeStopActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Would this much charge, freed by slowing down, remove the stop.
-     *
-     * The planner answers it rather than the what-if: the reserve, the band and the refusal
-     * rules live in one place, and a second implementation of them would drift.
-     */
-    private fun removesStop(
-        socPercent: Double?,
-        savedPercent: Double,
-        routeKm: Double,
-        rate: SocRate?,
-        grade: RouteGrade.Cost?,
-        settings: VehicleSettings.Values,
-    ): Boolean {
-        if (socPercent == null) return false
-        val freed = (socPercent + savedPercent).coerceAtMost(100.0)
-        return ChargeStopPlan.of(freed, routeKm, rate, settings.reservePercent, grade) is
-            ChargeStopPlan.Plan.NoStop
-    }
-
-    /**
-     * The last charger reachable before the reserve floor, on the worker thread that already
-     * has the route.
-     *
-     * Only the stretch of road where a stop could fall is sent — [OpenChargeMap.WINDOW_KM] of it
-     * — and never the trip. The charger service has no business knowing where the driver started
-     * or where they are going, and CP-048 is where that boundary is argued.
-     */
     /**
      * The same trip on roads that are not motorways, planned but not searched for chargers.
      *
@@ -527,6 +502,14 @@ class ChargeStopActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * The last charger reachable before the reserve floor, on the worker thread that already
+     * has the route.
+     *
+     * Only the stretch of road where a stop could fall is sent — [OpenChargeMap.WINDOW_KM] of it
+     * — and never the trip. The charger service has no business knowing where the driver started
+     * or where they are going, and CP-048 is where that boundary is argued.
+     */
     private fun findCharger(
         route: OrsDirections.Route,
         afterKm: Double,
@@ -873,12 +856,7 @@ class ChargeStopActivity : AppCompatActivity() {
         place: OrsGeocode.Place,
         noteRes: Int = R.string.charge_stop_navigate_unplanned,
     ) {
-        val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
-        handoff = Handoff(
-            place.latitude, place.longitude, place.label, toStop = false,
-            point = destination, destination = destination, pathway = emptyList(),
-            legs = listOfNotNull(destination),
-        )
+        handoff = ChargeStopHandoff.unplanned(place)
         followed = null
         binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(noteRes)
@@ -905,34 +883,10 @@ class ChargeStopActivity : AppCompatActivity() {
         rate: SocRate?,
         grade: RouteGrade.Cost?,
     ) {
-        val stop = (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }
         // The adapter takes the plan as it was planned: the destination, and the stop on the way
-        // to it. A point that fails validation drops out of the list rather than out of the plan —
-        // the geo: fallback below still has somewhere to go.
-        val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
-        val pathway = NavigationHandoff.pathway(
-            listOfNotNull(
-                stop?.let {
-                    NavigationHandoff.poi(it.charger.latitude, it.charger.longitude, it.charger.name)
-                }
-            )
-        )
-        // The stop first and the destination after it: that is the order they are driven in, and
-        // the order the chain hands them over in once each leg's guidance ends.
-        val legs = pathway + listOfNotNull(destination)
-        val target = if (stop != null) {
-            Handoff(
-                stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true,
-                point = pathway.firstOrNull(), destination = destination, pathway = pathway,
-                legs = legs,
-            )
-        } else {
-            Handoff(
-                place.latitude, place.longitude, place.label, toStop = false,
-                point = destination, destination = destination, pathway = pathway,
-                legs = listOfNotNull(destination),
-            )
-        }
+        // to it. Which of the two the single-point channels get is [ChargeStopHandoff]'s
+        // decision, tested there.
+        val target = ChargeStopHandoff.of(place, (plan as? ChargeStopPlan.Plan.Stop)?.let { charger })
         handoff = target
         followed = follow(plan, charger, route, rate, grade)
         binding.navigateNote.visibility = View.VISIBLE
@@ -1303,38 +1257,6 @@ class ChargeStopActivity : AppCompatActivity() {
     private data class MotorwayFree(
         val route: OrsDirections.Route,
         val plan: ChargeStopPlan.Plan,
-    )
-
-    /**
-     * What the button would send, held between the render that offered it and the tap.
-     *
-     * Three shapes of the same plan, because the car has three channels and each takes a
-     * different amount of it. [latitude], [longitude] and [label] are the single point a `geo:`
-     * URI can carry — the charging stop when there is one, since that is the leg the forecast is
-     * about. [point] is that same leg target validated for the adapter's `goTo`, the command that
-     * starts guidance. [destination] and [pathway] are the whole plan, for the route handoff,
-     * which has a waypoint list and therefore needs no such choice — and which, on the car, drew
-     * the route without ever driving it.
-     */
-    private data class Handoff(
-        val latitude: Double,
-        val longitude: Double,
-        val label: String?,
-        val toStop: Boolean,
-        val point: NavigationHandoff.Poi?,
-        val destination: NavigationHandoff.Poi?,
-        val pathway: List<NavigationHandoff.Poi>,
-        /**
-         * The trip in order, first leg first, for the chain that drives it one point at a time.
-         * The leg the tap sends is in it: the chain counts from the leg already handed over.
-         */
-        val legs: List<NavigationHandoff.Poi>,
-    )
-
-    private data class Found(
-        val charger: OpenChargeMap.Charger,
-        val alongKm: Double,
-        val arrivalPercent: Double?,
     )
 
     private companion object {

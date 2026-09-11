@@ -53,12 +53,18 @@ object DestinationFavorites {
 
     private fun format(place: OrsGeocode.Place) = "${place.longitude},${place.latitude}"
 
+    /**
+     * Through [RoutingConfig.place], the same gate every other door to a destination goes
+     * through. Reading is a trust boundary too: what [save] wrote was checked, but a preferences
+     * file survives a downgrade, a restore and a hand edit, and a pair of numbers that is not a
+     * place on Earth must not become a route origin because it was already on disk.
+     */
     private fun parse(label: String, value: String): OrsGeocode.Place? {
         val separator = value.indexOf(',')
         if (separator <= 0) return null
         val longitude = value.substring(0, separator).trim().toDoubleOrNull() ?: return null
         val latitude = value.substring(separator + 1).trim().toDoubleOrNull() ?: return null
-        return OrsGeocode.Place(label, longitude, latitude)
+        return RoutingConfig.place(label, longitude, latitude)
     }
 
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

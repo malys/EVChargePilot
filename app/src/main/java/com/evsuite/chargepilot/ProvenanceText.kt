@@ -18,6 +18,12 @@ internal const val PATTERN_DISTANCE = "%.1f km"
 internal const val PATTERN_ENERGY = "%.2f kWh"
 internal const val PATTERN_CONSUMPTION = "%.1f kWh/100 km"
 
+// The same two figures where a decimal would be a promise the reading cannot keep: a charge
+// forecast good to a tenth of a percent, a reach good to a hundred metres. Same units, one
+// digit fewer, and still declared here so a screen never spells a unit out on its own.
+internal const val PATTERN_SOC_WHOLE = "%.0f %%"
+internal const val PATTERN_DISTANCE_WHOLE = "%.0f km"
+
 /**
  * Draws a [Provenanced] value so its kind is visible without a legend.
  *

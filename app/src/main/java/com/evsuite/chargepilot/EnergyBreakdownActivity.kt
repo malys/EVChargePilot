@@ -140,7 +140,7 @@ class EnergyBreakdownActivity : AppCompatActivity() {
             binding.measuredRows,
             R.string.energy_breakdown_charge_distance,
             R.string.energy_breakdown_claim_derived_distance,
-            String.format(Locale.getDefault(), "%.1f km", value.distanceKm),
+            String.format(Locale.getDefault(), PATTERN_DISTANCE, value.distanceKm),
         )
         addRow(
             binding.measuredRows,
@@ -292,10 +292,10 @@ class EnergyBreakdownActivity : AppCompatActivity() {
     }
 
     private fun energy(value: Double): String =
-        String.format(Locale.getDefault(), "%.2f kWh", value)
+        String.format(Locale.getDefault(), PATTERN_ENERGY, value)
 
     private fun percent(value: Double): String =
-        String.format(Locale.getDefault(), "%.1f %%", value)
+        String.format(Locale.getDefault(), PATTERN_SOC, value)
 
     private fun chargeBand(value: ChargeEstimate): String = String.format(
         Locale.getDefault(),

@@ -81,13 +81,24 @@ object NavLegs {
      *
      * Call from a worker thread. Cheap when nothing is armed: a volatile read and a return.
      */
-    fun tick() {
+    fun tick() = tick(::readGuiding, ::send)
+
+    /**
+     * The same tick with its two vehicle calls handed in, so the cadence, the grace and the
+     * chaining can be driven from a JVM test. Both defaults are the real binder calls; nothing
+     * else is stubbed, because everything else here is the decision under test.
+     *
+     * The parameters are named apart from the private members they default to on purpose: a
+     * parameter of function type loses name resolution to a member function of the same name, so
+     * `send(step)` inside here would quietly go to the binder in a test that passed its own.
+     */
+    internal fun tick(guidingNow: () -> Boolean?, handOver: (NavLegChain.Step.Send) -> Unit) {
         if (!watching) return
         if (++samples < TICK_SAMPLES) return
         samples = 0
         // Null is "the adapter did not answer", which is not the same as "not guiding". Passing
         // it on as false would spend the chain's grace against a question that was never asked.
-        val guiding = runCatching { SaicNavGuidance.isMapNavigating() }.getOrNull() ?: return
+        val guiding = guidingNow() ?: return
         if (guiding != lastGuiding) {
             lastGuiding = guiding
             ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
@@ -98,7 +109,7 @@ object NavLegs {
         val current = chain ?: return
         when (val step = current.tick(guiding)) {
             is NavLegChain.Step.Wait -> Unit
-            is NavLegChain.Step.Send -> send(step)
+            is NavLegChain.Step.Send -> handOver(step)
             is NavLegChain.Step.Done -> {
                 chain = null
                 AppLogger.i(TAG, "leg chain finished; arrived=${step.arrived}")
@@ -119,6 +130,9 @@ object NavLegs {
      * behaves the other way round — this code runs unattended on a road, and a leg that goes
      * nowhere strands the driver at a charger with no guidance onward.
      */
+    private fun readGuiding(): Boolean? =
+        runCatching { SaicNavGuidance.isMapNavigating() }.getOrNull()
+
     private fun send(step: NavLegChain.Step.Send) {
         val route = runCatching {
             SaicNavGuidance.startNavFromEvRoute(step.poi, emptyList())

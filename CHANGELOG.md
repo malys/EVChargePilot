@@ -20,6 +20,37 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **The only socket, the leg chain and the USB fallback now have tests around them.** Three of the
+  app's decisions ran unpinned: `RoutingTransport`, which is the single HTTP entry point the whole
+  network argument rests on; `NavLegs`, which is the one thing here that asks the car to act with
+  nobody touching the screen; and `DiagnosticUsbStorage`'s write fallback, which already carried
+  an `internal` seam for exactly this and had never been called through it. The transport's cases
+  all sit in front of the socket — that is what makes them testable and it is also the claim worth
+  testing, that nothing reaches the wire unchecked — and the two that must spend the quota aim at
+  `https://127.0.0.1:1`, refused by the loopback stack without a DNS lookup or a packet leaving the
+  machine. `NavLegs` grew one seam to allow it: an `internal tick(guidingNow, handOver)` taking the
+  two binder calls as parameters, named apart from the private members they default to because a
+  parameter of function type loses name resolution to a member function of the same name and the
+  test's own sender would have been silently ignored. `PowerHistoryPolicy` and the handoff
+  assembly below are covered too. `ProvenanceText` and `DriftCompanion` are deliberately still
+  not: both are `Context`-bound, the arithmetic under them is EVHardware's and tested there, and
+  a Robolectric dependency is a larger thing to own than the two classes are worth.
+
+- **Which point the car is sent to is no longer assembled inside an activity.**
+  `ChargeStopHandoff` holds it — the geo:/`goTo` single point, the route channel's pathway and
+  destination, and the legs in the order they are driven. Nothing in it needed an `Activity`, and
+  the mistake it guards costs nothing to make and is invisible until someone arrives under their
+  reserve: send the destination where the charging stop was meant, and the car picks its own road
+  while every figure on the screen goes on describing a different trip. `removesStop` moved with
+  it and now takes the reserve rather than the whole settings object, since that is the only field
+  it read.
+
+- **The units are declared once.** `%.1f km`, `%.2f kWh` and `%.1f %%` were spelled out again in
+  four screens and the recording notification, next to the `PATTERN_*` constants that exist so the
+  dashboard and the diagnostics report print the same figure the same way. They all read the
+  constants now, and the two the arrival screen needed — a charge and a reach without a decimal —
+  are declared beside the others rather than inline.
+
 - **Every setting the driver owns now travels as one JSON file.** Import and export wrote
   `key = value` text carrying the two API keys, their base URLs and the saved destinations; the
   car's own figures — usable capacity when new, state of health, minimum charger power, reserve —
@@ -40,6 +71,46 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   vehicle preferences already applied for the four figures.
 
 ### Fixed
+
+- **A release APK is no longer built unsigned in silence.** With no keystore configured the
+  signing config simply did not exist and `assembleStableRelease` produced an APK that installs on
+  nothing and looks in the build output exactly like one that would. The keystore stays optional,
+  so debug builds, unit tests and lint still work on a machine that has none; only a release
+  assembly insists on it, and `-Pevsuite.allowUnsignedRelease=true` is the deliberate way to ask
+  for a bare APK.
+
+- **A saved destination is checked on the way out of storage, not only on the way in.**
+  `DestinationFavorites` validated coordinates when it wrote them and trusted them when it read
+  them back, so a preferences file that had been downgraded, restored or hand-edited could hand a
+  route origin a pair of numbers that is not a place on Earth. Reading now goes through
+  `RoutingConfig.place`, the same gate every other door to a destination already used.
+
+- **One charger record with a null field no longer empties the whole charger list.** Open Charge
+  Map returns members as explicit JSON nulls — `"OperatorInfo": null` on a community-added site,
+  `"StatusTypeID": null` on one whose status nobody has confirmed — and Gson answers those with
+  `JsonNull`, which throws on every typed accessor including the object cast. The parse caught
+  that around the whole response, so a single such site discarded every other charger in the
+  answer and the screen said there was nowhere to stop on a motorway lined with chargers. Each
+  record is now read behind accessors that treat a null member as absent, and a record that still
+  fails to parse is skipped on its own instead of taking the answer with it.
+
+- **The arrival screen no longer prints `0 min` for a time the car did not give.** The head unit
+  publishes the remaining distance and the remaining time as two separate signals and sometimes
+  sends only the first; the missing one was rendered as zero, which reads as "you have arrived" —
+  the one substitution this app promises never to make. It renders as `—` now, like every other
+  unavailable reading.
+
+- **A route no longer gives up on the GPS because the network provider went down.** Both
+  providers are subscribed for one fix and the first `onProviderDisabled` ended the request for
+  both, so on a head unit with no usable network provider a GPS fix that was still coming was
+  abandoned and the route refused for want of an origin. A provider going down now removes only
+  itself, and only the last one left ends the wait.
+
+- **The telemetry sampler cannot be started twice.** Automatic detection starts a trip from
+  inside the sampler thread while the binder callbacks arrive on the main one; both call the same
+  "start sampling if it is not running" check, which was unsynchronised. Two callers could each
+  find nothing running and schedule a reader, leaving the vehicle polled at 2 Hz with one handle
+  to cancel it by.
 
 - **The car is asked to drive there through the channel that drives.** The vehicle answered on
   2026-09-09: `goTo taken=true guiding=false, route taken=true guiding=true`, and the navigation

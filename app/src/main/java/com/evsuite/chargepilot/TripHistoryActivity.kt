@@ -424,9 +424,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         return String.format(Locale.getDefault(), "%d:%02d", totalMinutes / 60L, totalMinutes % 60L)
     }
 
-    private fun distance(value: Double): String = format("%.1f km", value)
-    private fun energy(value: Double): String = format("%.2f kWh", value)
-    private fun consumption(value: Double): String = format("%.1f kWh/100 km", value)
+    private fun distance(value: Double): String = format(PATTERN_DISTANCE, value)
+    private fun energy(value: Double): String = format(PATTERN_ENERGY, value)
+    private fun consumption(value: Double): String = format(PATTERN_CONSUMPTION, value)
     private fun format(pattern: String, value: Double): String =
         String.format(Locale.getDefault(), pattern, value)
 

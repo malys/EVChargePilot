@@ -77,6 +77,25 @@ kotlin {
     }
 }
 
+// An unsigned release APK is indistinguishable from a signed one in the build output and
+// installs on nothing. The keystore stays optional so that debug builds, unit tests and lint
+// all work on a machine that has none; only a release assembly insists on it, and
+// `-Pevsuite.allowUnsignedRelease=true` is the deliberate way to say a bare APK is wanted.
+if (android.signingConfigs.findByName("platform") == null) {
+    val allowUnsigned = project.findProperty("evsuite.allowUnsignedRelease") == "true"
+    tasks.matching { it.name.startsWith("assemble") && it.name.endsWith("Release") }
+        .configureEach {
+            doFirst {
+                if (!allowUnsigned) throw GradleException(
+                    "No signing keystore was found, so this release APK would be unsigned. " +
+                        "Set EV_KEYSTORE / EV_KEYSTORE_PASSWORD / EV_KEY_ALIAS / EV_KEY_PASSWORD, " +
+                        "or the matching evsuite.* Gradle properties. " +
+                        "Pass -Pevsuite.allowUnsignedRelease=true to build one anyway."
+                )
+            }
+        }
+}
+
 // Prints the unstable versionName so the unstable workflow can name the APK asset
 // numerically comparable ("EVChargePilot-unstable-0.2.0.42.apk"). The pre-release itself
 // is always tagged "unstable" and overwritten, so the asset name carries the version.
