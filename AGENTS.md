@@ -48,7 +48,12 @@ workspace MIT default. EVHardware remains separately licensed.
 
 ## Security
 
-- The stable manifest has no `INTERNET`, location, overlay, install or boot capability.
+- The stable manifest has no overlay, install or boot capability. `INTERNET` and
+  `ACCESS_FINE/COARSE_LOCATION` are declared for route planning only, under CP-043
+  (`analysis/CP-043_network_and_location.md`): one HTTP entry point (`RoutingTransport`),
+  `https` plus a single-host allowlist on the initial URL and every redirect hop, the key in a
+  header and never a query string, no key in the APK, and no telemetry, trip or identifier on
+  the wire. Any second socket or any widening of that payload is a security review, not a patch.
 - USB diagnostic export adds no storage permission: offer every mounted volume the app can
   already list *except* primary emulated storage, and fall back only to this app's directory on
   the same volume. Never require positive proof that a volume is removable — this head unit

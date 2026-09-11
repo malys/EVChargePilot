@@ -95,6 +95,41 @@ class OpenChargeMapTest {
     }
 
     @Test
+    fun `a record OCM left null does not take the rest of the answer with it`() {
+        // Every one of these members comes back as an explicit null on real, community-added
+        // sites. Gson answers each with JsonNull, which throws on the typed accessors.
+        val nulled = """
+            {
+              "AddressInfo": { "Title": "unattributed", "Latitude": 45.6, "Longitude": 4.1 },
+              "StatusTypeID": null,
+              "StatusType": null,
+              "OperatorInfo": null,
+              "DataProvider": null,
+              "Connections": [
+                {
+                  "ConnectionTypeID": 33,
+                  "ConnectionType": { "Title": "CCS (Type 2)" },
+                  "StatusTypeID": null,
+                  "PowerKW": null
+                }
+              ]
+            }
+        """.trimIndent()
+        val chargers = OpenChargeMap.parse("[$nulled,${poi("Aire de Montélimar", 33, 150.0)}]")
+        assertEquals(listOf("unattributed", "Aire de Montélimar"), chargers.map { it.name })
+        assertNull(chargers.first().powerKw)
+        assertNull(chargers.first().operator)
+        assertNull(chargers.first().operational)
+    }
+
+    @Test
+    fun `one unparseable record is skipped, not the whole answer`() {
+        val broken = """{"AddressInfo": 7, "Connections": []}"""
+        val chargers = OpenChargeMap.parse("[$broken,${poi("good", 33, 150.0)}]")
+        assertEquals(listOf("good"), chargers.map { it.name })
+    }
+
+    @Test
     fun `the query carries a stretch of road, a corridor and a cap — and no key`() {
         val window = listOf(
             OrsDirections.Point(4.0, 45.0, null),

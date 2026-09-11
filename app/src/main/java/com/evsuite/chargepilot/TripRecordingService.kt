@@ -255,6 +255,11 @@ class TripRecordingService : Service() {
         }
     }
 
+    // Reached from both threads — the binder callbacks arrive on the main one, and automatic
+    // detection starts a trip from inside `sample()` on the sampler's own. Unsynchronised, two
+    // callers could each find no task and schedule one, leaving the vehicle read at 2 Hz with
+    // one handle to cancel.
+    @Synchronized
     private fun ensureSampling() {
         if (samplingTask != null) return
         samplingTask = sampler.scheduleWithFixedDelay(::sample, 0L, 1L, TimeUnit.SECONDS)
@@ -298,6 +303,7 @@ class TripRecordingService : Service() {
     }
 
     /** No dashboard, recording, or automatic monitor: sampling has no consumer to keep. */
+    @Synchronized
     private fun stopWhenNobodyNeedsIt() {
         val automaticMonitorNeeded = automaticDetectionEnabled && !automaticMonitoringSuspended
         if (boundClients > 0 || EnergyTripSession.isRecording || automaticMonitorNeeded ||
@@ -375,7 +381,7 @@ class TripRecordingService : Service() {
         val recording = forceRecording || EnergyTripSession.isRecording
         val summary = EnergyTripSession.current(System.currentTimeMillis())
         val distance = summary?.distanceKm?.let {
-            String.format(Locale.getDefault(), "%.1f km", it)
+            String.format(Locale.getDefault(), PATTERN_DISTANCE, it)
         }
         val intent = Intent(this, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)

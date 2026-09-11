@@ -22,10 +22,21 @@ on the screen when it is done wrong.
 
 Its bounds, all of which are testable:
 
-- **Parked.** The parked gate is re-read at the tap, not trusted from the render that drew the
-  button. A navigation screen changing under someone at 110 km/h is the hazard.
-- **One tap, one destination.** Nothing hands over a destination on a timer, on a route arriving,
-  on a drift, or on anything but a press.
+- **Parked, for the tap.** The parked gate is re-read at the tap, not trusted from the render that
+  drew the button. A navigation screen changing under someone at 110 km/h is the hazard.
+- **One tap, one plan — but a plan with a charging stop is two handovers.** Nothing starts a
+  handover except a press. What a press may start is the *plan the driver read and accepted*: this
+  head unit has not been seen to drive a stop and a destination from one command, so `NavLegs`
+  holds the accepted plan's remaining leg in memory and sends it when the car's own guidance flag
+  reports the previous leg reached. No new destination can enter that chain, a chain is replaced
+  rather than raced by the next press, it is never written to disk, and a process restart drops
+  it. Nothing hands over on a drift, on a timer of its own, or on anything the driver did not
+  already accept.
+- **The chained leg is NOT speed-gated, and that is a known gap.** It fires on arrival, where the
+  car is stopping or stopped, but nothing reads `PERF_VEHICLE_SPEED` before it sends — unlike the
+  tap. Closing it means deciding what a handover refused at 3 km/h rolling into a charger should
+  do, which is a product decision and not a patch; until it is made, this is the one place in this
+  app where a vehicle-facing command can leave without a speed reading behind it.
 - **One method.** `IMapNotificationListener` carries `stopNav`, `goHome` and `setFastestRoute`.
   None of them is called anywhere in this tree, and registering on that interface — which would
   mean impersonating a navigation provider — is not done.

@@ -109,6 +109,10 @@ object LocationSource {
             ?: return callback(null)
         val main = Handler(Looper.getMainLooper())
         var delivered = false
+        // Which providers are still worth waiting for. GPS and network are subscribed together
+        // and either may go down on its own; giving up on the first one to do so abandoned a
+        // GPS fix that was still coming because the head unit has no network provider to speak of.
+        val waitingOn = PROVIDERS.toMutableSet()
         lateinit var listener: LocationListener
         fun finish(location: Location?) {
             if (delivered) return
@@ -124,12 +128,17 @@ object LocationSource {
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
 
             override fun onProviderEnabled(provider: String) = Unit
-            override fun onProviderDisabled(provider: String) = finish(null)
+
+            override fun onProviderDisabled(provider: String) {
+                waitingOn.remove(provider)
+                if (waitingOn.isEmpty()) finish(null)
+            }
         }
         val enabled = PROVIDERS.filter {
             runCatching { manager.isProviderEnabled(it) }.getOrDefault(false)
         }
         if (enabled.isEmpty()) return finish(null)
+        waitingOn.retainAll(enabled.toSet())
         runCatching {
             enabled.forEach { provider ->
                 manager.requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())

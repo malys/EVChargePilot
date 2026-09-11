@@ -33,9 +33,12 @@ Read-only live energy dashboard and local trip analyser for the SAIC MG4 head un
 
 ## Overview
 
-EVChargePilot is an offline EVSuite application for Android Automotive OS 9. It reads typed,
+EVChargePilot is an EVSuite application for Android Automotive OS 9. It reads typed,
 firmware-aware vehicle capabilities from EVHardware and renders unavailable readings as `—`.
-It does not write to the vehicle and does not contain network or update code.
+It does not write to the vehicle and contains no update code. Every dashboard, trip and
+diagnostic screen works with no network at all; the route planner is the one feature that
+uses one, with a key the driver supplies, and it carries a route and never vehicle data
+(see [SECURITY.md](SECURITY.md) and `analysis/CP-043_network_and_location.md`).
 
 ## Features
 
@@ -269,9 +272,12 @@ Release signing reads `EV_KEYSTORE`, `EV_KEYSTORE_PASSWORD`, `EV_KEY_ALIAS` and
 
 ## Security
 
-The application has no network, location, overlay, installer or vehicle-write capability.
-USB diagnostic export adds no broad storage permission and writes only after an explicit parked
-user selects a volume, which is never primary emulated storage.
+The application has no overlay, installer, boot or vehicle-write capability. Network and
+location are declared for route planning alone (CP-043): what leaves the car is an origin, a
+destination and a window of road, never telemetry, a trip or an identifier, over `https` to the
+single host the driver configured. USB diagnostic export adds no broad storage permission and
+writes only after an explicit parked user selects a volume, which is never primary emulated
+storage.
 Permission drift is blocked in CI. Report vulnerabilities according to [SECURITY.md](SECURITY.md).
 
 ## Contributing

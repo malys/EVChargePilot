@@ -107,37 +107,45 @@ object OpenChargeMap {
      * and because a connector filter sent to the server turns a wrong ID into an empty answer
      * that looks like an empty road.
      */
-    fun parse(json: String, minPowerKw: Double = 0.0): List<Charger> = runCatching {
-        val root = JsonParser.parseString(json) as? JsonArray ?: return emptyList()
-        root.mapNotNull { element -> (element as? JsonObject)?.let { charger(it, minPowerKw) } }
-    }.getOrDefault(emptyList())
+    fun parse(json: String, minPowerKw: Double = 0.0): List<Charger> {
+        val root = runCatching { JsonParser.parseString(json) as? JsonArray }.getOrNull()
+            ?: return emptyList()
+        // Per record, not per response. OCM leaves whole members explicitly null — an
+        // unattributed site carries `"OperatorInfo": null`, an unknown status carries
+        // `"StatusTypeID": null` — and Gson answers those with JsonNull, which throws on
+        // every typed accessor. One such site used to discard every charger in the answer,
+        // which reads on screen as an empty road.
+        return root.mapNotNull { element ->
+            runCatching { (element as? JsonObject)?.let { charger(it, minPowerKw) } }.getOrNull()
+        }
+    }
 
     private fun charger(poi: JsonObject, minPowerKw: Double): Charger? {
-        val address = poi.getAsJsonObject("AddressInfo") ?: return null
-        val longitude = address.get("Longitude")?.asDouble ?: return null
-        val latitude = address.get("Latitude")?.asDouble ?: return null
+        val address = obj(poi, "AddressInfo") ?: return null
+        val longitude = number(address, "Longitude") ?: return null
+        val latitude = number(address, "Latitude") ?: return null
         if (!longitude.isFinite() || !latitude.isFinite()) return null
         if (longitude !in -180.0..180.0 || latitude !in -90.0..90.0) return null
 
-        if (poi.get("StatusTypeID")?.asInt in UNUSABLE_STATUS) return null
+        if (integer(poi, "StatusTypeID") in UNUSABLE_STATUS) return null
 
-        val connections = poi.getAsJsonArray("Connections") ?: return null
+        val connections = array(poi, "Connections") ?: return null
         var bestPower: Double? = null
         val titles = LinkedHashSet<String>()
         for (element in connections) {
             val connection = element as? JsonObject ?: continue
-            val typeId = connection.get("ConnectionTypeID")?.asInt ?: continue
+            val typeId = integer(connection, "ConnectionTypeID") ?: continue
             if (typeId !in USABLE_CONNECTORS) continue
-            if (connection.get("StatusTypeID")?.asInt in UNUSABLE_STATUS) continue
-            val power = connection.get("PowerKW")?.takeIf { it.isJsonPrimitive }?.asDouble
-            if (power != null && power.isFinite() && (bestPower == null || power > bestPower!!)) {
+            if (integer(connection, "StatusTypeID") in UNUSABLE_STATUS) continue
+            val power = number(connection, "PowerKW")
+            if (power != null && power.isFinite() && (bestPower == null || power > bestPower)) {
                 bestPower = power
             }
-            connection.getAsJsonObject("ConnectionType")?.get("Title")
-                ?.takeIf { it.isJsonPrimitive }?.asString?.let { titles.add(it) }
+            obj(connection, "ConnectionType")?.let { string(it, "Title") }?.let { titles.add(it) }
         }
         if (titles.isEmpty()) return null
-        if (minPowerKw > 0.0 && (bestPower == null || bestPower!! < minPowerKw)) return null
+        val best = bestPower
+        if (minPowerKw > 0.0 && (best == null || best < minPowerKw)) return null
 
         return Charger(
             name = string(address, "Title") ?: return null,
@@ -145,22 +153,34 @@ object OpenChargeMap {
             latitude = latitude,
             powerKw = bestPower,
             connectors = titles.toList(),
-            operator = poi.getAsJsonObject("OperatorInfo")?.let { string(it, "Title") },
-            dataProvider = poi.getAsJsonObject("DataProvider")?.let { string(it, "Title") },
-            licence = poi.getAsJsonObject("DataProvider")
-                ?.getAsJsonObject("License")?.let { string(it, "Title") }
-                ?: poi.getAsJsonObject("DataProvider")?.let { string(it, "License") },
+            operator = obj(poi, "OperatorInfo")?.let { string(it, "Title") },
+            dataProvider = obj(poi, "DataProvider")?.let { string(it, "Title") },
+            licence = obj(poi, "DataProvider")?.let { provider ->
+                obj(provider, "License")?.let { string(it, "Title") } ?: string(provider, "License")
+            },
             // DateLastVerified is OCM's own multi-signal estimate of when this was last
             // confirmed; DateLastStatusUpdate is when anything about it moved. Either is a
             // better answer to "how old is this" than silence.
             verifiedAt = string(poi, "DateLastVerified") ?: string(poi, "DateLastStatusUpdate"),
-            operational = poi.getAsJsonObject("StatusType")
+            operational = obj(poi, "StatusType")
                 ?.get("IsOperational")?.takeIf { it.isJsonPrimitive }?.asBoolean,
         )
     }
 
     private fun string(owner: JsonObject, member: String): String? =
         owner.get(member)?.takeIf { it.isJsonPrimitive }?.asString?.takeIf { it.isNotBlank() }
+
+    // A member OCM left null is JsonNull, not a missing key, and every typed Gson accessor
+    // throws on it — `getAsJsonObject` casts and `asInt` refuses. Read through these instead.
+    private fun obj(owner: JsonObject, member: String): JsonObject? = owner.get(member) as? JsonObject
+
+    private fun array(owner: JsonObject, member: String): JsonArray? = owner.get(member) as? JsonArray
+
+    private fun number(owner: JsonObject, member: String): Double? =
+        runCatching { owner.get(member)?.takeIf { it.isJsonPrimitive }?.asDouble }.getOrNull()
+
+    private fun integer(owner: JsonObject, member: String): Int? =
+        runCatching { owner.get(member)?.takeIf { it.isJsonPrimitive }?.asInt }.getOrNull()
 
     private fun trim(value: Double): String =
         if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()

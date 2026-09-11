@@ -154,7 +154,7 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
     }
 
     private fun render(state: ViewState) {
-        val arrival = provenance.render(state.arrival, "%.0f %%")
+        val arrival = provenance.render(state.arrival, PATTERN_SOC_WHOLE)
         binding.arrivalValue.text = arrival
         binding.arrivalValue.contentDescription =
             provenance.describe(getString(R.string.arrival_label), state.arrival, arrival)
@@ -163,10 +163,13 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
             !state.routeKnown -> getString(R.string.arrival_no_route)
             state.ratePending -> getString(R.string.arrival_rate_loading)
             !state.arrival.isAvailable -> getString(R.string.arrival_refused)
+            // The head unit publishes a remaining time separately from a remaining distance and
+            // sometimes only the distance. An em dash says so; a `0` would read as "you are
+            // there", which is the one thing this app promises never to print.
             else -> getString(
                 R.string.arrival_route,
                 String.format(Locale.getDefault(), "%.1f", state.remainingKm ?: 0.0),
-                state.minutes ?: 0,
+                state.minutes?.toString() ?: getString(R.string.value_unavailable),
                 state.road.orEmpty(),
             )
         }
@@ -183,7 +186,7 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
                 ),
                 rate.sampleCount,
                 String.format(Locale.getDefault(), "%.3f", rate.percentPerKm),
-                provenance.render(state.reachKm, "%.0f km"),
+                provenance.render(state.reachKm, PATTERN_DISTANCE_WHOLE),
             )
         }
     }
