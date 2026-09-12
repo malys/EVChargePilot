@@ -3,6 +3,20 @@
      each energy property does on a given firmware generation; the stable manifest declares no
      such activity and the stable source set contains no such class. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Unstable channel only, and the stable manifest must never gain this line.
+         The update check downloads a newer unstable APK into the head unit's own
+         `Download` folder, which on this platform (API 28) is what writing there costs.
+         `maxSdkVersion` is 28 because from API 29 scoped storage refuses that write
+         whatever is granted, and an unrequestable permission in a manifest is noise.
+         It is a runtime permission, so it is asked for on the dashboard the tester
+         opens; a refusal is a supported state — the APK then goes to this app's own
+         `Download` directory on the same volume and the dialog names that path.
+         Nothing else in the app reads or writes shared storage. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
     <application>
         <activity
             android:name=".EvidenceCaptureActivity"

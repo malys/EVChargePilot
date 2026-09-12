@@ -12,6 +12,37 @@ leaves the device. What leaves it for a route is origin, destination and road pr
 when a charging stop is needed — a window of road around that stop. Never a trip, a charge level,
 an odometer, a speed, a climate state or an identifier.
 
+### The unstable channel's update check
+
+Unstable builds ask GitHub's rolling `unstable` pre-release at start whether a newer APK exists,
+download it, and say where it landed. They do not install it, and they cannot: this app declares
+no `REQUEST_INSTALL_PACKAGES`, runs under no system UID and calls no `pm install`. Installing the
+downloaded file is the driver's own tap in the head unit's package installer. **Stable builds
+contain none of this code** — no release URL, no socket to GitHub, nothing a preference could
+switch on.
+
+Every control fails closed:
+
+- **`https` and an exact-match host allowlist**, on the initial URL *and* on every redirect hop.
+  A `Location:` header is a remote instruction; an `https` → `http` downgrade or a hop to
+  `github.com.attacker.net` is a refusal, not a download.
+- **A size ceiling on the declared and on the transferred length.** A lying `Content-Length` and
+  a chunked body are the same attack — filling a car's storage — and both are cut.
+- **Same signing certificate as the running app, or the file is deleted.** The download lands in
+  app-private cache and only reaches shared storage after that proof. An unreadable archive is
+  the same answer as a mismatched one: refuse.
+- **The version comes from a remote asset name, so it never reaches a path unsanitised.**
+- **One storage permission, unstable only.** The verified APK is written to the head unit's
+  `Download` folder so the driver can find it, which on API 28 costs `WRITE_EXTERNAL_STORAGE`.
+  It is declared in `app/src/unstable/AndroidManifest.xml` and nowhere else, capped at
+  `maxSdkVersion=28` (from API 29 scoped storage refuses that write whatever is granted), and
+  requested at runtime from the dashboard — a permission that is never asked for is a permission
+  the app does not have. The grant is re-read at the moment of writing, never remembered. A
+  refusal is a supported state: the APK goes to this app's own `Download` directory on the same
+  volume instead, and the dialog names whichever path was used. One published APK is kept.
+  Nothing else in this app reads or writes shared storage; the USB diagnostic export still adds
+  no permission of its own.
+
 ### The one write: handing a destination to the car's navigation
 
 `ChargeStopActivity` can send an `ACTION_VIEW` intent with a `geo:` URI, which moves whichever

@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.evsuite.chargepilot.databinding.ActivityMainBinding
+import com.evsuite.chargepilot.update.UpdateHook
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.BatteryPowerEvidence
 import com.evsuite.hardware.CarPropertyEvidence
@@ -131,6 +132,9 @@ class MainActivity : PrimaryNavigationActivity() {
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
             TripRecordingService.monitorAutomaticTrips(this)
         }
+        // Unstable only, and nothing here waits on it: the check runs on its own thread and
+        // speaks only when a newer build is already downloaded. Stable contains no updater.
+        UpdateHook.checkInBackground(this)
     }
 
     /**

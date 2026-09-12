@@ -34,4 +34,7 @@
     <string name="validation_disarm">Disarm validation drive</string>
     <string name="validation_on">Validation mode on. Every open question records itself; export to USB when you are back.</string>
     <string name="validation_off">Validation mode off. Nothing is recorded until it is armed.</string>
+    <string name="update_title">Unstable build available</string>
+    <string name="update_ready">%1$s has been downloaded to:\n%2$s\n\nEVChargePilot cannot install it. Open it from the head unit’s file manager when the car is parked.</string>
+    <string name="update_close">OK</string>
 </resources>

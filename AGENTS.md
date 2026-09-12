@@ -58,6 +58,18 @@ workspace MIT default. EVHardware remains separately licensed.
   already list *except* primary emulated storage, and fall back only to this app's directory on
   the same volume. Never require positive proof that a volume is removable — this head unit
   cannot give it, and demanding it is why exports found nothing.
+- The unstable channel checks GitHub's rolling `unstable` pre-release at start and downloads a
+  newer APK (`app/src/unstable/.../update/`). It is the second HTTP entry point and stays inside
+  the same rules: `https` plus an exact-match host allowlist on the initial URL and every
+  redirect hop, a size ceiling on the declared and the transferred length, and the archive only
+  reaches shared storage after its signing certificate is proven identical to the running app's.
+  It installs nothing — no `REQUEST_INSTALL_PACKAGES`, no `pm install`, no system UID — and the
+  verified APK is written to the head unit's `Download` folder. That write is the one reason
+  this app declares `WRITE_EXTERNAL_STORAGE`, in the **unstable manifest only**, capped at
+  `maxSdkVersion=28` and requested at runtime from the dashboard; a refusal falls back to this
+  app's own `Download` directory on the same volume, the same shape the USB export uses, and the
+  dialog names whichever path was used. Stable declares neither the permission nor any of that
+  code. The USB diagnostic export still adds no storage permission and must not start.
 - Any new permission requires an allowlist change and a security review in the same commit.
 - Signing configuration comes only from environment variables or local Gradle properties.
 

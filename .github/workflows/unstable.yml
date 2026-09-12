@@ -1,8 +1,11 @@
 name: Unstable
 
 # Unstable / pre-release channel: one rolling pre-release rebuilt on every push to master.
-# Unlike EVSwipe and EVLauncher, these builds do NOT self-update — EVChargePilot has no
-# network capability at all, in any channel. Installing an unstable build is a manual tap.
+# These builds check this pre-release at start and download a newer APK for the tester, but
+# they install nothing: EVChargePilot declares no install capability in any channel, so the
+# archive lands in the download folder and installing it stays a manual tap. Stable contains
+# no updater code at all. The asset name below is the contract that check reads — the tag is
+# always "unstable", so the version has to live in the file name.
 on:
   push:
     branches: [master]

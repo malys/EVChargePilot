@@ -6,6 +6,32 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Unstable builds now tell you when a newer one exists.** A tester's only way to find out was
+  to go and look at the releases page. An unstable build now asks the rolling `unstable`
+  pre-release at start, downloads a newer APK into the download folder and names the file and the
+  folder on screen. It stops there on purpose: this app holds no install capability in any
+  channel, so the install stays a tap the driver makes in the head unit's own package installer,
+  parked. What it downloads is proven first — `https` and an exact-match host allowlist on the
+  initial URL and every redirect, a size ceiling on both the declared and the transferred length,
+  and the same signing certificate as the running app or the file is deleted rather than offered.
+  Writing into `Download` is the one reason an unstable build asks for storage access, and it
+  asks on the dashboard rather than assuming; say no and the APK lands in the app's own folder
+  instead, which the dialog then names. One APK is kept, and stable contains none of the code —
+  not the permission, not the release URL, not a line of the updater.
+
+- **A destination now suggests itself while you type.** Typing an address on this head unit's
+  keyboard was the slowest part of planning a trip, and it ended on a button: nothing happened
+  until the driver tapped **Search** with a finished address. Places now arrive on the way —
+  every pause in typing asks the geocoder's own type-ahead endpoint what the prefix might mean,
+  and the saved list beside it narrows at the same time to the favourites that match, matched
+  inside the car with accents folded away so a keyboard without an É still finds Écully. The
+  keyboard's own search key finishes the job; it said "search" all along and did nothing. The
+  restraint is the point: one request per pause rather than per keystroke, none under three
+  letters, none twice for the same text, and a slow answer to an older prefix is dropped rather
+  than shown over a newer one — a screen that suggests is a screen that spends a quota, and the
+  geocoding allowance is only assumed. Refusals are still announced; a quota that has run out
+  says so instead of looking like a place that does not exist.
+
 - **A plan with a charging stop is now driven all the way, one leg at a time.** The command that
   starts guidance on this head unit carries a single point, so the tap sends the charging stop and
   the destination used to be the driver's problem again. It no longer is: the trip is held in

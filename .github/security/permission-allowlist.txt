@@ -28,3 +28,10 @@ android.permission.ACCESS_COARSE_LOCATION
 # today. The foreground type mask stays derived from permissions held at runtime, never
 # from the manifest.
 android.permission.FOREGROUND_SERVICE_LOCATION
+# UNSTABLE CHANNEL ONLY (app/src/unstable/AndroidManifest.xml), maxSdkVersion 28.
+# The update check writes a signature-verified APK into the head unit's `Download` folder
+# so the tester can install it by hand; from API 29 scoped storage refuses that write
+# whatever is granted. Runtime request from the dashboard, refusal falls back to this app's
+# own `Download` directory. The stable manifest does not declare it and the stable APK
+# contains no updater code. See SECURITY.md.
+android.permission.WRITE_EXTERNAL_STORAGE
