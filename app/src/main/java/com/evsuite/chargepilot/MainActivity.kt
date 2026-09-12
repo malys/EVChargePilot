@@ -77,6 +77,10 @@ class MainActivity : PrimaryNavigationActivity() {
         outcome.filterValues { !it }.keys.forEach {
             AppLogger.w(TAG, "vehicle permission denied: $it")
         }
+        // An activity holds one permission request at a time; a second launched while this one
+        // is in flight is dropped by the framework. The unstable update check asks for storage
+        // access of its own, so it starts here, once this dialog has been answered.
+        UpdateHook.checkInBackground(this)
     }
 
     /**
@@ -132,9 +136,6 @@ class MainActivity : PrimaryNavigationActivity() {
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
             TripRecordingService.monitorAutomaticTrips(this)
         }
-        // Unstable only, and nothing here waits on it: the check runs on its own thread and
-        // speaks only when a newer build is already downloaded. Stable contains no updater.
-        UpdateHook.checkInBackground(this)
     }
 
     /**
@@ -146,7 +147,12 @@ class MainActivity : PrimaryNavigationActivity() {
         val missing = VehiclePermissions.missing {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
-        if (missing.isNotEmpty()) vehiclePermissions.launch(missing)
+        // Unstable only, and nothing waits on it: the check runs on its own thread and speaks
+        // only when a newer build is already downloaded. Stable contains no updater. It starts
+        // here when there is no vehicle dialog to collide with, and from that dialog's answer
+        // when there is.
+        if (missing.isEmpty()) UpdateHook.checkInBackground(this)
+        else vehiclePermissions.launch(missing)
     }
 
     /**

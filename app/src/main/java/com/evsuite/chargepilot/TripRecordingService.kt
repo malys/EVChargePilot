@@ -126,8 +126,12 @@ class TripRecordingService : Service() {
         return START_NOT_STICKY
     }
 
+    // Same lock as `ensureSampling`: the sampler's own thread can be starting a task while
+    // this runs, and cancelling the handle it has not yet published cancels nothing.
+    @Synchronized
     override fun onDestroy() {
         samplingTask?.cancel(false)
+        samplingTask = null
         sampler.shutdownNow()
         AppLogger.i(TAG, "service destroyed")
         super.onDestroy()

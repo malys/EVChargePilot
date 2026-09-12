@@ -98,6 +98,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The unstable update check no longer loses its storage question to the vehicle one.** Both were
+  asked from `onCreate`, and an activity holds one permission request at a time — the second was
+  dropped by the framework, so on the first launch of a fresh unstable install the driver was never
+  asked for the `Download` folder and the APK quietly landed in the app's own directory instead.
+  The update check now starts once the vehicle dialog has been answered, or straight away when
+  there is no vehicle dialog to collide with.
+
+- **The telemetry sampler's handle is cleared under the same lock that sets it.** `onDestroy`
+  cancelled `samplingTask` outside the lock `ensureSampling` takes, so a task the sampler's own
+  thread was in the middle of scheduling could be cancelled before it was published — which
+  cancels nothing.
+
 - **A release APK is no longer built unsigned in silence.** With no keystore configured the
   signing config simply did not exist and `assembleStableRelease` produced an APK that installs on
   nothing and looks in the build output exactly like one that would. The keystore stays optional,
