@@ -46,6 +46,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **"Y aller" now hands the car the road, not only the end of it.** The handoff named where the
+  driver was going and left the car to plan its own way there, so every figure on the screen — the
+  arrival charge, the stop, the drift the companion watches — described a route the car might not
+  be driving. The route handoff's pathway list now carries the shape of the planned road as well:
+  points sampled evenly *by distance along the route* rather than by vertex, since a router puts
+  hundreds of vertices in a roundabout and four in a motorway straight, each named by the road the
+  router said it sits on, with the charging stop keeping its own place in the order. They are
+  waypoints and never legs: a place the car passes is not an arrival, and a chain that read one as
+  one would hand the next destination over in the middle of a motorway. Sending the same points as
+  a series of `goTo` calls would not do it — `goTo` takes one point and starts guidance, so a
+  second replaces the first and the car would drive to the last one sent.
+
+- **Starting guidance now gets the screen out of the way.** Tapping "Y aller" left the charge-stop
+  screen sitting over the map that had just been told where to go. It now finishes, which returns
+  the driver to the dashboard behind it, and only on the one outcome the car confirmed: guidance
+  actually running. A refusal keeps the screen and its message, because the driver has something
+  left to do there.
+
 - **The only socket, the leg chain and the USB fallback now have tests around them.** Three of the
   app's decisions ran unpinned: `RoutingTransport`, which is the single HTTP entry point the whole
   network argument rests on; `NavLegs`, which is the one thing here that asks the car to act with

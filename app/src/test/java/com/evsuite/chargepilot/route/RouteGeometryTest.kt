@@ -49,6 +49,31 @@ class RouteGeometryTest {
     }
 
     @Test
+    fun `waypoints are spread by distance along the road, not by vertex`() {
+        // Ten kilometres of dense vertices, then a hundred of empty motorway. Spacing by index
+        // would put every waypoint in the first tenth of the trip and none on the road after it.
+        val dense = (0 until 100).map { OrsDirections.Point(4.0, 45.0 + it * 0.0009, null) }
+        val sparse = (1..10).map { OrsDirections.Point(4.0, 45.09 + it * 0.09, null) }
+        val spaced = RouteGeometry.evenlySpaced(dense + sparse, 3)
+
+        assertEquals(3, spaced.size)
+        val total = RouteGeometry.cumulativeKm(dense + sparse).last()
+        spaced.forEachIndexed { index, along ->
+            assertEquals(total * (index + 1) / 4.0, along.alongKm, total / 10.0)
+        }
+        // The destination is handed over on its own, so it is never also a waypoint.
+        assertTrue(spaced.last().alongKm < total)
+
+        // A route with nothing to sample asks the car for nothing.
+        assertTrue(RouteGeometry.evenlySpaced(dense, 0).isEmpty())
+        assertTrue(RouteGeometry.evenlySpaced(listOf(dense.first()), 3).isEmpty())
+        // Two vertices and three targets: an origin and a destination, and nothing in between to
+        // pin. Three copies of the destination would be a worse instruction than none.
+        assertTrue(RouteGeometry.evenlySpaced(northward(2), 3).isEmpty())
+        assertEquals(2, RouteGeometry.evenlySpaced(northward(4), 3).size)
+    }
+
+    @Test
     fun `the polyline is the one the rest of the world encodes`() {
         // Google's own documented example, which is the only way to know this is right without
         // sending a request and reading someone else's error message.

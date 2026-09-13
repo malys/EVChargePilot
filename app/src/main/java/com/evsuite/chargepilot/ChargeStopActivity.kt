@@ -886,7 +886,8 @@ class ChargeStopActivity : AppCompatActivity() {
         // The adapter takes the plan as it was planned: the destination, and the stop on the way
         // to it. Which of the two the single-point channels get is [ChargeStopHandoff]'s
         // decision, tested there.
-        val target = ChargeStopHandoff.of(place, (plan as? ChargeStopPlan.Plan.Stop)?.let { charger })
+        val target =
+            ChargeStopHandoff.of(place, (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }, route)
         handoff = target
         followed = follow(plan, charger, route, rate, grade)
         binding.navigateNote.visibility = View.VISIBLE
@@ -1042,7 +1043,10 @@ class ChargeStopActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 when {
-                    guided || routeGuided -> guidanceRunning(target, viaRoute = routeGuided)
+                    guided || routeGuided -> {
+                        guidanceRunning(target, viaRoute = routeGuided)
+                        returnToDashboard()
+                    }
                     // Accepted, and the car cannot say what came of it because it was already
                     // guiding when the tap happened. Reported as asked, never as started.
                     wasGuiding && (route || goTo) -> guidanceAsked(target, viaGoTo = goTo)
@@ -1052,6 +1056,20 @@ class ChargeStopActivity : AppCompatActivity() {
             }
         }
     }
+
+    /**
+     * The plan is being driven, so this screen is over: back to the dashboard.
+     *
+     * **Finishing, never starting.** The map is in front by now and it is what the driver is
+     * about to follow; starting the dashboard here would pull this app over it. Finishing a
+     * screen nobody is looking at leaves the map alone and puts the dashboard — with the drift
+     * companion on it — under the driver's next return to this app.
+     *
+     * Only on the one outcome the car confirmed. A handoff that was merely accepted, or refused,
+     * leaves the screen where it is, because the sentence saying so is the only place the driver
+     * can read what happened.
+     */
+    private fun returnToDashboard() = finish()
 
     /**
      * Waits for the navigation app to say it is guiding, and gives up saying nothing happened.
@@ -1074,6 +1092,7 @@ class ChargeStopActivity : AppCompatActivity() {
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
             "the car is guiding: channel=${if (viaRoute) "startNavFromEVRout" else "goTo"}" +
                 ", to=${if (target.toStop) "charging stop" else "destination"}" +
+                ", pathway=${target.pathway.size} point(s)" +
                 ", confirmed by isMapNavigating"
         }
         announce(
