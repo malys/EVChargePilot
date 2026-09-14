@@ -2,6 +2,7 @@ package com.evsuite.chargepilot.route
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -97,6 +98,38 @@ class RoutingTransportTest {
         assertEquals(
             RoutingTransport.Reason.QUOTA_DAY,
             refusal(day.post(creds(base = deadEnd), "/v2/x", "{}", now)).reason,
+        )
+    }
+
+    @Test
+    fun `a zero remaining beside a served answer is not an allowance this app has spent`() {
+        // A limiter describing a window nobody configured reports the same `0`. Kept, it closes
+        // the local gate on a key that had just answered 200.
+        assertNull(RoutingTransport.remainingWorthKeeping("0", 200))
+        // From a refusal the number is the server standing behind it, and it is kept.
+        assertEquals(0, RoutingTransport.remainingWorthKeeping("0", 403))
+        assertEquals(1998, RoutingTransport.remainingWorthKeeping("1998", 200))
+        assertNull(RoutingTransport.remainingWorthKeeping(null, 200))
+        assertNull(RoutingTransport.remainingWorthKeeping("not a number", 200))
+    }
+
+    @Test
+    fun `a 403 is a quota only when it says so, and otherwise a key this host does not serve`() {
+        assertEquals(
+            RoutingTransport.Reason.SERVER_DAILY_LIMIT,
+            RoutingTransport.forbiddenReason("""{"error":{"code":2003,"message":"Quota exceeded"}}"""),
+        )
+        // What api.heigit.org answers for a key it does not serve, read from it on 2026-09-14.
+        // Called a quota, this sends the driver away to wait for tomorrow on a key that will
+        // never work however long they wait.
+        assertEquals(
+            RoutingTransport.Reason.SERVER_KEY_REFUSED,
+            RoutingTransport.forbiddenReason("""{"error":"Access to this API has been disallowed"}"""),
+        )
+        // A body that could not be read is not evidence of a quota.
+        assertEquals(
+            RoutingTransport.Reason.SERVER_KEY_REFUSED,
+            RoutingTransport.forbiddenReason(null),
         )
     }
 

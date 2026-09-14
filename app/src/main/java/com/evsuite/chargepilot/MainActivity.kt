@@ -161,6 +161,10 @@ class MainActivity : PrimaryNavigationActivity() {
      */
     override fun onStart() {
         super.onStart()
+        // Unstable only, and a no-op unless the last check gave up without reaching GitHub:
+        // the hook latches itself. This is what makes a head unit whose Wi-Fi arrived after
+        // launch still find the update, without polling for it. Stable contains no updater.
+        UpdateHook.checkInBackground(this)
         loadRecentTrips()
         // The consumption fit reads the whole trip history, so it happens once per visit to
         // this screen and only when there is actually a plan being followed.

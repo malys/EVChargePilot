@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// The rolling unstable build number, passed by the unstable workflow as its run number.
+// It has to reach BOTH the APK's own versionName and the published asset name, because the
+// update check compares one against the other: a build whose versionName stops at "0.2.0"
+// reads as older than the very release it was cut from, so every launch offers the update
+// that is already installed and installing it changes nothing.
+val unstableBuild = (project.findProperty("unstableBuild") ?: "0").toString()
+
 android {
     namespace = "com.evsuite.chargepilot"
     compileSdk = 36
@@ -39,7 +46,10 @@ android {
         create("unstable") {
             dimension = "channel"
             applicationIdSuffix = ".unstable"
-            versionNameSuffix = "-unstable"
+            // Same shape as the asset name: "0.2.0.85-unstable" against a published
+            // "EVChargePilot-unstable-0.2.0.85.apk". A local build has no run number and
+            // becomes 0, which is older than any release — which is what a local build is.
+            versionNameSuffix = ".$unstableBuild-unstable"
         }
     }
 
@@ -101,7 +111,7 @@ if (android.signingConfigs.findByName("platform") == null) {
 // is always tagged "unstable" and overwritten, so the asset name carries the version.
 tasks.register("printUnstableVersion") {
     doLast {
-        println("${android.defaultConfig.versionName}.${project.findProperty("unstableBuild") ?: "0"}")
+        println("${android.defaultConfig.versionName}.$unstableBuild")
     }
 }
 

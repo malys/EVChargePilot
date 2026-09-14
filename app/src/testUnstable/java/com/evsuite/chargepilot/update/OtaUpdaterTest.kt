@@ -40,6 +40,17 @@ class OtaUpdaterTest {
         assertTrue(OtaUpdater.isNewer("0.3.0.1", "0.2.0.99"))
     }
 
+    @Test fun `the build a release was cut from is not an update to itself`() {
+        // The published asset is named "$versionName.$unstableBuild" and the APK inside it
+        // carries "$versionName.$unstableBuild-unstable". Drop the build number from the
+        // flavor's versionNameSuffix and this flips: every launch offers the release that is
+        // already installed, and installing it changes nothing.
+        val asset = OtaUpdater.versionFromAssetName("EVChargePilot-unstable-0.2.0.85.apk")
+        assertEquals("0.2.0.85", asset)
+        assertFalse(OtaUpdater.isNewer(asset!!, "0.2.0.85-unstable"))
+        assertTrue(OtaUpdater.isNewer(asset, "0.2.0.84-unstable"))
+    }
+
     @Test fun `the same or an older build is not an update`() {
         assertFalse(OtaUpdater.isNewer("0.2.0.42", "0.2.0.42"))
         assertFalse(OtaUpdater.isNewer("0.2.0.41", "0.2.0.42"))

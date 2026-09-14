@@ -22,20 +22,14 @@ import java.util.Locale
  * refused, the screen says the server rejected the request and the driver keeps a key that
  * never leaked — which is the failure this project prefers.
  *
- * **Quota, and the honesty about it.** Directions limits were read from ORS's own documentation
- * (2000 a day, 40 a minute). The geocoding numbers below could not be: on 2026-09-04 the plans
- * page is a JavaScript application that serves no readable figures, and the numbers commonly
- * published for it — 1000 a day, 100 a minute — come from third parties. The day figure is used
- * as an assumed ceiling, safe in the direction that matters: if the real allowance is larger
- * nothing breaks, and [RoutingQuota.observe] corrects the count from the server's own header the
- * moment a request comes back. **The per-minute figure is not**, and [RoutingQuota.observe]
- * does not correct it — only the day count reads the server's header, because a shared key can
- * be spent by another client between two of our own requests, which a minute-sized window
- * rarely lives long enough to matter for. Typing one destination on a head-unit keyboard, with
- * autocomplete firing per pause, is enough distinct prefixes to reach a wrong-and-too-generous
- * per-minute assumption before the address is finished — the driver then spends the rest of that
- * minute refused. [PER_MINUTE] is kept at [RoutingQuota.DIRECTIONS_PER_MINUTE], the one number
- * here with real confirmation, rather than a third-party guess this app cannot check.
+ * **Quota.** Geocoding has a budget of its own, separate from directions: the key dashboard
+ * lists it among the micro endpoints at 3000 a day and 100 a minute, read there on 2026-09-14.
+ * Both numbers were third-party guesses until then, and the guesses were low — a local throttle
+ * refusing requests the service would have answered is the same broken screen as one that spends
+ * a quota, minus the evidence. [RoutingQuota.observe] still corrects the day count from the
+ * server's own header, because a shared key can be spent by another client between two of our
+ * own requests; the minute count is not corrected, and at 100 a minute a driver typing one
+ * address on a head-unit keyboard cannot reach it.
  */
 object OrsGeocode {
 
@@ -62,20 +56,15 @@ object OrsGeocode {
      * keyboard, where the gap between two letters routinely exceeds a physical keyboard's,
      * still coalesces into one request instead of firing after nearly every letter.
      *
-     * 500ms measured as unusable: a driver typing one destination spent the whole local
-     * per-minute allowance before the address was finished, because a touchscreen's own
-     * typing cadence is slower than what that number assumed.
+     * Not a quota number: at [PER_MINUTE] a driver cannot type fast enough to reach the
+     * allowance at any debounce worth using. This is the head unit's own cadence — 500ms fires
+     * between two letters of the same word on this keyboard, and answers a prefix nobody meant.
      */
     const val SUGGEST_DEBOUNCE_MS = 900L
 
-    /**
-     * Assumed, not verified — see the class note. Brought down to the one number this app
-     * does have real confirmation for, [RoutingQuota.DIRECTIONS_PER_MINUTE]: the geocode
-     * endpoint's own per-minute figure was a guess that let this local throttle wave through
-     * requests the server was already refusing, so every one of them still spent a wait.
-     */
-    const val PER_DAY = 1000
-    const val PER_MINUTE = RoutingQuota.DIRECTIONS_PER_MINUTE
+    /** The geocoding endpoint's own allowance, from the key dashboard on 2026-09-14. */
+    const val PER_DAY = 3000
+    const val PER_MINUTE = 100
 
     /** More than a driver reads on a head unit while parked. */
     const val MAX_RESULTS = 5

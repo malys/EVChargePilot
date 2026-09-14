@@ -334,6 +334,7 @@ Spending %6$s %% per km</string>
     <string name="routing_refused_quota_day">Today’s routing allowance is spent. It rolls 24 h after the first request.</string>
     <string name="routing_refused_transport">The request could not be made safely and was not sent.</string>
     <string name="routing_refused_server_day">The routing service says the daily allowance for this key is spent.</string>
+    <string name="routing_refused_server_key">This key is not served at that address. Check the key, and the service address in Configuration.</string>
     <string name="routing_refused_server_minute">The routing service is rate-limiting this key. Try again shortly.</string>
     <string name="routing_refused_server">The routing service refused the request (%1$s).</string>
     <string name="routing_refused_unreadable">The answer was too large or unreadable and was discarded.</string>

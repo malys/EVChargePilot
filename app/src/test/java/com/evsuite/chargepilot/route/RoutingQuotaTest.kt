@@ -56,18 +56,30 @@ class RoutingQuotaTest {
     @Test
     fun `the server's own count wins, because another client may share the key`() {
         val quota = RoutingQuota()
-        quota.observe(0)
+        quota.observe(0, start)
         assertEquals(RoutingQuota.Window.DAY, wait(quota.check(start)).window)
 
-        quota.observe(5)
+        quota.observe(5, start)
         assertSame(RoutingQuota.Verdict.Allowed, quota.check(start))
     }
 
     @Test
     fun `a header we could not read leaves the local count alone`() {
         val quota = RoutingQuota()
-        quota.observe(0)
-        quota.observe(null)
+        quota.observe(0, start)
+        quota.observe(null, start)
         assertEquals(RoutingQuota.Window.DAY, wait(quota.check(start)).window)
+    }
+
+    @Test
+    fun `the server's count is not believed for ever, or nothing can ask it again`() {
+        val quota = RoutingQuota()
+        quota.observe(0, start)
+        assertEquals(RoutingQuota.Window.DAY, wait(quota.check(start)).window)
+        // Held for ever this is a deadlock: refusing locally means no request leaves, and only
+        // a request brings back the header that would reopen the gate. One is let through when
+        // the trust window ends, and the screen works again by itself.
+        val later = start + RoutingQuota.SERVER_TRUST_MS
+        assertSame(RoutingQuota.Verdict.Allowed, quota.check(later))
     }
 }

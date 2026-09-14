@@ -116,6 +116,37 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **An unstable build no longer offers the release it was cut from.** The published asset name and
+  the APK's own `versionName` were computed by two different formulas: the workflow named the file
+  `EVChargePilot-unstable-0.2.0.85.apk` while the APK inside it reported `0.2.0-unstable`. The
+  update check compares one against the other, so every launch found an update that was already
+  installed, and installing it changed nothing. The build number now reaches both, and a local
+  build with no run number becomes `0.2.0.0-unstable` — older than any release, which is what a
+  local build is.
+
+- **A `403` is no longer always read as a spent quota.** HeiGIT answers `403` both when the day's
+  allowance is gone and when the key is simply not served on that API, and the screen said "the
+  daily quota for this key is spent" for both. A driver whose key was refused outright was sent
+  away to wait until tomorrow for a key that would never work, however long they waited. The body
+  now decides, and a refused key gets its own message naming the key and the service address.
+
+- **The server's own remaining count no longer locks the local gate shut for good.** A
+  `x-ratelimit-remaining: 0` closed `RoutingQuota` with no way back: refusing locally meant no
+  request went out, and only a request could bring back the header that would reopen it. The count
+  is now believed for five minutes, and a `0` sitting beside an answer the server actually served
+  is not kept at all — a limiter describing a window this app never asked about reads exactly the
+  same as an allowance this app has spent.
+
+- **Geocoding is no longer throttled at a third of what the key allows.** The local limits were
+  third-party guesses and the guesses were low: 1000 a day and 40 a minute against the 3000 and 100
+  the key dashboard actually lists. A local throttle refusing requests the service would have
+  answered is the same broken screen as one that spends a quota, minus the evidence.
+
+- **The unstable update check asks again when the network was not there yet.** The check latched
+  itself for the process after three attempts spanning about forty seconds, so a head unit whose
+  Wi-Fi came up a minute after launch left the tester on an old build until they killed the app.
+  Giving up now releases the latch, and returning to the dashboard checks again.
+
 - **The unstable update check no longer loses its storage question to the vehicle one.** Both were
   asked from `onCreate`, and an activity holds one permission request at a time — the second was
   dropped by the framework, so on the first launch of a fresh unstable install the driver was never

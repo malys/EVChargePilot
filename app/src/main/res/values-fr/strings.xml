@@ -329,6 +329,7 @@ Consommation %6$s %% par km</string>
     <string name="routing_refused_quota_day">Le quota de routage du jour est épuisé. Il se renouvelle 24 h après la première requête.</string>
     <string name="routing_refused_transport">La requête ne pouvait pas être émise en sécurité : elle n’a pas été envoyée.</string>
     <string name="routing_refused_server_day">Le service de routage indique que le quota quotidien de cette clé est épuisé.</string>
+    <string name="routing_refused_server_key">Cette clé n’est pas acceptée à cette adresse. Vérifiez la clé, et l’adresse du service dans Configuration.</string>
     <string name="routing_refused_server_minute">Le service de routage limite le débit de cette clé. Réessayez dans un instant.</string>
     <string name="routing_refused_server">Le service de routage a refusé la requête (%1$s).</string>
     <string name="routing_refused_unreadable">La réponse était trop volumineuse ou illisible : elle a été écartée.</string>

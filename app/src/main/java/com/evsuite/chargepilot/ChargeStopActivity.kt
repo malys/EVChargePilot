@@ -444,7 +444,7 @@ class ChargeStopActivity : AppCompatActivity() {
                 )
                 announce(
                     when {
-                        result is RoutingTransport.Result.Refused -> refusal(result)
+                        result is RoutingTransport.Result.Refused -> routingRefusal(result)
                         route == null -> getString(R.string.charge_stop_no_route)
                         else -> getString(R.string.charge_stop_ready)
                     }
@@ -1209,25 +1209,6 @@ class ChargeStopActivity : AppCompatActivity() {
         binding.chargerSource.text = charger.charger.verifiedAt?.let {
             getString(R.string.charge_stop_charger_source, provider, it.take(10))
         } ?: getString(R.string.charge_stop_charger_source_undated, provider)
-    }
-
-    /**
-     * A refusal the driver can act on. The detail travels only where it means something to
-     * them — seconds to wait, a status code — never the transport's own English reason string.
-     */
-    private fun refusal(result: RoutingTransport.Result.Refused): String = when (result.reason) {
-        RoutingTransport.Reason.NOT_CONFIGURED -> getString(R.string.charge_stop_not_configured)
-        RoutingTransport.Reason.BUSY -> getString(R.string.routing_refused_busy)
-        RoutingTransport.Reason.QUOTA_MINUTE ->
-            getString(R.string.routing_refused_quota_minute, result.detail.orEmpty())
-        RoutingTransport.Reason.QUOTA_DAY -> getString(R.string.routing_refused_quota_day)
-        RoutingTransport.Reason.TRANSPORT -> getString(R.string.routing_refused_transport)
-        RoutingTransport.Reason.SERVER_DAILY_LIMIT -> getString(R.string.routing_refused_server_day)
-        RoutingTransport.Reason.SERVER_RATE_LIMIT ->
-            getString(R.string.routing_refused_server_minute)
-        RoutingTransport.Reason.SERVER_REJECTED ->
-            getString(R.string.routing_refused_server, result.detail.orEmpty())
-        RoutingTransport.Reason.UNREADABLE -> getString(R.string.routing_refused_unreadable)
     }
 
     private fun announce(text: String) {

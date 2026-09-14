@@ -23,8 +23,9 @@ class RoutingQuota(
 
     private val spent = ArrayDeque<Long>()
 
-    /** Fewer than the day's count if the server has told us otherwise. */
+    /** Fewer than the day's count if the server has told us otherwise, and when it said so. */
     private var remainingFromServer: Int? = null
+    private var remainingObservedAtMs: Long = 0L
 
     sealed interface Verdict {
         object Allowed : Verdict
@@ -43,10 +44,19 @@ class RoutingQuota(
             val oldest = spent.first { nowMs - it < MINUTE_MS }
             return Verdict.Wait(secondsUntil(oldest + MINUTE_MS, nowMs), Window.MINUTE)
         }
-        val serverExhausted = remainingFromServer?.let { it <= 0 } ?: false
-        if (spent.size >= dayLimit || serverExhausted) {
+        if (spent.size >= dayLimit) {
             val oldest = spent.firstOrNull() ?: nowMs
             return Verdict.Wait(secondsUntil(oldest + DAY_MS, nowMs), Window.DAY)
+        }
+        // The server's own number closes the gate, but only for as long as it is fresh. Held
+        // for ever it is a deadlock: refusing locally means no request goes out, and only a
+        // request can bring back the header that would reopen it. Re-checking costs one
+        // refusal every [SERVER_TRUST_MS] and is the only thing that ever says "you may again".
+        val serverSaysNone = remainingFromServer?.let { it <= 0 } == true
+        if (serverSaysNone && nowMs - remainingObservedAtMs < SERVER_TRUST_MS) {
+            return Verdict.Wait(
+                secondsUntil(remainingObservedAtMs + SERVER_TRUST_MS, nowMs), Window.DAY
+            )
         }
         return Verdict.Allowed
     }
@@ -60,8 +70,11 @@ class RoutingQuota(
 
     /** The server's own count wins over ours: it knows about other clients on the same key. */
     @Synchronized
-    fun observe(remaining: Int?) {
-        if (remaining != null && remaining >= 0) remainingFromServer = remaining
+    fun observe(remaining: Int?, nowMs: Long = System.currentTimeMillis()) {
+        if (remaining != null && remaining >= 0) {
+            remainingFromServer = remaining
+            remainingObservedAtMs = nowMs
+        }
     }
 
     @Synchronized
@@ -81,6 +94,13 @@ class RoutingQuota(
         /** ORS FAQ, verified 2026-09-04. Endpoint limits differ; these are the directions ones. */
         const val DIRECTIONS_PER_DAY = 2000
         const val DIRECTIONS_PER_MINUTE = 40
+
+        /**
+         * How long the server's own remaining count is believed. Long enough that a real
+         * exhaustion is not hammered, short enough that a number read wrong — or read from a
+         * limiter describing a window this app never asked about — costs minutes, not a day.
+         */
+        const val SERVER_TRUST_MS = 5 * 60_000L
 
         const val MINUTE_MS = 60_000L
         const val DAY_MS = 24 * 60 * 60 * 1000L

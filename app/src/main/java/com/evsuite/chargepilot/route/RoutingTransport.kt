@@ -7,6 +7,7 @@ import java.net.URI
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -50,6 +51,11 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
         QUOTA_DAY,
         TRANSPORT,
         SERVER_DAILY_LIMIT,
+
+        /** The service will not serve this key on this API at all — not a quota, and waiting
+         *  does not help. A key issued for another host, or one without the entitlement the
+         *  path needs, lands here. */
+        SERVER_KEY_REFUSED,
         SERVER_RATE_LIMIT,
         SERVER_REJECTED,
         UNREADABLE,
@@ -140,7 +146,9 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
             }
 
             val status = connection.responseCode
-            quota.observe(connection.getHeaderField(HEADER_REMAINING)?.toIntOrNull())
+            quota.observe(
+                remainingWorthKeeping(connection.getHeaderField(HEADER_REMAINING), status)
+            )
             when {
                 status in 300..399 -> {
                     val outcome = RedirectPolicy.evaluate(
@@ -155,7 +163,7 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
                         }
                     }
                 }
-                status == 403 -> Result.Refused(Reason.SERVER_DAILY_LIMIT)
+                status == 403 -> forbidden(connection)
                 status == 429 -> Result.Refused(Reason.SERVER_RATE_LIMIT)
                 status !in 200..299 -> Result.Refused(Reason.SERVER_REJECTED, status.toString())
                 else -> readCapped(connection)
@@ -167,6 +175,25 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
         } finally {
             connection.disconnect()
         }
+    }
+
+    /**
+     * What a `403` actually means, which is two different things.
+     *
+     * HeiGIT answers `403` when the day's allowance is spent *and* when the key is simply not
+     * served on that API — a key issued for the old `api.openrouteservice.org`, or one without
+     * the entitlement a path needs, gets `Access to this API has been disallowed`. Only the body
+     * tells them apart, and telling them apart matters: the quota wording sends a driver away
+     * to wait until tomorrow for a key that will never work, however long they wait.
+     *
+     * The body is read for one word and never logged, never shown: the rule that no response
+     * body leaves this class holds here too.
+     */
+    private fun forbidden(connection: HttpURLConnection): Result {
+        val body = runCatching {
+            connection.errorStream?.bufferedReader(StandardCharsets.UTF_8)?.use { it.readText() }
+        }.getOrNull()
+        return Result.Refused(forbiddenReason(body))
     }
 
     /** Refuses an oversized body rather than truncating it into a route that is not the route. */
@@ -200,6 +227,28 @@ class RoutingTransport(private val quota: RoutingQuota = RoutingQuota()) {
 
         private fun encode(value: String): String =
             URLEncoder.encode(value, StandardCharsets.UTF_8.name())
+
+        /**
+         * The remaining count worth keeping out of a response.
+         *
+         * A `0` beside an answer the server actually served is not an allowance this app has
+         * spent — a limiter reporting a window nobody configured reads exactly the same — and
+         * keeping it closes the local gate on a key that is working, on the strength of a
+         * header whose meaning this app cannot check.
+         */
+        internal fun remainingWorthKeeping(header: String?, status: Int): Int? {
+            val remaining = header?.toIntOrNull()
+            return if (remaining == 0 && status in 200..299) null else remaining
+        }
+
+        /**
+         * Which of the two a `403` is. A body naming a quota is the only thing that makes it
+         * one; anything else — including a body that could not be read — is a key this service
+         * does not serve here, which is the reading that does not send a driver away to wait.
+         */
+        internal fun forbiddenReason(body: String?): Reason =
+            if (body.orEmpty().lowercase(Locale.US).contains("quota")) Reason.SERVER_DAILY_LIMIT
+            else Reason.SERVER_KEY_REFUSED
 
         private const val TAG = "RoutingTransport"
         private const val USER_AGENT = "EVChargePilot"

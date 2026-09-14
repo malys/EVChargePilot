@@ -26,10 +26,18 @@ object UpdateHook {
     private const val TAG = "EV_UPDATE"
 
     /**
-     * One check per process. The activity is recreated on a configuration change, and a
-     * release lookup per recreation is a request GitHub counts and the driver never asked for.
+     * One check per answer, not one per process. A release lookup on every visit to the
+     * dashboard is a request GitHub counts and the driver never asked for, so this latches —
+     * but it is released again when the pipeline gave up without an answer, because a head unit
+     * whose network arrived late would otherwise stay on an old build until the app is killed.
      */
     private val checked = AtomicBoolean(false)
+
+    /**
+     * The storage prompt is a one-shot for the process. A refusal is a supported state — the
+     * APK goes to the app's own folder — not a question to ask again on every visit.
+     */
+    private val askedForDownloads = AtomicBoolean(false)
 
     /** Arbitrary, and never read back: the grant is re-checked at the moment of writing. */
     private const val STORAGE_REQUEST = 0xE7A
@@ -37,7 +45,7 @@ object UpdateHook {
     /** Fire-and-forget. Every network and disk step runs off the main thread. */
     fun checkInBackground(activity: Activity) {
         if (!checked.compareAndSet(false, true)) return
-        requestDownloadsAccess(activity)
+        if (askedForDownloads.compareAndSet(false, true)) requestDownloadsAccess(activity)
         val context = activity.applicationContext
         // The thread holds the activity until its timeouts expire, which is what lets it
         // speak on the screen the driver is already looking at. Bounded, and the dialog is
@@ -94,6 +102,13 @@ object UpdateHook {
             if (attempt !is Attempt.Retry) break
             Thread.sleep(delay)
             attempt = attempt(context)
+        }
+        if (attempt is Attempt.Retry) {
+            // Still nothing after the retries: the network was not there yet. Release the latch
+            // so the next visit to the dashboard asks again, instead of leaving the tester on an
+            // old build for the rest of the process because Wi-Fi came up a minute too late.
+            checked.set(false)
+            return
         }
         val apk = (attempt as? Attempt.Ready)?.apk ?: return
         activity.runOnUiThread {

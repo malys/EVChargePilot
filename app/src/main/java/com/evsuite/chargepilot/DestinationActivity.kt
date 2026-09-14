@@ -138,7 +138,7 @@ class DestinationActivity : AppCompatActivity() {
                 places = found.orEmpty()
                 showPlaces()
                 when {
-                    result is RoutingTransport.Result.Refused -> announce(refusal(result))
+                    result is RoutingTransport.Result.Refused -> announce(routingRefusal(result))
                     places.isEmpty() && !quiet ->
                         announce(getString(R.string.charge_stop_no_results))
                     places.isNotEmpty() -> announce(getString(R.string.charge_stop_choose))
@@ -226,25 +226,6 @@ class DestinationActivity : AppCompatActivity() {
             )
         )
         showFavorites(typed())
-    }
-
-    /**
-     * A refusal the driver can act on. The detail travels only where it means something to
-     * them — seconds to wait, a status code — never the transport's own English reason string.
-     */
-    private fun refusal(result: RoutingTransport.Result.Refused): String = when (result.reason) {
-        RoutingTransport.Reason.NOT_CONFIGURED -> getString(R.string.charge_stop_not_configured)
-        RoutingTransport.Reason.BUSY -> getString(R.string.routing_refused_busy)
-        RoutingTransport.Reason.QUOTA_MINUTE ->
-            getString(R.string.routing_refused_quota_minute, result.detail.orEmpty())
-        RoutingTransport.Reason.QUOTA_DAY -> getString(R.string.routing_refused_quota_day)
-        RoutingTransport.Reason.TRANSPORT -> getString(R.string.routing_refused_transport)
-        RoutingTransport.Reason.SERVER_DAILY_LIMIT -> getString(R.string.routing_refused_server_day)
-        RoutingTransport.Reason.SERVER_RATE_LIMIT ->
-            getString(R.string.routing_refused_server_minute)
-        RoutingTransport.Reason.SERVER_REJECTED ->
-            getString(R.string.routing_refused_server, result.detail.orEmpty())
-        RoutingTransport.Reason.UNREADABLE -> getString(R.string.routing_refused_unreadable)
     }
 
     private fun announce(text: String) {
