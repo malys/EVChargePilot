@@ -16,8 +16,9 @@ import com.evsuite.hardware.AppLogger
  *
  * **The key never leaves this file on its own.** Not into `AppLogger`, not into a diagnostic
  * export, not into the USB bundle. `DiagnosticExporter` reads nothing from here and must keep
- * not reading anything from here. The single way out is [snapshot], and only a driver who is
- * parked and taps *Export to USB* asks for it.
+ * not reading anything from here. The single way out is [snapshot], and it is reached only by a
+ * driver who is parked: tapping *Export to USB*, or looking at the Configuration page, whose key
+ * boxes hold what is stored so the key can be checked against the one on the service dashboard.
  */
 object RoutingCredentials {
 
@@ -90,10 +91,11 @@ object RoutingCredentials {
     }
 
     /**
-     * Everything stored, for the driver's own export and nothing else. This is the one call that
-     * hands the keys to a caller that is not building a request: it must not be logged, shown or
-     * put in a diagnostic bundle. Unset values stay null, so exporting and importing back is not
-     * a way to write defaults over a self-hosted address.
+     * Everything stored, for the driver's own eyes and nothing else. This is the one call that
+     * hands the keys to a caller that is not building a request: it must not be logged or put in
+     * a diagnostic bundle, and the only screen it may reach is the Configuration page, masked and
+     * behind the parked gate. Unset values stay null, so exporting and importing back is not a
+     * way to write defaults over a self-hosted address.
      */
     fun snapshot(context: Context): RoutingConfig {
         val prefs = preferences(context)

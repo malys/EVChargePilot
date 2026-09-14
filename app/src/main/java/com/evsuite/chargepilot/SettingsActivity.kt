@@ -99,6 +99,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
 
     override fun onStart() {
         super.onStart()
+        fillKeys()
         bound = bindService(
             Intent(this, TripRecordingService::class.java),
             connection,
@@ -115,7 +116,9 @@ class SettingsActivity : PrimaryNavigationActivity() {
         bound = false
         speedKmh = null
         speedObservedAtMs = null
-        // The typed keys do not survive the screen going away.
+        // The keys do not stay in a view the driver has left. They are put back by onStart,
+        // from storage, so leaving and returning shows the key again rather than an empty box
+        // that reads as "nothing configured".
         binding.routingKeyInput.text?.clear()
         binding.chargerKeyInput.text?.clear()
         super.onStop()
@@ -161,8 +164,13 @@ class SettingsActivity : PrimaryNavigationActivity() {
         if (values.isDefault) VehicleSettings.clear(this) else VehicleSettings.write(this, values)
         fill(values)
 
+        val stored = RoutingCredentials.snapshot(this)
         val key = binding.routingKeyInput.text?.toString()?.trim().orEmpty()
         val chargerKey = binding.chargerKeyInput.text?.toString()?.trim().orEmpty()
+        // The boxes now open holding what is stored, so "a key was typed" no longer means "a key
+        // was changed": a driver saving a new reserve would otherwise be told they saved a key.
+        val keysChanged = key != stored.apiKey.orEmpty() ||
+            chargerKey != stored.chargerApiKey.orEmpty()
         val typedBaseUrl = binding.routingBaseUrlInput.text?.toString()?.trim().orEmpty()
         val baseUrl = if (typedBaseUrl.isEmpty()) RoutingConfig.DEFAULT_BASE_URL else typedBaseUrl
         RoutingConfig.refuseBaseUrl(baseUrl)?.let { reason ->
@@ -179,15 +187,31 @@ class SettingsActivity : PrimaryNavigationActivity() {
                 chargerApiKey = chargerKey.ifEmpty { null },
             ),
         )
-        binding.routingKeyInput.text?.clear()
-        binding.chargerKeyInput.text?.clear()
+        fillKeys()
         announce(
-            if (key.isEmpty() && chargerKey.isEmpty()) {
+            if (!keysChanged) {
                 getString(R.string.vehicle_saved)
             } else {
                 getString(R.string.routing_saved)
             }
         )
+    }
+
+    /**
+     * The stored keys back into their boxes, masked.
+     *
+     * They used to start empty, which made the field write-only: the reveal button on it showed
+     * an empty box, and the only way to read the key a car was actually using was to export the
+     * settings to a stick and open the file on a laptop. EVABRPUploader fills the same field the
+     * same way for the same reason — a key that cannot be read cannot be checked against the one
+     * on the dashboard, and that check is what tells a wrong key from a spent quota.
+     *
+     * Masked by default and behind the parked gate, like every other box on this page.
+     */
+    private fun fillKeys() {
+        val stored = RoutingCredentials.snapshot(this)
+        binding.routingKeyInput.setText(stored.apiKey.orEmpty())
+        binding.chargerKeyInput.setText(stored.chargerApiKey.orEmpty())
     }
 
     private fun clearKeys() {
@@ -282,6 +306,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
                 // The fields on this page are now behind what was just written.
                 fill(VehicleSettings.read(this))
                 binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
+                fillKeys()
                 // The file name, never its contents: the contents are the keys.
                 announce(getString(R.string.settings_import_done, file.name))
             }

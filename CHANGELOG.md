@@ -116,6 +116,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The key boxes on the Configuration page can be read, not only written.** They opened empty, so
+  the reveal button on them showed an empty box and the only way to see the key a car was actually
+  using was to export the settings to a stick and open the file on a laptop. They now open holding
+  what is stored, masked, the way EVABRPUploader's have always done — a key that cannot be read
+  cannot be checked against the one on the service dashboard, and that check is what tells a wrong
+  key from a spent quota.
+
 - **An unstable build no longer offers the release it was cut from.** The published asset name and
   the APK's own `versionName` were computed by two different formulas: the workflow named the file
   `EVChargePilot-unstable-0.2.0.85.apk` while the APK inside it reported `0.2.0-unstable`. The
