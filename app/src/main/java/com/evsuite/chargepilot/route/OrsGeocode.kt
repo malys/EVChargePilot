@@ -2,6 +2,8 @@ package com.evsuite.chargepilot.route
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import java.text.Normalizer
+import java.util.Locale
 
 /**
  * Turning what the driver typed into the coordinates a route needs.
@@ -23,10 +25,17 @@ import com.google.gson.JsonParser
  * **Quota, and the honesty about it.** Directions limits were read from ORS's own documentation
  * (2000 a day, 40 a minute). The geocoding numbers below could not be: on 2026-09-04 the plans
  * page is a JavaScript application that serves no readable figures, and the numbers commonly
- * published for it — 1000 a day, 100 a minute — come from third parties. They are used here as
- * an assumed ceiling, which is safe in the direction that matters: if the real allowance is
- * larger nothing breaks, and [RoutingQuota.observe] corrects the count from the server's own
- * header the moment a request comes back.
+ * published for it — 1000 a day, 100 a minute — come from third parties. The day figure is used
+ * as an assumed ceiling, safe in the direction that matters: if the real allowance is larger
+ * nothing breaks, and [RoutingQuota.observe] corrects the count from the server's own header the
+ * moment a request comes back. **The per-minute figure is not**, and [RoutingQuota.observe]
+ * does not correct it — only the day count reads the server's header, because a shared key can
+ * be spent by another client between two of our own requests, which a minute-sized window
+ * rarely lives long enough to matter for. Typing one destination on a head-unit keyboard, with
+ * autocomplete firing per pause, is enough distinct prefixes to reach a wrong-and-too-generous
+ * per-minute assumption before the address is finished — the driver then spends the rest of that
+ * minute refused. [PER_MINUTE] is kept at [RoutingQuota.DIRECTIONS_PER_MINUTE], the one number
+ * here with real confirmation, rather than a third-party guess this app cannot check.
  */
 object OrsGeocode {
 
@@ -37,12 +46,50 @@ object OrsGeocode {
      */
     const val PATH = "/pelias/v1/search"
 
-    /** Assumed, not verified — see the class note. */
+    /**
+     * Pelias's own type-ahead endpoint. It answers a *prefix*, which is what a driver has while
+     * they are still typing, and it is the reason a destination no longer needs a finished
+     * address and a tap on a button: the answers arrive on the way. Same host, same key, same
+     * header, same transport — one socket to audit, which is [RoutingTransport]'s whole rule.
+     */
+    const val AUTOCOMPLETE_PATH = "/pelias/v1/autocomplete"
+
+    /** Under three letters a prefix matches half a country, and every request is quota. */
+    const val MIN_SUGGEST_CHARS = 3
+
+    /**
+     * A pause in typing, not a keystroke — long enough that a finger tapping a head-unit
+     * keyboard, where the gap between two letters routinely exceeds a physical keyboard's,
+     * still coalesces into one request instead of firing after nearly every letter.
+     *
+     * 500ms measured as unusable: a driver typing one destination spent the whole local
+     * per-minute allowance before the address was finished, because a touchscreen's own
+     * typing cadence is slower than what that number assumed.
+     */
+    const val SUGGEST_DEBOUNCE_MS = 900L
+
+    /**
+     * Assumed, not verified — see the class note. Brought down to the one number this app
+     * does have real confirmation for, [RoutingQuota.DIRECTIONS_PER_MINUTE]: the geocode
+     * endpoint's own per-minute figure was a guess that let this local throttle wave through
+     * requests the server was already refusing, so every one of them still spent a wait.
+     */
     const val PER_DAY = 1000
-    const val PER_MINUTE = 100
+    const val PER_MINUTE = RoutingQuota.DIRECTIONS_PER_MINUTE
 
     /** More than a driver reads on a head unit while parked. */
     const val MAX_RESULTS = 5
+
+    /**
+     * Whether what is in the box is worth a request: long enough to mean something, and not the
+     * text already asked about — a driver moving the cursor, or fixing capitalisation, has not
+     * asked a new question.
+     */
+    fun shouldSuggest(text: String, lastQueried: String?): Boolean {
+        val trimmed = text.trim()
+        return trimmed.length >= MIN_SUGGEST_CHARS &&
+            !trimmed.equals(lastQueried?.trim(), ignoreCase = true)
+    }
 
     fun quota(): RoutingQuota = RoutingQuota(dayLimit = PER_DAY, minuteLimit = PER_MINUTE)
 
@@ -61,6 +108,34 @@ object OrsGeocode {
             put("focus.point.lat", near.latitude.toString())
         }
     }
+
+    /**
+     * The saved places that match what is being typed, best-effort and free: matched here,
+     * against what is already on disk, so the shortest destination of all — one the driver has
+     * been to before — costs no request and no wait.
+     *
+     * Every word typed has to appear somewhere in the label, in any order, with accents folded
+     * away: this head unit's keyboard is what turns Écully into "ecully", and a saved favourite
+     * that hides because of an accent is worse than no filter at all. Blank text matches
+     * everything, which is the list the screen opens on.
+     */
+    fun matching(places: List<Place>, text: String): List<Place> {
+        val words = fold(text).trim().split(WHITESPACE).filter { it.isNotEmpty() }
+        if (words.isEmpty()) return places
+        return places.filter { place ->
+            val label = fold(place.label)
+            words.all { label.contains(it) }
+        }
+    }
+
+    private val WHITESPACE = Regex("\\s+")
+
+    /** Combining marks, after NFD split every accented letter into letter + mark. */
+    private val DIACRITICS = Regex("\\p{Mn}+")
+
+    private fun fold(text: String): String =
+        Normalizer.normalize(text.lowercase(Locale.US), Normalizer.Form.NFD)
+            .replace(DIACRITICS, "")
 
     /** The places the service recognised, best first, or an empty list. */
     fun parse(json: String): List<Place> = runCatching {

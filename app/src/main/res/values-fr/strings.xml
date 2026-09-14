@@ -246,7 +246,7 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_title">Arrêt de charge</string>
     <string name="charge_stop_action_search">Rechercher</string>
     <string name="charge_stop_hint_destination">Où allez-vous ?</string>
-    <string name="charge_stop_helper_destination">Recherché uniquement quand vous appuyez. Seuls le lieu et la position du véhicule sortent de la voiture.</string>
+    <string name="charge_stop_helper_destination">Des suggestions apparaissent dès que vous marquez une pause. Seuls le lieu et la position du véhicule sortent de la voiture.</string>
     <string name="charge_stop_idle">Véhicule stationné. Saisissez une destination pour planifier l’arrêt.</string>
     <string name="charge_stop_moving">La planification est refusée pendant que le véhicule roule.</string>
     <string name="charge_stop_speed_unavailable">La planification est refusée tant que la vitesse du véhicule est illisible.</string>
@@ -265,6 +265,7 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_favorites_saved">Enregistré comme favori.</string>
     <string name="charge_stop_favorites_save_failed">Impossible d’enregistrer : la liste contient déjà %1$d favoris.</string>
     <string name="charge_stop_favorites_removed">Favori retiré.</string>
+    <string name="charge_stop_favorites_no_match">Aucun favori ne correspond à votre saisie.</string>
     <string name="charge_stop_routing">Demande de l’itinéraire…</string>
     <string name="charge_stop_ready">Itinéraire reçu.</string>
     <string name="charge_stop_no_route">Aucun itinéraire exploitable. Rien n’est affiché plutôt qu’un demi-itinéraire.</string>

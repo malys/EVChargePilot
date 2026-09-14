@@ -193,6 +193,12 @@ Free-tier allowances, as published by ORS: 2000 directions requests a day and 40
 requests and refuses before the server does, and every request follows a driver action — nothing
 is on a timer.
 
+Destination suggestions are the one request a driver does not tap for: while you type a place,
+the app asks the geocoder what you might mean. It asks on a pause in typing, never per
+keystroke, never under three letters and never twice for the same text — a handful of requests
+per destination, out of a geocoding allowance assumed at 1000 a day. A destination you have
+already saved is matched inside the car and costs nothing at all.
+
 What leaves the car is the destination you type, the car's position and the road profile, to
 the host configured above. Never a trip, an evidence capture, a diagnostic bundle, a charge
 reading, a speed or an identifier. Route data comes from OpenStreetMap under ODbL and the

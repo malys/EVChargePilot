@@ -74,6 +74,31 @@ class OrsGeocodeTest {
     }
 
     @Test
+    fun `a suggestion is worth a request only for new text long enough to mean something`() {
+        assertFalse(OrsGeocode.shouldSuggest("ly", null))
+        assertFalse(OrsGeocode.shouldSuggest("  ly  ", null))
+        assertTrue(OrsGeocode.shouldSuggest("lyo", null))
+        // The text already asked about, however the cursor moved or the shift key landed.
+        assertFalse(OrsGeocode.shouldSuggest("lyon", "lyon"))
+        assertFalse(OrsGeocode.shouldSuggest("Lyon ", "lyon"))
+        assertTrue(OrsGeocode.shouldSuggest("lyon g", "lyon"))
+    }
+
+    @Test
+    fun `the saved list narrows to what is being typed, accents and word order aside`() {
+        val saved = listOf(
+            OrsGeocode.Place("Écully, Rhône, France", 4.77, 45.77),
+            OrsGeocode.Place("Lyon Part-Dieu, France", 4.86, 45.76),
+            OrsGeocode.Place("Gap, Hautes-Alpes, France", 6.08, 44.56),
+        )
+        assertEquals(saved, OrsGeocode.matching(saved, "   "))
+        assertEquals(listOf(saved[0]), OrsGeocode.matching(saved, "ecully"))
+        assertEquals(listOf(saved[0]), OrsGeocode.matching(saved, "ÉCULLY"))
+        assertEquals(listOf(saved[1]), OrsGeocode.matching(saved, "dieu lyon"))
+        assertTrue(OrsGeocode.matching(saved, "marseille").isEmpty())
+    }
+
+    @Test
     fun `what the driver typed is encoded, never pasted into a URL`() {
         assertEquals(
             "?text=Caf%C3%A9+%26+Co&size=5",

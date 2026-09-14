@@ -250,7 +250,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_title">Charging stop</string>
     <string name="charge_stop_action_search">Search</string>
     <string name="charge_stop_hint_destination">Where are you going?</string>
-    <string name="charge_stop_helper_destination">Searched only when you tap. Nothing but the place and the car’s position leaves the car.</string>
+    <string name="charge_stop_helper_destination">Suggestions appear as you pause typing. Nothing but the place and the car’s position leaves the car.</string>
     <string name="charge_stop_idle">Parked. Type a destination to plan the stop.</string>
     <string name="charge_stop_moving">Planning is refused while the vehicle is moving.</string>
     <string name="charge_stop_speed_unavailable">Planning is refused until vehicle speed is readable.</string>
@@ -269,6 +269,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_favorites_saved">Saved as a favourite.</string>
     <string name="charge_stop_favorites_save_failed">Could not save: the list already holds %1$d favourites.</string>
     <string name="charge_stop_favorites_removed">Favourite removed.</string>
+    <string name="charge_stop_favorites_no_match">No favourite matches what you typed.</string>
     <string name="charge_stop_routing">Asking for the route…</string>
     <string name="charge_stop_ready">Route received.</string>
     <string name="charge_stop_no_route">No usable route came back. Nothing is shown rather than half a route.</string>
