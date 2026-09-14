@@ -62,6 +62,19 @@ internal object OtaUpdater {
 
     data class Update(val versionName: String, val apkUrl: String)
 
+    sealed interface CheckResult {
+        /**
+         * GitHub answered — [update] is the newer build, or null when the running build is
+         * already current (or the tag/asset situation offered nothing valid). Either way this
+         * is a definitive answer for right now: retrying moments later would only ask GitHub
+         * the same question and get the same reply.
+         */
+        data class Answered(val update: Update?) : CheckResult
+
+        /** The request itself never completed — worth trying again once the network is up. */
+        object Unreachable : CheckResult
+    }
+
     /** True if [url] is `https` and points at an allowed host. Everything else is refused. */
     fun isAllowedUrl(url: String): Boolean {
         val uri = try { URI(url) } catch (_: Exception) { return false }
@@ -115,10 +128,10 @@ internal object OtaUpdater {
     }
 
     /**
-     * Asks GitHub for the rolling pre-release and returns it when it beats [currentVersion].
+     * Asks GitHub for the rolling pre-release and reports whether it beats [currentVersion].
      * Blocking network work — never call this from the main thread.
      */
-    fun check(currentVersion: String): Update? {
+    fun check(currentVersion: String): CheckResult {
         var connection: HttpURLConnection? = null
         return try {
             connection = (URL(RELEASE_API).openConnection() as HttpURLConnection).apply {
@@ -130,7 +143,7 @@ internal object OtaUpdater {
             }
             if (connection.responseCode != 200) {
                 AppLogger.w(TAG, "Release API returned ${connection.responseCode}")
-                return null
+                return CheckResult.Answered(null)
             }
             val json = JSONObject(
                 connection.inputStream.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
@@ -139,9 +152,9 @@ internal object OtaUpdater {
             // a different application id and could not update an unstable install anyway.
             if (!json.optBoolean("prerelease", false)) {
                 AppLogger.w(TAG, "Tag 'unstable' is not a pre-release — ignored")
-                return null
+                return CheckResult.Answered(null)
             }
-            val assets = json.optJSONArray("assets") ?: return null
+            val assets = json.optJSONArray("assets") ?: return CheckResult.Answered(null)
             for (index in 0 until assets.length()) {
                 val asset = assets.getJSONObject(index)
                 val version = versionFromAssetName(asset.optString("name", "")) ?: continue
@@ -151,12 +164,12 @@ internal object OtaUpdater {
                     AppLogger.w(TAG, "Rejected update URL from an unexpected host: $url")
                     continue
                 }
-                return Update(version, url)
+                return CheckResult.Answered(Update(version, url))
             }
-            null
+            CheckResult.Answered(null)
         } catch (e: Exception) {
             AppLogger.w(TAG, "Update check failed: ${e.message}")
-            null
+            CheckResult.Unreachable
         } finally {
             connection?.disconnect()
         }

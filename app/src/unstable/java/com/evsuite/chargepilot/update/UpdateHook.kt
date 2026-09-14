@@ -69,24 +69,53 @@ object UpdateHook {
         ActivityCompat.requestPermissions(activity, arrayOf(permission), STORAGE_REQUEST)
     }
 
+    /**
+     * A vehicle head unit rarely has a network the instant this activity is created — Wi-Fi or
+     * a tethered phone is still connecting while the app is already on screen. Two retries,
+     * 20s apart, cover that without turning into a poll: only [Attempt.Retry] — the request
+     * never reaching GitHub at all — is retried. A build that IS current answers on the first
+     * try and stops there, so an ordinary launch with a healthy network still makes exactly
+     * one GitHub call, not three.
+     */
+    private val RETRY_DELAYS_MS = longArrayOf(20_000L, 20_000L)
+
+    /** One pass over the whole pipeline, or the reason nothing is ready yet. */
+    private sealed interface Attempt {
+        data class Ready(val apk: File) : Attempt
+        object Nothing : Attempt
+
+        /** The check or the download never reached the network — worth trying again. */
+        object Retry : Attempt
+    }
+
     private fun deliver(context: Context, activity: Activity) {
-        val apk = findOrFetch(context) ?: return
+        var attempt = attempt(context)
+        for (delay in RETRY_DELAYS_MS) {
+            if (attempt !is Attempt.Retry) break
+            Thread.sleep(delay)
+            attempt = attempt(context)
+        }
+        val apk = (attempt as? Attempt.Ready)?.apk ?: return
         activity.runOnUiThread {
             if (!activity.isFinishing && !activity.isDestroyed) announce(activity, apk)
         }
     }
 
     /**
-     * The published APK for a newer build, or null when there is none, when anything refused,
-     * or when the check simply could not run. A failed update check is not an error the driver
-     * has to see: the dashboard is the app, and this channel is a convenience on top of it.
+     * The published APK for a newer build, [Attempt.Nothing] when there is none or anything
+     * refused, or [Attempt.Retry] when the network step itself never completed. A failed
+     * update check is not an error the driver has to see: the dashboard is the app, and this
+     * channel is a convenience on top of it.
      */
-    private fun findOrFetch(context: Context): File? {
+    private fun attempt(context: Context): Attempt {
         val current = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        }.getOrNull() ?: return null
+        }.getOrNull() ?: return Attempt.Nothing
 
-        val update = OtaUpdater.check(current) ?: return null
+        val update = when (val result = OtaUpdater.check(current)) {
+            OtaUpdater.CheckResult.Unreachable -> return Attempt.Retry
+            is OtaUpdater.CheckResult.Answered -> result.update ?: return Attempt.Nothing
+        }
 
         // A build already downloaded is not downloaded again: the check runs at every start,
         // and an unstable tester who has not installed yesterday's APK would otherwise pull
@@ -94,14 +123,15 @@ object UpdateHook {
         // in the fallback directory while the grant was still pending is fetched once more, to
         // the `Download` folder the driver was told to look in. Self-correcting beats a file
         // stranded where the dialog no longer points.
-        val directory = OtaUpdater.downloadDirectory(context) ?: return null
+        val directory = OtaUpdater.downloadDirectory(context) ?: return Attempt.Nothing
         val existing = File(directory, OtaUpdater.fileName(update.versionName))
-        if (existing.isFile && existing.length() > 0) return existing
+        if (existing.isFile && existing.length() > 0) return Attempt.Ready(existing)
 
-        val downloaded = OtaUpdater.download(context, update) ?: return null
+        val downloaded = OtaUpdater.download(context, update) ?: return Attempt.Retry
         val published = OtaUpdater.publish(context, downloaded, update.versionName)
-        if (published != null) AppLogger.i(TAG, "Update ${update.versionName} ready at $published")
-        return published
+            ?: return Attempt.Nothing
+        AppLogger.i(TAG, "Update ${update.versionName} ready at $published")
+        return Attempt.Ready(published)
     }
 
     private fun announce(activity: Activity, apk: File) {
