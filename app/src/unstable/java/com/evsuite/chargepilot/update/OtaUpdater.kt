@@ -143,7 +143,13 @@ internal object OtaUpdater {
             }
             if (connection.responseCode != 200) {
                 AppLogger.w(TAG, "Release API returned ${connection.responseCode}")
-                return CheckResult.Answered(null)
+                // 404 is the one status GitHub gives for real: no `unstable` tag exists yet.
+                // Everything else — 403 unauthenticated rate limit, 5xx, 429 — is GitHub itself
+                // being unreachable in every way that matters, and is exactly the condition the
+                // retry exists for; answering it with a definitive "no update" would silently
+                // turn every one of those into the outcome the retry was added to avoid.
+                return if (connection.responseCode == 404) CheckResult.Answered(null)
+                else CheckResult.Unreachable
             }
             val json = JSONObject(
                 connection.inputStream.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
@@ -175,21 +181,32 @@ internal object OtaUpdater {
         }
     }
 
+    sealed interface DownloadResult {
+        data class Downloaded(val file: File) : DownloadResult
+
+        /** A deliberate no: a disallowed host, an oversized or empty body, too many redirects.
+         *  Trying again in 20s changes nothing about any of those. */
+        object Refused : DownloadResult
+
+        /** The request itself never completed — worth trying again once the network is up. */
+        object Unreachable : DownloadResult
+    }
+
     /**
      * Downloads into app-private cache, following redirects by hand so that every hop is
-     * re-checked. Returns null on any refusal or failure; the partial file never survives.
+     * re-checked. The partial file never survives a refusal or a failure.
      */
-    fun download(context: Context, update: Update): File? {
+    fun download(context: Context, update: Update): DownloadResult {
         if (!isAllowedUrl(update.apkUrl)) {
             AppLogger.w(TAG, "Refusing to download from ${update.apkUrl}")
-            return null
+            return DownloadResult.Refused
         }
         val temporary = File.createTempFile(CACHE_PREFIX, ".apk", context.cacheDir)
         var current = update.apkUrl
         var kept = false
         try {
             repeat(MAX_REDIRECTS) {
-                if (!isAllowedUrl(current)) return null
+                if (!isAllowedUrl(current)) return DownloadResult.Refused
                 val connection = (URL(current).openConnection() as HttpURLConnection).apply {
                     instanceFollowRedirects = false
                     setRequestProperty("User-Agent", "EVChargePilot-Android")
@@ -199,7 +216,8 @@ internal object OtaUpdater {
                 try {
                     val status = connection.responseCode
                     if (status in 300..399) {
-                        val location = connection.getHeaderField("Location") ?: return null
+                        val location = connection.getHeaderField("Location")
+                            ?: return DownloadResult.Refused
                         // Resolved against the current URL: a `Location` may be relative, and
                         // a bare path would otherwise fail the allowlist for the wrong reason.
                         current = URI(current).resolve(location).toString()
@@ -207,12 +225,15 @@ internal object OtaUpdater {
                     }
                     if (status != HttpURLConnection.HTTP_OK) {
                         AppLogger.w(TAG, "Update download returned $status")
-                        return null
+                        // A 404/410 on the asset itself is permanent for this run; a 5xx or a
+                        // rate limit is the same "GitHub, not us" case check() already retries.
+                        return if (status in 500..599) DownloadResult.Unreachable
+                        else DownloadResult.Refused
                     }
                     // The declared length is a claim; the transferred length is the fact.
                     // Both are capped, so neither a lying header nor a chunked response can
                     // fill the head unit's storage.
-                    if (connection.contentLengthLong > MAX_APK_BYTES) return null
+                    if (connection.contentLengthLong > MAX_APK_BYTES) return DownloadResult.Refused
                     var written = 0L
                     connection.inputStream.use { input ->
                         temporary.outputStream().use { output ->
@@ -221,24 +242,24 @@ internal object OtaUpdater {
                                 val read = input.read(buffer)
                                 if (read == -1) break
                                 written += read
-                                if (written > MAX_APK_BYTES) return null
+                                if (written > MAX_APK_BYTES) return DownloadResult.Refused
                                 output.write(buffer, 0, read)
                             }
                             output.fd.sync()
                         }
                     }
-                    if (written == 0L) return null
+                    if (written == 0L) return DownloadResult.Refused
                     kept = true
-                    return temporary
+                    return DownloadResult.Downloaded(temporary)
                 } finally {
                     connection.disconnect()
                 }
             }
             AppLogger.w(TAG, "Update download exceeded $MAX_REDIRECTS redirects")
-            return null
+            return DownloadResult.Refused
         } catch (e: Exception) {
             AppLogger.w(TAG, "Update download failed: ${e.message}")
-            return null
+            return DownloadResult.Unreachable
         } finally {
             // Only a returned file survives. A partial body left in the cache after a refused
             // redirect or a dropped connection is an unverified archive on disk, which is

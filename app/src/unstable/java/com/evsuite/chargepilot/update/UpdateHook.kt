@@ -127,7 +127,11 @@ object UpdateHook {
         val existing = File(directory, OtaUpdater.fileName(update.versionName))
         if (existing.isFile && existing.length() > 0) return Attempt.Ready(existing)
 
-        val downloaded = OtaUpdater.download(context, update) ?: return Attempt.Retry
+        val downloaded = when (val result = OtaUpdater.download(context, update)) {
+            OtaUpdater.DownloadResult.Unreachable -> return Attempt.Retry
+            OtaUpdater.DownloadResult.Refused -> return Attempt.Nothing
+            is OtaUpdater.DownloadResult.Downloaded -> result.file
+        }
         val published = OtaUpdater.publish(context, downloaded, update.versionName)
             ?: return Attempt.Nothing
         AppLogger.i(TAG, "Update ${update.versionName} ready at $published")
