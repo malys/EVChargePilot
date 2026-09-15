@@ -6,6 +6,80 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The trip trace opens at full size.** In the ledger it is a thumbnail a couple of hundred
+  pixels tall, and on a panel shorter than the emulator's it is the first thing squeezed. Tap it
+  and it gets a screen of its own: speed and charge on labelled axes, and a cursor dragged along
+  the trace that reads back what the car actually held at that moment — elapsed time, speed,
+  charge, outside temperature, battery power, climate. With no finger on it the row shows the
+  trip's own extremes instead of six dashes. Nothing here is computed: a gap in the record reads
+  as a gap, never as a zero.
+
+- **`mise run seed-settings` loads the keys into the emulator.** Validating a routing change cost
+  a USB stick or a key typed on a touch keyboard. A debug build now applies a settings file
+  dropped in its own files directory, once, at the next start; the task pushes
+  `evchargepilot-settings.local.json` (gitignored — it holds keys in clear text) there over adb.
+  `mise run run` and `run-unstable` do it on every install, and launch without it when the file
+  is absent. Release builds have no such path: the only way in stays the stick the driver browsed
+  to.
+
+- **A search result can be kept without going there.** Every row in the destination results now
+  carries a star beside it: tap the place to drive to it, tap the star to put it in the favourites
+  and keep searching. Saving used to be a long press, which is an affordance nobody finds on a
+  panel; the long press still works for a hand that learned it.
+
+- **The diagnostics capture reports the panel.** A `[panel]` section records what the resource
+  system and the window manager actually see — the dp the layouts are written in, the density, the
+  font scale, the pixels, and the insets the platform reserves — so the next layout question about
+  this screen is settled by a capture instead of by a guess from a desk.
+
+- **The probe asks the property channel, the charging counters and the platform's diagnostics.**
+  Three unblocked tickets' worth of questions in one capture: the typed property channel reached
+  by name rather than by reflection, asked for eight ids including the two the energy screen has
+  no source for; the charging service's own energy counters *with the validity flag the vehicle
+  publishes beside each one*, which is what can finally settle the unit nobody could prove; and
+  whether the platform's own diagnostic service is reachable here at all, so the OBD question has
+  a recorded answer rather than an assumed one. Reads only — no transaction that starts, stops or
+  limits a charge, or writes a property, is named anywhere in the probe, and a test asserts it
+  against the full write set harvested from each interface.
+
+- **The probe bundle asks three more questions.** The pack's voltage and current are reported by
+  name, so a capture says which of the two answered rather than only that their product did not;
+  and the one remaining in-car temperature candidate the firmware declares is probed rather than
+  read, because guessing wrong would put the outside temperature in the cabin tile.
+
+### Changed
+
+- **The trip screen no longer assumes the emulator's height.** The car has no system bars but its
+  per-app DPI is the driver's to set, and a taller density buys fewer dp — so the real panel is
+  shorter than the emulator and the trip readouts came out squashed. The readout rows now take a
+  share of whatever height the panel has, with the tile size as a floor rather than a fixed slice,
+  and the trace keeps the largest share. No height bucket decides it: a `-hXXXdp` qualifier only
+  moves the guess, and a panel on the wrong side of the threshold gets the layout meant for the
+  other one.
+
+- **The speed comparison and the energy breakdown can train again.** Both rest on a local model,
+  and the model refused to train because no drive has ever confirmed a battery-power conversion on
+  this firmware — so on the only car this project runs on, they were empty by construction. The
+  model now trains on the pack pair the dashboard already derives its power from, and carries a
+  separate interpretation stamp saying so. Nothing is relabelled as measured: the figure on the
+  dashboard stays derived, the model's own predictions stay estimates with a band, and the day a
+  validated conversion arrives the stamp changes and the derived model is retrained from scratch
+  rather than quietly surviving underneath it.
+
+- **Battery power is shown where the car publishes it, labelled for what it is.** On this firmware
+  the standard power property never answers, so instantaneous power, consumption, the trip's
+  energy and the adaptive range were all blank. The pack's own voltage and current are readable
+  and multiply out to watts, so they are read and published as a derived figure — arithmetic,
+  drawn differently from a vehicle reading, and still barred from training any model: a trip
+  recorded this way carries no power evidence, which is what the models filter on.
+
+- **A trip with no power reading is priced from the pack you declared.** The charge dropped by a
+  measured number of points and the settings say what a point is worth, so the trip's energy and
+  its average consumption are estimated from that instead of left empty — with the band that a
+  declared capacity and a state of health deserve. Regeneration keeps its dash: the gauge cannot
+  tell energy that came back from energy never spent. The same figure closes the energy breakdown
+  when neither model can produce one, instead of a screen that only says no.
+
 - **Unstable builds now tell you when a newer one exists.** A tester's only way to find out was
   to go and look at the releases page. An unstable build now asks the rolling `unstable`
   pre-release at start, downloads a newer APK into the download folder and names the file and the

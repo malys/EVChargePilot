@@ -96,6 +96,13 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 startActivity(TripExportActivity.single(this, startedAt))
             }
         }
+        // The thumbnail is a few hundred pixels tall on the car and the first thing a shorter
+        // panel takes space from. Reading a value off it is the full-size plot's job.
+        binding.tripPlot.setOnClickListener {
+            selectedStartedAtMs?.let { startedAt ->
+                startActivity(TripPlotActivity.forTrip(this, startedAt))
+            }
+        }
         binding.speedWhatIfAction.setOnClickListener { openSpeedWhatIfIfParked() }
         binding.energyBreakdownAction.setOnClickListener {
             selectedStartedAtMs?.let { startedAt ->

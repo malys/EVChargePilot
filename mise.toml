@@ -145,6 +145,8 @@ for attempt in $(seq 1 120); do
 done
 # AVD hardware config owns geometry; discard stale overrides from older 1920x720 profiles.
 "$ADB" shell wm size reset
+# No GPS receiver in the emulator: the root `geo` task keeps a fixed Auzielle position fresh.
+nohup mise run geo >/dev/null 2>&1 &
 echo "Automotive emulator ready."
 '''
 
@@ -183,9 +185,12 @@ fi
 APK=$(ls -t app/build/outputs/apk/stable/debug/*.apk | head -1)
 echo "Installing $APK"
 "$ADB" install -r -g "$APK"
-"$ADB" shell am start -n \
-  "com.evsuite.chargepilot/com.evsuite.chargepilot.MainActivity"
-echo "EVChargePilot launched."
+# A route needs a position and the emulator has no receiver. The task is a no-op when
+# emulator-car already started one.
+nohup mise run geo >/dev/null 2>&1 &
+# seed-settings launches the app: the seed is read at start, so the install has to come first
+# and the launch has to come after it. Without the local settings file it only launches.
+SEED_PKG="com.evsuite.chargepilot" mise run seed-settings
 '''
 
 [tasks.run-unstable]
@@ -201,11 +206,40 @@ fi
 APK=$(ls -t app/build/outputs/apk/unstable/debug/*.apk | head -1)
 echo "Installing $APK"
 "$ADB" install -r -g "$APK"
-"$ADB" shell am start -n \
-  "com.evsuite.chargepilot.unstable/com.evsuite.chargepilot.MainActivity"
-echo "EVChargePilot (unstable) launched."
+nohup mise run geo >/dev/null 2>&1 &
+SEED_PKG="com.evsuite.chargepilot.unstable" mise run seed-settings
 '''
 
 [tasks.logs]
 description = "Follow EVChargePilot and shared hardware logs"
 run = 'adb logcat -s EVChargePilot:V EV_HW:V AndroidRuntime:E'
+
+# The emulator has no USB stick and no driver to type a key on a touch keyboard. This drops the
+# real settings into a debug build's own files directory, where ChargePilotApp applies them once
+# at the next start. Debug builds only — a release build has no such path. The file it reads is
+# gitignored: it carries API keys in clear text, exactly like the stick does.
+[tasks.seed-settings]
+description = "Load evchargepilot-settings.local.json into the connected emulator (debug builds)"
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+FILE="${SEED_FILE:-evchargepilot-settings.local.json}"
+PKG="${SEED_PKG:-com.evsuite.chargepilot}"
+if [ -z "$($ADB devices | sed '1d' | grep -w device || true)" ]; then
+  echo "No device connected. Start emulator-car/emulator-screen first." >&2
+  exit 1
+fi
+USER_ID="$($ADB shell am get-current-user | tr -d '\r\n')"
+if [ -f "$FILE" ]; then
+  "$ADB" push "$FILE" /data/local/tmp/seed-settings.json
+  # The redirect has to run inside run-as, not in the shell that invokes it: the outer shell is
+  # uid shell, which cannot write into an app's data directory, and its cwd is /.
+  "$ADB" shell "run-as $PKG --user $USER_ID sh -c 'cat /data/local/tmp/seed-settings.json > /data/user/$USER_ID/$PKG/files/seed-settings.json'"
+  "$ADB" shell rm /data/local/tmp/seed-settings.json
+  echo "Settings seeded into $PKG (user $USER_ID)."
+else
+  echo "No $FILE — launching without seeding. Copy evchargepilot-settings.json to it and put the real keys in."
+fi
+"$ADB" shell am force-stop "$PKG"
+"$ADB" shell am start --user "$USER_ID" -n "$PKG/com.evsuite.chargepilot.MainActivity"
+'''

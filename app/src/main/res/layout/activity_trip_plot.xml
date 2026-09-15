@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Impeccable direction contract
+  THESIS: the trace the ledger can only sketch, at the size where its values can be read off it.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow.
+  STORY: open a recorded trip's trace, drag a cursor along it, read what the car held at that moment.
+  FIRST VIEWPORT: a fixed bar and one cursor readout row; the plot owns everything between them.
+  FORM: a single evidence plate extending trip history; seed key cp062-20260915.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_target"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:id="@+id/plotTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="@dimen/touch_target"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/plotLegend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_sm"
+        android:text="@string/trip_plot_legend"
+        android:textAppearance="@style/Text.EV.Secondary" />
+
+    <com.evsuite.chargepilot.TripPlotView
+        android:id="@+id/tripPlot"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/spacing_lg"
+        android:layout_marginEnd="@dimen/spacing_lg"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_weight="1"
+        android:background="@drawable/bg_card"
+        android:importantForAccessibility="yes" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chargepilot_readout_height"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingBottom="@dimen/spacing_sm">
+
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_plot_cursor_time" />
+            <TextView android:id="@+id/cursorTime" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_speed" />
+            <TextView android:id="@+id/cursorSpeed" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc" />
+            <TextView android:id="@+id/cursorSoc" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_outside_temp" />
+            <TextView android:id="@+id/cursorOutsideTemp" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_power" />
+            <TextView android:id="@+id/cursorPower" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+        <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1">
+            <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate" />
+            <TextView android:id="@+id/cursorClimate" style="@style/Text.EV.ReadoutValue" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

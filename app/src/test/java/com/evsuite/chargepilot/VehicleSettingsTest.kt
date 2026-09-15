@@ -7,7 +7,7 @@ import org.junit.Test
 class VehicleSettingsTest {
 
     @Test fun `typed figures replace the specification sheet`() {
-        val parsed = VehicleSettings.parse("54,2", "88", "50", "15")
+        val parsed = VehicleSettings.parse("54,2", "88", "50", "15", "80")
         val values = (parsed as VehicleSettings.Parsed.Ok).values
         // The dashboard keyboard produces a comma, and a comma is a decimal point here.
         assertEquals(54.2, values.usableCapacityKwhWhenNew, 1e-9)
@@ -21,7 +21,7 @@ class VehicleSettingsTest {
     }
 
     @Test fun `an empty field means the documented default, not zero`() {
-        val values = (VehicleSettings.parse("", "", "", "") as VehicleSettings.Parsed.Ok).values
+        val values = (VehicleSettings.parse("", "", "", "", "") as VehicleSettings.Parsed.Ok).values
         assertEquals(VehicleSettings.DEFAULT_CAPACITY_KWH, values.usableCapacityKwhWhenNew, 1e-9)
         assertEquals(VehicleSettings.DEFAULT_RESERVE_PERCENT, values.reservePercent, 1e-9)
         assertTrue(values.isDefault)
@@ -32,28 +32,48 @@ class VehicleSettingsTest {
         // a 90 % reserve turns every trip into a charging stop.
         assertEquals(
             VehicleSettings.Field.CAPACITY,
-            (VehicleSettings.parse("0", "100", "22", "10")
+            (VehicleSettings.parse("0", "100", "22", "10", "80")
                 as VehicleSettings.Parsed.Refused).field,
         )
         assertEquals(
             VehicleSettings.Field.HEALTH,
-            (VehicleSettings.parse("61,7", "300", "22", "10")
+            (VehicleSettings.parse("61,7", "300", "22", "10", "80")
                 as VehicleSettings.Parsed.Refused).field,
         )
         assertEquals(
             VehicleSettings.Field.MIN_POWER,
-            (VehicleSettings.parse("61,7", "100", "0", "10")
+            (VehicleSettings.parse("61,7", "100", "0", "10", "80")
                 as VehicleSettings.Parsed.Refused).field,
         )
         assertEquals(
             VehicleSettings.Field.RESERVE,
-            (VehicleSettings.parse("61,7", "100", "22", "90")
+            (VehicleSettings.parse("61,7", "100", "22", "90", "80")
                 as VehicleSettings.Parsed.Refused).field,
         )
         assertEquals(
             VehicleSettings.Field.CAPACITY,
-            (VehicleSettings.parse("sixty", "100", "22", "10")
+            (VehicleSettings.parse("sixty", "100", "22", "10", "80")
                 as VehicleSettings.Parsed.Refused).field,
+        )
+    }
+
+    /** CP-062: a stop left with less than the reserve buys no kilometres, leg after leg. */
+    @Test fun `a departure charge at or below the reserve is refused`() {
+        assertEquals(
+            VehicleSettings.Field.DEPARTURE,
+            (VehicleSettings.parse("61,7", "100", "22", "30", "25")
+                as VehicleSettings.Parsed.Refused).field,
+        )
+        assertEquals(
+            VehicleSettings.Field.DEPARTURE,
+            (VehicleSettings.parse("61,7", "100", "22", "10", "5")
+                as VehicleSettings.Parsed.Refused).field,
+        )
+        assertEquals(
+            70.0,
+            (VehicleSettings.parse("61,7", "100", "22", "10", "70")
+                as VehicleSettings.Parsed.Ok).values.departurePercent,
+            1e-9,
         )
     }
 }

@@ -14,6 +14,12 @@ class TripPlotRunsTest {
         assertEquals(listOf(7f to 7f), runs[2])
     }
 
+    @Test fun `the cursor clock reads minutes and seconds, and never counts backwards`() {
+        assertEquals("0:07", TripPlotView.elapsed(7_400L))
+        assertEquals("12:30", TripPlotView.elapsed(750_000L))
+        assertEquals("0:00", TripPlotView.elapsed(-1_000L))
+    }
+
     @Test fun `an all-null trace draws nothing`() {
         assertEquals(emptyList<List<Pair<Float, Float>>>(), TripPlotView.contiguousRuns(listOf(null, null)))
     }

@@ -4,9 +4,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
+import android.view.WindowInsets
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.evsuite.chargepilot.databinding.ActivityDiagnosticsBinding
@@ -258,6 +261,9 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine("app_log_total_since_start=${AppLogger.totalCount}")
             appendLine("app_log_retained=${logEntries.size}")
             appendLine()
+            appendLine("[panel]")
+            panelReport().forEach(::appendLine)
+            appendLine()
             appendLine("[internal_storage_artifacts]")
             diagnosticFileInventory().forEach(::appendLine)
             appendLine()
@@ -286,6 +292,52 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine("[previous_crash]")
             appendLine(crash ?: "none")
         })
+    }
+
+    /**
+     * Exactly what the resource system sees, so a layout no longer has to guess the panel.
+     *
+     * The car draws no system bars and its per-app DPI is the driver's to set, so neither the
+     * pixel size nor the density is knowable from a desk — and a screen sized for the emulator
+     * came out squashed in the vehicle. `screen_height_dp` is the figure a `-hXXXdp` qualifier
+     * matches on, and `window_*` is what an activity is actually handed once the insets the
+     * platform reserves are taken out. Reported rather than adapted to: one capture settles it.
+     */
+    private fun panelReport(): List<String> {
+        val config = resources.configuration
+        val metrics = resources.displayMetrics
+        val lines = mutableListOf(
+            "screen_width_dp=${config.screenWidthDp}",
+            "screen_height_dp=${config.screenHeightDp}",
+            "smallest_screen_width_dp=${config.smallestScreenWidthDp}",
+            "density_dpi=${config.densityDpi}",
+            "density=${metrics.density}",
+            "scaled_density=${metrics.scaledDensity}",
+            "font_scale=${config.fontScale}",
+            "display_px=${metrics.widthPixels}x${metrics.heightPixels}",
+            "xdpi=${metrics.xdpi};ydpi=${metrics.ydpi}",
+            "ui_mode_night=${
+                config.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                    Configuration.UI_MODE_NIGHT_YES
+            }",
+            "orientation=${config.orientation}",
+        )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            lines += "window_metrics=unavailable below API 30"
+            return lines
+        }
+        val window = windowManager.currentWindowMetrics
+        val bounds = window.bounds
+        val insets = window.windowInsets.getInsets(
+            WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+        )
+        lines += "window_px=${bounds.width()}x${bounds.height()}"
+        lines += "system_bar_insets_px=l${insets.left};t${insets.top};r${insets.right};b${insets.bottom}"
+        // What a full-screen layout really has, in the unit the layouts are written in.
+        val usableHeightDp = (bounds.height() - insets.top - insets.bottom) / metrics.density
+        val usableWidthDp = (bounds.width() - insets.left - insets.right) / metrics.density
+        lines += "usable_dp=${usableWidthDp.toInt()}x${usableHeightDp.toInt()}"
+        return lines
     }
 
     /** Metadata only: no trip contents, location, VIN or other user data enters diagnostics. */

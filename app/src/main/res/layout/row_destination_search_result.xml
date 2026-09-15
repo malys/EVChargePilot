@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A geocoding answer and the one thing a driver may want to do with it besides going there.
+     The long-press that used to be the only way to save a place is invisible on a panel, so the
+     save is a target of its own, beside the answer and never in front of it. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:baselineAligned="false"
+    android:orientation="horizontal">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/resultChoose"
+        style="@style/Widget.EV.Button.Outlined"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/touch_target"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/resultSave"
+        style="@style/Widget.EV.Button.Outlined"
+        android:layout_width="@dimen/touch_target"
+        android:layout_height="@dimen/touch_target"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:text="@string/destination_save_favorite_symbol" />
+</LinearLayout>

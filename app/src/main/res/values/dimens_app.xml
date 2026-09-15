@@ -8,9 +8,16 @@
          the suite size for a Display sharing a screen with a bar and a status line; with
          both removed the anchor is scaled to the field it anchors. The suite token
          text_display is untouched, and no second element on this screen uses this size. -->
-    <dimen name="chargepilot_text_soc">56sp</dimen>
+    <dimen name="chargepilot_text_soc">40sp</dimen>
     <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
     <dimen name="chargepilot_swipe_threshold">96dp</dimen>
     <!-- Fixed across primary screens so destination tabs never shift under the driver's hand. -->
     <dimen name="chargepilot_primary_title_width">300dp</dimen>
+    <!-- Trip readout tiles, as a floor rather than a height. The car's usable height is
+         not the emulator's - it has no system bars, and its per-app DPI is the driver's
+         to set, so a taller density buys fewer dp. A -hXXXdp qualifier would only move
+         the guess: a panel on the wrong side of the threshold gets the layout meant for
+         the other one, and that is what squashed the trip screen. The rows take their
+         share of whatever height exists and never fall below this. -->
+    <dimen name="chargepilot_readout_height">84dp</dimen>
 </resources>

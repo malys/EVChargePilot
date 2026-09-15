@@ -8,7 +8,9 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityEnergyBreakdownBinding
 import com.evsuite.chargepilot.databinding.RowEnergyBreakdownBinding
+import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.model.AttributedEnergyEstimate
 import com.evsuite.hardware.telemetry.model.EnergyAttribution
 import com.evsuite.hardware.telemetry.model.EnergyAttributionCalculator
@@ -68,14 +70,20 @@ class EnergyBreakdownActivity : AppCompatActivity() {
                     )
                 }
             }
+            val pack = VehicleSettings.read(this).pack
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(result, charge)
+                render(result, charge, trip?.summary, pack)
             }
         }
     }
 
-    private fun render(result: EnergyAttributionResult?, charge: ChargeAttributionResult?) {
+    private fun render(
+        result: EnergyAttributionResult?,
+        charge: ChargeAttributionResult?,
+        summary: EnergyTripSummary?,
+        pack: BatteryCapacityConfig?,
+    ) {
         binding.loadingState.visibility = View.GONE
         if (result is EnergyAttributionResult.Ready) {
             binding.emptyState.visibility = View.GONE
@@ -91,7 +99,7 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         }
         binding.breakdownContent.visibility = View.GONE
         binding.emptyState.visibility = View.VISIBLE
-        binding.emptyReason.setText(
+        val reason = getString(
             when {
                 // On a car that publishes no power, the charge path is the only one that will
                 // ever answer, so its reason is the one the driver can act on.
@@ -102,6 +110,32 @@ class EnergyBreakdownActivity : AppCompatActivity() {
                     R.string.energy_breakdown_missing_power
                 else -> R.string.energy_breakdown_model_unavailable
             },
+        )
+        // A breakdown neither path can produce is still a trip that spent charge over a
+        // distance. Both models need evidence this car has not yet given; the pack size the
+        // driver typed in needs none, so the screen ends on a figure instead of on a refusal.
+        // It is deliberately one sentence and not a table: it is one number and its origin.
+        binding.emptyReason.text = declaredTotals(summary, pack)?.let { "$reason\n\n$it" }
+            ?: reason
+    }
+
+    /** The gauge drop priced with the declared pack, or null when either is missing. */
+    private fun declaredTotals(
+        summary: EnergyTripSummary?,
+        pack: BatteryCapacityConfig?,
+    ): String? {
+        if (pack == null || summary == null) return null
+        val start = summary.startSocPercent?.toDouble() ?: return null
+        val end = summary.endSocPercent?.toDouble() ?: return null
+        val distanceKm = summary.recordedDistanceKm?.takeIf { it >= MIN_DISTANCE_KM } ?: return null
+        val drop = start - end
+        val kwh = pack.energyAtSocKwh(drop).value?.takeIf { it > 0.0 } ?: return null
+        return getString(
+            R.string.energy_breakdown_declared_totals,
+            drop,
+            distanceKm,
+            kwh,
+            kwh * 100.0 / distanceKm,
         )
     }
 
@@ -315,6 +349,7 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         private const val EXTRA_STARTED_AT = "started_at"
         private const val INVALID_ID = Long.MIN_VALUE
         private const val HISTORY_FILE = "trips.json"
+        private const val MIN_DISTANCE_KM = 0.1
 
         fun forTrip(context: Context, startedAtMs: Long) =
             Intent(context, EnergyBreakdownActivity::class.java)

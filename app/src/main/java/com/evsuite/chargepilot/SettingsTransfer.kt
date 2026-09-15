@@ -167,6 +167,7 @@ object SettingsTransfer {
             vehicle.addProperty(HEALTH, values.stateOfHealthPercent)
             vehicle.addProperty(MIN_POWER, values.minChargerPowerKw)
             vehicle.addProperty(RESERVE, values.reservePercent)
+            vehicle.addProperty(DEPARTURE, values.departurePercent)
             root.add("vehicle", vehicle)
         }
         if (settings.routing.favorites.isNotEmpty()) {
@@ -213,6 +214,8 @@ object SettingsTransfer {
                             ?: VehicleSettings.DEFAULT_MIN_POWER_KW,
                         reservePercent = it.number(RESERVE)
                             ?: VehicleSettings.DEFAULT_RESERVE_PERCENT,
+                        departurePercent = it.number(DEPARTURE)
+                            ?: VehicleSettings.DEFAULT_DEPARTURE_PERCENT,
                     )
                 )
             },
@@ -247,4 +250,5 @@ object SettingsTransfer {
     private const val HEALTH = "state_of_health_percent"
     private const val MIN_POWER = "min_charger_power_kw"
     private const val RESERVE = "reserve_percent"
+    private const val DEPARTURE = "departure_percent"
 }

@@ -10,3 +10,6 @@ local.properties
 *.keystore
 mise.local.toml
 
+
+# Real API keys, the emulator seed. Same secret as the USB stick.
+evchargepilot-settings.local.json

@@ -63,36 +63,45 @@ internal object ChargeStopHandoff {
     /**
      * The handoff for a planned trip.
      *
-     * @param stop the charger this plan stops at, or null for a trip that needs none — and also
-     *   for a `Stop` plan that found no charger, which has no coordinates to send.
+     * @param stops the chargers this plan stops at, in the order they are driven — empty for a
+     *   trip that needs none, and also for a `Stop` plan that found no charger, which has no
+     *   coordinates to send. A long route has more than one of them (CP-062), and all of them are
+     *   carried: a trip handed over with only its first stop is a trip the car re-plans at the
+     *   second one.
      *
      * A point that fails [NavigationHandoff.poi]'s validation drops out of the lists rather than
      * out of the plan: the `geo:` fallback still has somewhere to go, because [latitude] and
      * [longitude] are carried as numbers and not as a validated POI.
      */
-    fun of(place: OrsGeocode.Place, stop: Found?, route: OrsDirections.Route? = null): Handoff {
+    fun of(
+        place: OrsGeocode.Place,
+        stops: List<Found>,
+        route: OrsDirections.Route? = null,
+    ): Handoff {
         val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
-        val stopPoi = stop?.let {
-            NavigationHandoff.poi(it.charger.latitude, it.charger.longitude, it.charger.name)
+        // The stops are the points the plan is about and they keep their place in the list
+        // whatever the shape costs: the budget is what is left over, not the other way round.
+        val stopsOnTheWay = stops.mapNotNull { stop ->
+            NavigationHandoff.poi(stop.charger.latitude, stop.charger.longitude, stop.charger.name)
+                ?.let { stop.alongKm to it }
         }
-        // The stop is the point the plan is about and it keeps its place in the list whatever the
-        // shape costs: the budget is what is left over, not the other way round.
-        val stopOnTheWay = listOfNotNull(stopPoi?.let { (stop?.alongKm ?: 0.0) to it })
-        val budget = NavigationHandoff.MAX_PATHWAY_POINTS - stopOnTheWay.size
+        val budget = NavigationHandoff.MAX_PATHWAY_POINTS - stopsOnTheWay.size
         // Ordered by distance along the road, because a pathway is an itinerary and not a set: a
         // waypoint after the destination in the list is a route that doubles back.
         val pathway = NavigationHandoff.pathway(
-            (shape(route, budget) + stopOnTheWay).sortedBy { it.first }.map { it.second }
+            (shape(route, budget) + stopsOnTheWay).sortedBy { it.first }.map { it.second }
         )
-        // The stop first and the destination after it: that is the order they are driven in, and
-        // the order the chain hands them over in once each leg's guidance ends. Shape points are
-        // deliberately not legs — they are places the car passes, and a chain that treated one as
-        // an arrival would re-send guidance in the middle of a motorway.
-        return if (stop != null) {
+        // The stops first and the destination after them: that is the order they are driven in,
+        // and the order the chain hands them over in once each leg's guidance ends. Shape points
+        // are deliberately not legs — they are places the car passes, and a chain that treated one
+        // as an arrival would re-send guidance in the middle of a motorway.
+        val first = stops.firstOrNull()
+        return if (first != null) {
             Handoff(
-                stop.charger.latitude, stop.charger.longitude, stop.charger.name, toStop = true,
-                point = stopPoi, destination = destination, pathway = pathway,
-                legs = listOfNotNull(stopPoi, destination),
+                first.charger.latitude, first.charger.longitude, first.charger.name, toStop = true,
+                point = stopsOnTheWay.firstOrNull()?.second, destination = destination,
+                pathway = pathway,
+                legs = stopsOnTheWay.map { it.second } + listOfNotNull(destination),
             )
         } else {
             Handoff(

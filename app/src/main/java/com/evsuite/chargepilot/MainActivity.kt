@@ -22,6 +22,7 @@ import com.evsuite.hardware.BatteryPowerEvidence
 import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.AdaptiveRangeEstimator
+import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ConsumptionCalculator
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -60,6 +61,9 @@ class MainActivity : PrimaryNavigationActivity() {
     private var recorder: TripRecordingService? = null
     /** Exact normalized service frame; the parked-only actions re-read it rather than the UI. */
     @Volatile private var latestSnapshot: EnergySnapshot? = null
+
+    /** The declared pack, so a trip with no power interval can still price its SoC drop. */
+    @Volatile private var pack: BatteryCapacityConfig? = null
     /** Immutable snapshot loaded off the UI thread; the store writes newest trips first. */
     @Volatile private var recentTrips: List<EnergyTripSummary> = emptyList()
     /** Rebuilt only when history or firmware evidence changes, never on every 1 Hz frame. */
@@ -165,6 +169,7 @@ class MainActivity : PrimaryNavigationActivity() {
         // the hook latches itself. This is what makes a head unit whose Wi-Fi arrived after
         // launch still find the update, without polling for it. Stable contains no updater.
         UpdateHook.checkInBackground(this)
+        pack = VehicleSettings.read(this).pack
         loadRecentTrips()
         // The consumption fit reads the whole trip history, so it happens once per visit to
         // this screen and only when there is actually a plan being followed.
@@ -202,15 +207,17 @@ class MainActivity : PrimaryNavigationActivity() {
 
     private fun render(value: EnergySnapshot) {
         latestSnapshot = value
-        val powerValidated = DashboardReadings.isPowerValidated(value.firmware)
-        val calculationSnapshot = if (powerValidated || value.batteryPowerKw == null) value
-            else value.copy(batteryPowerKw = null)
+        // The calculators are fed the reading as it arrived, unvalidated firmware included.
+        // A power figure the vehicle publishes is still a power figure; what an unproven
+        // property costs it is its provenance, not its existence, and DashboardReadings
+        // labels it derived rather than measured. Blanking it here emptied instantaneous
+        // consumption, adaptive range and the trip totals on the only firmware this car has.
         val powerMissingReason = DashboardReadings.powerUnavailableReason(value.firmware)
-        val consumptionReading = consumption.add(calculationSnapshot, powerMissingReason)
+        val consumptionReading = consumption.add(value, powerMissingReason)
         val currentTrip = EnergyTripSession.current(value.timestampMs)
-        val powerEvidence = CarPropertyEvidence.batteryPowerEvidence(value.firmware)
+        val powerEvidence = CarPropertyEvidence.powerModelEvidence(value.firmware)
         val adaptiveRange = rangeEstimator.estimate(
-            calculationSnapshot,
+            value,
             currentTrip,
             trustedRecentTrips(powerEvidence),
             powerMissingReason,
@@ -220,6 +227,7 @@ class MainActivity : PrimaryNavigationActivity() {
             currentTrip,
             consumptionReading.smoothedInstantaneous,
             adaptiveRange,
+            pack,
         )
         DashboardFrame.publish(readings)
         renderReadings(readings, value.firmware)

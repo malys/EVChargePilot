@@ -134,9 +134,13 @@
     <string name="trip_history_row_summary">%1$s · %2$s</string>
     <string name="trip_history_row_energy">%1$s · %2$s</string>
     <string name="label_soc_change">STATE OF CHARGE</string>
-    <string name="trip_track_legend">Speed (accent) and battery power over recorded time</string>
-    <string name="trip_track_description">Speed and battery power trace over %1$d recorded minutes</string>
+    <string name="trip_track_legend">Speed (accent), charge and battery power — tap to enlarge</string>
+    <string name="trip_track_description">Speed, charge and battery power trace over %1$d recorded minutes. Tap to open the full-size plot.</string>
     <string name="trip_track_unavailable">No sample track was retained for this trip.</string>
+    <!-- Full-size trip plot. -->
+    <string name="trip_plot_legend">Speed on the left axis in km/h, charge on the right in percent over its own observed range, battery power around the centre line. Drag across the plot to read a moment.</string>
+    <string name="trip_plot_climate_ac">A/C</string>
+    <string name="label_plot_cursor_time">ELAPSED</string>
     <string name="trip_attribution_intro">ESTIMATED RESIDUAL · Derived from integrated battery energy minus modelled traction; not a vehicle per-consumer measurement.</string>
     <string name="trip_attribution_traction">Modelled traction: %1$s</string>
     <string name="trip_attribution_climate_active">Climate active</string>
@@ -151,6 +155,7 @@
     <string name="energy_breakdown_title">Post-trip energy breakdown</string>
     <string name="energy_breakdown_loading">Calculating from the bounded local trip record…</string>
     <string name="energy_breakdown_unavailable_title">Breakdown unavailable</string>
+    <string name="energy_breakdown_declared_totals">Read off the gauge instead: %1$.1f %% of charge over %2$.1f km — about %3$.1f kWh, or %4$.1f kWh/100 km, at the pack size you declared. An estimate built on a figure you entered, not a measurement.</string>
     <string name="energy_breakdown_model_unavailable">No validated local model can produce this breakdown yet. No estimate is substituted.</string>
     <string name="energy_breakdown_missing_power">This trip has no complete retained power evidence for a breakdown. Recorded totals remain unchanged.</string>
     <string name="power_never_published">This vehicle never publishes battery power, so nothing here can be worked out from it — now or later. Charge planning uses state of charge instead.</string>
@@ -264,8 +269,10 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_action_destination">Choose a destination</string>
     <string name="charge_stop_action_destination_chosen">Change destination \u2014 %1$s</string>
     <string name="charge_stop_favorites_title">Favourites</string>
-    <string name="charge_stop_favorites_hint">Tap to choose it. Long-press a result on the left to save it, long-press a favourite to remove it.</string>
+    <string name="charge_stop_favorites_hint">Tap to choose it. Tap the star beside a result to save it, long-press a favourite to remove it.</string>
     <string name="charge_stop_favorites_empty">No favourites saved yet. Long-press a result on the left to save one.</string>
+    <string name="destination_save_favorite_symbol">★</string>
+    <string name="destination_save_favorite">Save as a favourite</string>
     <string name="charge_stop_favorites_saved">Saved as a favourite.</string>
     <string name="charge_stop_favorites_save_failed">Could not save: the list already holds %1$d favourites.</string>
     <string name="charge_stop_favorites_removed">Favourite removed.</string>
@@ -282,6 +289,15 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_refused_route">No route length to plan against.</string>
     <string name="charge_stop_refused_rate">No usable rate yet. Record a few trips and this fills in.</string>
     <string name="charge_stop_refused_band">Too uncertain over this distance to be worth acting on.</string>
+    <!-- CP-062. The long route, planned leg by leg: each leg carries its own band, and the
+         charge a stop is left with is the driver's own figure, never a modelled curve. -->
+    <string name="charge_stop_refused_progress">This charge reaches no further than the stop before it: nothing here moves the trip forward.</string>
+    <string name="charge_stop_refused_legs">More charging stops than one plan places. Plan this trip in parts.</string>
+    <string name="charge_stop_chain_stops">%1$d charging stop(s) on the way</string>
+    <string name="charge_stop_chain_stop">Stop %1$d · after about %2$s km (± %3$s km) · leaving with %4$s %%</string>
+    <string name="charge_stop_chain_arrival">Arriving with about %1$s %%, %2$s %% above the reserve</string>
+    <string name="charge_stop_chain_refused">The last leg: %1$s</string>
+    <string name="charge_stop_chain_searches">%1$d charger search(es), one per stop.</string>
     <string name="charge_stop_detail">%1$s
 %2$s km · %3$d min · climb %4$s m · descent %5$s m
 Spending %6$s %% per km</string>
@@ -305,6 +321,8 @@ Spending %6$s %% per km</string>
     <string name="vehicle_helper_min_power">Below this, a stop is an overnight. Empty = %1$s kW.</string>
     <string name="vehicle_hint_reserve">Reserve to keep on arrival (\u0025)</string>
     <string name="vehicle_helper_reserve">Charge the plan refuses to spend. Empty = %1$s %%.</string>
+    <string name="vehicle_hint_departure">Charge to leave a stop with (\u0025)</string>
+    <string name="vehicle_helper_departure">What a driver actually plugs in to, not a full battery. Empty = %1$s %%.</string>
     <string name="vehicle_status_default">Defaults: the MG4 Long Range model, not this car.</string>
     <string name="vehicle_status_custom">These are your figures.</string>
     <string name="vehicle_saved">Saved. The charge-stop screen uses these from its next search.</string>
@@ -312,6 +330,7 @@ Spending %6$s %% per km</string>
     <string name="vehicle_refused_health">Health refused: it must be a number between 50 and 110 \u0025.</string>
     <string name="vehicle_refused_min_power">Minimum power refused: it must be a number between 3 and 400 kW.</string>
     <string name="vehicle_refused_reserve">Reserve refused: it must be a number between 0 and 40 \u0025.</string>
+    <string name="vehicle_refused_departure">Departure charge refused: it must be a number between 20 and 100 \u0025, above the reserve.</string>
     <string name="routing_title">Routing key</string>
     <string name="routing_hint_key">OpenRouteService API key</string>
     <string name="routing_helper_key">Your own key, from openrouteservice.org. Stored encrypted, never logged.</string>

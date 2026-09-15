@@ -2,6 +2,7 @@ package com.evsuite.chargepilot
 
 import com.evsuite.hardware.BatteryPowerEvidence
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ClimateSnapshot
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSummary
@@ -13,10 +14,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class DashboardReadingsTest {
-    @Test fun `unvalidated firmware hides raw and derived power figures`() {
+    @Test fun `unvalidated firmware with no reading still hides every power figure`() {
         val readings = DashboardReadings.of(
-            snapshot(FirmwareInfo.Gen.SWI68),
-            trip(),
+            snapshot(FirmwareInfo.Gen.SWI68).copy(batteryPowerKw = null),
+            trip().copy(consumedKwh = null, regeneratedKwh = null),
             Provenanced.derived(18.0),
             Provenanced.estimated(280.0, 20.0),
         )
@@ -33,6 +34,62 @@ class DashboardReadingsTest {
             assertEquals(Provenance.UNAVAILABLE, reading.provenance)
             assertEquals(UnavailableReason.UNVALIDATED_FIRMWARE, reading.reason)
         }
+    }
+
+    @Test fun `unvalidated firmware publishes a live power reading as derived`() {
+        val readings = DashboardReadings.of(
+            snapshot(FirmwareInfo.Gen.SWI68),
+            trip(),
+            Provenanced.derived(18.0),
+            Provenanced.estimated(280.0, 20.0),
+        )
+
+        // Present but unproven: arithmetic on the pack's voltage and current, never drawn
+        // like a value the VHAL stands behind.
+        assertEquals(Provenance.DERIVED, readings.power.provenance)
+        assertEquals(42f, readings.power.value)
+        assertEquals(Provenance.DERIVED, readings.instantConsumption.provenance)
+        assertEquals(0.2, readings.tripEnergy.value)
+        assertEquals(0.05, readings.tripRegen.value)
+        assertEquals(Provenance.ESTIMATED, readings.adaptiveRange.provenance)
+    }
+
+    @Test fun `a trip with no power interval is priced from the declared pack`() {
+        val readings = DashboardReadings.of(
+            snapshot(FirmwareInfo.Gen.SWI68).copy(batteryPowerKw = null),
+            trip().copy(
+                distanceKm = 10.0,
+                startSocPercent = 80f,
+                endSocPercent = 70f,
+                consumedKwh = null,
+                regeneratedKwh = null,
+            ),
+            Provenanced.derived(18.0),
+            Provenanced.estimated(280.0, 20.0),
+            // 61,7 kWh when new, 92 % of health left: 56,764 kWh at 100 %.
+            BatteryCapacityConfig(61.7, 92.0),
+        )
+
+        // Ten points of a 56,764 kWh pack over ten kilometres.
+        assertEquals(5.6764, readings.tripEnergy.value!!, 1e-4)
+        assertEquals(Provenance.ESTIMATED, readings.tripEnergy.provenance)
+        assertEquals(56.764, readings.tripConsumption.value!!, 1e-3)
+        assertEquals(Provenance.ESTIMATED, readings.tripConsumption.provenance)
+        // Regeneration has no equivalent on the gauge, and is not invented.
+        assertEquals(Provenance.UNAVAILABLE, readings.tripRegen.provenance)
+    }
+
+    @Test fun `a measured trip total is never replaced by the declared pack`() {
+        val readings = DashboardReadings.of(
+            snapshot(FirmwareInfo.Gen.SWI68),
+            trip(),
+            Provenanced.derived(18.0),
+            Provenanced.estimated(280.0, 20.0),
+            BatteryCapacityConfig(61.7, 92.0),
+        )
+
+        assertEquals(0.2, readings.tripEnergy.value)
+        assertEquals(Provenance.DERIVED, readings.tripEnergy.provenance)
     }
 
     @Test fun `unknown firmware reports unsupported rather than unvalidated power`() {
@@ -84,17 +141,6 @@ class DashboardReadingsTest {
             listOf(matching),
             DashboardReadings.trustedPowerTrips(listOf(legacy, matching, otherFirmware), swi68V1),
         )
-    }
-
-    @Test fun `normal trip ingress removes unvalidated raw power and preserves proven power`() {
-        val raw = snapshot(FirmwareInfo.Gen.SWI68)
-        val evidence = BatteryPowerEvidence(
-            FirmwareInfo.Gen.SWI68,
-            BatteryPowerEvidence.OUTPUT_POSITIVE_MW_V1,
-        )
-
-        assertEquals(null, PowerHistoryPolicy.sanitize(raw, evidence = null).batteryPowerKw)
-        assertEquals(42f, PowerHistoryPolicy.sanitize(raw, evidence).batteryPowerKw)
     }
 
     private fun trip() = EnergyTripSummary(

@@ -60,7 +60,7 @@ class ChargeStopHandoffTest {
 
     @Test
     fun `a trip that needs a stop sends the stop, not the destination`() {
-        val handoff = ChargeStopHandoff.of(marseille, found())
+        val handoff = ChargeStopHandoff.of(marseille, listOf(found()))
 
         assertTrue(handoff.toStop)
         // The single-point channels — geo: and the adapter's goTo — get the charger.
@@ -76,7 +76,7 @@ class ChargeStopHandoffTest {
 
     @Test
     fun `the pathway carries the road's shape, with the stop in its place along it`() {
-        val handoff = ChargeStopHandoff.of(marseille, found(alongKm = 180.0), route())
+        val handoff = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 180.0)), route())
 
         // Every point the adapter will take, and no more: the stop plus the shape fills the cap.
         assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
@@ -91,9 +91,33 @@ class ChargeStopHandoffTest {
         assertEquals(listOf("Aire de Montélimar", "Marseille"), handoff.legs.map { it.name })
     }
 
+    /** CP-062: Auzielle → Paris stops twice, and the car is told about both stops. */
+    @Test
+    fun `every stop of a long trip is a waypoint and a leg, in the order they are driven`() {
+        val handoff = ChargeStopHandoff.of(
+            marseille,
+            listOf(
+                Found(charger(name = "Brive", latitude = 45.15, longitude = 1.53), 220.0, 15.0),
+                Found(charger(name = "Vierzon", latitude = 47.22, longitude = 2.07), 440.0, 14.0),
+            ),
+            route(),
+        )
+
+        assertEquals(listOf("Brive", "Vierzon", "Marseille"), handoff.legs.map { it.name })
+        // Both stops are in the pathway, in road order, and the shape gives up points for them.
+        assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
+        assertTrue(
+            handoff.pathway.indexOfFirst { it.name == "Brive" } <
+                handoff.pathway.indexOfFirst { it.name == "Vierzon" }
+        )
+        // The single-point channels still get the first stop: it is the leg about to be driven.
+        assertEquals("Brive", handoff.label)
+        assertEquals("Brive", handoff.point?.name)
+    }
+
     @Test
     fun `a trip with no stop still has its road pinned`() {
-        val handoff = ChargeStopHandoff.of(marseille, stop = null, route = route())
+        val handoff = ChargeStopHandoff.of(marseille, stops = emptyList(), route = route())
 
         assertFalse(handoff.toStop)
         assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
@@ -103,13 +127,13 @@ class ChargeStopHandoffTest {
 
     @Test
     fun `the legs are in the order they are driven, the stop first`() {
-        val legs = ChargeStopHandoff.of(marseille, found()).legs
+        val legs = ChargeStopHandoff.of(marseille, listOf(found())).legs
         assertEquals(listOf("Aire de Montélimar", "Marseille"), legs.map { it.name })
     }
 
     @Test
     fun `a trip that needs no stop is one leg to the destination`() {
-        val handoff = ChargeStopHandoff.of(marseille, stop = null)
+        val handoff = ChargeStopHandoff.of(marseille, stops = emptyList())
 
         assertFalse(handoff.toStop)
         assertEquals(43.2965, handoff.latitude, 1e-9)
@@ -132,7 +156,7 @@ class ChargeStopHandoffTest {
     fun `a point the adapter would refuse drops out of the lists, never out of the plan`() {
         // A charger whose coordinates are not a place on Earth: the validated POI lists lose it,
         // and the raw numbers stay so the geo: fallback still has somewhere to aim.
-        val handoff = ChargeStopHandoff.of(marseille, Found(charger(latitude = 999.0), 10.0, null))
+        val handoff = ChargeStopHandoff.of(marseille, listOf(Found(charger(latitude = 999.0), 10.0, null)))
 
         assertTrue(handoff.toStop)
         assertEquals(999.0, handoff.latitude, 1e-9)

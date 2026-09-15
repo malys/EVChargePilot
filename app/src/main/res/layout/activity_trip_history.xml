@@ -134,19 +134,21 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:baselineAligned="false"
+                    android:minHeight="@dimen/chargepilot_readout_height"
                     android:orientation="horizontal">
 
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_duration" />
                         <TextView android:id="@+id/detailDuration" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_distance" />
                         <TextView android:id="@+id/detailDistance" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
                         <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
@@ -154,19 +156,21 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:baselineAligned="false"
+                    android:minHeight="@dimen/chargepilot_readout_height"
                     android:orientation="horizontal">
 
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc_change" />
                         <TextView android:id="@+id/detailSoc" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_energy_used" />
                         <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="104dp" android:layout_weight="1">
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_regenerated" />
                         <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
@@ -201,7 +205,7 @@
                     android:id="@+id/trackGroup"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2.2"
                     android:orientation="vertical">
 
                     <TextView
@@ -223,7 +227,7 @@
                     android:id="@+id/trackUnavailable"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2.2"
                     android:gravity="center"
                     android:text="@string/trip_track_unavailable"
                     android:textAppearance="@style/Text.EV.Body"

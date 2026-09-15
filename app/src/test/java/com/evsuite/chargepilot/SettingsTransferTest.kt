@@ -23,7 +23,7 @@ class SettingsTransferTest {
                 OrsGeocode.Place("Office, 12 Rue de la Paix", 3.8767, 43.6108),
             ),
         ),
-        vehicle = VehicleSettings.Values(54.0, 92.0, 50.0, 15.0),
+        vehicle = VehicleSettings.Values(54.0, 92.0, 50.0, 15.0, 75.0),
     )
 
     @Test fun `one file carries every setting from one car to the next`() {
@@ -45,6 +45,8 @@ class SettingsTransferTest {
         assertTrue(text.contains("clear text"))
         assertTrue(text.contains("\"ors_api_key\": \"5b3ce3597851110001cf6248abc=\""))
         assertTrue(text.contains("\"usable_capacity_kwh_when_new\": 54.0"))
+        // CP-062's figure travels with the rest: a car set up once is set up for long trips too.
+        assertTrue(text.contains("\"departure_percent\": 75.0"))
         assertTrue(text.contains("\"label\": \"Office, 12 Rue de la Paix\""))
     }
 

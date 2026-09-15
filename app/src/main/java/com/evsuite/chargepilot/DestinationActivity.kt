@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import com.evsuite.chargepilot.databinding.ActivityDestinationBinding
@@ -153,14 +154,32 @@ class DestinationActivity : AppCompatActivity() {
 
     private fun typed(): String = binding.destinationInput.text?.toString()?.trim().orEmpty()
 
-    /** One button per answer: a head unit list the driver reads once and taps once. */
+    /**
+     * One row per answer: the place, and a star that saves it without going there.
+     *
+     * Saving used to be a long-press on the result, which is an affordance nobody finds on a
+     * panel — the driver asked for the button that was already there in spirit. The long-press
+     * is kept, because a hand that learned it should not be told it was wrong.
+     */
     private fun showPlaces() {
         binding.destinationResults.removeAllViews()
         places.forEach { place ->
-            binding.destinationResults.addView(
-                row(binding.destinationResults, place) { saveFavorite(place) }
-            )
+            binding.destinationResults.addView(searchRow(binding.destinationResults, place))
         }
+    }
+
+    private fun searchRow(parent: android.view.ViewGroup, place: OrsGeocode.Place): View {
+        val view = layoutInflater.inflate(R.layout.row_destination_search_result, parent, false)
+        view.findViewById<MaterialButton>(R.id.resultChoose).apply {
+            text = place.label
+            setOnClickListener { choose(place) }
+            setOnLongClickListener { saveFavorite(place); true }
+        }
+        view.findViewById<MaterialButton>(R.id.resultSave).apply {
+            contentDescription = getString(R.string.destination_save_favorite)
+            setOnClickListener { saveFavorite(place) }
+        }
+        return view
     }
 
     /**

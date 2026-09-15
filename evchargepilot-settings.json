@@ -12,7 +12,8 @@
     "usable_capacity_kwh_when_new": 61.7,
     "state_of_health_percent": 92.0,
     "min_charger_power_kw": 22.0,
-    "reserve_percent": 10.0
+    "reserve_percent": 10.0,
+    "departure_percent": 80.0
   },
   "destinations": [
     { "label": "Home", "longitude": 5.4474, "latitude": 43.5297 },

@@ -202,7 +202,7 @@ class TripRecordingService : Service() {
     }
 
     private fun beginTrip(sample: EnergySnapshot) {
-        if (!EnergyTripSession.isRecording) EnergyTripSession.start(PowerHistoryPolicy.sanitize(sample))
+        if (!EnergyTripSession.isRecording) EnergyTripSession.start(sample)
         detector.markRecording()
         samplesSinceNotification = 0
         AppLogger.i(TAG, "trip recording started; sample_epoch_ms=${sample.timestampMs}")
@@ -278,15 +278,18 @@ class TripRecordingService : Service() {
             if (automaticDetectionEnabled) updateAutomaticMonitorAvailability(null)
             return
         }
-        val recordable = PowerHistoryPolicy.sanitize(value)
-        latestSnapshot = recordable
-        EnergyTripSession.add(recordable)
+        // The power reading is kept even where no drive has yet proven the property. What
+        // stops a model from training on it is the evidence stamped on the trip summary,
+        // which stays null until CP-003 says otherwise; stripping the number here only
+        // blanked the screen, and left the driver with three empty energy tiles instead.
+        latestSnapshot = value
+        EnergyTripSession.add(value)
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state
             val result = detector.add(value)
             when (result.event) {
-                TripDetector.Event.START -> beginTrip(recordable)
+                TripDetector.Event.START -> beginTrip(value)
                 TripDetector.Event.STOP -> stopTrip()
                 null -> Unit
             }
@@ -298,7 +301,7 @@ class TripRecordingService : Service() {
             samplesSinceNotification = 0
             main.post { updateNotification() }
         }
-        main.post { listener?.onSample(recordable) }
+        main.post { listener?.onSample(value) }
         // A plan handed over leg by leg needs somewhere to be watched from, and this is already
         // a worker thread waking once a second with nothing else to do. Cheap when no chain is
         // armed, and it must not run on the main thread: the adapter's fan-out holds a lock.

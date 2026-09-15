@@ -345,17 +345,32 @@ class ChargeStopActivity : AppCompatActivity() {
         )
         announce(getString(R.string.charge_stop_routing))
         worker.execute {
-            val body = OrsDirections.requestBody(
-                OrsDirections.Point(origin.longitude, origin.latitude, origin.altitudeMetres),
-                OrsDirections.Point(place.longitude, place.latitude, null),
-                alternatives = ALTERNATIVES,
+            val from = OrsDirections.Point(origin.longitude, origin.latitude, origin.altitudeMetres)
+            val to = OrsDirections.Point(place.longitude, place.latitude, null)
+            val asked = directions.post(
+                credentials,
+                OrsDirections.PATH,
+                OrsDirections.requestBody(from, to, alternatives = ALTERNATIVES),
             )
-            val result = directions.post(credentials, OrsDirections.PATH, body)
+            // ORS serves alternatives under 100 km and refuses the *whole* request past it
+            // (error 2004). Auzielle → Paris is 685 km, so the screen that asked for a second
+            // road came back with no road at all. Asked again without them, the same trip
+            // routes: the long trip is the one this screen least affords to lose, and a second
+            // road on it was never the point.
+            val retried = asked is RoutingTransport.Result.Refused &&
+                asked.reason == RoutingTransport.Reason.SERVER_REJECTED
+            val result = if (retried) {
+                directions.post(credentials, OrsDirections.PATH, OrsDirections.requestBody(from, to))
+            } else {
+                asked
+            }
             val routes = (result as? RoutingTransport.Result.Ok)
                 ?.let { OrsDirections.parse(it.body) }.orEmpty()
             val route = routes.firstOrNull()
             ValidationProbe.record(ValidationQuestion.ROUTE_ALTERNATIVES) {
-                "asked alternatives=$ALTERNATIVES, " + when (result) {
+                "asked alternatives=$ALTERNATIVES" +
+                    (if (retried) ", refused and asked again without them" else "") + ", " +
+                    when (result) {
                     is RoutingTransport.Result.Ok ->
                         "answered ${result.body.length} chars, parsed ${routes.size} route(s)"
                     is RoutingTransport.Result.Refused -> "refused(${result.reason})"
@@ -376,21 +391,32 @@ class ChargeStopActivity : AppCompatActivity() {
             val grade = route?.let {
                 RouteGrade.of(it.ascentMetres, it.descentMetres, settings.pack)
             }
-            val plan = route?.let {
-                ChargeStopPlan.of(
+            // CP-062: the whole trip, leg by leg. `of` still answers about one charge and is what
+            // the comparison rows and the drift companion read; this screen is about the trip.
+            val chain = route?.let {
+                ChargeStopPlan.chain(
                     socPercent,
                     it.distanceKm,
                     effective,
                     settings.reservePercent,
                     grade,
+                    settings.departurePercent,
                 )
             }
+            // The leg being driven now. Every figure that predates CP-062 — the charger card, the
+            // comparison, the hand-off, the drift — is about that leg and reads it here.
+            val plan = chain?.legs?.firstOrNull()?.plan
             val stop = plan as? ChargeStopPlan.Plan.Stop
-            val charger = if (route != null && stop != null) {
-                findCharger(route, stop.afterKm, socPercent, effective, settings)
-            } else {
-                null
+            val stops = chain?.stops.orEmpty()
+            // One search per stop, and the count is known before the first is spent: the
+            // allowance is the driver's (CP-062 rule 7).
+            ValidationProbe.record(ValidationQuestion.CHARGERS) {
+                "${stops.size} stop(s) planned: ${stops.size} charger search(es) about to be spent"
             }
+            val chargers = if (route == null) emptyList() else stops.map { leg ->
+                findCharger(route, leg, effective, settings)
+            }
+            val charger = chargers.firstOrNull()
             // Arithmetic over what already came back — no second request, and on the worker
             // thread the route arrived on.
             val whatIf = route?.let {
@@ -439,8 +465,10 @@ class ChargeStopActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 render(
-                    place, route, plan, effective, charger, grade, whatIf, alternative,
-                    motorwayFree, if (motorwayFree == null) 1 else 2,
+                    place, route, chain, effective, chargers, grade, whatIf, alternative,
+                    motorwayFree,
+                    (if (retried) 2 else 1) + (if (motorwayFree == null) 0 else 1),
+                    settings.departurePercent,
                 )
                 announce(
                     when {
@@ -490,14 +518,18 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         val chosen = road ?: return null
         val grade = RouteGrade.of(chosen.ascentMetres, chosen.descentMetres, settings.pack)
+        // Chained like the planned road, or the two rows would answer different questions: a
+        // road this long refuses under `of` while the row above it names two stops, and a driver
+        // reading them side by side would take that for a broken screen rather than a choice.
         return MotorwayFree(
             route = chosen,
-            plan = ChargeStopPlan.of(
+            chain = ChargeStopPlan.chain(
                 socPercent,
                 chosen.distanceKm,
                 rate,
                 settings.reservePercent,
                 grade,
+                settings.departurePercent,
             ),
         )
     }
@@ -509,21 +541,25 @@ class ChargeStopActivity : AppCompatActivity() {
      * Only the stretch of road where a stop could fall is sent — [OpenChargeMap.WINDOW_KM] of it
      * — and never the trip. The charger service has no business knowing where the driver started
      * or where they are going, and CP-048 is where that boundary is argued.
+     *
+     * The leg, not the route: the window stops at the leg it belongs to and so does the arrival
+     * charge, which counts from the charge that leg starts with. A charger found for a later leg
+     * is a charger hundreds of kilometres from the stop it would be shown against (CP-062 rule 6).
      */
     private fun findCharger(
         route: OrsDirections.Route,
-        afterKm: Double,
-        socPercent: Double?,
+        leg: ChargeStopPlan.Leg,
         rate: SocRate?,
         settings: VehicleSettings.Values,
     ): Found? {
+        val afterKm = leg.endKm
         val credentials = RoutingCredentials.readCharger(this) ?: run {
             ValidationProbe.record(ValidationQuestion.CHARGERS) { "no charger key configured" }
             return null
         }
         val window = RouteGeometry.window(
             route.points,
-            (afterKm - OpenChargeMap.WINDOW_KM).coerceAtLeast(0.0),
+            (afterKm - OpenChargeMap.WINDOW_KM).coerceAtLeast(leg.startKm),
             afterKm,
         )
         if (window.size < 2) {
@@ -559,10 +595,10 @@ class ChargeStopActivity : AppCompatActivity() {
                     charger.latitude,
                     OpenChargeMap.CORRIDOR_KM,
                 ) ?: return@mapNotNull null
-                if (alongKm > afterKm) return@mapNotNull null
+                if (alongKm > afterKm || alongKm <= leg.startKm) return@mapNotNull null
                 val arrival = ChargeStopPlan.of(
-                    socPercent,
-                    alongKm,
+                    leg.startPercent,
+                    alongKm - leg.startKm,
                     rate,
                     settings.reservePercent,
                 ) as? ChargeStopPlan.Plan.NoStop
@@ -576,16 +612,19 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun render(
         place: OrsGeocode.Place,
         route: OrsDirections.Route?,
-        plan: ChargeStopPlan.Plan?,
+        chain: ChargeStopPlan.Chain?,
         rate: SocRate?,
-        charger: Found?,
+        chargers: List<Found?>,
         grade: RouteGrade.Cost?,
         whatIf: RouteWhatIf.Result?,
         alternative: RouteWhatIf.Alternative?,
         motorwayFree: MotorwayFree?,
         routeRequests: Int,
+        departurePercent: Double,
     ) {
-        if (route == null || plan == null) {
+        val plan = chain?.legs?.firstOrNull()?.plan
+        val charger = chargers.firstOrNull()
+        if (route == null || chain == null || plan == null) {
             binding.chargeStopPlan.visibility = View.GONE
             binding.chargeStopDetail.visibility = View.GONE
             binding.chargeStopAttribution.visibility = View.GONE
@@ -597,26 +636,7 @@ class ChargeStopActivity : AppCompatActivity() {
             return
         }
         binding.chargeStopPlan.visibility = View.VISIBLE
-        binding.chargeStopPlan.text = when (plan) {
-            is ChargeStopPlan.Plan.NoStop -> getString(
-                R.string.charge_stop_plan_none,
-                format(plan.arrivalPercent, "%.0f"),
-                format(plan.marginPercent, "%.0f"),
-            )
-            is ChargeStopPlan.Plan.Stop -> getString(
-                R.string.charge_stop_plan_stop,
-                format(plan.afterKm, "%.0f"),
-                format(plan.bandKm, "%.0f"),
-            )
-            is ChargeStopPlan.Plan.Refused -> getString(
-                when (plan.reason) {
-                    ChargeStopPlan.Reason.NO_CHARGE -> R.string.charge_stop_refused_charge
-                    ChargeStopPlan.Reason.NO_ROUTE -> R.string.charge_stop_refused_route
-                    ChargeStopPlan.Reason.NO_RATE -> R.string.charge_stop_refused_rate
-                    ChargeStopPlan.Reason.BAND_TOO_WIDE -> R.string.charge_stop_refused_band
-                }
-            )
-        }
+        binding.chargeStopPlan.text = planText(chain, chargers, departurePercent)
 
         binding.chargeStopDetail.visibility = View.VISIBLE
         val detail = getString(
@@ -639,16 +659,84 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         binding.chargeStopDetail.text = listOfNotNull(detail, gradeLine).joinToString("\n")
 
-        renderCharger(plan, charger)
+        renderCharger(plan, chargers)
         renderWhatIf(whatIf, alternative)
-        renderChoices(route, plan, charger, whatIf, motorwayFree, routeRequests)
-        renderHandoff(place, plan, charger, route, rate, grade)
+        renderChoices(route, plan, charger, whatIf, motorwayFree, routeRequests, chargers.size)
+        renderHandoff(place, plan, chargers, route, rate, grade)
 
         // ORS routes are OpenStreetMap under ODbL. Showing this is the licence, not a courtesy.
         binding.chargeStopAttribution.visibility =
             if (route.attribution == null) View.GONE else View.VISIBLE
         binding.chargeStopAttribution.text = route.attribution
     }
+
+    /**
+     * The plan in words: one line where one charge covers the road, a line per leg where it does
+     * not.
+     *
+     * Each stop carries the band of its own leg, not of the whole trip — that is the arithmetic
+     * CP-062 changed, and it is why Auzielle → Paris says something now. The charge beside a stop
+     * is the one the driver declared they leave with, never a modelled curve, and the last line is
+     * either the arrival or the refusal of that last leg alone: a chain whose first legs are
+     * usable is still the thing someone leaving now acts on.
+     */
+    private fun planText(
+        chain: ChargeStopPlan.Chain,
+        chargers: List<Found?>,
+        departurePercent: Double,
+    ): String {
+        val stops = chain.stops
+        if (stops.isEmpty()) return legLine(chain.legs.first().plan)
+        val lines = ArrayList<String>()
+        lines += getString(R.string.charge_stop_chain_stops, stops.size)
+        stops.forEachIndexed { index, leg ->
+            val stop = leg.plan as ChargeStopPlan.Plan.Stop
+            val line = getString(
+                R.string.charge_stop_chain_stop,
+                index + 1,
+                format(leg.endKm, "%.0f"),
+                format(stop.bandKm, "%.0f"),
+                format(departurePercent, "%.0f"),
+            )
+            // This leg's charger or none at all: a name borrowed from another leg would sit
+            // hundreds of kilometres from the stop it is written under (CP-062 rule 6).
+            val named = chargers.getOrNull(index)?.let { chargerLine(it) }
+            lines += listOfNotNull(line, named?.let { "  $it" }).joinToString("\n")
+        }
+        val tail = chain.arrival?.let {
+            getString(
+                R.string.charge_stop_chain_arrival,
+                format(it.arrivalPercent, "%.0f"),
+                format(it.marginPercent, "%.0f"),
+            )
+        } ?: chain.refusal?.let {
+            getString(R.string.charge_stop_chain_refused, refused(it))
+        }
+        return (lines + listOfNotNull(tail)).joinToString("\n")
+    }
+
+    /** One leg on its own terms, which is what a trip of one leg has to say. */
+    private fun legLine(plan: ChargeStopPlan.Plan): String = when (plan) {
+        is ChargeStopPlan.Plan.NoStop -> getString(
+            R.string.charge_stop_plan_none,
+            format(plan.arrivalPercent, "%.0f"),
+            format(plan.marginPercent, "%.0f"),
+        )
+        is ChargeStopPlan.Plan.Stop -> getString(
+            R.string.charge_stop_plan_stop,
+            format(plan.afterKm, "%.0f"),
+            format(plan.bandKm, "%.0f"),
+        )
+        is ChargeStopPlan.Plan.Refused -> refused(plan.reason)
+    }
+
+    private fun chargerLine(found: Found): String = getString(
+        R.string.charge_stop_charger,
+        found.charger.name,
+        format(found.alongKm, "%.0f"),
+        found.charger.powerKw?.let { format(it, "%.0f") } ?: getString(R.string.value_unavailable),
+        found.charger.connectors.joinToString(", "),
+    )
 
     /**
      * What driving differently would change, with its price attached.
@@ -749,6 +837,7 @@ class ChargeStopActivity : AppCompatActivity() {
         whatIf: RouteWhatIf.Result?,
         motorwayFree: MotorwayFree?,
         routeRequests: Int,
+        chargerSearches: Int,
     ) {
         // Only a plan that has to choose is worth a comparison: a route the car reaches on the
         // charge it already holds has one way of being driven and no trade to make.
@@ -787,21 +876,14 @@ class ChargeStopActivity : AppCompatActivity() {
                 format(motorwayFree.route.durationMinutes, "%.0f"),
                 if (delta >= 0.0) getString(R.string.route_choices_delta_slower, format(delta, "%.0f"))
                 else getString(R.string.route_choices_delta_faster, format(-delta, "%.0f")),
-            ) + "\n  " + when (val other = motorwayFree.plan) {
-                is ChargeStopPlan.Plan.NoStop -> getString(
-                    R.string.route_choices_no_stop,
-                    format(other.arrivalPercent, "%.0f"),
-                )
-                is ChargeStopPlan.Plan.Stop -> getString(
-                    R.string.route_choices_stop_unknown,
-                    format(other.afterKm, "%.0f"),
-                )
-                is ChargeStopPlan.Plan.Refused ->
-                    getString(R.string.route_choices_refused, refused(other.reason))
-            }
+            ) + "\n  " + otherRoadLine(motorwayFree.chain)
         }
 
         lines += getString(R.string.route_choices_requests, routeRequests)
+        // Legs multiply requests, so the multiplication is on the card rather than in a log.
+        if (chargerSearches > 0) {
+            lines += getString(R.string.charge_stop_chain_searches, chargerSearches)
+        }
         binding.routeChoices.visibility = View.VISIBLE
         binding.routeChoices.text = lines.joinToString("\n")
     }
@@ -825,12 +907,36 @@ class ChargeStopActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * The other road's consequence in one line: how many stops it needs, or why it has no answer.
+     *
+     * No charger is searched for it — CP-057 spends no allowance on a row the driver has not
+     * chosen — so a stop here is a distance and nothing more.
+     */
+    private fun otherRoadLine(chain: ChargeStopPlan.Chain): String {
+        chain.refusal?.let { return getString(R.string.route_choices_refused, refused(it)) }
+        val stops = chain.stops
+        return when (stops.size) {
+            0 -> getString(
+                R.string.route_choices_no_stop,
+                format(chain.arrival?.arrivalPercent ?: 0.0, "%.0f"),
+            )
+            1 -> getString(
+                R.string.route_choices_stop_unknown,
+                format(stops.first().endKm, "%.0f"),
+            )
+            else -> getString(R.string.charge_stop_chain_stops, stops.size)
+        }
+    }
+
     private fun refused(reason: ChargeStopPlan.Reason): String = getString(
         when (reason) {
             ChargeStopPlan.Reason.NO_CHARGE -> R.string.charge_stop_refused_charge
             ChargeStopPlan.Reason.NO_ROUTE -> R.string.charge_stop_refused_route
             ChargeStopPlan.Reason.NO_RATE -> R.string.charge_stop_refused_rate
             ChargeStopPlan.Reason.BAND_TOO_WIDE -> R.string.charge_stop_refused_band
+            ChargeStopPlan.Reason.NO_PROGRESS -> R.string.charge_stop_refused_progress
+            ChargeStopPlan.Reason.TOO_MANY_LEGS -> R.string.charge_stop_refused_legs
         }
     )
 
@@ -878,18 +984,18 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun renderHandoff(
         place: OrsGeocode.Place,
         plan: ChargeStopPlan.Plan,
-        charger: Found?,
+        chargers: List<Found?>,
         route: OrsDirections.Route,
         rate: SocRate?,
         grade: RouteGrade.Cost?,
     ) {
-        // The adapter takes the plan as it was planned: the destination, and the stop on the way
-        // to it. Which of the two the single-point channels get is [ChargeStopHandoff]'s
-        // decision, tested there.
-        val target =
-            ChargeStopHandoff.of(place, (plan as? ChargeStopPlan.Plan.Stop)?.let { charger }, route)
+        // The adapter takes the plan as it was planned: the destination, and every stop on the
+        // way to it (CP-062 rule 8). Which of them the single-point channels get is
+        // [ChargeStopHandoff]'s decision, tested there.
+        val stops = if (plan is ChargeStopPlan.Plan.Stop) chargers.filterNotNull() else emptyList()
+        val target = ChargeStopHandoff.of(place, stops, route)
         handoff = target
-        followed = follow(plan, charger, route, rate, grade)
+        followed = follow(plan, chargers.firstOrNull(), route, rate, grade)
         binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(
             if (target.toStop) R.string.charge_stop_navigate_stop
@@ -1167,7 +1273,8 @@ class ChargeStopActivity : AppCompatActivity() {
         )
     }
 
-    private fun renderCharger(plan: ChargeStopPlan.Plan, charger: Found?) {
+    private fun renderCharger(plan: ChargeStopPlan.Plan, chargers: List<Found?>) {
+        val charger = chargers.firstOrNull()
         if (plan !is ChargeStopPlan.Plan.Stop) {
             binding.chargerPlace.visibility = View.GONE
             binding.chargerSource.visibility = View.GONE
@@ -1183,14 +1290,7 @@ class ChargeStopActivity : AppCompatActivity() {
             }
             return
         }
-        val place = getString(
-            R.string.charge_stop_charger,
-            charger.charger.name,
-            format(charger.alongKm, "%.0f"),
-            charger.charger.powerKw?.let { format(it, "%.0f") }
-                ?: getString(R.string.value_unavailable),
-            charger.charger.connectors.joinToString(", "),
-        )
+        val place = chargerLine(charger)
         val arrival = charger.arrivalPercent
             ?.let { getString(R.string.charge_stop_charger_arrival, format(it, "%.0f")) }
         val working = if (charger.charger.operational == false) {
@@ -1201,10 +1301,13 @@ class ChargeStopActivity : AppCompatActivity() {
         binding.chargerPlace.text = listOfNotNull(place, arrival, working).joinToString("\n")
 
         // Open Charge Map's terms require the data provider's own attribution, visible to the
-        // driver: half the dataset is imported and is not OCM's to license.
-        val provider = charger.charger.operator
-            ?: charger.charger.dataProvider
-            ?: getString(R.string.value_unavailable)
+        // driver: half the dataset is imported and is not OCM's to license. Every leg's charger
+        // is on the screen, so every leg's provider is named.
+        val provider = chargers.filterNotNull()
+            .mapNotNull { it.charger.operator ?: it.charger.dataProvider }
+            .distinct()
+            .joinToString(", ")
+            .ifEmpty { getString(R.string.value_unavailable) }
         binding.chargerSource.visibility = View.VISIBLE
         binding.chargerSource.text = charger.charger.verifiedAt?.let {
             getString(R.string.charge_stop_charger_source, provider, it.take(10))
@@ -1256,7 +1359,7 @@ class ChargeStopActivity : AppCompatActivity() {
     /** CP-057's third row: another road, planned, with no charger search spent on it. */
     private data class MotorwayFree(
         val route: OrsDirections.Route,
-        val plan: ChargeStopPlan.Plan,
+        val chain: ChargeStopPlan.Chain,
     )
 
     private companion object {

@@ -130,9 +130,13 @@
     <string name="trip_history_row_summary">%1$s · %2$s</string>
     <string name="trip_history_row_energy">%1$s · %2$s</string>
     <string name="label_soc_change">ÉTAT DE CHARGE</string>
-    <string name="trip_track_legend">Vitesse (accent) et puissance batterie pendant la durée enregistrée</string>
-    <string name="trip_track_description">Courbe de vitesse et de puissance batterie sur %1$d minutes enregistrées</string>
+    <string name="trip_track_legend">Vitesse (accent), charge et puissance batterie — toucher pour agrandir</string>
+    <string name="trip_track_description">Courbe de vitesse, de charge et de puissance batterie sur %1$d minutes enregistrées. Toucher pour ouvrir le tracé en grand.</string>
     <string name="trip_track_unavailable">Aucune trace d’échantillons n’a été conservée pour ce trajet.</string>
+    <!-- Tracé du trajet en grand. -->
+    <string name="trip_plot_legend">Vitesse sur l’axe de gauche en km/h, charge sur celui de droite en pourcentage sur sa propre plage observée, puissance batterie autour de la ligne centrale. Faire glisser le doigt sur le tracé pour lire un instant.</string>
+    <string name="trip_plot_climate_ac">A/C</string>
+    <string name="label_plot_cursor_time">ÉCOULÉ</string>
     <string name="trip_attribution_intro">RÉSIDUEL ESTIMÉ · Calculé par différence entre l’énergie batterie intégrée et la traction modélisée ; ce n’est pas une mesure véhicule par consommateur.</string>
     <string name="trip_attribution_traction">Traction modélisée : %1$s</string>
     <string name="trip_attribution_climate_active">Climatisation active</string>
@@ -147,6 +151,7 @@
     <string name="energy_breakdown_title">Bilan énergétique après trajet</string>
     <string name="energy_breakdown_loading">Calcul à partir du trajet local borné…</string>
     <string name="energy_breakdown_unavailable_title">Bilan indisponible</string>
+    <string name="energy_breakdown_declared_totals">À défaut, relevé sur la jauge : %1$.1f %% de charge sur %2$.1f km — soit environ %3$.1f kWh, ou %4$.1f kWh/100 km, pour la capacité que vous avez déclarée. Une estimation bâtie sur un chiffre saisi, pas une mesure.</string>
     <string name="energy_breakdown_model_unavailable">Aucun modèle local validé ne peut encore produire ce bilan. Aucune estimation de remplacement n’est affichée.</string>
     <string name="energy_breakdown_missing_power">Ce trajet ne possède pas toutes les preuves de puissance conservées nécessaires au bilan. Les totaux enregistrés restent inchangés.</string>
     <string name="power_never_published">Ce véhicule ne publie jamais la puissance batterie ; rien ici ne peut en être déduit, ni maintenant ni plus tard. La planification de recharge utilise l\'état de charge à la place.</string>
@@ -260,8 +265,10 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_action_destination">Choisir une destination</string>
     <string name="charge_stop_action_destination_chosen">Changer de destination \u2014 %1$s</string>
     <string name="charge_stop_favorites_title">Favoris</string>
-    <string name="charge_stop_favorites_hint">Touchez pour la choisir. Appui long sur un résultat à gauche pour l’enregistrer, appui long sur un favori pour le retirer.</string>
+    <string name="charge_stop_favorites_hint">Touchez pour la choisir. Touchez l’étoile à côté d’un résultat pour l’enregistrer, appui long sur un favori pour le retirer.</string>
     <string name="charge_stop_favorites_empty">Aucun favori enregistré. Appui long sur un résultat à gauche pour en garder un.</string>
+    <string name="destination_save_favorite_symbol">★</string>
+    <string name="destination_save_favorite">Enregistrer en favori</string>
     <string name="charge_stop_favorites_saved">Enregistré comme favori.</string>
     <string name="charge_stop_favorites_save_failed">Impossible d’enregistrer : la liste contient déjà %1$d favoris.</string>
     <string name="charge_stop_favorites_removed">Favori retiré.</string>
@@ -278,6 +285,14 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="charge_stop_refused_route">Aucune longueur d’itinéraire sur laquelle planifier.</string>
     <string name="charge_stop_refused_rate">Pas encore de taux exploitable. Enregistrez quelques trajets et ceci se remplira.</string>
     <string name="charge_stop_refused_band">Trop incertain sur cette distance pour être exploitable.</string>
+    <!-- CP-062. Le long trajet, étape par étape. -->
+    <string name="charge_stop_refused_progress">Cette charge ne va pas plus loin que l\u2019arrêt précédent : rien ici ne fait avancer le trajet.</string>
+    <string name="charge_stop_refused_legs">Plus d\u2019arrêts de recharge qu\u2019un plan n\u2019en place. Planifiez ce trajet en plusieurs parties.</string>
+    <string name="charge_stop_chain_stops">%1$d arrêt(s) de recharge en chemin</string>
+    <string name="charge_stop_chain_stop">Arrêt %1$d · après environ %2$s km (± %3$s km) · en repartant à %4$s %%</string>
+    <string name="charge_stop_chain_arrival">Arrivée avec environ %1$s %%, %2$s %% au-dessus de la réserve</string>
+    <string name="charge_stop_chain_refused">Dernière étape : %1$s</string>
+    <string name="charge_stop_chain_searches">%1$d recherche(s) de borne, une par arrêt.</string>
     <string name="charge_stop_detail">%1$s
 %2$s km · %3$d min · montée %4$s m · descente %5$s m
 Consommation %6$s %% par km</string>
@@ -300,6 +315,8 @@ Consommation %6$s %% par km</string>
     <string name="vehicle_helper_min_power">En dessous, un arrêt est une nuit. Vide = %1$s kW.</string>
     <string name="vehicle_hint_reserve">Réserve à conserver à l\'arrivée (\u0025)</string>
     <string name="vehicle_helper_reserve">Charge que le calcul refuse de dépenser. Vide = %1$s %%.</string>
+    <string name="vehicle_hint_departure">Charge en repartant d\'un arrêt (\u0025)</string>
+    <string name="vehicle_helper_departure">Ce qu\'un conducteur recharge vraiment, pas un plein. Vide = %1$s %%.</string>
     <string name="vehicle_status_default">Valeurs par défaut : le modèle MG4 Long Range, pas cette voiture.</string>
     <string name="vehicle_status_custom">Ce sont vos valeurs.</string>
     <string name="vehicle_saved">Enregistré. L\'écran d\'arrêt recharge les utilise dès la prochaine recherche.</string>
@@ -307,6 +324,7 @@ Consommation %6$s %% par km</string>
     <string name="vehicle_refused_health">Santé refusée : elle doit être un nombre entre 50 et 110 \u0025.</string>
     <string name="vehicle_refused_min_power">Puissance minimale refusée : elle doit être un nombre entre 3 et 400 kW.</string>
     <string name="vehicle_refused_reserve">Réserve refusée : elle doit être un nombre entre 0 et 40 \u0025.</string>
+    <string name="vehicle_refused_departure">Charge de départ refusée : elle doit être un nombre entre 20 et 100 \u0025, au-dessus de la réserve.</string>
     <string name="routing_title">Clé de routage</string>
     <string name="routing_hint_key">Clé d’API OpenRouteService</string>
     <string name="routing_helper_key">Votre propre clé, sur openrouteservice.org. Stockée chiffrée, jamais journalisée.</string>
