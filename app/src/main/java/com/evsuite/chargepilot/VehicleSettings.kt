@@ -156,6 +156,18 @@ object VehicleSettings {
     /** `ChargeStopPlan.DEFAULT_DEPARTURE_PERCENT`, restated where a driver can change it. */
     const val DEFAULT_DEPARTURE_PERCENT = ChargeStopPlan.DEFAULT_DEPARTURE_PERCENT
 
+    /**
+     * Whether a health figure may be stored at all.
+     *
+     * The estimator (CP-070) can hand back a figure outside this — a node bias in the energy
+     * source moves the absolute, and a pack that measures at 112 % says more about where the
+     * kilowatt-hours were counted than about the cells. Such a figure is reported on the
+     * battery screen and never offered as a setting: a plan built on it would be wrong in the
+     * optimistic direction.
+     */
+    fun isHealthAcceptable(percent: Double): Boolean =
+        percent.isFinite() && percent in HEALTH_RANGE
+
     private val CAPACITY_RANGE = 10.0..200.0
     private val HEALTH_RANGE = 50.0..110.0
     private val MIN_POWER_RANGE = 3.0..400.0

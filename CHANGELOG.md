@@ -6,6 +6,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A battery page: what the pack is worth, what its gauge is anchored on, what it has been
+  through.** The health figure is measured rather than declared — the energy that left the pack
+  over the charge it cost, from the car's own counters where it keeps any and from the pack
+  voltage-current pair otherwise — and it leads with the trend, because the absolute inherits
+  whichever node the energy was counted at. Beside it: how long since the pack saw a full charge,
+  any charge step that nothing explains, and the dwell, cycles and charge sessions the ledger has
+  accumulated. The sampler now feeds that ledger, which is what makes windows spanning the
+  parking between two drives possible at all. The estimate can be adopted as the declared state of
+  health in the vehicle settings — parked only, one tap, never silently, and never offered for a
+  figure outside the band those settings accept. Nothing on the page writes to the car: no charge
+  limit, no schedule, no preheat. With too little history it says exactly what it is waiting for.
+
 - **The trip trace opens at full size.** In the ledger it is a thumbnail a couple of hundred
   pixels tall, and on a panel shorter than the emulator's it is the first thing squeezed. Tap it
   and it gets a screen of its own: speed and charge on labelled axes, and a cursor dragged along

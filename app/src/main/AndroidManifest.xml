@@ -120,6 +120,11 @@
             android:screenOrientation="landscape" />
 
         <activity
+            android:name=".BatteryHealthActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+
+        <activity
             android:name=".ChargeStopActivity"
             android:exported="false"
             android:screenOrientation="landscape" />

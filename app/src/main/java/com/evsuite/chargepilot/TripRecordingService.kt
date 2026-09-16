@@ -17,6 +17,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.evsuite.hardware.AppLogger
+import com.evsuite.hardware.telemetry.BatteryLedgerRecorder
+import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -62,6 +64,7 @@ class TripRecordingService : Service() {
     }
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
+    private lateinit var batteryLedger: BatteryLedgerRecorder
     private val detector = TripDetector()
     private val pendingHistoryWrites = AtomicInteger()
     private val missingSpeedSamples = AtomicInteger()
@@ -90,6 +93,9 @@ class TripRecordingService : Service() {
         super.onCreate()
         reader = EnergyTelemetryReader(applicationContext)
         tripStore = EnergyTripHistoryStore(File(filesDir, "trips.json"))
+        batteryLedger = BatteryLedgerRecorder(
+            BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME))
+        )
         automaticDetectionEnabled = isAutomaticDetectionEnabled(this)
         createNotificationChannel()
         AppLogger.i(TAG, "service created; automatic=$automaticDetectionEnabled")
@@ -284,6 +290,14 @@ class TripRecordingService : Service() {
         // blanked the screen, and left the driver with three empty energy tiles instead.
         latestSnapshot = value
         EnergyTripSession.add(value)
+        // The battery ledger spans what trips cannot: the parking, the overnight standing and
+        // the charge that happens between two drives, which is where a health estimate's
+        // windows begin and end. It writes only when the sample earned an entry — a point of
+        // charge, a change of charging state, or a quarter of an hour — so this costs one
+        // comparison on all the other samples. It runs on the sampler thread, which is the
+        // thread that already owns this file's neighbours.
+        runCatching { batteryLedger.observe(value) }
+            .onFailure { AppLogger.w(TAG, "battery ledger write failed: ${it.message}") }
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state
