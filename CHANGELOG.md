@@ -6,6 +6,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The charge-stop probe says which gate refused the fit.** `fit=unavailable(INSUFFICIENT_SAMPLES)`
+  was the same line for a history of short drives and for a history with no motorway leg in it,
+  and the two ask the driver for opposite things. The validation line now carries the library's
+  own `describe()`: used trips, segments and speed span, each against its threshold. Evaluated
+  inside the probe lambda, so the second collection pass costs nothing unless validation is armed.
+
 - **A battery page: what the pack is worth, what its gauge is anchored on, what it has been
   through.** The health figure is measured rather than declared — the energy that left the pack
   over the charge it cost, from the car's own counters where it keeps any and from the pack

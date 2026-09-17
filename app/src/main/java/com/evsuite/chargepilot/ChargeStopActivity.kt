@@ -261,7 +261,8 @@ class ChargeStopActivity : AppCompatActivity() {
         // power and the kWh model therefore never trains on it (CP-052). Refitted on each
         // load rather than stored: it is a few thousand samples of arithmetic on a worker
         // thread, and a cache would only add a way for the two to disagree.
-        val fit = SocConsumptionFitter().fit(trips, generation)
+        val fitter = SocConsumptionFitter()
+        val fit = fitter.fit(trips, generation)
         model = (fit as? SocConsumptionFitResult.Ready)?.model
         ValidationProbe.record(ValidationQuestion.SOC_SEGMENTS) {
             val head = "trips=${trips.size} samples=${trips.sumOf { it.samples?.size ?: 0 }} " +
@@ -275,7 +276,11 @@ class ChargeStopActivity : AppCompatActivity() {
                             probeFormat(m.envelope.maxOutsideTempCelsius, "%.0f")} C " +
                         "rmse=${probeFormat(m.residualRmsePercentPer100Km, "%.2f")} %/100 km"
                 }
-                is SocConsumptionFitResult.Unavailable -> "$head fit=unavailable(${fit.reason})"
+                // The reason code alone cannot say which gate refused, and the two ask the
+                // driver for opposite things (CP-052). Evaluated here, inside the probe
+                // lambda, so the second collection pass costs nothing unless armed.
+                is SocConsumptionFitResult.Unavailable ->
+                    "$head fit=unavailable(${fit.reason}) ${fitter.describe(trips, generation)}"
             }
         }
     }
