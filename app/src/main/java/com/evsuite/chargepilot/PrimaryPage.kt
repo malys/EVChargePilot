@@ -4,6 +4,7 @@ enum class PrimaryPage {
     ENERGY,
     ARRIVAL,
     TRIPS,
+    BATTERY,
     DIAGNOSTICS,
     SETTINGS;
 

@@ -135,11 +135,6 @@ class MainActivity : PrimaryNavigationActivity() {
         binding.driftLine.setOnClickListener { forgetPlan() }
         binding.aboutAction.text = getString(R.string.about_version_badge, appVersion())
         binding.aboutAction.setOnClickListener { showAbout() }
-        // A reading screen, so it opens while moving like the trip history does; the one thing
-        // on it that changes a setting carries the parked gate itself.
-        binding.batteryHealthAction.setOnClickListener {
-            startActivity(BatteryHealthActivity.intent(this))
-        }
         renderUnavailable()
         requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {

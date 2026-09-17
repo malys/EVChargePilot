@@ -15,25 +15,26 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/touch_target"
+        android:layout_height="@dimen/chargepilot_bar_height"
         android:background="@drawable/bg_topbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_lg"
         android:paddingEnd="@dimen/spacing_lg">
 
-        <include layout="@layout/view_primary_navigation" />
-
-        <Space
+        <include
+            layout="@layout/view_primary_navigation"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="match_parent"
             android:layout_weight="1" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/exportAllAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="220dp"
-            android:layout_height="@dimen/touch_target"
+            android:layout_height="match_parent"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:layout_marginEnd="@dimen/spacing_sm"
             android:text="@string/action_export_all_trips" />
 
@@ -41,7 +42,9 @@
             android:id="@+id/deleteAllAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="220dp"
-            android:layout_height="@dimen/touch_target"
+            android:layout_height="match_parent"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:text="@string/action_delete_all_trips" />
     </LinearLayout>
 
@@ -56,7 +59,10 @@
             android:layout_height="match_parent"
             android:baselineAligned="false"
             android:orientation="horizontal"
-            android:padding="@dimen/spacing_lg"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/chargepilot_bar_gap"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_lg"
             android:visibility="gone">
 
             <LinearLayout

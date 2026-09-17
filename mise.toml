@@ -13,13 +13,19 @@ _.path = [
 # profiles therefore validate different axes and neither replaces an on-vehicle pass:
 #   emulator-car     API 33 Automotive, with CarPropertyManager but the wrong OS version.
 #   emulator-screen  API 28 tablet, with the target OS and panel geometry but no car service.
-# The 1920x1080 panel leaves the target 1920x720 app viewport after system UI.
+# The car's panel is 1920x720 at 160dpi and carries no system bars, so a layout gets all 720
+# of them. An emulator does have bars, which take EMU_SYSTEM_UI off the panel before the
+# activity sees it, so the panel is that much taller and the configuration then reports
+# h720dp — the car's box. The old 1080 panel reported h908dp and hid every overflow.
 EMU_CAR_AVD = "evchargepilot-car"
 EMU_CAR_IMAGE = "system-images;android-33;android-automotive;x86_64"
 EMU_SCREEN_AVD = "evchargepilot-screen"
 EMU_SCREEN_IMAGE = "system-images;android-28;google_apis;x86_64"
 EMU_WIDTH = "1920"
-EMU_HEIGHT = "1080"
+EMU_APP_HEIGHT = "720"
+# Measured on the API 33 Automotive image: a 76dp status bar and a 96dp control bar.
+EMU_SYSTEM_UI = "172"
+EMU_HEIGHT = "892"
 EMU_DENSITY = "160"
 COMPILE_SDK = "36"
 BUILD_TOOLS = "36.0.0"
@@ -143,15 +149,14 @@ for attempt in $(seq 1 120); do
   [ "$attempt" -eq 120 ] && { echo "Automotive emulator boot timed out." >&2; exit 1; }
   sleep 1
 done
-# AVD hardware config owns geometry; discard stale overrides from older 1920x720 profiles.
-"$ADB" shell wm size reset
+mise run emulator-viewport
 # No GPS receiver in the emulator: the root `geo` task keeps a fixed Auzielle position fresh.
 nohup mise run geo >/dev/null 2>&1 &
 echo "Automotive emulator ready."
 '''
 
 [tasks.emulator-screen]
-description = "Start the API 28 1920x1080 panel emulator"
+description = "Start the API 28 panel emulator"
 run = '''
 set -e
 "$ANDROID_HOME/emulator/emulator" -avd "$EMU_SCREEN_AVD" \
@@ -164,8 +169,29 @@ for attempt in $(seq 1 120); do
   [ "$attempt" -eq 120 ] && { echo "Screen emulator boot timed out." >&2; exit 1; }
   sleep 1
 done
-"$ADB" shell wm size reset
+mise run emulator-viewport
 echo "Screen emulator ready."
+'''
+
+[tasks.emulator-viewport]
+description = "Size the running emulator so the app window matches the car's 1920x720 viewport"
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+"$ADB" shell wm size "${EMU_WIDTH}x${EMU_HEIGHT}"
+"$ADB" shell wm density "$EMU_DENSITY"
+# The panel is the viewport plus the bars; if this emulator's bars are not EMU_SYSTEM_UI tall
+# the app window is not the car's and every layout check made on it is measuring the wrong box.
+# The configuration's own w/h, which is the box a layout is measured in — and display 0 only,
+# because an Automotive image also publishes a cluster display and lists it first.
+box=$("$ADB" shell dumpsys window displays \
+  | awk '/mDisplayId=0/{f=1} f && /overrideConfig/{match($0, /w[0-9]+dp h[0-9]+dp/); print substr($0, RSTART, RLENGTH); exit}')
+want="w${EMU_WIDTH}dp h${EMU_APP_HEIGHT}dp"
+if [ "$box" != "$want" ]; then
+  echo "Layouts would be measured in $box, not the car's $want: this emulator's system UI is not $EMU_SYSTEM_UI tall." >&2
+  exit 1
+fi
+echo "Layout box $box at ${EMU_DENSITY}dpi — the car's viewport."
 '''
 
 [tasks.emulator-stop]
@@ -190,6 +216,7 @@ echo "Installing $APK"
 nohup mise run geo >/dev/null 2>&1 &
 # seed-settings launches the app: the seed is read at start, so the install has to come first
 # and the launch has to come after it. Without the local settings file it only launches.
+SEED_PKG="com.evsuite.chargepilot" mise run seed-trips
 SEED_PKG="com.evsuite.chargepilot" mise run seed-settings
 '''
 
@@ -207,7 +234,40 @@ APK=$(ls -t app/build/outputs/apk/unstable/debug/*.apk | head -1)
 echo "Installing $APK"
 "$ADB" install -r -g "$APK"
 nohup mise run geo >/dev/null 2>&1 &
+SEED_PKG="com.evsuite.chargepilot.unstable" mise run seed-trips
 SEED_PKG="com.evsuite.chargepilot.unstable" mise run seed-settings
+'''
+
+# Every screen in this app reads recorded history: the trip ledger, the plot, the arrival
+# forecast, the speed comparison, the health estimate. A fresh emulator has none, so every one of
+# them renders its empty state and the rendering cannot be reviewed. This drops a recorded drive,
+# a short errand and eight measurable discharges — checked in, no keys, no personal position —
+# into the app's own files, so run/run-unstable always start with data. TRIP_FILE= and
+# LEDGER_FILE= seed a different history.
+[tasks.seed-trips]
+description = "Inject the reference trips and battery ledger so the screens render with data"
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+TRIPS="${TRIP_FILE:-evchargepilot-trips.json}"
+LEDGER="${LEDGER_FILE:-evchargepilot-battery-ledger.json}"
+PKG="${SEED_PKG:-com.evsuite.chargepilot}"
+if [ -z "$($ADB devices | sed '1d' | grep -w device || true)" ]; then
+  echo "No device connected. Start emulator-car/emulator-screen first." >&2
+  exit 1
+fi
+USER_ID="$($ADB shell am get-current-user | tr -d '\r\n')"
+# Same shape as seed-settings: only run-as can write into the app's data directory, and the
+# redirect has to happen inside it.
+"$ADB" shell "run-as $PKG --user $USER_ID mkdir -p /data/user/$USER_ID/$PKG/files"
+seed() {
+  "$ADB" push "$1" /data/local/tmp/seed-history.json >/dev/null
+  "$ADB" shell "run-as $PKG --user $USER_ID sh -c 'cat /data/local/tmp/seed-history.json > /data/user/$USER_ID/$PKG/files/$2'"
+  "$ADB" shell rm /data/local/tmp/seed-history.json
+}
+seed "$TRIPS" trips.json
+seed "$LEDGER" battery-ledger.json
+echo "Trips and battery ledger seeded into $PKG (user $USER_ID)."
 '''
 
 [tasks.logs]
@@ -234,7 +294,8 @@ if [ -f "$FILE" ]; then
   "$ADB" push "$FILE" /data/local/tmp/seed-settings.json
   # The redirect has to run inside run-as, not in the shell that invokes it: the outer shell is
   # uid shell, which cannot write into an app's data directory, and its cwd is /.
-  "$ADB" shell "run-as $PKG --user $USER_ID sh -c 'cat /data/local/tmp/seed-settings.json > /data/user/$USER_ID/$PKG/files/seed-settings.json'"
+ "$ADB" shell "run-as $PKG --user $USER_ID mkdir -p /data/user/$USER_ID/$PKG/files"
+ "$ADB" shell "run-as $PKG --user $USER_ID sh -c 'cat /data/local/tmp/seed-settings.json > /data/user/$USER_ID/$PKG/files/seed-settings.json'"
   "$ADB" shell rm /data/local/tmp/seed-settings.json
   echo "Settings seeded into $PKG (user $USER_ID)."
 else

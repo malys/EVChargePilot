@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "atMs": 1787220000000,
+      "socPercent": 92.0,
+      "odometerKm": 41250.0,
+      "outsideTempCelsius": 14.0,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1787230800000,
+      "socPercent": 85.6,
+      "odometerKm": 41296.0,
+      "outsideTempCelsius": 14.8,
+      "vehicleConsumedKwh": 3.91,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1787241600000,
+      "socPercent": 79.2,
+      "odometerKm": 41342.0,
+      "outsideTempCelsius": 15.6,
+      "vehicleConsumedKwh": 7.83,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1787252400000,
+      "socPercent": 72.8,
+      "odometerKm": 41388.0,
+      "outsideTempCelsius": 16.4,
+      "vehicleConsumedKwh": 11.74,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1787263200000,
+      "socPercent": 66.4,
+      "odometerKm": 41434.0,
+      "outsideTempCelsius": 17.2,
+      "vehicleConsumedKwh": 15.65,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1787274000000,
+      "socPercent": 60.0,
+      "odometerKm": 41480.0,
+      "outsideTempCelsius": 18.0,
+      "vehicleConsumedKwh": 19.57,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1787565600000,
+      "socPercent": 92.0,
+      "odometerKm": 41560.0,
+      "outsideTempCelsius": 14.4,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1787576400000,
+      "socPercent": 85.6,
+      "odometerKm": 41606.0,
+      "outsideTempCelsius": 15.2,
+      "vehicleConsumedKwh": 3.9,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1787587200000,
+      "socPercent": 79.2,
+      "odometerKm": 41652.0,
+      "outsideTempCelsius": 16.0,
+      "vehicleConsumedKwh": 7.81,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1787598000000,
+      "socPercent": 72.8,
+      "odometerKm": 41698.0,
+      "outsideTempCelsius": 16.8,
+      "vehicleConsumedKwh": 11.71,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1787608800000,
+      "socPercent": 66.4,
+      "odometerKm": 41744.0,
+      "outsideTempCelsius": 17.6,
+      "vehicleConsumedKwh": 15.61,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1787619600000,
+      "socPercent": 60.0,
+      "odometerKm": 41790.0,
+      "outsideTempCelsius": 18.4,
+      "vehicleConsumedKwh": 19.51,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1787911200000,
+      "socPercent": 92.0,
+      "odometerKm": 41870.0,
+      "outsideTempCelsius": 14.8,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1787922000000,
+      "socPercent": 85.6,
+      "odometerKm": 41916.0,
+      "outsideTempCelsius": 15.6,
+      "vehicleConsumedKwh": 3.89,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1787932800000,
+      "socPercent": 79.2,
+      "odometerKm": 41962.0,
+      "outsideTempCelsius": 16.4,
+      "vehicleConsumedKwh": 7.78,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1787943600000,
+      "socPercent": 72.8,
+      "odometerKm": 42008.0,
+      "outsideTempCelsius": 17.2,
+      "vehicleConsumedKwh": 11.68,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1787954400000,
+      "socPercent": 66.4,
+      "odometerKm": 42054.0,
+      "outsideTempCelsius": 18.0,
+      "vehicleConsumedKwh": 15.57,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1787965200000,
+      "socPercent": 60.0,
+      "odometerKm": 42100.0,
+      "outsideTempCelsius": 18.8,
+      "vehicleConsumedKwh": 19.46,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788256800000,
+      "socPercent": 92.0,
+      "odometerKm": 42180.0,
+      "outsideTempCelsius": 15.2,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788267600000,
+      "socPercent": 85.6,
+      "odometerKm": 42226.0,
+      "outsideTempCelsius": 16.0,
+      "vehicleConsumedKwh": 3.88,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1788278400000,
+      "socPercent": 79.2,
+      "odometerKm": 42272.0,
+      "outsideTempCelsius": 16.8,
+      "vehicleConsumedKwh": 7.76,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1788289200000,
+      "socPercent": 72.8,
+      "odometerKm": 42318.0,
+      "outsideTempCelsius": 17.6,
+      "vehicleConsumedKwh": 11.64,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1788300000000,
+      "socPercent": 66.4,
+      "odometerKm": 42364.0,
+      "outsideTempCelsius": 18.4,
+      "vehicleConsumedKwh": 15.52,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1788310800000,
+      "socPercent": 60.0,
+      "odometerKm": 42410.0,
+      "outsideTempCelsius": 19.2,
+      "vehicleConsumedKwh": 19.4,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788602400000,
+      "socPercent": 92.0,
+      "odometerKm": 42490.0,
+      "outsideTempCelsius": 15.6,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788613200000,
+      "socPercent": 85.6,
+      "odometerKm": 42536.0,
+      "outsideTempCelsius": 16.4,
+      "vehicleConsumedKwh": 3.87,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1788624000000,
+      "socPercent": 79.2,
+      "odometerKm": 42582.0,
+      "outsideTempCelsius": 17.2,
+      "vehicleConsumedKwh": 7.74,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1788634800000,
+      "socPercent": 72.8,
+      "odometerKm": 42628.0,
+      "outsideTempCelsius": 18.0,
+      "vehicleConsumedKwh": 11.61,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1788645600000,
+      "socPercent": 66.4,
+      "odometerKm": 42674.0,
+      "outsideTempCelsius": 18.8,
+      "vehicleConsumedKwh": 15.48,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1788656400000,
+      "socPercent": 60.0,
+      "odometerKm": 42720.0,
+      "outsideTempCelsius": 19.6,
+      "vehicleConsumedKwh": 19.35,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788948000000,
+      "socPercent": 92.0,
+      "odometerKm": 42800.0,
+      "outsideTempCelsius": 16.0,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1788958800000,
+      "socPercent": 85.6,
+      "odometerKm": 42846.0,
+      "outsideTempCelsius": 16.8,
+      "vehicleConsumedKwh": 3.86,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1788969600000,
+      "socPercent": 79.2,
+      "odometerKm": 42892.0,
+      "outsideTempCelsius": 17.6,
+      "vehicleConsumedKwh": 7.72,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1788980400000,
+      "socPercent": 72.8,
+      "odometerKm": 42938.0,
+      "outsideTempCelsius": 18.4,
+      "vehicleConsumedKwh": 11.58,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1788991200000,
+      "socPercent": 66.4,
+      "odometerKm": 42984.0,
+      "outsideTempCelsius": 19.2,
+      "vehicleConsumedKwh": 15.44,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1789002000000,
+      "socPercent": 60.0,
+      "odometerKm": 43030.0,
+      "outsideTempCelsius": 20.0,
+      "vehicleConsumedKwh": 19.3,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1789293600000,
+      "socPercent": 92.0,
+      "odometerKm": 43110.0,
+      "outsideTempCelsius": 16.4,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1789304400000,
+      "socPercent": 85.6,
+      "odometerKm": 43156.0,
+      "outsideTempCelsius": 17.2,
+      "vehicleConsumedKwh": 3.85,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1789315200000,
+      "socPercent": 79.2,
+      "odometerKm": 43202.0,
+      "outsideTempCelsius": 18.0,
+      "vehicleConsumedKwh": 7.7,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1789326000000,
+      "socPercent": 72.8,
+      "odometerKm": 43248.0,
+      "outsideTempCelsius": 18.8,
+      "vehicleConsumedKwh": 11.54,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1789336800000,
+      "socPercent": 66.4,
+      "odometerKm": 43294.0,
+      "outsideTempCelsius": 19.6,
+      "vehicleConsumedKwh": 15.39,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1789347600000,
+      "socPercent": 60.0,
+      "odometerKm": 43340.0,
+      "outsideTempCelsius": 20.4,
+      "vehicleConsumedKwh": 19.24,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    },
+    {
+      "atMs": 1789639200000,
+      "socPercent": 92.0,
+      "odometerKm": 43420.0,
+      "outsideTempCelsius": 16.8,
+      "vehicleConsumedKwh": 0.0,
+      "vehicleRegeneratedKwh": 0.0,
+      "integratedDistanceKm": 0.0,
+      "parked": true
+    },
+    {
+      "atMs": 1789650000000,
+      "socPercent": 85.6,
+      "odometerKm": 43466.0,
+      "outsideTempCelsius": 17.6,
+      "vehicleConsumedKwh": 3.84,
+      "vehicleRegeneratedKwh": 0.24,
+      "integratedDistanceKm": 45.6,
+      "parked": false
+    },
+    {
+      "atMs": 1789660800000,
+      "socPercent": 79.2,
+      "odometerKm": 43512.0,
+      "outsideTempCelsius": 18.4,
+      "vehicleConsumedKwh": 7.67,
+      "vehicleRegeneratedKwh": 0.48,
+      "integratedDistanceKm": 91.2,
+      "parked": false
+    },
+    {
+      "atMs": 1789671600000,
+      "socPercent": 72.8,
+      "odometerKm": 43558.0,
+      "outsideTempCelsius": 19.2,
+      "vehicleConsumedKwh": 11.51,
+      "vehicleRegeneratedKwh": 0.72,
+      "integratedDistanceKm": 136.8,
+      "parked": false
+    },
+    {
+      "atMs": 1789682400000,
+      "socPercent": 66.4,
+      "odometerKm": 43604.0,
+      "outsideTempCelsius": 20.0,
+      "vehicleConsumedKwh": 15.35,
+      "vehicleRegeneratedKwh": 0.96,
+      "integratedDistanceKm": 182.4,
+      "parked": false
+    },
+    {
+      "atMs": 1789693200000,
+      "socPercent": 60.0,
+      "odometerKm": 43650.0,
+      "outsideTempCelsius": 20.8,
+      "vehicleConsumedKwh": 19.19,
+      "vehicleRegeneratedKwh": 1.2,
+      "integratedDistanceKm": 228.0,
+      "parked": true
+    }
+  ]
+}

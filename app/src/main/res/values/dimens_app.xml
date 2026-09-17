@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Every top bar, title bar included. The bar is overhead: it costs the panel height that
+         the screen's own content wants, and the soft keyboard takes the bottom half of the panel
+         with it, so the bar is the shortest it can be while its tabs and actions stay tappable —
+         48dp, the platform's minimum touch target. Anything inside a bar takes match_parent
+         rather than touch_target, so this is the only number to change. -->
+    <dimen name="chargepilot_bar_height">48dp</dimen>
+    <!-- Breathing room under a bar, where the suite's spacing_lg is space the keyboard needs
+         more than the eye does. -->
+    <dimen name="chargepilot_bar_gap">@dimen/spacing_sm</dimen>
     <!-- Fixed instrument rail: app-specific because it balances live readouts against
          one parked-only action on the 1920×720 MG4 panel. -->
     <dimen name="chargepilot_rail_width">420dp</dimen>
@@ -12,7 +21,6 @@
     <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
     <dimen name="chargepilot_swipe_threshold">96dp</dimen>
     <!-- Fixed across primary screens so destination tabs never shift under the driver's hand. -->
-    <dimen name="chargepilot_primary_title_width">300dp</dimen>
     <!-- Trip readout tiles, as a floor rather than a height. The car's usable height is
          not the emulator's - it has no system bars, and its per-app DPI is the driver's
          to set, so a taller density buys fewer dp. A -hXXXdp qualifier would only move

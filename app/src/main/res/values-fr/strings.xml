@@ -44,6 +44,7 @@
     <string name="tab_energy">Énergie</string>
     <string name="tab_arrival">Arrivée</string>
     <string name="tab_trips">Trajets</string>
+    <string name="tab_battery">Batterie</string>
     <string name="tab_diagnostics">Diagnostic</string>
     <string name="tab_settings">Configuration</string>
     <string name="action_back">Retour</string>
@@ -432,8 +433,8 @@ Consommation %6$s %% par km</string>
 
     <string name="settings_title">Configuration</string>
     <string name="settings_transfer_ready">À l’arrêt. L’import relit le fichier ; l’export l’écrit, avec les clés en clair.</string>
-    <string name="settings_action_import">Importer USB</string>
-    <string name="settings_action_export">Exporter USB</string>
+    <string name="settings_action_import">Importer</string>
+    <string name="settings_action_export">Exporter</string>
     <string name="settings_import_pick">Choisir le stockage USB</string>
     <string name="settings_import_none">Aucune clé USB trouvée. Placez-y le fichier evchargepilot-settings.json exporté par cette application.</string>
     <string name="settings_import_done">Paramètres importés depuis %1$s.</string>
@@ -445,7 +446,6 @@ Consommation %6$s %% par km</string>
     <string name="diagnostics_intro">Ce que l’application a lu dans la voiture, ce qu’elle en a déduit, et pourquoi une valeur manquante manque. L’export écrit ce même texte sur une clé USB.</string>
     <string name="diagnostics_building">Lecture des propriétés du véhicule…</string>
     <string name="battery_health_title">Santé de la batterie</string>
-    <string name="battery_health_action">Batterie</string>
     <string name="battery_health_state_of_health">État de santé estimé</string>
     <string name="battery_health_calibration">Calibrage de la jauge de charge</string>
     <string name="battery_health_exposure">Ce que cette batterie a subi</string>

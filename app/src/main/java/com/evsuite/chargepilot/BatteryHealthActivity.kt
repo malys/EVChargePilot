@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.evsuite.chargepilot.databinding.ActivityBatteryHealthBinding
 import com.evsuite.hardware.telemetry.BatteryExposure
 import com.evsuite.hardware.telemetry.BatteryExposureReport
@@ -37,7 +36,9 @@ import java.util.concurrent.Executors
  * — so it is offered as a suggestion, gated parked-only like every other setting, and the
  * driver's figure stays theirs until they tap.
  */
-class BatteryHealthActivity : AppCompatActivity() {
+class BatteryHealthActivity : PrimaryNavigationActivity() {
+    override val primaryPage = PrimaryPage.BATTERY
+
 
     private lateinit var binding: ActivityBatteryHealthBinding
     private val disk = Executors.newSingleThreadExecutor { runnable ->
@@ -83,7 +84,6 @@ class BatteryHealthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityBatteryHealthBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.backAction.setOnClickListener { finish() }
         binding.applyAction.setOnClickListener { apply() }
         load()
     }
@@ -357,8 +357,5 @@ class BatteryHealthActivity : AppCompatActivity() {
 
     companion object {
         private const val PATTERN_TREND = "%+.1f pt"
-
-        fun intent(context: Context): Intent =
-            Intent(context, BatteryHealthActivity::class.java)
     }
 }

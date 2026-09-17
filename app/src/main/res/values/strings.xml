@@ -47,6 +47,7 @@
     <string name="tab_energy">Energy</string>
     <string name="tab_arrival">Arrival</string>
     <string name="tab_trips">Trips</string>
+    <string name="tab_battery">Battery</string>
     <string name="tab_diagnostics">Diagnostics</string>
     <string name="tab_settings">Settings</string>
     <string name="action_back">Back</string>
@@ -441,8 +442,8 @@ Spending %6$s %% per km</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_transfer_ready">Parked. Import reads the file back; export writes it, keys in clear text.</string>
-    <string name="settings_action_import">Import USB</string>
-    <string name="settings_action_export">Export USB</string>
+    <string name="settings_action_import">Import</string>
+    <string name="settings_action_export">Export</string>
     <string name="settings_import_pick">Choose USB storage</string>
     <string name="settings_import_none">No USB stick found. Put the evchargepilot-settings.json file this app exports on one.</string>
     <string name="settings_import_done">Settings imported from %1$s.</string>
@@ -454,7 +455,6 @@ Spending %6$s %% per km</string>
     <string name="diagnostics_intro">What this app read from the car, what it derived, and why a missing figure is missing. Export writes the same text to a USB volume.</string>
     <string name="diagnostics_building">Reading the vehicle properties…</string>
     <string name="battery_health_title">Battery health</string>
-    <string name="battery_health_action">Battery</string>
     <string name="battery_health_state_of_health">Estimated state of health</string>
     <string name="battery_health_calibration">Charge gauge calibration</string>
     <string name="battery_health_exposure">What this pack has been through</string>

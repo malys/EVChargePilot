@@ -15,7 +15,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/touch_target"
+        android:layout_height="@dimen/chargepilot_bar_height"
         android:background="@drawable/bg_topbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -33,7 +33,9 @@
             android:id="@+id/backAction"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="180dp"
-            android:layout_height="@dimen/touch_target"
+            android:layout_height="match_parent"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:text="@string/action_back" />
     </LinearLayout>
 
@@ -43,7 +45,7 @@
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/spacing_lg"
         android:paddingEnd="@dimen/spacing_lg"
-        android:paddingTop="@dimen/spacing_sm"
+        android:paddingTop="@dimen/chargepilot_bar_gap"
         android:text="@string/trip_plot_legend"
         android:textAppearance="@style/Text.EV.Secondary" />
 
@@ -58,9 +60,13 @@
         android:background="@drawable/bg_card"
         android:importantForAccessibility="yes" />
 
+    <!-- A floor, not a height: a label over a 26sp value with its own padding needs more than
+         84dp, and as a fixed height the row cut the values off at the bottom. The plot keeps
+         whatever is left. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/chargepilot_readout_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/chargepilot_readout_height"
         android:baselineAligned="false"
         android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_lg"

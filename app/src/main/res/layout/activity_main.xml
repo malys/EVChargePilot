@@ -17,20 +17,26 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/touch_target"
+        android:layout_height="@dimen/chargepilot_bar_height"
         android:background="@drawable/bg_topbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_lg"
         android:paddingEnd="@dimen/spacing_lg">
 
-        <include layout="@layout/view_primary_navigation" />
+        <include
+            layout="@layout/view_primary_navigation"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <!-- Full-height target despite secondary typography. -->
+        <!-- Full-height target despite secondary typography. Wide as its own text: the
+             version it shows grows with the build number, and 140dp wrapped it onto two
+             lines inside a 72dp bar. -->
         <TextView
             android:id="@+id/aboutAction"
-            android:layout_width="140dp"
-            android:layout_height="@dimen/touch_target"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="@dimen/spacing_lg"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
@@ -39,21 +45,11 @@
             android:gravity="center"
             android:paddingStart="@dimen/spacing_sm"
             android:paddingEnd="@dimen/spacing_sm"
+            android:maxLines="1"
             android:text="@string/app_name"
             android:textAppearance="@style/Text.EV.Secondary"
             android:textColor="@color/ev_accent" />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/batteryHealthAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="220dp"
-            android:layout_height="@dimen/touch_target"
-            android:text="@string/battery_health_action" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,7 +58,10 @@
         android:layout_weight="1"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:padding="@dimen/spacing_md">
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/chargepilot_bar_gap"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_md">
 
         <LinearLayout
             android:layout_width="0dp"

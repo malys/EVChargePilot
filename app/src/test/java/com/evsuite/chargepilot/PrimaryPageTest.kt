@@ -9,7 +9,9 @@ class PrimaryPageTest {
     fun `pages follow visible navigation order`() {
         assertEquals(PrimaryPage.ARRIVAL, PrimaryPage.ENERGY.neighbour(1))
         assertEquals(PrimaryPage.TRIPS, PrimaryPage.ARRIVAL.neighbour(1))
-        assertEquals(PrimaryPage.DIAGNOSTICS, PrimaryPage.TRIPS.neighbour(1))
+        assertEquals(PrimaryPage.BATTERY, PrimaryPage.TRIPS.neighbour(1))
+        assertEquals(PrimaryPage.DIAGNOSTICS, PrimaryPage.BATTERY.neighbour(1))
+        assertEquals(PrimaryPage.TRIPS, PrimaryPage.BATTERY.neighbour(-1))
         assertEquals(PrimaryPage.SETTINGS, PrimaryPage.DIAGNOSTICS.neighbour(1))
         assertEquals(PrimaryPage.ENERGY, PrimaryPage.ARRIVAL.neighbour(-1))
         assertNull(PrimaryPage.ENERGY.neighbour(-1))

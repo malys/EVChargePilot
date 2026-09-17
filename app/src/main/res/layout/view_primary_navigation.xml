@@ -1,59 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fixed title width keeps every destination under the same point after a swipe. -->
+<!-- Every width here is a weight, not a number. The strip is the top bar's flexible element:
+     each host gives it 0dp and weight 1 so it takes what the screen's own action buttons leave,
+     and the six tabs split that evenly. The fixed 300dp title and 200dp tabs it replaces added
+     up to 1300dp on a 1920dp panel, which a sixth tab or a translated label overflowed. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/touch_target"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <TextView
-        android:layout_width="@dimen/chargepilot_primary_title_width"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_md"
         android:text="@string/app_name"
         android:textAppearance="@style/Text.EV.Title" />
 
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/primaryNavigation"
-        android:layout_width="1000dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         app:selectionRequired="true"
         app:singleSelection="true">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/navEnergy"
         style="@style/Widget.EVChargePilot.NavTab"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:text="@string/tab_energy" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/navArrival"
         style="@style/Widget.EVChargePilot.NavTab"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:text="@string/tab_arrival" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/navTrips"
         style="@style/Widget.EVChargePilot.NavTab"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:text="@string/tab_trips" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/navBattery"
+        style="@style/Widget.EVChargePilot.NavTab"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/tab_battery" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/navDiagnostics"
         style="@style/Widget.EVChargePilot.NavTab"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:text="@string/tab_diagnostics" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/navSettings"
         style="@style/Widget.EVChargePilot.NavTab"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:text="@string/tab_settings" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 </LinearLayout>

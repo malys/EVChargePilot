@@ -81,6 +81,7 @@ abstract class PrimaryNavigationActivity : AppCompatActivity() {
         R.id.navEnergy -> PrimaryPage.ENERGY
         R.id.navArrival -> PrimaryPage.ARRIVAL
         R.id.navTrips -> PrimaryPage.TRIPS
+        R.id.navBattery -> PrimaryPage.BATTERY
         R.id.navDiagnostics -> PrimaryPage.DIAGNOSTICS
         R.id.navSettings -> PrimaryPage.SETTINGS
         else -> null
@@ -90,6 +91,7 @@ abstract class PrimaryNavigationActivity : AppCompatActivity() {
         PrimaryPage.ENERGY -> R.id.navEnergy
         PrimaryPage.ARRIVAL -> R.id.navArrival
         PrimaryPage.TRIPS -> R.id.navTrips
+        PrimaryPage.BATTERY -> R.id.navBattery
         PrimaryPage.DIAGNOSTICS -> R.id.navDiagnostics
         PrimaryPage.SETTINGS -> R.id.navSettings
     }
@@ -98,6 +100,7 @@ abstract class PrimaryNavigationActivity : AppCompatActivity() {
         PrimaryPage.ENERGY -> MainActivity::class.java
         PrimaryPage.ARRIVAL -> ArrivalForecastActivity::class.java
         PrimaryPage.TRIPS -> TripHistoryActivity::class.java
+        PrimaryPage.BATTERY -> BatteryHealthActivity::class.java
         PrimaryPage.DIAGNOSTICS -> DiagnosticsActivity::class.java
         PrimaryPage.SETTINGS -> SettingsActivity::class.java
     }
