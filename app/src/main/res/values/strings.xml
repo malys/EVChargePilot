@@ -195,7 +195,7 @@
     <string name="energy_breakdown_charge_verdict_climate">The stretches driven with the climate on cost more charge than your usual trips do.</string>
     <string name="energy_breakdown_charge_verdict_other">A residual is distinguishable, but the available evidence cannot assign it to a separate consumer.</string>
     <string name="energy_breakdown_charge_rate">On this trip 1 %% of charge ran about %1$.1f km. Charge outside the modelled stretches stays in its own row.</string>
-    <string name="energy_breakdown_charge_untrained">Not enough recorded driving yet to fit this car\'s charge model: it needs twelve stretches of at least 2 %% and 2 km, across a range of speeds and temperatures. Nothing is estimated in its place.</string>
+    <string name="energy_breakdown_charge_untrained" formatted="false">Not enough recorded driving yet to fit this car\'s charge model: it needs twelve stretches of at least 2 % and 2 km, across a range of speeds and temperatures. Nothing is estimated in its place.</string>
     <string name="energy_breakdown_charge_no_interval">This trip has no stretch with a speed, an outside temperature and a charge reading the model can speak about.</string>
     <string name="energy_breakdown_charge_too_small">The gauge moved two steps or less across this trip. Splitting that between driving and everything else would be splitting the gauge\'s own resolution.</string>
     <string name="action_speed_what_if">Speed comparison</string>
@@ -473,7 +473,7 @@ Spending %6$s %% per km</string>
     <string name="battery_health_declared">Your declared figure: %1$.0f %% of %2$.1f kWh.</string>
     <string name="battery_health_calibration_settled">Settled. The gauge saw a full charge %1$.0f days ago, which is what it corrects itself against.</string>
     <string name="battery_health_calibration_watch">Worth watching. The last full charge was %1$.0f days ago.</string>
-    <string name="battery_health_calibration_re_anchor">A full charge would help. Charging to 100 %% and leaving the car plugged in until it stops drawing is what lets the pack re-anchor its own charge estimate.</string>
+    <string name="battery_health_calibration_re_anchor" formatted="false">A full charge would help. Charging to 100 % and leaving the car plugged in until it stops drawing is what lets the pack re-anchor its own charge estimate.</string>
     <string name="battery_health_calibration_never_full">This app has never seen this car charged above %1$.0f %%.</string>
     <string name="battery_health_calibration_steps">%1$d charge step(s) nothing explains, the largest %2$.0f points while parked. That is the gauge re-estimating, not the pack losing charge.</string>
     <string name="battery_health_calibration_cycles">%1$.1f equivalent full cycles since then.</string>

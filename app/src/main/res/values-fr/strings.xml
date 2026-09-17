@@ -191,7 +191,7 @@
     <string name="energy_breakdown_charge_verdict_climate">Les portions parcourues climatisation en marche ont coûté plus de charge que vos trajets habituels.</string>
     <string name="energy_breakdown_charge_verdict_other">Un résiduel se distingue, mais les preuves disponibles ne permettent pas de l\'attribuer à un consommateur précis.</string>
     <string name="energy_breakdown_charge_rate">Sur ce trajet, 1 %% de charge a couvert environ %1$.1f km. La charge hors portions modélisées reste sur sa propre ligne.</string>
-    <string name="energy_breakdown_charge_untrained">Pas encore assez de conduite enregistrée pour ajuster le modèle de charge de cette voiture : il faut douze portions d\'au moins 2 %% et 2 km, sur une plage de vitesses et de températures. Aucune estimation n\'est affichée à la place.</string>
+    <string name="energy_breakdown_charge_untrained" formatted="false">Pas encore assez de conduite enregistrée pour ajuster le modèle de charge de cette voiture : il faut douze portions d\'au moins 2 % et 2 km, sur une plage de vitesses et de températures. Aucune estimation n\'est affichée à la place.</string>
     <string name="energy_breakdown_charge_no_interval">Ce trajet ne comporte aucune portion avec une vitesse, une température extérieure et une lecture de charge dont le modèle puisse parler.</string>
     <string name="energy_breakdown_charge_too_small">La jauge n\'a pas bougé de plus de deux crans sur ce trajet. Répartir cela entre conduite et reste reviendrait à répartir la résolution de la jauge.</string>
     <string name="action_speed_what_if">Comparer les vitesses</string>
@@ -464,7 +464,7 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_declared">Votre valeur déclarée : %1$.0f %% de %2$.1f kWh.</string>
     <string name="battery_health_calibration_settled">Stable. La jauge a vu une charge complète il y a %1$.0f jours, et c’est là-dessus qu’elle se recale.</string>
     <string name="battery_health_calibration_watch">À surveiller. Dernière charge complète il y a %1$.0f jours.</string>
-    <string name="battery_health_calibration_re_anchor">Une charge complète aiderait. Charger à 100 %% et laisser la voiture branchée jusqu’à l’arrêt du courant est ce qui permet au pack de recaler son estimation de charge.</string>
+    <string name="battery_health_calibration_re_anchor" formatted="false">Une charge complète aiderait. Charger à 100 % et laisser la voiture branchée jusqu’à l’arrêt du courant est ce qui permet au pack de recaler son estimation de charge.</string>
     <string name="battery_health_calibration_never_full">Cette application n’a jamais vu cette voiture chargée au-dessus de %1$.0f %%.</string>
     <string name="battery_health_calibration_steps">%1$d saut(s) de charge que rien n’explique, le plus grand de %2$.0f points à l’arrêt. C’est la jauge qui se réestime, pas le pack qui se vide.</string>
     <string name="battery_health_calibration_cycles">%1$.1f cycles complets équivalents depuis.</string>

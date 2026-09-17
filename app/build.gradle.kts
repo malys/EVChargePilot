@@ -115,6 +115,21 @@ tasks.register("printUnstableVersion") {
     }
 }
 
+// Some unit tests read files off disk: res/values*/strings.xml, because the app's own resources
+// are not on a plain JVM test's classpath and nothing here runs Robolectric, and the seeded
+// fixtures, which live beside the mise task that pushes them. Gradle cannot see those inputs by
+// itself, so a changed string or fixture would leave the tests UP-TO-DATE and the check would
+// pass without running them. Declared here rather than worked around in the tests.
+tasks.withType<Test>().configureEach {
+    inputs.dir(layout.projectDirectory.dir("src/main/res"))
+        .withPropertyName("appResources")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files(rootProject.layout.projectDirectory.files(
+        "evchargepilot-trips.json",
+        "evchargepilot-battery-ledger.json",
+    )).withPropertyName("seededFixtures").withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 dependencies {
     implementation(project(":evhardware"))
     implementation(libs.androidx.core.ktx)
