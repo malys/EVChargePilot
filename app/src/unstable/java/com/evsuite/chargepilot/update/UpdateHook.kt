@@ -42,6 +42,51 @@ object UpdateHook {
     /** Arbitrary, and never read back: the grant is re-checked at the moment of writing. */
     private const val STORAGE_REQUEST = 0xE7A
 
+    /**
+     * What the last pass over the pipeline concluded, for the diagnostic report.
+     *
+     * The channel is deliberately quiet on screen — a failed check is not the driver's problem
+     * — which leaves a tester unable to tell a check that found nothing from one that never
+     * ran at all. The head unit has no adb, so the verdict goes where the report goes:
+     * [diagnosis], on the Diagnostics screen and in its USB export.
+     */
+    @Volatile
+    private var verdict: String = "no pass has run in this process"
+
+    /** Records the outcome and returns it, so every exit from [attempt] is accounted for. */
+    private fun <T : Attempt> conclude(state: String, attempt: T): T {
+        verdict = state
+        AppLogger.i(TAG, state)
+        return attempt
+    }
+
+    /**
+     * The update pipeline's own state, as report lines.
+     *
+     * Read on the report's thread: no network, no disk, nothing that can block. The
+     * `EV_UPDATE` log lines come along because the refusals inside [OtaUpdater] are recorded
+     * there and nowhere else, and a bundle that shows the verdict without them says what
+     * happened but not why.
+     */
+    fun diagnosis(context: Context): List<String> {
+        val current = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        }.getOrNull()
+        val log = AppLogger.entries.filter { it.tag == TAG }.takeLast(MAX_DIAGNOSIS_LOG_LINES)
+        return listOf(
+            "channel=unstable",
+            "updater_present=true",
+            "installs_apks=false",
+            "running_version=${current ?: "unreadable"}",
+            "check_latched=${checked.get()}",
+            "last_verdict=$verdict",
+            "log_lines=${log.size}",
+        ) + log.map { "log=[${it.time}] ${it.level}: ${it.msg}" }
+    }
+
+    /** The whole pipeline logs a handful of lines per pass; this is several passes' worth. */
+    private const val MAX_DIAGNOSIS_LOG_LINES = 40
+
     /** Fire-and-forget. Every network and disk step runs off the main thread. */
     fun checkInBackground(activity: Activity) {
         if (!checked.compareAndSet(false, true)) return
@@ -108,6 +153,8 @@ object UpdateHook {
             // so the next visit to the dashboard asks again, instead of leaving the tester on an
             // old build for the rest of the process because Wi-Fi came up a minute too late.
             checked.set(false)
+            verdict = "no network for the check after ${RETRY_DELAYS_MS.size} retries"
+            AppLogger.i(TAG, verdict)
             return
         }
         val apk = (attempt as? Attempt.Ready)?.apk ?: return
@@ -125,11 +172,13 @@ object UpdateHook {
     private fun attempt(context: Context): Attempt {
         val current = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        }.getOrNull() ?: return Attempt.Nothing
+        }.getOrNull() ?: return conclude("this build's own version is unreadable", Attempt.Nothing)
 
         val update = when (val result = OtaUpdater.check(current)) {
-            OtaUpdater.CheckResult.Unreachable -> return Attempt.Retry
-            is OtaUpdater.CheckResult.Answered -> result.update ?: return Attempt.Nothing
+            OtaUpdater.CheckResult.Unreachable ->
+                return conclude("GitHub did not answer the release check", Attempt.Retry)
+            is OtaUpdater.CheckResult.Answered -> result.update
+                ?: return conclude("nothing published beats $current", Attempt.Nothing)
         }
 
         // A build already downloaded is not downloaded again: the check runs at every start,
@@ -138,19 +187,23 @@ object UpdateHook {
         // in the fallback directory while the grant was still pending is fetched once more, to
         // the `Download` folder the driver was told to look in. Self-correcting beats a file
         // stranded where the dialog no longer points.
-        val directory = OtaUpdater.downloadDirectory(context) ?: return Attempt.Nothing
+        val directory = OtaUpdater.downloadDirectory(context)
+            ?: return conclude("no writable download folder for ${update.versionName}", Attempt.Nothing)
         val existing = File(directory, OtaUpdater.fileName(update.versionName))
-        if (existing.isFile && existing.length() > 0) return Attempt.Ready(existing)
+        if (existing.isFile && existing.length() > 0) {
+            return conclude("${update.versionName} already downloaded at $existing", Attempt.Ready(existing))
+        }
 
         val downloaded = when (val result = OtaUpdater.download(context, update)) {
-            OtaUpdater.DownloadResult.Unreachable -> return Attempt.Retry
-            OtaUpdater.DownloadResult.Refused -> return Attempt.Nothing
+            OtaUpdater.DownloadResult.Unreachable ->
+                return conclude("download of ${update.versionName} never completed", Attempt.Retry)
+            OtaUpdater.DownloadResult.Refused ->
+                return conclude("download of ${update.versionName} refused", Attempt.Nothing)
             is OtaUpdater.DownloadResult.Downloaded -> result.file
         }
         val published = OtaUpdater.publish(context, downloaded, update.versionName)
-            ?: return Attempt.Nothing
-        AppLogger.i(TAG, "Update ${update.versionName} ready at $published")
-        return Attempt.Ready(published)
+            ?: return conclude("${update.versionName} downloaded but not published", Attempt.Nothing)
+        return conclude("${update.versionName} ready at $published", Attempt.Ready(published))
     }
 
     private fun announce(activity: Activity, apk: File) {

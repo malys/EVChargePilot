@@ -13,6 +13,7 @@ import android.view.WindowInsets
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.evsuite.chargepilot.databinding.ActivityDiagnosticsBinding
+import com.evsuite.chargepilot.update.UpdateHook
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.EVHardware
@@ -283,6 +284,12 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine("[provenance]")
             appendLine(getString(R.string.diagnostics_provenance))
             provenance.describeAll(DashboardFrame.readings).forEach { appendLine(it) }
+            appendLine()
+            // The update channel answers for itself: which channel this APK is, and what the
+            // last pass over the pipeline concluded. A head unit has no adb, so this section
+            // and the USB export are the only way that verdict leaves the car.
+            appendLine("[update]")
+            UpdateHook.diagnosis(applicationContext).forEach(::appendLine)
             appendLine()
             appendLine("[app_log]")
             appendLine(getString(R.string.diagnostics_recent_log))

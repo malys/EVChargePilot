@@ -160,11 +160,25 @@ internal object OtaUpdater {
                 AppLogger.w(TAG, "Tag 'unstable' is not a pre-release — ignored")
                 return CheckResult.Answered(null)
             }
-            val assets = json.optJSONArray("assets") ?: return CheckResult.Answered(null)
+            val assets = json.optJSONArray("assets") ?: run {
+                AppLogger.w(TAG, "Pre-release 'unstable' carries no assets")
+                return CheckResult.Answered(null)
+            }
             for (index in 0 until assets.length()) {
                 val asset = assets.getJSONObject(index)
-                val version = versionFromAssetName(asset.optString("name", "")) ?: continue
-                if (!isNewer(version, currentVersion)) continue
+                val name = asset.optString("name", "")
+                // Both of these used to be a silent `continue`, and between them they cover
+                // every "the update never arrives while a release is clearly published" case:
+                // an asset named off the pattern the version is read from, and a release that
+                // simply is not newer than what is running.
+                val version = versionFromAssetName(name) ?: run {
+                    AppLogger.w(TAG, "Asset '$name' carries no '$ASSET_PREFIX<version>.apk' version")
+                    continue
+                }
+                if (!isNewer(version, currentVersion)) {
+                    AppLogger.i(TAG, "Published $version does not beat installed $currentVersion")
+                    continue
+                }
                 val url = asset.optString("browser_download_url", "")
                 if (!isAllowedUrl(url)) {
                     AppLogger.w(TAG, "Rejected update URL from an unexpected host: $url")
