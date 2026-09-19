@@ -14,6 +14,8 @@ import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.CalibrationDrift
 import com.evsuite.hardware.telemetry.CalibrationDriftReport
 import com.evsuite.hardware.telemetry.CalibrationVerdict
+import com.evsuite.hardware.telemetry.ChargeEnergyAnalyzer
+import com.evsuite.hardware.telemetry.ChargeEnergyReport
 import com.evsuite.hardware.telemetry.SohEnergySource
 import com.evsuite.hardware.telemetry.StateOfHealthEstimate
 import com.evsuite.hardware.telemetry.StateOfHealthEstimator
@@ -21,6 +23,7 @@ import com.evsuite.hardware.telemetry.StateOfHealthResult
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 /**
  * What the pack is worth today, what its gauge is anchored on, and what it has been through.
@@ -53,6 +56,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
     private var health: StateOfHealthResult? = null
     private var drift: CalibrationDriftReport? = null
     private var exposure: BatteryExposureReport? = null
+    private var charge: ChargeEnergyReport? = null
     private var declared = VehicleSettings.Values()
     private var applied: String? = null
 
@@ -123,12 +127,17 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             val ready = (estimate as? StateOfHealthResult.Ready)?.estimate
             val report = CalibrationDrift().analyse(entries, System.currentTimeMillis(), ready)
             val exposureReport = BatteryExposure().analyse(entries)
+            // The sessions come from the exposure report rather than being cut again here, so
+            // the two blocks on this screen can never disagree about what counts as a charge.
+            val chargeReport = ChargeEnergyAnalyzer()
+                .analyse(entries, exposureReport?.sessions.orEmpty())
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 declared = settings
                 health = estimate
                 drift = report
                 exposure = exposureReport
+                charge = chargeReport
                 render()
             }
         }
@@ -137,6 +146,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
     private fun render() {
         renderHealth()
         renderCalibration()
+        renderCharge()
         renderExposure()
         renderApply()
     }
@@ -250,6 +260,42 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             )
         }
         binding.calibrationFacts.text = facts.joinToString("\n")
+    }
+
+    /**
+     * What the last charge actually cost the grid, which is the half of the ledger the health
+     * estimate never reads: it measures discharges only.
+     *
+     * A rise in charge is how a charge is found at all here, and a long descent raises the
+     * charge too — so only a session the odometer says stood still is offered as "your last
+     * charge". The energy is stated as approximate and with its source named, because it is an
+     * integral of a pack voltage-current pair whose sign convention no drive has yet confirmed;
+     * the magnitude is the same either way, which is why the line can be shown while RI-002 is
+     * still open.
+     */
+    private fun renderCharge() {
+        val last = charge?.lastPluggedCharge
+        if (last == null) {
+            binding.chargeFacts.text = getString(R.string.battery_health_last_charge_none)
+            return
+        }
+        val energy = last.packDeltaKwh?.takeIf { last.watched }
+        val power = last.meanPowerKw
+        binding.chargeFacts.text = if (energy != null && power != null) {
+            getString(
+                R.string.battery_health_last_charge,
+                last.session.gainedPercent,
+                last.session.durationHours,
+                abs(energy),
+                power,
+            )
+        } else {
+            getString(
+                R.string.battery_health_last_charge_unwatched,
+                last.session.gainedPercent,
+                last.session.durationHours,
+            )
+        }
     }
 
     private fun renderExposure() {

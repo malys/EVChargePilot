@@ -115,6 +115,7 @@
     <string name="reason_speed_too_low">la vitesse est trop faible pour une consommation stable rapportée à la distance</string>
     <string name="reason_model_not_trained">le modèle n\'a aucun ajustement pour prédire</string>
     <string name="reason_power_never_published">ce véhicule ne publie jamais la puissance batterie</string>
+    <string name="diagnostics_charge_energy">Ce que chaque charge enregistrée a remis dans le pack, et ce qu’ont fait les compteurs d’énergie de la voiture pendant ce temps. Le signe est rapporté tel qu’observé, jamais corrigé.</string>
     <string name="diagnostics_provenance">Ce que vaut chaque valeur, et pourquoi elle manque</string>
     <string name="label_soc">État de charge</string>
     <string name="notification_channel_recording">Détection et enregistrement des trajets</string>
@@ -472,6 +473,9 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_exposure_dwell">%1$.0f %% du temps enregistré au-dessus de %2$.0f %% de charge, %3$.0f %% en dessous de %4$.0f %%. Charge moyenne %5$.0f %%.</string>
     <string name="battery_health_exposure_cycles">%1$.1f cycles complets équivalents sur %2$.0f jours.</string>
     <string name="battery_health_exposure_km">%1$.0f km par cycle équivalent.</string>
+    <string name="battery_health_last_charge">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh à %4$.1f kW, d’après la tension × le courant du pack intégrés ici.</string>
+    <string name="battery_health_last_charge_unwatched">Dernière charge : +%1$.0f points en %2$.1f h. Pas de valeur d’énergie : l’application n’échantillonnait pas pendant une partie de la charge.</string>
+    <string name="battery_health_last_charge_none">Aucune charge mesurée pour l’instant. Une charge apparaît ici une fois que l’application en a suivi une du début à la fin, voiture à l’arrêt.</string>
     <string name="battery_health_exposure_sessions">%1$d sessions de charge, la plus rapide à %2$.0f points par heure.</string>
     <string name="battery_health_exposure_unavailable">Rien d’enregistré pour l’instant. Cela se remplit à mesure que l’application lit la voiture.</string>
     <string name="battery_health_read_only">Cette application ne change rien sur la voiture : ni limite de charge, ni programmation, ni préchauffage. Elle mesure et elle dit ce qu’elle voit.</string>

@@ -61,6 +61,11 @@ uses one, with a key the driver supplies, and it carries a route and never vehic
   shows what 130, 120, 110, 100 and 90 km/h would save in charge and cost in minutes, and
   names the mildest slowdown that removes the charging stop. A second road comes back with the
   same request and is compared on distance, time and charge. It never recommends a speed.
+- A battery page: the pack's state of health measured rather than declared, how long since its
+  charge gauge last had a full charge to anchor itself on, what the pack has been subjected to,
+  and what the last charge cost — points gained, duration, and approximate energy and mean power
+  where this app watched the whole session. Read-only, like every other screen: no charge limit,
+  no schedule, no preheat.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
 never zero. Charger data and energy-source attribution remain outside this initial milestone.

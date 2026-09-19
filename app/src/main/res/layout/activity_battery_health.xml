@@ -77,6 +77,16 @@
                 android:layout_marginTop="@dimen/spacing_sm"
                 android:textAppearance="@style/Text.EV.Secondary" />
 
+            <!-- The charge side of the same ledger. It lives under the estimate rather than in
+                 the exposure pane because this pane is the one with room by construction: the
+                 space below the evidence exists only to push the apply button down. -->
+            <TextView
+                android:id="@+id/chargeFacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

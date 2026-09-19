@@ -119,6 +119,7 @@
     <string name="reason_speed_too_low">vehicle speed is too low for stable distance-normalized consumption</string>
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
     <string name="reason_power_never_published">this vehicle never publishes battery power</string>
+    <string name="diagnostics_charge_energy">What each recorded charge put back into the pack, and what the car’s own energy counters did while it happened. The sign is reported as observed, never corrected.</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>
     <string name="notification_channel_recording">Trip detection and recording</string>
@@ -478,6 +479,9 @@ Spending %6$s %% per km</string>
     <string name="battery_health_calibration_steps">%1$d charge step(s) nothing explains, the largest %2$.0f points while parked. That is the gauge re-estimating, not the pack losing charge.</string>
     <string name="battery_health_calibration_cycles">%1$.1f equivalent full cycles since then.</string>
     <string name="battery_health_calibration_unavailable">Nothing to say yet: this needs a few days of history.</string>
+    <string name="battery_health_last_charge">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh at %4$.1f kW, from pack voltage × current integrated here.</string>
+    <string name="battery_health_last_charge_unwatched">Last charge: +%1$.0f points in %2$.1f h. No energy figure for it: this app was not sampling for part of it.</string>
+    <string name="battery_health_last_charge_none">No charge measured yet. A charge appears here once this app has watched one from start to finish with the car standing still.</string>
     <string name="battery_health_exposure_dwell">%1$.0f %% of the recorded time above %2$.0f %% charge, %3$.0f %% below %4$.0f %%. Mean charge %5$.0f %%.</string>
     <string name="battery_health_exposure_cycles">%1$.1f equivalent full cycles over %2$.0f days.</string>
     <string name="battery_health_exposure_km">%1$.0f km per equivalent cycle.</string>

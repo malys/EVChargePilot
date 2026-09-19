@@ -6,6 +6,20 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The battery page says what the last charge actually cost.** The pack's health is measured
+  from discharges, so the charge that ends each window was a boundary marker and nothing more —
+  on a page about energy, in an app about energy, the driver was told nothing about their own
+  charging. It now reads "+34 points in 2,1 h — about 12,3 kWh at 5,9 kW", with the source named
+  inline and the energy stated as approximate, because it is an integral of a pack
+  voltage-current pair whose sign no drive has yet confirmed. Only a session the odometer says
+  stood still is offered: a long descent raises the charge too, and that is regeneration rather
+  than a plug. A charge this app slept through says so and drops the energy instead of
+  understating it. The exported diagnostic gains a `[charge_energy]` section carrying the same
+  measurements plus the two verdicts RI-002 has been blocked on — which way the pack pair signs a
+  charge, and whether the car's own kWh counters reset across one — so a bundle brought back from
+  one watched charge settles the ticket with no probe to arm and no drive to plan. Nothing new is
+  sampled and nothing is written to the car (CP-073).
+
 - **The charge-stop probe says which gate refused the fit.** `fit=unavailable(INSUFFICIENT_SAMPLES)`
   was the same line for a history of short drives and for a history with no motorway leg in it,
   and the two ask the driver for opposite things. The validation line now carries the library's

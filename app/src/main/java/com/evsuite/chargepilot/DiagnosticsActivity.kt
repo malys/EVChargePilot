@@ -19,6 +19,9 @@ import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
+import com.evsuite.hardware.telemetry.BatteryExposure
+import com.evsuite.hardware.telemetry.BatteryLedgerStore
+import com.evsuite.hardware.telemetry.ChargeEnergyAnalyzer
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import java.io.File
@@ -271,6 +274,14 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine("[latest_normalized_snapshot]")
             DiagnosticSnapshotFormatter.format(snapshot).forEach(::appendLine)
             appendLine()
+            // RI-002 asks two things a desk cannot answer: whether the car's own kWh counters
+            // move across a charge, and which way the pack voltage-current pair signs one. Both
+            // are recorded in the battery ledger already; this is where a returned bundle says
+            // what they did.
+            appendLine("[charge_energy]")
+            appendLine(getString(R.string.diagnostics_charge_energy))
+            chargeEnergyLines().forEach(::appendLine)
+            appendLine()
             // A field showing an em dash says the signal is unusable but not why. This says why:
             // unsupported, declared and never published, or unreachable on this runtime.
             appendLine("[property_probe]")
@@ -300,6 +311,19 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine(crash ?: "none")
         })
     }
+
+    /**
+     * The charge side of the battery ledger, read off disk on this background thread.
+     *
+     * Nothing is sampled for it: [TripRecordingService] has been writing these entries since the
+     * battery page shipped, and the sessions are the ones [BatteryExposure] already cuts — the
+     * report and the screen must not disagree about what counts as a charge.
+     */
+    private fun chargeEnergyLines(): List<String> = runCatching {
+        val entries = BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME)).read()
+        val sessions = BatteryExposure().analyse(entries)?.sessions.orEmpty()
+        ChargeEnergyAnalyzer().analyse(entries, sessions).describe()
+    }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
     /**
      * Exactly what the resource system sees, so a layout no longer has to guess the panel.
