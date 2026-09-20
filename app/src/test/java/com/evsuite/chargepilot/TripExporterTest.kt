@@ -5,6 +5,7 @@ import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.TripSample
+import com.evsuite.hardware.telemetry.UnavailableReason
 import com.google.gson.JsonParser
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -74,7 +75,7 @@ class TripExporterTest {
         val exportedSummary = exportedTrip.getAsJsonObject("summary")
         val exportedSample = exportedTrip.getAsJsonArray("samples")[0].asJsonObject
 
-        assertEquals(2, document.get("schemaVersion").asInt)
+        assertEquals(3, document.get("schemaVersion").asInt)
         assertEquals("2023-11-14T22:13:20Z", document.get("exportedAtUtc").asString)
         assertEquals(setOf("schemaVersion", "exportedAtUtc", "trips"), document.keySet())
         assertEquals(
@@ -93,10 +94,27 @@ class TripExporterTest {
             ),
             exportedSample.keySet(),
         )
+        assertTrue(exportedTrip.get("ecoReview").isJsonNull)
         assertTrue(exportedSummary.get("consumedKwh").isJsonNull)
         assertTrue(exportedSummary.get("batteryPowerEvidence").isJsonNull)
         assertTrue(exportedSample.get("speedKmh").isJsonNull)
         assertEquals(2L, exportedSample.get("atMs").asLong)
+    }
+
+    @Test
+    fun jsonCarriesTheReviewTheScreenShows() {
+        // The shared file answers "was that drive efficient" with the screen's own lines, and a
+        // refusal travels as a refusal rather than as an absent key.
+        val trip = trip(startedAtMs = 1L)
+        val review = EcoTripReview.Unavailable(UnavailableReason.INSUFFICIENT_SAMPLES)
+
+        val exported = exporter()
+            .export(listOf(trip), TripExporter.Format.JSON, true, mapOf(1L to review))
+            .getOrThrow()
+        val document = JsonParser.parseString(exported.file.readText()).asJsonObject
+        val lines = document.getAsJsonArray("trips")[0].asJsonObject.getAsJsonArray("ecoReview")
+
+        assertEquals(EcoTripReviewer.describe(review), lines.map { it.asString })
     }
 
     @Test

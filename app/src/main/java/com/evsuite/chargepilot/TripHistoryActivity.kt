@@ -12,11 +12,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
+import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.StoredTrip
+import com.evsuite.hardware.telemetry.UnavailableReason
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.model.AttributedEnergyEstimate
 import com.evsuite.hardware.telemetry.model.EnergyAttribution
-import com.evsuite.hardware.telemetry.model.EnergyAttributionCalculator
 import com.evsuite.hardware.telemetry.model.EnergyAttributionResult
 import com.evsuite.hardware.telemetry.model.ResidualAttribution
 import com.evsuite.hardware.telemetry.model.ResidualContext
@@ -27,6 +28,7 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
+import kotlin.math.roundToInt
 
 /** Reverse-chronological trip ledger with one selected record kept open beside it. */
 class TripHistoryActivity : PrimaryNavigationActivity() {
@@ -40,6 +42,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private val adapter = TripAdapter()
     private var selectedStartedAtMs: Long? = null
     private var attributions: Map<Long, EnergyAttributionResult> = emptyMap()
+    private var reviews: Map<Long, EcoTripReview> = emptyMap()
+    private val reasons by lazy { ProvenanceText(this) }
     private var recorder: TripRecordingService? = null
     private var speedKmh: Float? = null
     private var speedObservedAtMs: Long? = null
@@ -151,16 +155,13 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private fun loadTrips() {
         disk.execute {
             val trips = store.read()
-            val evidence = trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence }
-            val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
-            val loadedAttributions = trips.associate { trip ->
-                trip.summary.startedAtMs to EnergyAttributionCalculator.calculate(trip, model)
-            }
+            val reviewed = reviewHistory(filesDir, trips)
             val dateFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
             val rows = trips.map { trip -> buildRow(trip, dateFormatter) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                attributions = loadedAttributions
+                attributions = reviewed.attributions
+                reviews = reviewed.reviews
                 adapter.submit(trips, rows)
                 if (trips.none { it.summary.startedAtMs == selectedStartedAtMs }) {
                     selectedStartedAtMs = trips.firstOrNull()?.summary?.startedAtMs
@@ -256,6 +257,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             R.string.trip_power_not_recorded,
         )
         renderAttribution(attributions[summary.startedAtMs])
+        renderEcoReview(reviews[summary.startedAtMs])
 
         val samples = trip.samples
         val hasTrack = !samples.isNullOrEmpty()
@@ -268,6 +270,63 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         }
     }
 
+    /**
+     * The verdict and what the drive's own numbers say would have changed it.
+     *
+     * A review that has not been computed yet and one that had nothing to measure read the same
+     * to the driver, and both say which silence it was rather than showing an empty line.
+     */
+    private fun renderEcoReview(review: EcoTripReview?) {
+        val text = when (review) {
+            is EcoTripReview.Ready ->
+                (listOf(verdictLine(review.verdict)) + review.findings.map(::findingLine))
+                    .joinToString("\n")
+            is EcoTripReview.Unavailable -> reviewUnavailable(review.reason)
+            null -> reviewUnavailable(UnavailableReason.MODEL_NOT_TRAINED)
+        }
+        binding.detailEcoReview.text = text
+        binding.detailEcoReview.contentDescription = text
+    }
+
+    private fun reviewUnavailable(reason: UnavailableReason): String = getString(
+        R.string.trip_eco_review_unavailable,
+        getString(reasons.reasonRes(reason)),
+    )
+
+    private fun verdictLine(verdict: EcoVerdict): String {
+        val band = verdict.band.value
+        val delta = verdict.deltaPercent
+        if (band == null || delta == null) {
+            return getString(
+                R.string.trip_eco_verdict_unavailable,
+                getString(
+                    reasons.reasonRes(verdict.band.reason ?: UnavailableReason.INSUFFICIENT_SAMPLES)
+                ),
+            )
+        }
+        return getString(R.string.trip_eco_verdict, getString(ecoBandRes(band)), delta.roundToInt())
+    }
+
+    private fun findingLine(finding: EcoFinding): String = when (finding) {
+        is EcoFinding.MotorwaySpeed -> getString(
+            if (finding.basis == SpeedWhatIfBasis.ENERGY_KWH) {
+                R.string.trip_eco_finding_motorway_energy
+            } else {
+                R.string.trip_eco_finding_motorway_soc
+            },
+            finding.referenceSpeedKmh,
+            finding.motorwayDistanceKm,
+            finding.savingLow,
+            finding.savingHigh,
+        )
+        is EcoFinding.Cabin ->
+            getString(R.string.trip_eco_finding_cabin, finding.kwh, finding.sharePercent)
+        is EcoFinding.Steadiness -> getString(
+            R.string.trip_eco_finding_steadiness,
+            finding.harshSharePercent.roundToInt(),
+        )
+    }
+
     private fun renderAttribution(result: EnergyAttributionResult?) {
         binding.detailAttribution.text = when (result) {
             is EnergyAttributionResult.Ready -> attributionText(result.attribution)
@@ -276,8 +335,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 getString(
                     when {
                         batteryPowerNeverPublished() -> R.string.reason_power_never_published
-                        result.reason ==
-                            com.evsuite.hardware.telemetry.UnavailableReason.MODEL_NOT_TRAINED ->
+                        result.reason == UnavailableReason.MODEL_NOT_TRAINED ->
                             R.string.reason_model_not_trained
                         else -> R.string.reason_insufficient_samples
                     },

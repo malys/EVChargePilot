@@ -24,6 +24,7 @@ import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.ChargeEnergyAnalyzer
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
+import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -284,6 +285,22 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine()
             // A field showing an em dash says the signal is unusable but not why. This says why:
             // unsupported, declared and never published, or unreachable on this runtime.
+            // CP-074. What the coach concluded and, when it concluded nothing, which refusal
+            // it made: no fit yet, a speed the fit never saw, too little distance or too little
+            // charge drop. The verdict is the published one, not a refit — a report that
+            // disagreed with the screen would be worse than no report.
+            appendLine("[eco_driving]")
+            appendLine(getString(R.string.diagnostics_eco_driving))
+            appendLine("advice_enabled=${EcoCoach.adviceEnabled(this@DiagnosticsActivity)}")
+            appendLine("voice_enabled=${EcoCoach.voiceEnabled(this@DiagnosticsActivity)}")
+            DashboardFrame.eco.describe().forEach(::appendLine)
+            appendLine()
+            // CP-075. The same verdict the trip screen shows for the newest drive, so a bundle
+            // sent from the car answers "was that drive efficient" without the app to hand.
+            appendLine("[eco_trip_review]")
+            appendLine(getString(R.string.diagnostics_eco_trip_review))
+            latestTripReviewLines().forEach(::appendLine)
+            appendLine()
             appendLine("[property_probe]")
             appendLine(getString(R.string.diagnostics_properties))
             appendLine(getString(R.string.diagnostics_properties_hint))
@@ -311,6 +328,17 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine(crash ?: "none")
         })
     }
+
+    /** The newest stored trip, reviewed on this background thread. */
+    private fun latestTripReviewLines(): List<String> = runCatching {
+        val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
+        val latest = trips.maxByOrNull { it.summary.startedAtMs }
+            ?: return listOf("no_trip_recorded")
+        val review = reviewHistory(filesDir, trips).reviews[latest.summary.startedAtMs]
+            ?: return listOf("no_trip_recorded")
+        listOf("started_at_epoch_ms=${latest.summary.startedAtMs}") +
+            EcoTripReviewer.describe(review)
+    }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
     /**
      * The charge side of the battery ledger, read off disk on this background thread.
@@ -391,5 +419,6 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
         const val MAX_LOG_MESSAGE_CHARS = 1_024
         const val MAX_LOG_SECTION_BYTES = 32 * 1_024
         const val MAX_INVENTORY_FILES = 64
+        const val HISTORY_FILE = "trips.json"
     }
 }

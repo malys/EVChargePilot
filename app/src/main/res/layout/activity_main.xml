@@ -86,6 +86,22 @@
                 android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone" />
 
+            <!-- CP-074. The advice, and only when the driver asked for advice. Same shape as the
+                 drift line above and for the same reasons: one line, no dialog, no sound of its
+                 own, nothing that wants a decision at 130 km/h. It is gone rather than stale when
+                 there is nothing measurable to say. -->
+            <TextView
+                android:id="@+id/ecoAdviceLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:minHeight="@dimen/touch_target"
+                android:gravity="center_vertical"
+                android:padding="@dimen/spacing_lg"
+                android:textAppearance="@style/Text.EV.Body"
+                android:visibility="gone" />
+
             <!-- CP-062. Was a fixed 184dp card on a pane 478dp tall: a third of the panel for
                  two numbers, which left the evidence grid too short to draw its own values —
                  the climate readouts were clipped away entirely on the 720 panel. It now takes
@@ -229,6 +245,22 @@
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1" android:padding="@dimen/spacing_sm">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_trip_average_consumption" />
                         <TextView android:id="@+id/tripConsumptionValue" style="@style/Text.EV.ReadoutValue" />
+                    </LinearLayout>
+
+                    <!-- CP-074. The verdict, beside the figures it is a verdict about. The word
+                         carries the meaning and the delta sits under it in the secondary size:
+                         a band word at readout size plus a signed percent on one line does not
+                         fit a sixth of this row on a panel at a larger per-app density, and
+                         CP-076 is what that looks like when it is not noticed. -->
+                    <LinearLayout style="@style/Widget.EV.Readout" android:layout_weight="1" android:padding="@dimen/spacing_sm">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_eco" />
+                        <TextView android:id="@+id/ecoValue" style="@style/Text.EV.ReadoutValue" />
+                        <TextView
+                            android:id="@+id/ecoDelta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFeatureSettings="tnum"
+                            android:textAppearance="@style/Text.EV.Secondary" />
                     </LinearLayout>
                 </LinearLayout>
 

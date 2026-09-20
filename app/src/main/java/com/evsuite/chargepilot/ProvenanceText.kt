@@ -137,7 +137,8 @@ class ProvenanceText(private val context: Context) {
         )
     }
 
-    private fun reasonRes(reason: UnavailableReason): Int = when (reason) {
+    /** The reason as a phrase. Public because every screen refuses in the same words. */
+    fun reasonRes(reason: UnavailableReason): Int = when (reason) {
         UnavailableReason.UNSUPPORTED_FIRMWARE -> R.string.reason_unsupported_firmware
         UnavailableReason.UNVALIDATED_FIRMWARE -> R.string.reason_unvalidated_firmware
         UnavailableReason.SIGNAL_ABSENT -> R.string.reason_signal_absent

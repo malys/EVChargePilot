@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.evsuite.chargepilot.databinding.ActivitySettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingCredentials
@@ -94,7 +96,54 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.settingsExportAction.setOnClickListener { export() }
         fill(VehicleSettings.read(this))
         binding.routingBaseUrlInput.setText(RoutingCredentials.baseUrl(this))
+        fillEco()
+        fillLanguage()
         render()
+    }
+
+    /**
+     * The coach's two switches, applied on the tap rather than on Save.
+     *
+     * The voice follows the advice: there is nothing to speak when there is no line, so turning
+     * the advice off disables the voice switch and stops the voice with it. Both are off until
+     * the driver asks, which is CP-074's condition for giving advice at all.
+     */
+    private fun fillEco() {
+        binding.ecoAdviceSwitch.isChecked = EcoCoach.adviceEnabled(this)
+        binding.ecoVoiceSwitch.isChecked = EcoCoach.voiceEnabled(this)
+        binding.ecoVoiceSwitch.isEnabled = binding.ecoAdviceSwitch.isChecked
+        binding.ecoAdviceSwitch.setOnCheckedChangeListener { _, checked ->
+            EcoCoach.storeAdviceEnabled(this, checked)
+            binding.ecoVoiceSwitch.isEnabled = checked
+        }
+        binding.ecoVoiceSwitch.setOnCheckedChangeListener { _, checked ->
+            EcoCoach.storeVoiceEnabled(this, checked)
+        }
+    }
+
+    /**
+     * The app's own language, applied on the tap.
+     *
+     * `AppCompatDelegate` both applies and stores it, so nothing of ours holds the choice and the
+     * settings file the driver copies to another car does not carry it — the language belongs to
+     * the person reading the screen, not to the vehicle.
+     *
+     * The listener is attached after the initial check so that reading the current choice does
+     * not look like making one, and it compares buttons rather than tags: a system picker that
+     * sets `fr-FR` where we would have set `fr` is the same button and must not trigger a
+     * recreation loop.
+     */
+    private fun fillLanguage() {
+        val current = languageButton(AppCompatDelegate.getApplicationLocales().toLanguageTags())
+        binding.languageChoice.check(current)
+        binding.languageChoice.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val applied = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+            if (languageButton(applied) == checkedId) return@addOnButtonCheckedListener
+            AppCompatDelegate.setApplicationLocales(
+                LocaleListCompat.forLanguageTags(languageTag(checkedId))
+            )
+        }
     }
 
     override fun onStart() {
@@ -421,4 +470,18 @@ class SettingsActivity : PrimaryNavigationActivity() {
         } else {
             String.format(Locale.getDefault(), "%.1f", value)
         }
+}
+
+/** The button that stands for a stored language tag list. Empty, or anything else, is the system. */
+internal fun languageButton(tags: String): Int = when (tags.take(2).lowercase(Locale.ROOT)) {
+    "fr" -> R.id.languageFrench
+    "en" -> R.id.languageEnglish
+    else -> R.id.languageSystem
+}
+
+/** The tag to store for a button. The system choice is the empty list, which is what clears it. */
+internal fun languageTag(buttonId: Int): String = when (buttonId) {
+    R.id.languageFrench -> "fr"
+    R.id.languageEnglish -> "en"
+    else -> ""
 }

@@ -26,14 +26,11 @@
 
     <!-- Status. Never the sole carrier of meaning: a text label always accompanies
          the colour. -->
-    <color name="ev_ok">#FF09501F</color>
     <color name="ev_warn">#FF6B3A00</color>
     <color name="ev_error">#FF8F0F18</color>
 
     <!-- Pressed: an alpha veil over the surface, not a different hue, so a pressed
          card still reads as the same card. -->
-    <color name="ev_pressed">#14000000</color>
-    <color name="ev_pressed_strong">#29000000</color>
 
     <!-- Launcher icon tile. The same in light and dark: it is the suite's mark, not
          a surface. See DESIGN.md section Iconography. -->

@@ -64,7 +64,8 @@ class TripExportActivity : AppCompatActivity() {
                     ?.let(::listOf)
                     .orEmpty()
             } ?: allTrips
-            val result = exporter.export(selected, format, singleStartedAtMs != null)
+            val reviews = reviewHistory(filesDir, allTrips).reviews
+            val result = exporter.export(selected, format, singleStartedAtMs != null, reviews)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 setBusy(false)

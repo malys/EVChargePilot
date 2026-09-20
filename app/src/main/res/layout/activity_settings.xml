@@ -251,6 +251,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
+                            android:saveEnabled="false"
                             android:singleLine="true"
                             android:textSize="@dimen/text_body" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -273,6 +274,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
+                            android:saveEnabled="false"
                             android:singleLine="true"
                             android:textSize="@dimen/text_body" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -307,6 +309,102 @@
                         android:layout_marginTop="@dimen/spacing_sm"
                         android:text="@string/routing_action_clear" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <!-- CP-074. Two switches, and no Save: they apply as they are flipped, like the
+                 automatic-trip switch on the dashboard. A coach the driver wants silenced is
+                 silenced by the tap, not by remembering to scroll to a button afterwards. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/eco_settings_title"
+                    android:textAppearance="@style/Text.EV.Title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/eco_settings_note"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/ecoAdviceSwitch"
+                    style="@style/Widget.EV.Switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/eco_settings_advice" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/ecoVoiceSwitch"
+                    style="@style/Widget.EV.Switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/eco_settings_voice" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language_settings_title"
+                    android:textAppearance="@style/Text.EV.Title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/language_settings_note"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/languageChoice"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/languageSystem"
+                        style="@style/Widget.EVChargePilot.NavTab"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/language_system" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/languageEnglish"
+                        style="@style/Widget.EVChargePilot.NavTab"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/language_english" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/languageFrench"
+                        style="@style/Widget.EVChargePilot.NavTab"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/language_french" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

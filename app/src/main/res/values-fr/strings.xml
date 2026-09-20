@@ -17,7 +17,6 @@
     <string name="label_adaptive_range">ESTIMATION ADAPTATIVE</string>
     <string name="label_speed">VITESSE</string>
     <string name="label_climate">CLIMATISATION</string>
-    <string name="label_thermal_climate">THERMIQUE + CLIMATISATION</string>
     <string name="label_outside_temp">EXTÉRIEUR</string>
     <string name="label_cabin_temp">HABITACLE</string>
     <string name="label_battery_temp">TEMP. BATTERIE</string>
@@ -40,7 +39,6 @@
     <string name="action_start_trip">Démarrer le trajet</string>
     <string name="action_stop_trip">Arrêter et enregistrer</string>
     <string name="action_automatic_trips">Trajets automatiques</string>
-    <string name="action_trip_history">Historique des trajets</string>
     <string name="tab_energy">Énergie</string>
     <string name="tab_arrival">Arrivée</string>
     <string name="tab_trips">Trajets</string>
@@ -57,7 +55,6 @@
     <string name="action_export_csv">Exporter en CSV</string>
     <string name="action_export_json">Exporter en JSON</string>
     <string name="action_share_export">Partager le fichier</string>
-    <string name="action_close">Fermer</string>
     <string name="trip_control_speed_unavailable">Les commandes restent désactivées tant que la vitesse est illisible.</string>
     <string name="trip_control_park_to_change">L’enregistrement continue. Stationnez-vous pour le modifier.</string>
     <string name="trip_recording">Enregistrement actif. L’énergie apparaît seulement si le véhicule l’expose.</string>
@@ -75,7 +72,6 @@
     <string name="climate_missing_signal">— = signal actuellement indisponible</string>
     <string name="climate_missing_unvalidated">Température batterie non validée sur %1$s</string>
     <string name="climate_missing_unsupported">— = firmware non pris en charge</string>
-    <string name="diagnostics_title">Diagnostic</string>
     <string name="diagnostics_export_usb">Exporter vers USB</string>
     <string name="diagnostics_open_evidence">Ouvrir la capture de preuves</string>
     <string name="evidence_scenario_title">Choisir le scénario de test véhicule</string>
@@ -97,7 +93,6 @@
     <string name="diagnostics_export_ok">Paquet de diagnostic exporté vers %1$s</string>
     <string name="diagnostics_firmware">Génération du firmware : %1$s</string>
     <string name="diagnostics_read_only">Accès au véhicule : lecture seule</string>
-    <string name="diagnostics_previous_crash">Rapport du crash précédent</string>
     <string name="diagnostics_recent_log">Journal récent de l’application</string>
     <string name="diagnostics_no_log">Aucune entrée pour le moment.</string>
     <string name="diagnostics_properties">Propriétés énergie du véhicule</string>
@@ -124,7 +119,6 @@
     <string name="notification_automatic_title">Détection automatique des trajets</string>
     <string name="notification_recording_distance">%1$s parcourus</string>
     <string name="notification_recording_waiting">En attente des données véhicule</string>
-    <string name="trip_history_title">Historique des trajets</string>
     <string name="trip_history_recent">TRAJETS RÉCENTS</string>
     <string name="trip_history_empty_title">Aucun trajet enregistré</string>
     <string name="trip_history_loading">Chargement de l’historique…</string>
@@ -236,8 +230,6 @@
     <string name="trip_speed_not_recorded">Aucun intervalle exploitable de vitesse n’a été enregistré pour ce trajet.</string>
     <string name="trip_value_missing_description">%1$s : indisponible. %2$s</string>
     <string name="trip_value_description">%1$s : %2$s</string>
-    <string name="action_arrival_forecast">Charge à l’arrivée</string>
-    <string name="arrival_title">Charge à l’arrivée</string>
     <string name="arrival_label">Charge à l’arrivée</string>
     <string name="arrival_no_route">Aucun itinéraire. Lancez un guidage dans la navigation du véhicule et ceci se remplira.</string>
     <string name="arrival_rate_loading">Lecture des trajets enregistrés…</string>
@@ -249,7 +241,6 @@ Cette charge atteint environ %4$s à ce rythme</string>
     <string name="arrival_source_range">l’autonomie du véhicule</string>
 
     <!-- CP-042 / CP-044 / CP-047 : clé de routage, recherche de destination, arrêt de charge. -->
-    <string name="action_charge_stop">Arrêt de charge</string>
     <string name="charge_stop_title">Arrêt de charge</string>
     <string name="charge_stop_action_search">Rechercher</string>
     <string name="charge_stop_hint_destination">Où allez-vous ?</string>
@@ -359,7 +350,6 @@ Consommation %6$s %% par km</string>
     <string name="routing_helper_charger_key">Une seconde clé gratuite, sur openchargemap.org.</string>
     <string name="routing_charger_configured">Recherche de bornes configurée.</string>
     <string name="routing_charger_absent">Aucune clé bornes : quand s\u2019arrêter, pas où.</string>
-    <string name="charge_stop_charger_searching">Recherche d\u2019une borne sur le trajet\u2026</string>
     <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
     <string name="charge_stop_charger_absent">Ajoutez une clé Open Charge Map pour savoir où vous arrêter.</string>
     <string name="charge_stop_charger">%1$s\u2009· à %2$s km · %3$s kW · %4$s</string>
@@ -432,7 +422,6 @@ Consommation %6$s %% par km</string>
     <string name="about_qr_description">QR code du dépôt du projet</string>
     <string name="about_close">Fermer</string>
 
-    <string name="settings_title">Configuration</string>
     <string name="settings_transfer_ready">À l’arrêt. L’import relit le fichier ; l’export l’écrit, avec les clés en clair.</string>
     <string name="settings_action_import">Importer</string>
     <string name="settings_action_export">Exporter</string>
@@ -446,7 +435,6 @@ Consommation %6$s %% par km</string>
     <string name="settings_export_done">Clés, destinations et caractéristiques du véhicule exportées vers %1$s sur la clé USB. Ce fichier contient vos clés d’API en clair : gardez la clé USB comme vous garderiez ces clés.</string>
     <string name="diagnostics_intro">Ce que l’application a lu dans la voiture, ce qu’elle en a déduit, et pourquoi une valeur manquante manque. L’export écrit ce même texte sur une clé USB.</string>
     <string name="diagnostics_building">Lecture des propriétés du véhicule…</string>
-    <string name="battery_health_title">Santé de la batterie</string>
     <string name="battery_health_state_of_health">État de santé estimé</string>
     <string name="battery_health_calibration">Calibrage de la jauge de charge</string>
     <string name="battery_health_exposure">Ce que cette batterie a subi</string>
@@ -479,4 +467,33 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_exposure_sessions">%1$d sessions de charge, la plus rapide à %2$.0f points par heure.</string>
     <string name="battery_health_exposure_unavailable">Rien d’enregistré pour l’instant. Cela se remplit à mesure que l’application lit la voiture.</string>
     <string name="battery_health_read_only">Cette application ne change rien sur la voiture : ni limite de charge, ni programmation, ni préchauffage. Elle mesure et elle dit ce qu’elle voit.</string>
+    <!-- CP-074. Même règle en français : une conséquence avec un chiffre, jamais un impératif. -->
+    <string name="label_eco">CE TRAJET</string>
+    <string name="eco_band_better">Économe</string>
+    <string name="eco_band_typical">Habituel</string>
+    <string name="eco_band_worse">Gourmand</string>
+    <string name="eco_delta">%1$+d %%</string>
+    <string name="eco_advice_cruise">À %1$d plutôt que %2$d km/h, cette route coûte environ %3$d %% de moins.</string>
+    <string name="eco_advice_steadiness">Accélérations franches sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
+    <string name="eco_advice_waiting">Rien à dire pour l’instant — il faut quelques minutes de route avant qu’un conseil apparaisse ici.</string>
+    <string name="eco_settings_title">Assistant d’éco-conduite</string>
+    <string name="eco_settings_advice">Afficher les conseils de conduite</string>
+    <string name="eco_settings_voice">Énoncer les conseils</string>
+
+    <string name="language_settings_title">Langue</string>
+    <string name="language_settings_note">S’applique à cette application seulement. La langue de la voiture reste inchangée.</string>
+    <string name="language_system">Système</string>
+    <string name="language_english">English</string>
+    <string name="language_french">Français</string>
+    <string name="eco_settings_note">Le verdict sur l’écran énergie est toujours affiché. Les conseils et la voix restent désactivés tant qu’ils ne sont pas demandés, et la voix ne parle que lorsque le conseil change, voiture en mouvement.</string>
+    <string name="diagnostics_eco_driving">Éco-conduite</string>
+    <!-- CP-075. Le bilan du trajet : un verdict, puis au plus trois constats chiffrés. -->
+    <string name="trip_eco_verdict">Ce trajet : %1$s, %2$+d %% par rapport à votre propre moyenne à cette vitesse et à cette température.</string>
+    <string name="trip_eco_verdict_unavailable">Pas de verdict pour ce trajet : %1$s.</string>
+    <string name="trip_eco_review_unavailable">Rien de mesurable sur ce trajet pour l’instant : %1$s.</string>
+    <string name="trip_eco_finding_motorway_energy">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f kWh de moins.</string>
+    <string name="trip_eco_finding_motorway_soc">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f points de charge de moins.</string>
+    <string name="trip_eco_finding_cabin">Habitacle : environ %1$.1f kWh, soit %2$.0f %% de ce trajet.</string>
+    <string name="trip_eco_finding_steadiness">Accélérations franches sur %1$d %% de ce trajet.</string>
+    <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>
 </resources>

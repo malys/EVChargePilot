@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The two languages this app actually has strings for. The head unit's own per-app language
+     list reads this, so it offers exactly what Settings offers and nothing the app cannot say. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+</locale-config>

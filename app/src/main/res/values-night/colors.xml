@@ -25,11 +25,8 @@
 
     <!-- Status. Never the sole carrier of meaning: a text label always accompanies
          the colour. -->
-    <color name="ev_ok">#FF8FE6A6</color>
     <color name="ev_warn">#FFFFC978</color>
     <color name="ev_error">#FFFFACAC</color>
 
     <!-- Pressed: an alpha veil over the surface, not a different hue. -->
-    <color name="ev_pressed">#1FFFFFFF</color>
-    <color name="ev_pressed_strong">#33FFFFFF</color>
 </resources>

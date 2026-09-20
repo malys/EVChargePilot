@@ -1,5 +1,9 @@
 package com.evsuite.chargepilot
 
+import com.evsuite.hardware.telemetry.EcoVerdict
+import com.evsuite.hardware.telemetry.Provenanced
+import com.evsuite.hardware.telemetry.UnavailableReason
+
 /**
  * The last readings the dashboard drew, kept where the diagnostics page can read them.
  *
@@ -16,7 +20,20 @@ object DashboardFrame {
     var readings: DashboardReadings = DashboardReadings.empty()
         private set
 
+    /**
+     * The eco verdict as the dashboard last drew it, for the same reason as the readings: the
+     * speed window behind it is stateful, and a diagnostics page that refitted it would report a
+     * different verdict from the one the driver was shown.
+     */
+    @Volatile
+    var eco: EcoVerdict = EcoVerdict(Provenanced.unavailable(UnavailableReason.MODEL_NOT_TRAINED))
+        private set
+
     fun publish(value: DashboardReadings) {
         readings = value
+    }
+
+    fun publish(value: EcoVerdict) {
+        eco = value
     }
 }

@@ -52,6 +52,8 @@ class MainActivity : PrimaryNavigationActivity() {
      * initialiser runs before that.
      */
     private val drift by lazy { DriftCompanion(this) }
+
+    private val eco by lazy { EcoCoach(this) }
     /** Bounded history parsing and the drift fit never run on the main thread. */
     private val background = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-background")
@@ -174,6 +176,7 @@ class MainActivity : PrimaryNavigationActivity() {
         // The consumption fit reads the whole trip history, so it happens once per visit to
         // this screen and only when there is actually a plan being followed.
         background.execute { runCatching { drift.load() } }
+        background.execute { runCatching { eco.load() } }
         bindService(
             Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE
         )
@@ -183,6 +186,8 @@ class MainActivity : PrimaryNavigationActivity() {
         recorder?.clearListener(this)
         recorder = null
         unbindService(connection)
+        // The engine goes with the screen: nothing of this app talks in the background.
+        eco.close()
         super.onStop()
     }
 
@@ -199,6 +204,8 @@ class MainActivity : PrimaryNavigationActivity() {
                 return
             }
             service.stopTrip(::loadRecentTrips)
+            // The next drive is judged on its own window, not on the one that just ended.
+            eco.reset()
             service.latest?.let(::render)
         } else {
             TripRecordingService.start(this)
@@ -248,6 +255,7 @@ class MainActivity : PrimaryNavigationActivity() {
         )
         binding.tripHint.text = tripHint(value, parked, automatic)
         renderDrift(value, parked)
+        renderEco(value)
     }
 
     /**
@@ -268,6 +276,24 @@ class MainActivity : PrimaryNavigationActivity() {
         binding.driftLine.text =
             if (parked) line + getString(R.string.drift_forget_hint) else line
         binding.driftLine.isClickable = parked
+    }
+
+    /**
+     * The verdict, and — only if it was asked for — the advice.
+     *
+     * The band is always drawn, because it is a statement about the drive and not an
+     * instruction; the line and the voice are two separate opt-ins on top of it. The coach
+     * gates its own recomputation, so this runs on every frame and computes on almost none.
+     */
+    private fun renderEco(value: EnergySnapshot) {
+        val verdict = eco.update(value)
+        DashboardFrame.publish(verdict)
+        binding.ecoValue.text = eco.band(verdict)
+        binding.ecoDelta.text = eco.delta(verdict)
+        val line = eco.line(verdict)
+        binding.ecoAdviceLine.visibility = if (line == null) View.GONE else View.VISIBLE
+        binding.ecoAdviceLine.text = line.orEmpty()
+        eco.speak(verdict, value.speedKmh, value.timestampMs)
     }
 
     /** Parked only, and re-checked here rather than trusted from the last frame. */

@@ -28,7 +28,17 @@ class TripExporter(
         val tripCount: Int,
     )
 
-    fun export(trips: List<StoredTrip>, format: Format, singleTrip: Boolean): Result<ExportedFile> =
+    /**
+     * @param reviews CP-075's verdict per trip, keyed by `startedAtMs`, as the lines the screen
+     *   shows. Carried in the JSON only: the CSV is a fixed column contract for a spreadsheet,
+     *   and a multi-line review is not a cell.
+     */
+    fun export(
+        trips: List<StoredTrip>,
+        format: Format,
+        singleTrip: Boolean,
+        reviews: Map<Long, EcoTripReview> = emptyMap(),
+    ): Result<ExportedFile> =
         runCatching {
             synchronized(exportLock) {
                 require(trips.isNotEmpty()) { "There are no trips to export." }
@@ -38,7 +48,7 @@ class TripExporter(
                 val exportedAtMs = nowMs()
                 val bytes = when (format) {
                     Format.CSV -> csv(trips).toByteArray(Charsets.UTF_8)
-                    Format.JSON -> json(trips, exportedAtMs).toByteArray(Charsets.UTF_8)
+                    Format.JSON -> json(trips, exportedAtMs, reviews).toByteArray(Charsets.UTF_8)
                 }
                 require(bytes.size <= maxBytes) { "Trip export exceeds the size limit." }
                 require(exportDirectory.mkdirs() || exportDirectory.isDirectory) {
@@ -101,13 +111,19 @@ class TripExporter(
     }
 
     /** Explicit keys make the public export schema independent of R8 field renaming. */
-    private fun json(trips: List<StoredTrip>, exportedAtMs: Long): String = JsonObject().apply {
+    private fun json(
+        trips: List<StoredTrip>,
+        exportedAtMs: Long,
+        reviews: Map<Long, EcoTripReview>,
+    ): String = JsonObject().apply {
         addProperty("schemaVersion", JSON_SCHEMA_VERSION)
         addProperty("exportedAtUtc", Instant.ofEpochMilli(exportedAtMs).toString())
-        add("trips", JsonArray().apply { trips.forEach { add(jsonTrip(it)) } })
+        add("trips", JsonArray().apply {
+            trips.forEach { add(jsonTrip(it, reviews[it.summary.startedAtMs])) }
+        })
     }.toString()
 
-    private fun jsonTrip(trip: StoredTrip) = JsonObject().apply {
+    private fun jsonTrip(trip: StoredTrip, review: EcoTripReview?) = JsonObject().apply {
         val summary = trip.summary
         add("summary", JsonObject().apply {
             addProperty("startedAtMs", summary.startedAtMs)
@@ -129,6 +145,12 @@ class TripExporter(
                 } ?: JsonNull.INSTANCE,
             )
         })
+        add(
+            "ecoReview",
+            review?.let { value ->
+                JsonArray().apply { EcoTripReviewer.describe(value).forEach(::add) }
+            } ?: JsonNull.INSTANCE,
+        )
         add(
             "samples",
             trip.samples?.let { samples ->
@@ -197,7 +219,7 @@ class TripExporter(
         const val MAX_EXPORT_BYTES = 2 * 1024 * 1024
         const val MAX_TRIPS = 200
         const val MAX_EXPORT_FILES = 8
-        private const val JSON_SCHEMA_VERSION = 2
+        private const val JSON_SCHEMA_VERSION = 3
         private val exportLock = Any()
     }
 }

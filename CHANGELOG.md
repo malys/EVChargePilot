@@ -6,6 +6,52 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The energy screen says whether this drive is a careful one.** A sixth readout tile reads
+  *better than usual*, *usual* or *worse than usual* with the signed distance from the driver's
+  own fitted expectation for this speed and this outside temperature — their history, not a
+  brochure figure, and not a kilowatt-hour: the verdict is built on the charge gauge and the
+  speed, because the sign of the battery-power channel is still unvalidated on this firmware. The
+  band is the fit's own residual, so a model that knows little says *usual* more often instead of
+  accusing the driver. Advice is a separate opt-in — one line, one lever, never an imperative —
+  and the voice is a second opt-in on top of it, speaking only when the advice becomes different
+  advice, at most once every two minutes, and never while the car is stopped.
+- **A finished trip now answers whether it was an efficient one.** Under the trip readouts: the
+  same verdict replayed over the stored track, then up to three findings, each naming the
+  measurement it came from — what a lower motorway speed would have saved, in the unit the
+  what-if produced it in; the cabin's fitted share, and only where the attribution could tell it
+  apart from its own error; and the share of the drive spent accelerating hard. Findings are
+  ordered by how strong their evidence is rather than by size, because a kilowatt-hour, a fitted
+  share and a percentage of a drive have no exchange rate. Nothing measurable is a stated reason,
+  which is the normal answer for a first short trip. The same review travels in the JSON export
+  (schema version 3) and in the diagnostic bundle's new `[eco_trip_review]` section.
+- **The driver picks the app's language.** Settings offers system, English or French, applied on
+  the tap and stored by the platform rather than by us — so the app can be read in a language the
+  head unit is not set to, and the configuration file copied to another car does not carry it.
+  The eco tile, the trip review and every refusal reason follow the same choice, and the coach's
+  voice now speaks the language the line was written in: where the engine has no voice for it the
+  coach stays silent rather than reading French aloud with English phonemes (CP-077).
+
+### Fixed
+
+- **The advice line said nothing about having nothing to say.** With the switch on and no lever
+  measurable — no fitted model yet, or too little movement in the window — the line simply was
+  not drawn, which reads exactly like a switch that did nothing. It now states which it is, the
+  same rule every other unavailable value on these screens follows. The voice is unchanged: it
+  speaks advice, never the waiting line.
+
+- **The routing keys looked erased after any configuration change.** A password field does not
+  restore its own text, so a day/night switch, a density change — and now a language change, on
+  the very page that holds the keys — left both key boxes blank while the keys were still stored
+  and still in use. Nothing was ever lost, since a blank box has always meant "leave it alone" on
+  save, but the page contradicted its own status line. The boxes no longer restore state and are
+  filled from the store on every start.
+
+- **The trip screen's numbers were clipped on the car.** Both readout rows were weighted children
+  of the detail column, so the `minHeight` each carried could never apply — a weighted child is
+  measured exactly — and at the driver-set density the car actually runs, the figures lost their
+  descenders. The rows now wrap their content and keep the floor they always meant to have; the
+  track plot takes whatever height is left.
+
 - **The battery page says what the last charge actually cost.** The pack's health is measured
   from discharges, so the charge that ends each window was a boundary marker and nothing more —
   on a page about energy, in an app about energy, the driver was told nothing about their own
