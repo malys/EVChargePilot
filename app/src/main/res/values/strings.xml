@@ -278,6 +278,7 @@ This charge reaches about %4$s at that rate</string>
     <string name="charge_stop_no_position">No position. The car\u2019s receiver was asked and answered nothing. Try again where the sky is clear.</string>
     <string name="charge_stop_plan_none">No stop needed · about %1$s %% left on arrival, %2$s %% above the reserve</string>
     <string name="charge_stop_plan_stop">Charge after about %1$s km (± %2$s km)</string>
+    <string name="charge_stop_limit_advice">Vehicle charge limit is %1$d %%, but this plan assumes leaving a charging stop at %2$s %%. Raise the limit in the vehicle before charging.</string>
     <string name="charge_stop_refused_charge">Charge is unreadable, so there is nothing to plan from.</string>
     <string name="charge_stop_refused_route">No route length to plan against.</string>
     <string name="charge_stop_refused_rate">No usable rate yet. Record a few trips and this fills in.</string>

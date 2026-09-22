@@ -21,6 +21,7 @@ import com.evsuite.chargepilot.route.RoutingCredentials
 import com.evsuite.chargepilot.route.RoutingTransport
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.NavigationHandoff
+import com.evsuite.hardware.saic.SaicCharging
 import com.evsuite.hardware.saic.SaicNav
 import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.ChargeStopPlan
@@ -467,6 +468,7 @@ class ChargeStopActivity : AppCompatActivity() {
                 }
                 "$body | second road=${alternative?.viaLabel ?: "none"}"
             }
+            val chargeLimitPercent = SaicCharging.chargeLimitPercent()
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 render(
@@ -474,6 +476,7 @@ class ChargeStopActivity : AppCompatActivity() {
                     motorwayFree,
                     (if (retried) 2 else 1) + (if (motorwayFree == null) 0 else 1),
                     settings.departurePercent,
+                    chargeLimitPercent,
                 )
                 announce(
                     when {
@@ -626,6 +629,7 @@ class ChargeStopActivity : AppCompatActivity() {
         motorwayFree: MotorwayFree?,
         routeRequests: Int,
         departurePercent: Double,
+        chargeLimitPercent: Int?,
     ) {
         val plan = chain?.legs?.firstOrNull()?.plan
         val charger = chargers.firstOrNull()
@@ -662,7 +666,19 @@ class ChargeStopActivity : AppCompatActivity() {
                 format(it.uncertaintyPercent, "%.1f"),
             )
         }
-        binding.chargeStopDetail.text = listOfNotNull(detail, gradeLine).joinToString("\n")
+        val chargeLimitLine = ChargeLimitAdvice.of(
+            usesDepartureCharge = chain.stops.isNotEmpty(),
+            departurePercent = departurePercent,
+            limitPercent = chargeLimitPercent,
+        )?.let {
+            getString(
+                R.string.charge_stop_limit_advice,
+                it.limitPercent,
+                format(it.departurePercent, "%.0f"),
+            )
+        }
+        binding.chargeStopDetail.text =
+            listOfNotNull(chargeLimitLine, detail, gradeLine).joinToString("\n")
 
         renderCharger(plan, chargers)
         renderWhatIf(whatIf, alternative)
