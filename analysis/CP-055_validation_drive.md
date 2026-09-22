@@ -88,9 +88,9 @@ and never asks for anything.
 
 ## On arrival, parked
 
-1. Open **Charging stop** once more and search the same destination again. This is what refits
-   the consumption model with the drive you have just done, and that refit is question 6's
-   answer.
+1. Open **Charging stop** once more and search the same destination again to exercise the screen
+   path. Export independently refits the model from stored tracks and records question 6, so
+   forgetting this tap no longer loses model evidence.
 2. Plug in the USB stick.
 3. **View diagnostics** → **Export to USB** → pick the stick. Wait for the confirmation naming
    the file.

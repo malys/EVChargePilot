@@ -60,11 +60,15 @@ object EvidenceCaptureHook {
             firmware,
         )
         store.write(SignalEvidenceRecorder.capture())
+        val tripHistory = TripHistoryArtifact.of(context)
         store.write(
-            TripHistoryArtifact.of(context).toJson(),
+            tripHistory.toJson(),
             TripHistoryArtifact.KIND,
             firmware,
         )
+        ValidationProbe.record(ValidationQuestion.SOC_SEGMENTS) {
+            "at export: ${tripHistory.socModelFit}"
+        }
         // Written even when validation mode is off: "the toggle was never on" is the answer to
         // every empty block in it, and a bundle that simply lacks the file says nothing.
         store.write(

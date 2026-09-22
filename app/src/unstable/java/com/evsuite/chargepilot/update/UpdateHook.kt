@@ -14,8 +14,8 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Unstable channel: check GitHub's rolling pre-release at start, download a newer build and
- * tell the driver where it is.
+ * Unstable channel: after the driver double-taps the dashboard version, check GitHub's rolling
+ * pre-release, download a newer build and tell the driver where it is.
  *
  * It never installs. EVChargePilot holds no install capability, so the update becomes a file
  * in the download folder and a sentence saying so; the install is the driver's own tap in the
@@ -26,12 +26,10 @@ object UpdateHook {
     private const val TAG = "EV_UPDATE"
 
     /**
-     * One check per answer, not one per process. A release lookup on every visit to the
-     * dashboard is a request GitHub counts and the driver never asked for, so this latches —
-     * but it is released again when the pipeline gave up without an answer, because a head unit
-     * whose network arrived late would otherwise stay on an old build until the app is killed.
+     * Ignore a second double-tap while one pass is running. The flag is released after every
+     * outcome so a later explicit gesture can ask again without restarting the app.
      */
-    private val checked = AtomicBoolean(false)
+    private val checking = AtomicBoolean(false)
 
     /**
      * The storage prompt is a one-shot for the process. A refusal is a supported state — the
@@ -78,7 +76,7 @@ object UpdateHook {
             "updater_present=true",
             "installs_apks=false",
             "running_version=${current ?: "unreadable"}",
-            "check_latched=${checked.get()}",
+            "check_running=${checking.get()}",
             "last_verdict=$verdict",
             "log_lines=${log.size}",
         ) + log.map { "log=[${it.time}] ${it.level}: ${it.msg}" }
@@ -89,7 +87,7 @@ object UpdateHook {
 
     /** Fire-and-forget. Every network and disk step runs off the main thread. */
     fun checkInBackground(activity: Activity) {
-        if (!checked.compareAndSet(false, true)) return
+        if (!checking.compareAndSet(false, true)) return
         if (askedForDownloads.compareAndSet(false, true)) requestDownloadsAccess(activity)
         val context = activity.applicationContext
         // The thread holds the activity until its timeouts expire, which is what lets it
@@ -142,24 +140,24 @@ object UpdateHook {
     }
 
     private fun deliver(context: Context, activity: Activity) {
-        var attempt = attempt(context)
-        for (delay in RETRY_DELAYS_MS) {
-            if (attempt !is Attempt.Retry) break
-            Thread.sleep(delay)
-            attempt = attempt(context)
-        }
-        if (attempt is Attempt.Retry) {
-            // Still nothing after the retries: the network was not there yet. Release the latch
-            // so the next visit to the dashboard asks again, instead of leaving the tester on an
-            // old build for the rest of the process because Wi-Fi came up a minute too late.
-            checked.set(false)
-            verdict = "no network for the check after ${RETRY_DELAYS_MS.size} retries"
-            AppLogger.i(TAG, verdict)
-            return
-        }
-        val apk = (attempt as? Attempt.Ready)?.apk ?: return
-        activity.runOnUiThread {
-            if (!activity.isFinishing && !activity.isDestroyed) announce(activity, apk)
+        try {
+            var attempt = attempt(context)
+            for (delay in RETRY_DELAYS_MS) {
+                if (attempt !is Attempt.Retry) break
+                Thread.sleep(delay)
+                attempt = attempt(context)
+            }
+            if (attempt is Attempt.Retry) {
+                verdict = "no network for the check after ${RETRY_DELAYS_MS.size} retries"
+                AppLogger.i(TAG, verdict)
+                return
+            }
+            val apk = (attempt as? Attempt.Ready)?.apk ?: return
+            activity.runOnUiThread {
+                if (!activity.isFinishing && !activity.isDestroyed) announce(activity, apk)
+            }
+        } finally {
+            checking.set(false)
         }
     }
 

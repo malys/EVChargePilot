@@ -217,7 +217,11 @@ class TripRecordingService : Service() {
     }
 
     /** Called through the binder: the dashboard is on screen whenever a trip can be stopped. */
-    fun stopTrip(onSaved: (() -> Unit)? = null) {
+    fun stopTrip(onSaved: (() -> Unit)? = null) = finishTrip(false, onSaved)
+
+    private fun stopAutomaticTrip() = finishTrip(true, null)
+
+    private fun finishTrip(automaticallyDetected: Boolean, onSaved: (() -> Unit)?) {
         val endedAt = latestSnapshot?.timestampMs ?: System.currentTimeMillis()
         val recorded = EnergyTripSession.stop(endedAt)
         detector.reset()
@@ -226,6 +230,16 @@ class TripRecordingService : Service() {
         }
         if (recorded == null) {
             if (automaticDetectionEnabled) updateNotification()
+            stopWhenNobodyNeedsIt()
+            return
+        }
+        TripAverageEvidence.record(recorded.summary)
+        if (!AutomaticTripRetention.shouldStore(automaticallyDetected, recorded.summary)) {
+            AppLogger.i(
+                TAG,
+                "automatic trip not stored; distance_km=${recorded.summary.recordedDistanceKm}",
+            )
+            updateNotification()
             stopWhenNobodyNeedsIt()
             return
         }
@@ -304,7 +318,7 @@ class TripRecordingService : Service() {
             val result = detector.add(value)
             when (result.event) {
                 TripDetector.Event.START -> beginTrip(value)
-                TripDetector.Event.STOP -> stopTrip()
+                TripDetector.Event.STOP -> stopAutomaticTrip()
                 null -> Unit
             }
             if (result.event == null && result.state != previousState) {

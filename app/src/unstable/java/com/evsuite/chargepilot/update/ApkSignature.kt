@@ -18,6 +18,9 @@ import java.security.MessageDigest
 internal object ApkSignature {
 
     private const val TAG = "EV_UPDATE"
+    @Suppress("DEPRECATION")
+    private const val SIGNATURE_FLAGS =
+        PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_SIGNATURES
 
     /** True when [apk] carries exactly the certificates the installed app carries. */
     fun matchesRunningApp(context: Context, apk: File): Boolean {
@@ -38,7 +41,7 @@ internal object ApkSignature {
         digests(
             context.packageManager.getPackageArchiveInfo(
                 apk.absolutePath,
-                PackageManager.GET_SIGNING_CERTIFICATES
+                SIGNATURE_FLAGS
             )
         )
     } catch (e: Exception) {
@@ -50,7 +53,7 @@ internal object ApkSignature {
         digests(
             context.packageManager.getPackageInfo(
                 context.packageName,
-                PackageManager.GET_SIGNING_CERTIFICATES
+                SIGNATURE_FLAGS
             )
         )
     } catch (e: Exception) {
@@ -58,16 +61,19 @@ internal object ApkSignature {
         emptySet()
     }
 
-    // minSdk is 28, so SigningInfo always exists and the deprecated `signatures` array is
-    // never needed. A multi-signer APK reports its current signers; a single-signer one
-    // reports its rotation history, which is what lets a rotated key still match.
+    // Android 9 may leave SigningInfo null for an archive even when asked for it. Prefer its
+    // rotation-aware result, then use the legacy array requested alongside it. Empty still
+    // fails closed. A multi-signer APK reports its current signers; a single-signer one reports
+    // its rotation history, which is what lets a rotated key still match.
+    @Suppress("DEPRECATION")
     private fun digests(info: PackageInfo?): Set<String> {
-        val signingInfo = info?.signingInfo ?: return emptySet()
-        val signatures = if (signingInfo.hasMultipleSigners()) {
-            signingInfo.apkContentsSigners
-        } else {
-            signingInfo.signingCertificateHistory
-        } ?: return emptySet()
+        val signatures = info?.signingInfo?.let { signingInfo ->
+            if (signingInfo.hasMultipleSigners()) {
+                signingInfo.apkContentsSigners
+            } else {
+                signingInfo.signingCertificateHistory
+            }
+        } ?: info?.signatures ?: return emptySet()
         val sha256 = MessageDigest.getInstance("SHA-256")
         return signatures.mapNotNull { signature ->
             signature?.toByteArray()?.let { bytes ->

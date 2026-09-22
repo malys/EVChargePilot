@@ -58,8 +58,9 @@ workspace MIT default. EVHardware remains separately licensed.
   already list *except* primary emulated storage, and fall back only to this app's directory on
   the same volume. Never require positive proof that a volume is removable — this head unit
   cannot give it, and demanding it is why exports found nothing.
-- The unstable channel checks GitHub's rolling `unstable` pre-release at start and downloads a
-  newer APK (`app/src/unstable/.../update/`). It is the second HTTP entry point and stays inside
+- The unstable channel checks GitHub's rolling `unstable` pre-release only after the driver
+  double-taps the version on the Energy dashboard, then downloads a newer APK
+  (`app/src/unstable/.../update/`). It is the second HTTP entry point and stays inside
   the same rules: `https` plus an exact-match host allowlist on the initial URL and every
   redirect hop, a size ceiling on the declared and the transferred length, and the archive only
   reaches shared storage after its signing certificate is proven identical to the running app's.

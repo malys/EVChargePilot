@@ -6,6 +6,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Unstable automatic history now keeps model-worthy drives.** Automatically detected trips are
+  persisted only when their measured distance exceeds 5 km; manual recordings remain explicit and
+  are always kept. Existing storage bounds remain unchanged: 200 summaries and 512 KiB, with old
+  sample tracks evicted before trip summaries. At the same trip boundary, Q6 records the app's
+  gross and regeneration-adjusted averages beside the vehicle's raw published average, so the
+  next drive can establish why they diverge without assuming equivalent units or reset rules.
+
+- Unstable trip-history artifacts now include `socModelFit`, computed from full stored tracks
+  during export. CP-055 Q6 is recorded before validation artifact is written, so model evidence
+  no longer depends on reopening Charging stop after a drive.
+
 - **The energy screen says whether this drive is a careful one.** A sixth readout tile reads
   *better than usual*, *usual* or *worse than usual* with the signed distance from the driver's
   own fitted expectation for this speed and this outside temperature — their history, not a
@@ -32,6 +43,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   coach stays silent rather than reading French aloud with English phonemes (CP-077).
 
 ### Fixed
+
+- **Finished-trip eco advice no longer drops persisted samples.** Trip tracks keep the first
+  telemetry frame after each five-second boundary, commonly around 5.3 seconds apart. Replay used
+  the stricter five-second live gap and discarded those intervals; it now uses the stored-track
+  cadence while live monitoring keeps its original sleep-gap guard.
 
 - **The advice line said nothing about having nothing to say.** With the switch on and no lever
   measurable — no fitted model yet, or too little movement in the window — the line simply was

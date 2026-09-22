@@ -3,6 +3,7 @@ package com.evsuite.chargepilot
 import android.content.Context
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSummary
+import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import com.google.gson.Gson
 import java.io.File
 
@@ -25,13 +26,15 @@ internal data class TripHistoryArtifact(
     val trips: Int,
     /** The bundle's own answer to the speed-unit question, when a session can support one. */
     val speedScaleCheck: SpeedScaleCheck.Result,
+    /** Same model gate production screens use, evaluated without opening one. */
+    val socModelFit: String,
     val notes: List<String> = NOTES,
     val summaries: List<EnergyTripSummary>,
 ) {
     fun toJson(): String = GSON.toJson(this)
 
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
         const val PROBE = "trip-history"
         const val KIND = "trips"
 
@@ -58,8 +61,8 @@ internal data class TripHistoryArtifact(
             sessionStartedAtMs: Long? = SignalEvidenceRecorder.sessionStartedAtMs,
             odometerSpanKm: Double? = SignalEvidenceRecorder.adapterOdometerSpanKm(),
         ): TripHistoryArtifact {
-            val summaries = EnergyTripHistoryStore(File(context.filesDir, HISTORY_FILE))
-                .readSummaries()
+            val history = EnergyTripHistoryStore(File(context.filesDir, HISTORY_FILE)).read()
+            val summaries = history.map { it.summary }
             // Only trips this session recorded can be compared against this session's odometer
             // span. A trip from yesterday shares no clock with it.
             val integratedKm = sessionStartedAtMs?.let { since ->
@@ -71,6 +74,7 @@ internal data class TripHistoryArtifact(
                 savedAtMs = nowMs,
                 trips = summaries.size,
                 speedScaleCheck = SpeedScaleCheck.of(odometerSpanKm, integratedKm),
+                socModelFit = SocConsumptionFitter().describe(history),
                 summaries = summaries.take(MAX_SUMMARIES),
             )
         }

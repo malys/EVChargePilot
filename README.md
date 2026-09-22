@@ -103,8 +103,10 @@ unique temporary file and atomic rename.
 Automatic detection is enabled by default. A foreground service owns the sampler so detection
 and recording continue when the driver opens another app. On firmware where speed stays
 unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
-performs a bounded retry. Active trips remain fail-closed and under manual control. A trip's
-reported duration is the time actually covered by usable samples, not wall clock: a suspended
+performs a bounded retry. Active trips remain fail-closed and under manual control. The unstable
+build keeps automatically detected trips only above 5 km, concentrating the same bounded history
+budget on drives useful to the local consumption model. Manual recordings are always kept. A
+trip's reported duration is the time actually covered by usable samples, not wall clock: a suspended
 sampler adds nothing to duration, distance or energy, so consumption averages compare values
 measured over the same interval.
 
