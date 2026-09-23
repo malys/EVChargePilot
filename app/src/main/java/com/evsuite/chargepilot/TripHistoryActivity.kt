@@ -12,7 +12,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
+import com.evsuite.chargepilot.databinding.ViewTripOverviewCardBinding
 import com.evsuite.hardware.telemetry.EcoVerdict
+import com.evsuite.hardware.telemetry.EnergySnapshot
+import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.UnavailableReason
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -28,9 +31,14 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** Reverse-chronological trip ledger with one selected record kept open beside it. */
+/**
+ * Two views of the trips: an overview after Tesla's energy app — consumption over the last
+ * kilometres, the range it implies, four groups of trips — and the reverse-chronological
+ * ledger with one selected record kept open beside it.
+ */
 class TripHistoryActivity : PrimaryNavigationActivity() {
     override val primaryPage = PrimaryPage.TRIPS
 
@@ -48,6 +56,10 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private var speedKmh: Float? = null
     private var speedObservedAtMs: Long? = null
     private var bound = false
+    private val overviewPrefs by lazy { getSharedPreferences(OVERVIEW_FILE, MODE_PRIVATE) }
+    private var showOverview = true
+    private var loaded = false
+    private var lastOverviewMs = 0L
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -57,10 +69,15 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 speedKmh = snapshot.speedKmh
                 speedObservedAtMs = snapshot.timestampMs
                 renderSpeedWhatIfGate()
+                if (showOverview && snapshot.timestampMs - lastOverviewMs >= OVERVIEW_REFRESH_MS) {
+                    loadOverview()
+                }
             }
             speedKmh = value.latest?.speedKmh
             speedObservedAtMs = value.latest?.timestampMs
             renderSpeedWhatIfGate()
+            // The range needs the pack's charge, which only the service has.
+            loadOverview()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -77,6 +94,30 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         setContentView(binding.root)
         store = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE))
         selectedStartedAtMs = savedInstanceState?.getLong(STATE_SELECTED)?.takeIf { it != 0L }
+        showOverview = savedInstanceState?.getBoolean(STATE_OVERVIEW) ?: true
+
+        binding.viewChoice.check(if (showOverview) R.id.viewOverview else R.id.viewLedger)
+        binding.viewChoice.addOnButtonCheckedListener { _, id, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            showOverview = id == R.id.viewOverview
+            renderMode()
+            if (showOverview) loadOverview()
+        }
+        binding.windowChoice.check(WINDOW_BUTTONS[selectedWindowKm()] ?: R.id.window150)
+        binding.windowChoice.addOnButtonCheckedListener { _, id, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            val km = WINDOW_BUTTONS.entries.first { it.value == id }.key
+            overviewPrefs.edit().putFloat(KEY_WINDOW, km.toFloat()).apply()
+            loadOverview()
+        }
+        binding.resetTripAAction.setOnClickListener { resetTripAIfParked() }
+        listOf(
+            binding.overviewTrace,
+            binding.cardCurrent.cardTrace,
+            binding.cardSinceCharge.cardTrace,
+            binding.cardTripA.cardTrace,
+            binding.cardHistory.cardTrace,
+        ).forEach(ChartFullScreen::install)
 
         binding.historyList.adapter = adapter
         binding.historyList.setOnItemClickListener { _, _, position, _ ->
@@ -133,6 +174,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         selectedStartedAtMs?.let { outState.putLong(STATE_SELECTED, it) }
+        outState.putBoolean(STATE_OVERVIEW, showOverview)
         super.onSaveInstanceState(outState)
     }
 
@@ -168,9 +210,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 }
                 adapter.notifyDataSetChanged()
                 val empty = trips.isEmpty()
-                binding.loadingState.visibility = View.GONE
-                binding.emptyState.visibility = if (empty) View.VISIBLE else View.GONE
-                binding.historyContent.visibility = if (empty) View.GONE else View.VISIBLE
+                loaded = true
+                renderMode()
+                loadOverview()
                 binding.deleteAllAction.isEnabled = !empty
                 binding.exportAllAction.isEnabled = !empty
                 binding.energyBreakdownAction.isEnabled = !empty
@@ -180,10 +222,203 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         }
     }
 
+    /** Which of the two views, and the top-bar actions that belong to it, are on screen. */
+    private fun renderMode() {
+        val empty = adapter.items.isEmpty()
+        binding.loadingState.visibility = if (loaded) View.GONE else View.VISIBLE
+        binding.overviewContent.visibility = if (loaded && showOverview) View.VISIBLE else View.GONE
+        binding.emptyState.visibility =
+            if (loaded && !showOverview && empty) View.VISIBLE else View.GONE
+        binding.historyContent.visibility =
+            if (loaded && !showOverview && !empty) View.VISIBLE else View.GONE
+        binding.windowChoice.visibility = if (showOverview) View.VISIBLE else View.INVISIBLE
+        binding.resetTripAAction.visibility = if (showOverview) View.VISIBLE else View.GONE
+        binding.exportAllAction.visibility = if (showOverview) View.GONE else View.VISIBLE
+        binding.deleteAllAction.visibility = if (showOverview) View.GONE else View.VISIBLE
+    }
+
+    private fun selectedWindowKm(): Double =
+        overviewPrefs.getFloat(KEY_WINDOW, DEFAULT_WINDOW_KM.toFloat()).toDouble()
+            .takeIf { it in WINDOW_BUTTONS } ?: DEFAULT_WINDOW_KM
+
+    private fun loadOverview() {
+        if (!loaded) return
+        lastOverviewMs = System.currentTimeMillis()
+        val trips = adapter.items
+        val latest = recorder?.latest
+        val windowKm = selectedWindowKm()
+        val tripAFromMs = overviewPrefs.getLong(KEY_TRIP_A, 0L)
+        disk.execute {
+            val value = buildOverview(trips, latest, windowKm, tripAFromMs)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                renderOverview(value)
+            }
+        }
+    }
+
+    /** Off the UI thread: the whole kept history is walked for the last card's trace. */
+    private fun buildOverview(
+        stored: List<StoredTrip>,
+        latest: EnergySnapshot?,
+        windowKm: Double,
+        tripAFromMs: Long,
+    ): Overview {
+        val settings = VehicleSettings.read(this)
+        val current = EnergyTripSession.current(System.currentTimeMillis())
+        val currentTrip = current?.let { StoredTrip(it) }
+        val all = listOfNotNull(currentTrip) + stored
+        val window = TripOverview.window(all, windowKm)
+        val consumption = TripOverview.consumption(window)
+        val energyKwh = latest?.batteryEnergyKwh?.toDouble()?.takeIf { it.isFinite() && it >= 0.0 }
+            ?: settings.pack.energyAtSocKwh(latest?.socPercent?.toDouble()).value
+        val rangeKm = if (energyKwh != null && consumption != null && consumption > 0.0) {
+            energyKwh * 100.0 / consumption
+        } else null
+        val sinceCharge = TripOverview.sinceCharge(
+            latest?.socPercent,
+            current,
+            stored.map { it.summary },
+        )?.let { trips -> all.take(trips.size) }
+        return Overview(
+            windowKm = windowKm,
+            coveredKm = window.sumOf { it.distanceKm },
+            netKwh = window.sumOf { it.netKwh },
+            consumption = consumption,
+            rangeKm = rangeKm,
+            reference = settings.referenceConsumptionKwhPer100Km,
+            trace = TripOverview.trace(window),
+            tripAFromMs = tripAFromMs,
+            current = currentTrip?.let { card(listOf(it)) },
+            sinceCharge = sinceCharge?.let(::card),
+            tripA = card(all.filter { it.summary.startedAtMs >= tripAFromMs }),
+            history = card(all),
+        )
+    }
+
+    private fun card(tripsNewestFirst: List<StoredTrip>): OverviewCard {
+        val segments = tripsNewestFirst.asReversed().flatMap(TripOverview::segments)
+        return OverviewCard(
+            totals = TripOverview.totals(tripsNewestFirst.map { it.summary }),
+            trace = TripOverview.trace(segments),
+        )
+    }
+
+    private fun renderOverview(value: Overview) {
+        val window = format("%.0f km", value.windowKm)
+        binding.overviewRange.text = getString(
+            R.string.trip_overview_range,
+            value.rangeKm?.let { format("%.0f km", it) } ?: DASH,
+        )
+        binding.overviewRangeBasis.text = getString(R.string.trip_overview_range_basis, window)
+        binding.overviewConsumption.text = value.consumption?.let(::consumption) ?: DASH
+        val delta = value.consumption?.minus(value.reference)
+        binding.overviewDelta.text = delta?.let {
+            getString(
+                if (it > 0.0) R.string.trip_overview_above else R.string.trip_overview_below,
+                consumption(abs(it)),
+            )
+        }.orEmpty()
+        binding.overviewDelta.setTextColor(
+            getColor(if ((delta ?: 0.0) > 0.0) R.color.ev_warn else R.color.ev_accent)
+        )
+        binding.overviewWindowEnergy.text = if (value.consumption == null) {
+            getString(R.string.trip_overview_no_driving)
+        } else {
+            getString(
+                R.string.trip_overview_window_energy,
+                energy(value.netKwh),
+                distance(value.coveredKm),
+            )
+        }
+        binding.overviewLegend.text =
+            getString(R.string.trip_overview_legend, consumption(value.reference))
+        binding.overviewTrace.setTrace(value.trace, value.reference, value.coveredKm)
+        binding.overviewTrace.contentDescription =
+            getString(R.string.trip_overview_trace_description, distance(value.coveredKm))
+
+        renderCard(
+            binding.cardCurrent,
+            getString(R.string.trip_card_current),
+            value.current,
+            R.string.trip_card_not_recording,
+            value.reference,
+        )
+        renderCard(
+            binding.cardSinceCharge,
+            getString(R.string.trip_card_since_charge),
+            value.sinceCharge,
+            if (value.sinceCharge == null) R.string.trip_card_charge_unknown else R.string.trip_card_empty,
+            value.reference,
+        )
+        renderCard(
+            binding.cardTripA,
+            if (value.tripAFromMs > 0L) {
+                getString(R.string.trip_card_trip_a_since, formatDate(value.tripAFromMs))
+            } else {
+                getString(R.string.trip_card_trip_a)
+            },
+            value.tripA,
+            R.string.trip_card_empty,
+            value.reference,
+        )
+        renderCard(
+            binding.cardHistory,
+            getString(R.string.trip_card_history),
+            value.history,
+            R.string.trip_card_empty,
+            value.reference,
+        )
+    }
+
+    /** A missing group says why in place of its graph; its figures stay em dashes. */
+    private fun renderCard(
+        card: ViewTripOverviewCardBinding,
+        title: String,
+        value: OverviewCard?,
+        reasonRes: Int,
+        reference: Double,
+    ) {
+        card.cardTitle.text = title
+        val totals = value?.totals?.takeIf { it.trips > 0 }
+        card.cardReason.visibility = if (totals == null) View.VISIBLE else View.GONE
+        card.cardReason.text = getString(reasonRes)
+        card.cardTrace.setTrace(value?.trace.orEmpty(), reference, totals?.distanceKm)
+        card.cardTrace.contentDescription = title
+        card.cardEnergy.text = listOf(
+            totals?.consumptionKwhPer100Km?.let(::consumption) ?: DASH,
+            totals?.netKwh?.let(::energy) ?: DASH,
+        ).joinToString("\n")
+        card.cardDistance.text = listOf(
+            totals?.distanceKm?.let(::distance) ?: DASH,
+            totals?.let { duration(it.durationMs) } ?: DASH,
+        ).joinToString("\n")
+    }
+
+    /** Parked only, like every other control on this page; one Undo, because a lost start is lost. */
+    private fun resetTripAIfParked() {
+        val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
+        if (gate != ParkedDeletionGate.PARKED) {
+            renderSpeedWhatIfGate()
+            Snackbar.make(binding.root, R.string.trip_a_reset_moving, Snackbar.LENGTH_LONG).show()
+            return
+        }
+        val previous = overviewPrefs.getLong(KEY_TRIP_A, 0L)
+        overviewPrefs.edit().putLong(KEY_TRIP_A, System.currentTimeMillis()).apply()
+        loadOverview()
+        Snackbar.make(binding.root, R.string.trip_a_reset_done, Snackbar.LENGTH_LONG)
+            .setAction(R.string.trip_a_reset_undo) {
+                overviewPrefs.edit().putLong(KEY_TRIP_A, previous).apply()
+                loadOverview()
+            }
+            .show()
+    }
+
     private fun renderSpeedWhatIfGate() {
         binding.speedWhatIfAction.removeCallbacks(gateExpiry)
         val nowMs = System.currentTimeMillis()
         val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, nowMs)
+        binding.resetTripAAction.isEnabled = gate == ParkedDeletionGate.PARKED
         binding.speedWhatIfAction.isEnabled = selectedStartedAtMs != null &&
             gate == ParkedDeletionGate.PARKED
         if (gate == ParkedDeletionGate.PARKED) {
@@ -543,6 +778,23 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         }
     }
 
+    private data class OverviewCard(val totals: TripTotals, val trace: List<Float?>)
+
+    private data class Overview(
+        val windowKm: Double,
+        val coveredKm: Double,
+        val netKwh: Double,
+        val consumption: Double?,
+        val rangeKm: Double?,
+        val reference: Double,
+        val trace: List<Float?>,
+        val tripAFromMs: Long,
+        val current: OverviewCard?,
+        val sinceCharge: OverviewCard?,
+        val tripA: OverviewCard,
+        val history: OverviewCard,
+    )
+
     private data class TripRow(
         val date: String,
         val summary: String,
@@ -559,6 +811,18 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private companion object {
         const val HISTORY_FILE = "trips.json"
         const val STATE_SELECTED = "selected_started_at"
+        const val STATE_OVERVIEW = "show_overview"
+        const val OVERVIEW_FILE = "chargepilot_trip_overview"
+        const val KEY_WINDOW = "window_km"
+        const val KEY_TRIP_A = "trip_a_from_ms"
+        const val DEFAULT_WINDOW_KM = 150.0
+        /** A live trip moves the overview; every ten seconds is often enough to see it move. */
+        const val OVERVIEW_REFRESH_MS = 10_000L
+        val WINDOW_BUTTONS = mapOf(
+            TripOverview.WINDOWS_KM[0] to R.id.window15,
+            TripOverview.WINDOWS_KM[1] to R.id.window150,
+            TripOverview.WINDOWS_KM[2] to R.id.window300,
+        )
         const val DASH = "—"
     }
 

@@ -207,6 +207,24 @@
                             android:singleLine="true"
                             android:textSize="@dimen/text_body" />
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/referenceLayout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:hint="@string/vehicle_hint_reference"
+                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/referenceInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:singleLine="true"
+                            android:textSize="@dimen/text_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout

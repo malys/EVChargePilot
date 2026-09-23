@@ -508,4 +508,33 @@ Spending %6$s %% per km</string>
     <string name="trip_eco_finding_cabin">Cabin: about %1$.1f kWh, %2$.0f %% of this trip.</string>
     <string name="trip_eco_finding_steadiness">Hard acceleration on %1$d %% of this drive.</string>
     <string name="diagnostics_eco_trip_review">Latest trip, reviewed</string>
+    <string name="vehicle_hint_reference">Reference consumption (kWh/100 km)</string>
+    <string name="vehicle_helper_reference">The line the trip overview measures drives against. Empty = %1$s kWh/100 km.</string>
+    <string name="vehicle_refused_reference">Reference consumption refused: it must be a number between 5 and 50 kWh/100 km.</string>
+    <string name="trip_view_overview">Overview</string>
+    <string name="trip_view_ledger">Ledger</string>
+    <string name="trip_overview_range">Est. range: %1$s</string>
+    <string name="trip_overview_range_basis">Estimated from the charge left and the net consumption of the last %1$s.</string>
+    <string name="trip_overview_above">%1$s above your reference</string>
+    <string name="trip_overview_below">%1$s below your reference</string>
+    <string name="trip_overview_window_energy">%1$s net over the last %2$s</string>
+    <string name="trip_overview_no_driving">No driving with speed and power recorded in this window yet.</string>
+    <string name="trip_overview_legend">Dashed line: your reference, %1$s. Amber above it, blue below. Double-tap a graph for full screen.</string>
+    <string name="trip_overview_trace_description">Net consumption over the last %1$s against your reference</string>
+    <string name="trip_card_current">Current trip</string>
+    <string name="trip_card_since_charge">Since last charge</string>
+    <string name="trip_card_trip_a">Trip A</string>
+    <string name="trip_card_trip_a_since">Trip A · since %1$s</string>
+    <string name="trip_card_history">All kept trips</string>
+    <string name="trip_card_not_recording">No trip is being recorded.</string>
+    <string name="trip_card_charge_unknown">No charge found in the kept trips, or a charge reading is missing between two of them.</string>
+    <string name="trip_card_empty">No trip in this group yet.</string>
+    <string name="action_reset_trip_a">Reset trip A</string>
+    <string name="trip_a_reset_done">Trip A reset</string>
+    <string name="trip_a_reset_undo">Undo</string>
+    <string name="trip_a_reset_moving">Stop the car to reset trip A.</string>
+    <string name="action_chart_full_screen">Full screen</string>
+    <string name="trip_window_15" translatable="false">15 km</string>
+    <string name="trip_window_150" translatable="false">150 km</string>
+    <string name="trip_window_300" translatable="false">300 km</string>
 </resources>

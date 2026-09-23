@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One group of trips, Tesla's card: its name, the shape of its consumption, its totals.
+     Every height below the title is a share of the card, so the four cards keep a line
+     whatever the panel's real height turns out to be. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_sm">
+
+    <TextView
+        android:id="@+id/cardTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/Text.EV.Body" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.evsuite.chargepilot.ConsumptionTraceView
+            android:id="@+id/cardTrace"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="yes" />
+
+        <TextView
+            android:id="@+id/cardReason"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textAppearance="@style/Text.EV.Secondary"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/cardEnergy"
+            style="@style/Text.EV.TripValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:maxLines="2" />
+
+        <TextView
+            android:id="@+id/cardDistance"
+            style="@style/Text.EV.TripValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:maxLines="2" />
+    </LinearLayout>
+</LinearLayout>

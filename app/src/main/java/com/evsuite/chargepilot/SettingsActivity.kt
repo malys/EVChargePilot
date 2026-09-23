@@ -193,6 +193,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
             binding.minPowerInput.text?.toString().orEmpty(),
             binding.reserveInput.text?.toString().orEmpty(),
             binding.departureInput.text?.toString().orEmpty(),
+            binding.referenceInput.text?.toString().orEmpty(),
         )
         if (parsed is VehicleSettings.Parsed.Refused) {
             announce(
@@ -203,6 +204,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
                         VehicleSettings.Field.MIN_POWER -> R.string.vehicle_refused_min_power
                         VehicleSettings.Field.RESERVE -> R.string.vehicle_refused_reserve
                         VehicleSettings.Field.DEPARTURE -> R.string.vehicle_refused_departure
+                        VehicleSettings.Field.REFERENCE -> R.string.vehicle_refused_reference
                     }
                 )
             )
@@ -306,6 +308,11 @@ class SettingsActivity : PrimaryNavigationActivity() {
             binding.departureLayout, binding.departureInput,
             values.departurePercent, VehicleSettings.DEFAULT_DEPARTURE_PERCENT,
             R.string.vehicle_helper_departure,
+        )
+        set(
+            binding.referenceLayout, binding.referenceInput,
+            values.referenceConsumptionKwhPer100Km, VehicleSettings.DEFAULT_REFERENCE_CONSUMPTION,
+            R.string.vehicle_helper_reference,
         )
         binding.vehicleWhose.text = getString(
             if (values.isDefault) R.string.vehicle_status_default else R.string.vehicle_status_custom
@@ -434,6 +441,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.minPowerLayout.isEnabled = parked
         binding.reserveLayout.isEnabled = parked
         binding.departureLayout.isEnabled = parked
+        binding.referenceLayout.isEnabled = parked
         binding.routingKeyLayout.isEnabled = parked
         binding.chargerKeyLayout.isEnabled = parked
         binding.routingBaseUrlLayout.isEnabled = parked

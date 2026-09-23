@@ -5,7 +5,7 @@ import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 
 /**
- * The five numbers about *this* car and *this* driver that the app used to answer for them.
+ * The six numbers about *this* car and *this* driver that the app used to answer for them.
  *
  * A pack capacity from a specification sheet, a health of 100 % because nothing measured it, a
  * charger power floor and a reserve were constants in `ChargeStopActivity` — each with a
@@ -29,6 +29,8 @@ object VehicleSettings {
      * @param reservePercent charge the plan refuses to spend.
      * @param departurePercent charge a planned stop is left with, for a trip that needs more
      *   than one of them. How long the driver plugs in is theirs; this is where they say it.
+     * @param referenceConsumptionKwhPer100Km the consumption the trip screen measures a drive
+     *   against, as Tesla's "nominal" line: above it the pack empties faster than rated.
      */
     data class Values(
         val usableCapacityKwhWhenNew: Double = DEFAULT_CAPACITY_KWH,
@@ -36,6 +38,7 @@ object VehicleSettings {
         val minChargerPowerKw: Double = DEFAULT_MIN_POWER_KW,
         val reservePercent: Double = DEFAULT_RESERVE_PERCENT,
         val departurePercent: Double = DEFAULT_DEPARTURE_PERCENT,
+        val referenceConsumptionKwhPer100Km: Double = DEFAULT_REFERENCE_CONSUMPTION,
     ) {
         val pack: BatteryCapacityConfig
             get() = BatteryCapacityConfig(usableCapacityKwhWhenNew, stateOfHealthPercent)
@@ -45,7 +48,7 @@ object VehicleSettings {
     }
 
     /** Which field a driver has to fix, so the screen can say so instead of failing silently. */
-    enum class Field { CAPACITY, HEALTH, MIN_POWER, RESERVE, DEPARTURE }
+    enum class Field { CAPACITY, HEALTH, MIN_POWER, RESERVE, DEPARTURE, REFERENCE }
 
     sealed interface Parsed {
         data class Ok(val values: Values) : Parsed
@@ -66,6 +69,7 @@ object VehicleSettings {
         minPower: String,
         reserve: String,
         departure: String,
+        reference: String = "",
     ): Parsed {
         val capacityKwh = number(capacity, DEFAULT_CAPACITY_KWH)
             ?.takeIf { it in CAPACITY_RANGE } ?: return Parsed.Refused(Field.CAPACITY)
@@ -80,8 +84,13 @@ object VehicleSettings {
         val departurePercent = number(departure, DEFAULT_DEPARTURE_PERCENT)
             ?.takeIf { it in DEPARTURE_RANGE && it > reservePercent }
             ?: return Parsed.Refused(Field.DEPARTURE)
+        val referenceConsumption = number(reference, DEFAULT_REFERENCE_CONSUMPTION)
+            ?.takeIf { it in REFERENCE_RANGE } ?: return Parsed.Refused(Field.REFERENCE)
         return Parsed.Ok(
-            Values(capacityKwh, healthPercent, powerKw, reservePercent, departurePercent)
+            Values(
+                capacityKwh, healthPercent, powerKw, reservePercent, departurePercent,
+                referenceConsumption,
+            )
         )
     }
 
@@ -94,6 +103,7 @@ object VehicleSettings {
             minChargerPowerKw = prefs.getFloat(KEY_MIN_POWER, Float.NaN).toDouble(),
             reservePercent = prefs.getFloat(KEY_RESERVE, Float.NaN).toDouble(),
             departurePercent = prefs.getFloat(KEY_DEPARTURE, Float.NaN).toDouble(),
+            referenceConsumptionKwhPer100Km = prefs.getFloat(KEY_REFERENCE, Float.NaN).toDouble(),
         )
         return sanitized(stored)
     }
@@ -115,6 +125,8 @@ object VehicleSettings {
             .takeIf { it in RESERVE_RANGE } ?: DEFAULT_RESERVE_PERCENT,
         departurePercent = values.departurePercent
             .takeIf { it in DEPARTURE_RANGE } ?: DEFAULT_DEPARTURE_PERCENT,
+        referenceConsumptionKwhPer100Km = values.referenceConsumptionKwhPer100Km
+            .takeIf { it in REFERENCE_RANGE } ?: DEFAULT_REFERENCE_CONSUMPTION,
     )
 
     fun write(context: Context, values: Values) {
@@ -125,6 +137,7 @@ object VehicleSettings {
             .putFloat(KEY_MIN_POWER, values.minChargerPowerKw.toFloat())
             .putFloat(KEY_RESERVE, values.reservePercent.toFloat())
             .putFloat(KEY_DEPARTURE, values.departurePercent.toFloat())
+            .putFloat(KEY_REFERENCE, values.referenceConsumptionKwhPer100Km.toFloat())
             .apply()
     }
 
@@ -157,6 +170,13 @@ object VehicleSettings {
     const val DEFAULT_DEPARTURE_PERCENT = ChargeStopPlan.DEFAULT_DEPARTURE_PERCENT
 
     /**
+     * [DEFAULT_CAPACITY_KWH] over the MG4 Long Range's 435 km WLTP range: the pack-side figure
+     * the rating implies, which is what this app measures. The WLTP sheet's own 16.6 kWh/100 km
+     * counts charging losses at the wall and would flatter every drive against it.
+     */
+    const val DEFAULT_REFERENCE_CONSUMPTION = 14.2
+
+    /**
      * Whether a health figure may be stored at all.
      *
      * The estimator (CP-070) can hand back a figure outside this — a node bias in the energy
@@ -173,6 +193,7 @@ object VehicleSettings {
     private val MIN_POWER_RANGE = 3.0..400.0
     private val RESERVE_RANGE = 0.0..40.0
     private val DEPARTURE_RANGE = 20.0..100.0
+    private val REFERENCE_RANGE = 5.0..50.0
 
     private const val FILE_NAME = "chargepilot_vehicle"
     private const val KEY_CAPACITY = "usable_capacity_kwh"
@@ -180,4 +201,5 @@ object VehicleSettings {
     private const val KEY_MIN_POWER = "min_charger_power_kw"
     private const val KEY_RESERVE = "reserve_percent"
     private const val KEY_DEPARTURE = "departure_percent"
+    private const val KEY_REFERENCE = "reference_consumption_kwh_per_100km"
 }

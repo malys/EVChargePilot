@@ -497,4 +497,30 @@ Consommation %6$s %% par km</string>
     <string name="trip_eco_finding_cabin">Habitacle : environ %1$.1f kWh, soit %2$.0f %% de ce trajet.</string>
     <string name="trip_eco_finding_steadiness">Accélérations franches sur %1$d %% de ce trajet.</string>
     <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>
+    <string name="vehicle_hint_reference">Consommation de référence (kWh/100 km)</string>
+    <string name="vehicle_helper_reference">La ligne à laquelle la synthèse des trajets compare la conduite. Vide = %1$s kWh/100 km.</string>
+    <string name="vehicle_refused_reference">Consommation de référence refusée : elle doit être un nombre entre 5 et 50 kWh/100 km.</string>
+    <string name="trip_view_overview">Synthèse</string>
+    <string name="trip_view_ledger">Journal</string>
+    <string name="trip_overview_range">Autonomie est. : %1$s</string>
+    <string name="trip_overview_range_basis">Estimée à partir de l\'énergie restante et de la consommation nette des derniers %1$s.</string>
+    <string name="trip_overview_above">%1$s au-dessus de la référence</string>
+    <string name="trip_overview_below">%1$s en dessous de la référence</string>
+    <string name="trip_overview_window_energy">%1$s nets au cours des derniers %2$s</string>
+    <string name="trip_overview_no_driving">Aucune conduite avec vitesse et puissance enregistrées sur cette fenêtre.</string>
+    <string name="trip_overview_legend">Pointillés : votre référence, %1$s. Ambre au-dessus, bleu en dessous. Double tap sur un graphique pour le plein écran.</string>
+    <string name="trip_overview_trace_description">Consommation nette des derniers %1$s comparée à votre référence</string>
+    <string name="trip_card_current">Trajet actuel</string>
+    <string name="trip_card_since_charge">Depuis la recharge</string>
+    <string name="trip_card_trip_a">Trajet A</string>
+    <string name="trip_card_trip_a_since">Trajet A · depuis le %1$s</string>
+    <string name="trip_card_history">Tous les trajets gardés</string>
+    <string name="trip_card_not_recording">Aucun trajet en cours d\'enregistrement.</string>
+    <string name="trip_card_charge_unknown">Aucune recharge repérée dans les trajets gardés, ou un relevé de charge manque entre deux trajets.</string>
+    <string name="trip_card_empty">Aucun trajet dans ce groupe pour l\'instant.</string>
+    <string name="action_reset_trip_a">Remettre trajet A à zéro</string>
+    <string name="trip_a_reset_done">Trajet A remis à zéro</string>
+    <string name="trip_a_reset_undo">Annuler</string>
+    <string name="trip_a_reset_moving">Arrêtez la voiture pour remettre trajet A à zéro.</string>
+    <string name="action_chart_full_screen">Plein écran</string>
 </resources>

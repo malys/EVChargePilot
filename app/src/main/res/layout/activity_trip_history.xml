@@ -9,6 +9,7 @@
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -46,6 +47,89 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:text="@string/action_delete_all_trips" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/resetTripAAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="320dp"
+            android:layout_height="match_parent"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/action_reset_trip_a"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Overview first, after Tesla's energy app: the question a driver opens this page with is
+         "how am I doing", and the ledger answers "what happened on Tuesday". The window
+         choice sits on the same row so it costs no height of its own. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_target"
+        android:layout_marginTop="@dimen/chargepilot_bar_gap"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/viewChoice"
+            android:layout_width="480dp"
+            android:layout_height="match_parent"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewOverview"
+                style="@style/Widget.EVChargePilot.NavTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/trip_view_overview" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewLedger"
+                style="@style/Widget.EVChargePilot.NavTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/trip_view_ledger" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/windowChoice"
+            android:layout_width="480dp"
+            android:layout_height="match_parent"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/window15"
+                style="@style/Widget.EVChargePilot.NavTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/trip_window_15" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/window150"
+                style="@style/Widget.EVChargePilot.NavTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/trip_window_150" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/window300"
+                style="@style/Widget.EVChargePilot.NavTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/trip_window_300" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
     </LinearLayout>
 
     <FrameLayout
@@ -253,6 +337,135 @@
                     android:text="@string/trip_track_unavailable"
                     android:textAppearance="@style/Text.EV.Body"
                     android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/overviewContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/chargepilot_bar_gap"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_lg"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <TextView
+                        android:id="@+id/overviewRange"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFeatureSettings="tnum"
+                        android:textAppearance="@style/Text.EV.Title" />
+
+                    <TextView
+                        android:id="@+id/overviewRangeBasis"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="2"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <TextView
+                        android:id="@+id/overviewConsumption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:fontFeatureSettings="tnum"
+                        android:textAppearance="@style/Text.EV.Body" />
+
+                    <TextView
+                        android:id="@+id/overviewDelta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFeatureSettings="tnum"
+                        android:textAppearance="@style/Text.EV.Body" />
+
+                    <TextView
+                        android:id="@+id/overviewWindowEnergy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:maxLines="2"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+
+                    <TextView
+                        android:id="@+id/overviewLegend"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:maxLines="3"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1.4"
+                    android:background="@drawable/bg_card"
+                    android:padding="@dimen/spacing_sm">
+
+                    <com.evsuite.chargepilot.ConsumptionTraceView
+                        android:id="@+id/overviewTrace"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="yes" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_weight="1.2"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/cardCurrent"
+                    layout="@layout/view_trip_overview_card"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/cardSinceCharge"
+                    layout="@layout/view_trip_overview_card"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/cardTripA"
+                    layout="@layout/view_trip_overview_card"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/cardHistory"
+                    layout="@layout/view_trip_overview_card"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1" />
             </LinearLayout>
         </LinearLayout>
 

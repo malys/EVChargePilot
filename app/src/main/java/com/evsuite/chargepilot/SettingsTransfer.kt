@@ -168,6 +168,7 @@ object SettingsTransfer {
             vehicle.addProperty(MIN_POWER, values.minChargerPowerKw)
             vehicle.addProperty(RESERVE, values.reservePercent)
             vehicle.addProperty(DEPARTURE, values.departurePercent)
+            vehicle.addProperty(REFERENCE, values.referenceConsumptionKwhPer100Km)
             root.add("vehicle", vehicle)
         }
         if (settings.routing.favorites.isNotEmpty()) {
@@ -216,6 +217,8 @@ object SettingsTransfer {
                             ?: VehicleSettings.DEFAULT_RESERVE_PERCENT,
                         departurePercent = it.number(DEPARTURE)
                             ?: VehicleSettings.DEFAULT_DEPARTURE_PERCENT,
+                        referenceConsumptionKwhPer100Km = it.number(REFERENCE)
+                            ?: VehicleSettings.DEFAULT_REFERENCE_CONSUMPTION,
                     )
                 )
             },
@@ -251,4 +254,5 @@ object SettingsTransfer {
     private const val MIN_POWER = "min_charger_power_kw"
     private const val RESERVE = "reserve_percent"
     private const val DEPARTURE = "departure_percent"
+    private const val REFERENCE = "reference_consumption_kwh_per_100km"
 }
