@@ -8,12 +8,15 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import com.evsuite.chargepilot.databinding.ActivityBatteryHealthBinding
+import com.evsuite.hardware.telemetry.BatteryExposure
 import com.evsuite.hardware.telemetry.BatteryExposureReport
+import com.evsuite.hardware.telemetry.CalibrationDrift
 import com.evsuite.hardware.telemetry.CalibrationDriftReport
 import com.evsuite.hardware.telemetry.CalibrationVerdict
 import com.evsuite.hardware.telemetry.ChargeEnergyReport
 import com.evsuite.hardware.telemetry.SohEnergySource
 import com.evsuite.hardware.telemetry.StateOfHealthEstimate
+import com.evsuite.hardware.telemetry.StateOfHealthEstimator
 import com.evsuite.hardware.telemetry.StateOfHealthResult
 import java.util.Locale
 import java.util.concurrent.Executors
