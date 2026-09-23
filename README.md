@@ -104,8 +104,10 @@ Automatic detection is enabled by default. A foreground service owns the sampler
 and recording continue when the driver opens another app. On firmware where speed stays
 unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
 performs a bounded retry. Active trips remain fail-closed and under manual control. The unstable
-build keeps automatically detected trips only above 5 km, concentrating the same bounded history
-budget on drives useful to the local consumption model. Manual recordings are always kept. A
+The unstable build keeps every automatically detected trip with a positive trustworthy
+distance. The shared store still caps history at 200 trips and 512 KiB, discarding oldest
+sample tracks before oldest summaries. Each successful save refreshes the local model.
+Manual recordings are always kept.
 trip's reported duration is the time actually covered by usable samples, not wall clock: a suspended
 sampler adds nothing to duration, distance or energy, so consumption averages compare values
 measured over the same interval.
@@ -154,6 +156,9 @@ self-update.
 ## Configuration
 
 Automatic trip detection is enabled by default. Its switch, and the manual start/stop action,
+
+Unstable shows the live eco-advice line by default so a fresh install starts learning without a
+setup step. Stable keeps that line opt-in. Spoken advice remains opt-in in both channels.
 can be changed only while the vehicle reports zero speed. If speed is unavailable, the controls
 fail closed and the dashboard explains why.
 

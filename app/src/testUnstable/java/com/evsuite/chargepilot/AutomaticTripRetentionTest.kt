@@ -8,9 +8,9 @@ import org.junit.Test
 class AutomaticTripRetentionTest {
 
     @Test
-    fun `unstable stores only automatic trips longer than five kilometres`() {
-        assertFalse(AutomaticTripRetention.shouldStore(true, trip(5.0)))
-        assertTrue(AutomaticTripRetention.shouldStore(true, trip(5.001)))
+    fun `unstable stores every automatic trip with positive recorded distance`() {
+        assertFalse(AutomaticTripRetention.shouldStore(true, trip(0.0)))
+        assertTrue(AutomaticTripRetention.shouldStore(true, trip(0.001)))
         assertFalse(
             AutomaticTripRetention.shouldStore(true, trip(10.0, distanceAvailable = false))
         )

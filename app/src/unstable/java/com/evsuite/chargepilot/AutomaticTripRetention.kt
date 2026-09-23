@@ -2,11 +2,12 @@ package com.evsuite.chargepilot
 
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 
-/** Unstable spends its bounded history budget on trips long enough to improve the local model. */
+/** Unstable learns from every real trip; the shared store enforces count and byte ceilings. */
 internal object AutomaticTripRetention {
     fun shouldStore(automaticallyDetected: Boolean, summary: EnergyTripSummary): Boolean =
         !automaticallyDetected ||
-            summary.recordedDistanceKm?.let { it > MIN_DISTANCE_KM } == true
+            summary.recordedDistanceKm?.let { it > 0.0 } == true
 
-    internal const val MIN_DISTANCE_KM = 5.0
+    /** CP-055 comparison still needs a substantial trip; retention no longer does. */
+    internal const val MIN_EVIDENCE_DISTANCE_KM = 5.0
 }

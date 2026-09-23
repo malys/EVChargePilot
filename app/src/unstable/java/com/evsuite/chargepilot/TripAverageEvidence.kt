@@ -7,7 +7,10 @@ import java.util.Locale
 /** Captures the three non-equivalent trip averages at the same end-of-trip instant. */
 internal object TripAverageEvidence {
     fun record(summary: EnergyTripSummary) {
-        if ((summary.recordedDistanceKm ?: 0.0) <= AutomaticTripRetention.MIN_DISTANCE_KM) return
+        if (
+            (summary.recordedDistanceKm ?: 0.0) <=
+            AutomaticTripRetention.MIN_EVIDENCE_DISTANCE_KM
+        ) return
         ValidationProbe.record(ValidationQuestion.SOC_SEGMENTS) {
             describe(summary, SaicCharging.consumptionPerKm())
         }

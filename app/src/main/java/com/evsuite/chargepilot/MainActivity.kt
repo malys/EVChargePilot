@@ -63,6 +63,7 @@ class MainActivity : PrimaryNavigationActivity() {
 
     /** The recorder owns the sampler; this screen is one of its readers. */
     private var recorder: TripRecordingService? = null
+    private var loadedHistoryRevision = -1
     /** Exact normalized service frame; the parked-only actions re-read it rather than the UI. */
     @Volatile private var latestSnapshot: EnergySnapshot? = null
 
@@ -182,7 +183,6 @@ class MainActivity : PrimaryNavigationActivity() {
         // The consumption fit reads the whole trip history, so it happens once per visit to
         // this screen and only when there is actually a plan being followed.
         background.execute { runCatching { drift.load() } }
-        background.execute { runCatching { eco.load() } }
         bindService(
             Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE
         )
@@ -209,7 +209,10 @@ class MainActivity : PrimaryNavigationActivity() {
                 AppLogger.w(TAG, "trip stop ignored: recorder not bound")
                 return
             }
-            service.stopTrip(::loadRecentTrips)
+            service.stopTrip {
+                loadedHistoryRevision = service.historyRevision
+                loadRecentTrips()
+            }
             // The next drive is judged on its own window, not on the one that just ended.
             eco.reset()
             service.latest?.let(::render)
@@ -220,6 +223,15 @@ class MainActivity : PrimaryNavigationActivity() {
 
     private fun render(value: EnergySnapshot) {
         latestSnapshot = value
+        recorder?.historyRevision?.let { revision ->
+            if (loadedHistoryRevision < 0) {
+                loadedHistoryRevision = revision
+            } else if (revision != loadedHistoryRevision) {
+                loadedHistoryRevision = revision
+                eco.reset()
+                loadRecentTrips()
+            }
+        }
         // The calculators are fed the reading as it arrived, unvalidated firmware included.
         // A power figure the vehicle publishes is still a power figure; what an unproven
         // property costs it is its provenance, not its existence, and DashboardReadings
@@ -592,7 +604,9 @@ class MainActivity : PrimaryNavigationActivity() {
     private fun loadRecentTrips() {
         runCatching {
             background.execute {
-                val summaries = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).readSummaries()
+                val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
+                eco.load(trips)
+                val summaries = trips.map { it.summary }
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
                     recentTrips = summaries

@@ -67,6 +67,8 @@ class TripRecordingService : Service() {
     private lateinit var batteryLedger: BatteryLedgerRecorder
     private val detector = TripDetector()
     private val pendingHistoryWrites = AtomicInteger()
+    private val historyRevisionCounter = AtomicInteger()
+    private val batteryRevisionCounter = AtomicInteger()
     private val missingSpeedSamples = AtomicInteger()
 
     private var samplingTask: ScheduledFuture<*>? = null
@@ -88,6 +90,8 @@ class TripRecordingService : Service() {
     val missingSpeedSampleCount: Int get() = missingSpeedSamples.get()
     val boundClientCount: Int get() = boundClients
     val pendingHistoryWriteCount: Int get() = pendingHistoryWrites.get()
+    val historyRevision: Int get() = historyRevisionCounter.get()
+    val batteryRevision: Int get() = batteryRevisionCounter.get()
 
     override fun onCreate() {
         super.onCreate()
@@ -258,6 +262,16 @@ class TripRecordingService : Service() {
                 }.getOrDefault(false)
                 if (!saved) AppLogger.w(TAG, "trip history could not be saved")
                 if (saved) {
+                    runCatching {
+                        val trips = tripStore.read()
+                        val evidence = trips.firstNotNullOfOrNull {
+                            it.summary.batteryPowerEvidence
+                        }
+                        LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
+                    }.onFailure {
+                        AppLogger.w(TAG, "local energy model refresh failed: ${it.message}")
+                    }
+                    historyRevisionCounter.incrementAndGet()
                     AppLogger.i(
                         TAG,
                         "trip recording saved; started_epoch_ms=${recorded.summary.startedAtMs}; " +
@@ -310,8 +324,24 @@ class TripRecordingService : Service() {
         // charge, a change of charging state, or a quarter of an hour — so this costs one
         // comparison on all the other samples. It runs on the sampler thread, which is the
         // thread that already owns this file's neighbours.
-        runCatching { batteryLedger.observe(value) }
+        val batteryEntryWritten = runCatching { batteryLedger.observe(value) }
             .onFailure { AppLogger.w(TAG, "battery ledger write failed: ${it.message}") }
+            .getOrDefault(false)
+        if (batteryEntryWritten) {
+            if (ChargeLearningDefaults.AUTO_REFRESH) {
+                runCatching {
+                    val settings = VehicleSettings.read(this)
+                    LocalBatteryLearning.refresh(
+                        filesDir,
+                        settings.usableCapacityKwhWhenNew,
+                        value.timestampMs,
+                    )
+                }.onFailure {
+                    AppLogger.w(TAG, "battery learning refresh failed: ${it.message}")
+                }
+            }
+            batteryRevisionCounter.incrementAndGet()
+        }
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state

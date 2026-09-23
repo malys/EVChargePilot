@@ -8,19 +8,13 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import com.evsuite.chargepilot.databinding.ActivityBatteryHealthBinding
-import com.evsuite.hardware.telemetry.BatteryExposure
 import com.evsuite.hardware.telemetry.BatteryExposureReport
-import com.evsuite.hardware.telemetry.BatteryLedgerStore
-import com.evsuite.hardware.telemetry.CalibrationDrift
 import com.evsuite.hardware.telemetry.CalibrationDriftReport
 import com.evsuite.hardware.telemetry.CalibrationVerdict
-import com.evsuite.hardware.telemetry.ChargeEnergyAnalyzer
 import com.evsuite.hardware.telemetry.ChargeEnergyReport
 import com.evsuite.hardware.telemetry.SohEnergySource
 import com.evsuite.hardware.telemetry.StateOfHealthEstimate
-import com.evsuite.hardware.telemetry.StateOfHealthEstimator
 import com.evsuite.hardware.telemetry.StateOfHealthResult
-import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.math.abs
@@ -49,6 +43,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
     }
 
     private var recorder: TripRecordingService? = null
+    private var loadedBatteryRevision = -1
     private var bound = false
     private var speedKmh: Float? = null
     private var speedObservedAtMs: Long? = null
@@ -66,9 +61,20 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val value = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = value
+            if (ChargeLearningDefaults.AUTO_REFRESH) {
+                loadedBatteryRevision = value.batteryRevision
+                load()
+            }
             value.setListener(this@BatteryHealthActivity) { snapshot ->
                 speedKmh = snapshot.speedKmh
                 speedObservedAtMs = snapshot.timestampMs
+                if (
+                    ChargeLearningDefaults.AUTO_REFRESH &&
+                    value.batteryRevision != loadedBatteryRevision
+                ) {
+                    loadedBatteryRevision = value.batteryRevision
+                    load()
+                }
                 renderApply()
             }
             speedKmh = value.latest?.speedKmh
@@ -120,24 +126,18 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
 
     private fun load() {
         disk.execute {
-            val entries = BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME)).read()
             val settings = VehicleSettings.read(this)
-            val estimate = StateOfHealthEstimator()
-                .estimate(entries, settings.usableCapacityKwhWhenNew)
-            val ready = (estimate as? StateOfHealthResult.Ready)?.estimate
-            val report = CalibrationDrift().analyse(entries, System.currentTimeMillis(), ready)
-            val exposureReport = BatteryExposure().analyse(entries)
-            // The sessions come from the exposure report rather than being cut again here, so
-            // the two blocks on this screen can never disagree about what counts as a charge.
-            val chargeReport = ChargeEnergyAnalyzer()
-                .analyse(entries, exposureReport?.sessions.orEmpty())
+            val learned = LocalBatteryLearning.refresh(
+                filesDir,
+                settings.usableCapacityKwhWhenNew,
+            )
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 declared = settings
-                health = estimate
-                drift = report
-                exposure = exposureReport
-                charge = chargeReport
+                health = learned.health
+                drift = learned.drift
+                exposure = learned.exposure
+                charge = learned.charge
                 render()
             }
         }

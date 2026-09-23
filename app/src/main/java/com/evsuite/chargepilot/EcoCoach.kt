@@ -9,14 +9,13 @@ import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EcoLever
 import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.EnergySnapshot
-import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.Provenanced
+import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.UnavailableReason
 import com.evsuite.hardware.telemetry.model.SocConsumptionFitResult
 import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import com.evsuite.hardware.telemetry.model.SocConsumptionModel
-import java.io.File
 import kotlin.math.roundToInt
 
 /**
@@ -53,11 +52,8 @@ class EcoCoach(context: Context) {
     private var spokenLine: String? = null
     private var lastSpokeAtMs = 0L
 
-    /** Reads the trip history and fits CP-052's model. Call on a worker thread. */
-    fun load() {
-        val trips = runCatching {
-            EnergyTripHistoryStore(File(app.filesDir, HISTORY_FILE)).read()
-        }.getOrDefault(emptyList())
+    /** Fits CP-052's model from the current bounded history. Call on a worker thread. */
+    fun load(trips: List<StoredTrip>) {
         val fit = SocConsumptionFitter().fit(trips, FirmwareInfo.getGeneration())
         model = (fit as? SocConsumptionFitResult.Ready)?.model
     }
@@ -198,15 +194,14 @@ class EcoCoach(context: Context) {
         private const val SPEAK_COOLDOWN_MS = 120_000L
 
         private const val UTTERANCE_ID = "chargepilot-eco"
-        private const val HISTORY_FILE = "trips.json"
         private const val DASH = "—"
 
         private const val PREFERENCES = "eco_coach"
         private const val PREF_ADVICE = "advice_enabled"
         private const val PREF_VOICE = "voice_enabled"
 
-        /** Off until asked for: a driver who never opens settings gets the tile and silence. */
-        fun adviceEnabled(context: Context): Boolean = prefs(context).getBoolean(PREF_ADVICE, false)
+        fun adviceEnabled(context: Context): Boolean =
+            prefs(context).getBoolean(PREF_ADVICE, EcoCoachDefaults.ADVICE_ENABLED)
 
         fun voiceEnabled(context: Context): Boolean = prefs(context).getBoolean(PREF_VOICE, false)
 

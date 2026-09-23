@@ -17,9 +17,9 @@ object LocalEnergyModel {
     ): EnergyModel? {
         val store = EnergyModelStore(File(filesDir, MODEL_FILE))
         val stored = store.read()?.takeIf { it.evidence == evidence }
-        if (stored != null || evidence == null) return stored
+        if (evidence == null) return stored
         val trained = EnergyModelTrainer().train(trips, evidence.firmware)
-        if (trained !is EnergyModelTrainingResult.Ready) return null
+        if (trained !is EnergyModelTrainingResult.Ready) return stored
         store.write(trained.model)
         return trained.model
     }
