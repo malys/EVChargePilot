@@ -8,11 +8,11 @@ android.car.permission.CAR_VENDOR_EXTENSION
 # Install-time permissions, no vehicle access, no network.
 android.permission.FOREGROUND_SERVICE
 android.permission.FOREGROUND_SERVICE_SPECIAL_USE
-# CP-080, 2026-09-24. The monitor is restarted after a head-unit boot and after this app is
-# updated, because the process dies with the car and until now only opening the app brought
-# recording back — 116 of 148 km driven in one measured week were never recorded. Install-time,
-# no vehicle access, no network, no data. It starts the same monitor the dashboard starts, and
-# that monitor suspends itself after ten consecutive reads with no usable speed.
+# CP-080, 2026-09-24. The monitor is restarted after a head-unit boot, because the process dies
+# with the car and until now only opening the app brought recording back — 116 of 148 km driven
+# in one measured week were never recorded. Install-time, no vehicle access, no network, no data.
+# It starts the same monitor the dashboard starts, and that monitor suspends itself after ten
+# consecutive reads with no usable speed.
 android.permission.RECEIVE_BOOT_COMPLETED
 # Reviewed and approved 2026-09-04 (CP-043). The first two are declared in the main
 # manifest as of the same day, by the owner's decision, ahead of the routing client that

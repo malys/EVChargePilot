@@ -30,12 +30,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
-    <!-- CP-080. Automatic trip detection is worth nothing if it only starts when somebody opens
-         the app: the head unit shuts this process down with the car, and 116 of 148 km driven
-         between two probe bundles were never recorded for exactly that reason. This is an
-         install-time permission, it reaches no vehicle interface and it carries no data; what it
-         starts is the same monitor the dashboard starts, which suspends itself after ten reads
-         with no usable speed. -->
+    <!-- CP-080; reviewed in .github/security/permission-allowlist.txt. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Route planning. Reviewed and accepted by the owner under CP-043 on 2026-09-04; the
@@ -163,16 +158,11 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- exported, because a manifest receiver is not handed a system broadcast otherwise.
-             Both actions are protected broadcasts — only the platform may send them — and the
-             receiver checks the action regardless. -->
         <receiver
             android:name=".TripMonitorBootReceiver"
-            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 
