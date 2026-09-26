@@ -105,12 +105,15 @@ class EcoCoach(context: Context) {
      * an app that ignored the switch, so the enabled-but-silent case says which it is — the same
      * rule every other unavailable value on this screen follows. It stays a statement about the
      * measurement rather than a promise: the levers need either a fitted model or a few minutes
-     * of movement, and neither is a thing the driver can press.
+     * of movement, and neither is a thing the driver can press. Once that minute of movement is
+     * there and nothing crossed a threshold, the line says so with the figure it measured —
+     * a calm drive kept "a few minutes are needed" on screen for the whole of it.
      */
     fun line(verdict: EcoVerdict): String? {
         if (!adviceEnabled(app)) return null
-        val advice = verdict.advice ?: return app.getString(R.string.eco_advice_waiting)
-        return sentence(advice) ?: app.getString(R.string.eco_advice_waiting)
+        verdict.advice?.let(::sentence)?.let { return it }
+        val share = monitor.harshSharePercent() ?: return app.getString(R.string.eco_advice_waiting)
+        return app.getString(R.string.eco_advice_calm, share.roundToInt())
     }
 
     /**

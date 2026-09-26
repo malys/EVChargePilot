@@ -4,6 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The eco coach no longer waits forever on a calm drive.** It showed "a few minutes of driving
+  are needed" for a whole drive whenever nothing crossed an advice threshold. After a minute of
+  movement it now states the measured share of hard acceleration. The trip review keeps that
+  share as a finding too, so a calm drive without a trained model is no longer "nothing
+  measurable".
+- **Full-screen consumption graphs carry their axes and legend.** The trace draws both axes, the
+  kWh/100 km and "km before now" units, and a legend for above, below and the reference line,
+  since full screen leaves the text beside the graph behind.
+
 ### Added
 
 - **Speed comparison and energy breakdown answer on urban trips.** When no model can answer, both

@@ -236,7 +236,7 @@ class EcoTripReviewTest {
     @Test
     fun `nothing measurable is a stated reason rather than an empty review`() {
         val result = review(
-            trip = trip(endSoc = 89f, samples = track(speedKmh = 30f)),
+            trip = trip(endSoc = 89f, samples = null),
             socModel = null,
             attribution = null,
             whatIf = null,
@@ -245,6 +245,17 @@ class EcoTripReviewTest {
             EcoTripReview.Unavailable(UnavailableReason.MODEL_NOT_TRAINED),
             result,
         )
+    }
+
+    @Test
+    fun `a calm drive is reviewed even before any model is trained`() {
+        val result = review(
+            trip = trip(endSoc = 89f, samples = track(speedKmh = 30f)),
+            socModel = null,
+            attribution = null,
+            whatIf = null,
+        ) as EcoTripReview.Ready
+        assertEquals(listOf(EcoFinding.Steadiness(0.0)), result.findings)
     }
 
     @Test

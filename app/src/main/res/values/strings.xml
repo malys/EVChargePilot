@@ -493,6 +493,7 @@ Spending %6$s %% per km</string>
     <string name="eco_advice_cruise">At %1$d rather than %2$d km/h, this road costs about %3$d %% less.</string>
     <string name="eco_advice_steadiness">Hard acceleration on %1$d %% of this drive; the same road at a steady speed costs less.</string>
     <string name="eco_advice_waiting">Nothing to say yet — a few minutes of driving are needed before a line appears here.</string>
+    <string name="eco_advice_calm">Nothing to point out: hard acceleration on %1$d %% of recent driving.</string>
     <string name="eco_settings_title">Eco-driving coach</string>
     <string name="eco_settings_advice">Show driving advice</string>
     <string name="eco_settings_voice">Speak the advice</string>
@@ -527,6 +528,11 @@ Spending %6$s %% per km</string>
     <string name="trip_overview_no_driving">No driving with speed and power recorded in this window yet.</string>
     <string name="trip_overview_legend">Dashed line: your reference, %1$s. Amber above it, blue below. Double-tap a graph for full screen.</string>
     <string name="trip_overview_trace_description">Net consumption over the last %1$s against your reference</string>
+    <string name="trace_axis_consumption">kWh/100 km</string>
+    <string name="trace_axis_distance">km before now</string>
+    <string name="trace_legend_above">Above reference</string>
+    <string name="trace_legend_below">Below reference</string>
+    <string name="trace_legend_reference">Reference</string>
     <string name="trip_card_current">Current trip</string>
     <string name="trip_card_since_charge">Since last charge</string>
     <string name="trip_card_trip_a">Trip A</string>

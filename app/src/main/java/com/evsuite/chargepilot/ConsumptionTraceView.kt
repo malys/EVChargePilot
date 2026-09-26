@@ -19,8 +19,9 @@ import kotlin.math.min
  * The line takes the warning colour above the reference and the accent below it, and the
  * reference is a labelled dashed rule, so the colour is never the only thing saying which side
  * a stretch is on. Missing stretches break the line. A view wider than [DETAILED_MIN_DP] —
- * the large graph, or any graph opened full screen — also writes its scales; a card's
- * thumbnail, about as tall on this panel, stays a bare line.
+ * the large graph, or any graph opened full screen — also draws its axes, their units and a
+ * legend inside the plot, because full screen moves the graph away from the text beside it;
+ * a card's thumbnail, about as tall on this panel, stays a bare line.
  */
 class ConsumptionTraceView @JvmOverloads constructor(
     context: Context,
@@ -53,6 +54,11 @@ class ConsumptionTraceView @JvmOverloads constructor(
         color = context.getColor(R.color.ev_text_secondary)
         textSize = resources.getDimension(R.dimen.text_label)
     }
+    private val axisPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = context.getColor(R.color.ev_outline)
+        strokeWidth = density
+        style = Paint.Style.STROKE
+    }
 
     /**
      * @param trace kWh/100 km per equal stretch, oldest first; null where nothing was driven.
@@ -75,8 +81,9 @@ class ConsumptionTraceView @JvmOverloads constructor(
         val gutter = if (detailed) GUTTER_DP * density else 0f
         val left = inset + gutter
         val right = width - inset - gutter
-        val top = inset
-        val bottom = height - inset - if (detailed) labelPaint.textSize * 1.6f else 0f
+        // Detailed: a legend row above the plot, tick labels and the distance title below it.
+        val top = inset + if (detailed) labelPaint.textSize * 2f else 0f
+        val bottom = height - inset - if (detailed) labelPaint.textSize * 3f else 0f
         if (right <= left || bottom <= top) return
 
         val low = min(0f, min(known.min(), referenceKwhPer100Km))
@@ -117,6 +124,9 @@ class ConsumptionTraceView @JvmOverloads constructor(
         referenceY: Float,
     ) {
         val baseline = labelPaint.textSize / 3f
+        canvas.drawLine(left, top, left, bottom, axisPaint)
+        canvas.drawLine(left, bottom, right, bottom, axisPaint)
+        drawLegend(canvas, top - labelPaint.textSize)
         labelPaint.textAlign = Paint.Align.RIGHT
         for (step in 0..4) {
             val y = bottom - (bottom - top) * step / 4f
@@ -140,6 +150,35 @@ class ConsumptionTraceView @JvmOverloads constructor(
                 bottom + labelPaint.textSize * 1.4f,
                 labelPaint,
             )
+        }
+        canvas.drawText(
+            context.getString(R.string.trace_axis_distance),
+            (left + right) / 2f,
+            bottom + labelPaint.textSize * 2.8f,
+            labelPaint,
+        )
+    }
+
+    /** The vertical unit, then one swatch per line style, on one row above the plot. */
+    private fun drawLegend(canvas: Canvas, baselineY: Float) {
+        labelPaint.textAlign = Paint.Align.LEFT
+        val swatch = 20f * density
+        val gap = 8f * density
+        val swatchY = baselineY - labelPaint.textSize / 3f
+        var x = 8f * density
+        val unit = context.getString(R.string.trace_axis_consumption)
+        canvas.drawText(unit, x, baselineY, labelPaint)
+        x += labelPaint.measureText(unit) + 3 * gap
+        listOf(
+            abovePaint to R.string.trace_legend_above,
+            belowPaint to R.string.trace_legend_below,
+            referencePaint to R.string.trace_legend_reference,
+        ).forEach { (paint, label) ->
+            canvas.drawLine(x, swatchY, x + swatch, swatchY, paint)
+            x += swatch + gap
+            val text = context.getString(label)
+            canvas.drawText(text, x, baselineY, labelPaint)
+            x += labelPaint.measureText(text) + 3 * gap
         }
     }
 

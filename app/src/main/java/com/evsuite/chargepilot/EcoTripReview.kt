@@ -191,8 +191,13 @@ object EcoTripReviewer {
         )
     }
 
+    /**
+     * Whatever the share, once the track holds a minute of movement. A calm drive is a result
+     * too: below the live advice threshold it used to drop out, and a calm drive with no fitted
+     * model yet then read "nothing measurable" although its whole track had been measured.
+     */
     private fun steadiness(monitor: EcoDrivingMonitor): EcoFinding.Steadiness? =
-        monitor.steadiness()?.harshSharePercent?.let(EcoFinding::Steadiness)
+        monitor.harshSharePercent()?.let(EcoFinding::Steadiness)
 
     private fun format(value: Double): String = String.format(Locale.ROOT, "%.2f", value)
 }

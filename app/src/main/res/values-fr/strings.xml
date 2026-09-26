@@ -483,6 +483,7 @@ Consommation %6$s %% par km</string>
     <string name="eco_advice_cruise">À %1$d plutôt que %2$d km/h, cette route coûte environ %3$d %% de moins.</string>
     <string name="eco_advice_steadiness">Accélérations franches sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
     <string name="eco_advice_waiting">Rien à dire pour l’instant — il faut quelques minutes de route avant qu’un conseil apparaisse ici.</string>
+    <string name="eco_advice_calm">Rien à signaler : accélérations fortes sur %1$d %% de la conduite récente.</string>
     <string name="eco_settings_title">Assistant d’éco-conduite</string>
     <string name="eco_settings_advice">Afficher les conseils de conduite</string>
     <string name="eco_settings_voice">Énoncer les conseils</string>
@@ -516,6 +517,11 @@ Consommation %6$s %% par km</string>
     <string name="trip_overview_no_driving">Aucune conduite avec vitesse et puissance enregistrées sur cette fenêtre.</string>
     <string name="trip_overview_legend">Pointillés : votre référence, %1$s. Ambre au-dessus, bleu en dessous. Double tap sur un graphique pour le plein écran.</string>
     <string name="trip_overview_trace_description">Consommation nette des derniers %1$s comparée à votre référence</string>
+    <string name="trace_axis_consumption">kWh/100 km</string>
+    <string name="trace_axis_distance">km avant maintenant</string>
+    <string name="trace_legend_above">Au-dessus</string>
+    <string name="trace_legend_below">En dessous</string>
+    <string name="trace_legend_reference">Référence</string>
     <string name="trip_card_current">Trajet actuel</string>
     <string name="trip_card_since_charge">Depuis la recharge</string>
     <string name="trip_card_trip_a">Trajet A</string>
