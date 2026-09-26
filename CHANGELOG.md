@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Speed comparison and energy breakdown answer on urban trips.** When no model can answer, both
+  screens now show what the power line measured instead of only a refusal. Speed comparison
+  lists net kWh/100 km for each speed band over the retained trips (and for this trip), plus
+  the mean draw while standing still. Energy breakdown gives consumed, regenerated and net kWh,
+  kWh/100 km and the energy spent standing still.
 - **Unstable automatic history now keeps model-worthy drives.** Automatically detected trips are
   persisted only when their measured distance exceeds 5 km; manual recordings remain explicit and
   are always kept. Existing storage bounds remain unchanged: 200 summaries and 512 KiB, with old

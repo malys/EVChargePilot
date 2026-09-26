@@ -28,6 +28,8 @@ class SpeedWhatIfActivity : AppCompatActivity() {
     private var bound = false
     private var loaded = false
     private var result: SpeedWhatIfResult? = null
+    private var measured: List<SpeedBand> = emptyList()
+    private var measuredTrip: List<SpeedBand> = emptyList()
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -102,6 +104,16 @@ class SpeedWhatIfActivity : AppCompatActivity() {
                 ?.model
             result = trip?.let { SpeedWhatIfCalculator.calculate(it, model, socModel) }
                 ?: SpeedWhatIfResult.Unavailable(SpeedWhatIfUnavailable.NO_MOTORWAY_PORTION)
+            // Only trips whose power and speed were converted by the same rules as this one.
+            measured = trip?.summary?.let { own ->
+                TripOverview.speedBands(
+                    trips.filter {
+                        it.summary.batteryPowerEvidence == own.batteryPowerEvidence &&
+                            it.summary.speedEvidence == own.speedEvidence
+                    },
+                )
+            }.orEmpty()
+            measuredTrip = TripOverview.speedBands(listOfNotNull(trip))
             loaded = true
             runOnUiThread {
                 if (!isFinishing && !isDestroyed) renderGate()
@@ -146,7 +158,7 @@ class SpeedWhatIfActivity : AppCompatActivity() {
                 // The unit is written on every figure, because "4" in percent and "4" in
                 // kilowatt-hours are not the same drive told twice.
                 val unit = if (charge) "%" else "kWh"
-                binding.whatIfResults.text = current.comparisons.joinToString("\n\n") { row ->
+                val rows = current.comparisons.joinToString("\n\n") { row ->
                     getString(
                         if (charge) R.string.speed_what_if_row_charge else R.string.speed_what_if_row,
                         row.referenceSpeedKmh,
@@ -155,8 +167,17 @@ class SpeedWhatIfActivity : AppCompatActivity() {
                         range(row.rangeDeltaLowKm, row.rangeDeltaHighKm, "km"),
                     )
                 }
+                binding.whatIfResults.text = listOfNotNull(rows, measuredText()).joinToString("\n\n")
             }
-            is SpeedWhatIfResult.Unavailable -> renderBlocked(reason(current.reason))
+            is SpeedWhatIfResult.Unavailable -> {
+                renderBlocked(reason(current.reason))
+                // The model needs a motorway; the measurement needs only driving, so an urban
+                // trip still answers what its own speeds cost.
+                measuredText()?.let {
+                    binding.whatIfResults.text = it
+                    binding.whatIfResults.visibility = View.VISIBLE
+                }
+            }
             null -> renderBlocked(R.string.reason_model_not_trained)
         }
     }
@@ -185,6 +206,40 @@ class SpeedWhatIfActivity : AppCompatActivity() {
             R.string.speed_what_if_charge_too_small
     }
 
+    /** One line per speed band with enough distance to divide by, or null when none has. */
+    private fun measuredText(): String? {
+        val trip = measuredTrip.associateBy { it.fromKmh }
+        val lines = measured.mapNotNull { band ->
+            if (band.fromKmh == 0) {
+                val hours = band.durationMs / MILLIS_PER_HOUR
+                if (band.durationMs < MIN_STANDING_MS) return@mapNotNull null
+                return@mapNotNull getString(
+                    R.string.speed_what_if_measured_standing,
+                    (band.durationMs / 60_000L).toInt(),
+                    band.netKwh / hours,
+                )
+            }
+            if (band.distanceKm < MIN_BAND_KM) return@mapNotNull null
+            val label = band.toKmh?.let { "${band.fromKmh}–$it" } ?: "${band.fromKmh}+"
+            val own = trip[band.fromKmh]?.takeIf { it.distanceKm >= MIN_BAND_KM }
+            if (own == null) {
+                getString(R.string.speed_what_if_measured_row, label, per100(band), band.distanceKm)
+            } else {
+                getString(
+                    R.string.speed_what_if_measured_row_trip,
+                    label,
+                    per100(band),
+                    band.distanceKm,
+                    per100(own),
+                )
+            }
+        }
+        if (lines.isEmpty()) return null
+        return (listOf(getString(R.string.speed_what_if_measured_title)) + lines).joinToString("\n")
+    }
+
+    private fun per100(band: SpeedBand) = band.netKwh * 100.0 / band.distanceKm
+
     private fun range(low: Double, high: Double, unit: String): String =
         String.format(Locale.getDefault(), "≈ %.2f–%.2f %s", low, high, unit)
 
@@ -192,6 +247,11 @@ class SpeedWhatIfActivity : AppCompatActivity() {
         private const val EXTRA_STARTED_AT = "started_at"
         private const val INVALID_ID = Long.MIN_VALUE
         private const val HISTORY_FILE = "trips.json"
+        private const val MIN_STANDING_MS = 60_000L
+
+        /** Under half a kilometre, a kWh/100 km figure is one traffic light, not a speed. */
+        private const val MIN_BAND_KM = 0.5
+        private const val MILLIS_PER_HOUR = 3_600_000.0
 
         fun forTrip(context: Context, startedAtMs: Long) =
             Intent(context, SpeedWhatIfActivity::class.java)

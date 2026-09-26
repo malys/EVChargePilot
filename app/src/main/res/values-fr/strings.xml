@@ -148,6 +148,8 @@
     <string name="energy_breakdown_loading">Calcul à partir du trajet local borné…</string>
     <string name="energy_breakdown_unavailable_title">Bilan indisponible</string>
     <string name="energy_breakdown_declared_totals">À défaut, relevé sur la jauge : %1$.1f %% de charge sur %2$.1f km — soit environ %3$.1f kWh, ou %4$.1f kWh/100 km, pour la capacité que vous avez déclarée. Une estimation bâtie sur un chiffre saisi, pas une mesure.</string>
+    <string name="energy_breakdown_measured_totals">Mesuré sur la puissance batterie : %1$.2f kWh consommés, %2$.2f kWh régénérés, %3$.2f kWh nets sur %4$.1f km — %5$.1f kWh/100 km.</string>
+    <string name="energy_breakdown_measured_standing">Dont %1$.2f kWh à l’arrêt, sur %2$d min.</string>
     <string name="energy_breakdown_model_unavailable">Aucun modèle local validé ne peut encore produire ce bilan. Aucune estimation de remplacement n’est affichée.</string>
     <string name="energy_breakdown_missing_power">Ce trajet ne possède pas toutes les preuves de puissance conservées nécessaires au bilan. Les totaux enregistrés restent inchangés.</string>
     <string name="power_never_published">Ce véhicule ne publie jamais la puissance batterie ; rien ici ne peut en être déduit, ni maintenant ni plus tard. La planification de recharge utilise l\'état de charge à la place.</string>
@@ -205,6 +207,10 @@
     <string name="speed_what_if_charge_unavailable">Indisponible : un intervalle autoroutier n\'a aucune lecture d\'état de charge exploitable.</string>
     <string name="speed_what_if_charge_too_small">Indisponible : la jauge de charge n\'a bougé que d\'un pas ou moins sur le tronçon autoroutier enregistré, ce qui est trop grossier pour mesurer quoi que ce soit.</string>
     <string name="speed_what_if_envelope_unavailable">Indisponible : aucune des vitesses 90, 100, 110, 120 ou 130 km/h n’appartient à l’enveloppe de vitesse et de température apprise.</string>
+    <string name="speed_what_if_measured_title">MESURÉ · ce que chaque vitesse a coûté sur vos trajets enregistrés, régénération déduite. Pas un modèle : trafic, climatisation et pente diffèrent aussi d’une ligne à l’autre.</string>
+    <string name="speed_what_if_measured_row">%1$s km/h · %2$.1f kWh/100 km sur %3$.1f km</string>
+    <string name="speed_what_if_measured_row_trip">%1$s km/h · %2$.1f kWh/100 km sur %3$.1f km · ce trajet %4$.1f kWh/100 km</string>
+    <string name="speed_what_if_measured_standing">À l’arrêt · %1$d min · %2$.1f kW en moyenne</string>
     <string name="trip_export_one_title">Exporter ce trajet</string>
     <string name="trip_export_all_title">Exporter tous les trajets</string>
     <string name="trip_export_one_message">Le CSV exporte les totaux enregistrés. Le JSON inclut aussi la trace conservée. Le fichier reste dans le stockage privé de l’application jusqu’à son partage.</string>

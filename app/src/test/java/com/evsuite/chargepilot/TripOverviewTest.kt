@@ -54,6 +54,27 @@ class TripOverviewTest {
         assertEquals(listOf(DriveSegment(10.0, 1.5)), TripOverview.segments(StoredTrip(summary(1))))
     }
 
+    @Test fun `speed bands file each interval under its mean speed and skip empty bands`() {
+        // Standing 5 s at 1.8 kW, then 5 s at 36 km/h and 7.2 kW, then 5 s at 108 km/h.
+        val trip = StoredTrip(
+            summary(1),
+            listOf(
+                sample(0, 0f, 1.8f), sample(5_000, 0f, 1.8f), sample(10_000, 36f, 7.2f),
+                sample(15_000, 36f, 7.2f), sample(20_000, 120f, 20f), sample(25_000, 96f, 20f),
+            ),
+        )
+        val bands = TripOverview.speedBands(listOf(trip))
+        // Each interval is filed by its mean: 0→36 averages 18, 36→120 averages 78.
+        assertEquals(listOf(0, 1, 30, 70, 90), bands.map { it.fromKmh })
+        assertEquals(1, bands[0].toKmh)
+        assertEquals(0.0, bands[0].distanceKm, 1e-9)
+        assertEquals(0.0025, bands[0].netKwh, 1e-9)
+        assertEquals(5_000L, bands[1].durationMs)
+        assertEquals(0.05, bands[2].distanceKm, 1e-9)
+        assertEquals(0.15, bands[4].distanceKm, 1e-9)
+        assertEquals(110, bands[4].toKmh)
+    }
+
     @Test fun `the window takes the newest kilometres and cuts the straddling trip`() {
         val newest = StoredTrip(summary(2, km = 10.0, consumed = 1.0, regenerated = 0.0))
         val older = StoredTrip(summary(1, km = 20.0, consumed = 4.0, regenerated = 0.0))

@@ -71,9 +71,10 @@ class EnergyBreakdownActivity : AppCompatActivity() {
                 }
             }
             val pack = VehicleSettings.read(this).pack
+            val standing = TripOverview.speedBands(listOfNotNull(trip)).firstOrNull { it.fromKmh == 0 }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                render(result, charge, trip?.summary, pack)
+                render(result, charge, trip?.summary, pack, standing)
             }
         }
     }
@@ -83,6 +84,7 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         charge: ChargeAttributionResult?,
         summary: EnergyTripSummary?,
         pack: BatteryCapacityConfig?,
+        standing: SpeedBand?,
     ) {
         binding.loadingState.visibility = View.GONE
         if (result is EnergyAttributionResult.Ready) {
@@ -115,8 +117,35 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         // distance. Both models need evidence this car has not yet given; the pack size the
         // driver typed in needs none, so the screen ends on a figure instead of on a refusal.
         // It is deliberately one sentence and not a table: it is one number and its origin.
-        binding.emptyReason.text = declaredTotals(summary, pack)?.let { "$reason\n\n$it" }
-            ?: reason
+        // Measured totals come first: they need no model and no figure the driver typed.
+        binding.emptyReason.text = listOfNotNull(
+            reason,
+            measuredTotals(summary, standing),
+            declaredTotals(summary, pack),
+        ).joinToString("\n\n")
+    }
+
+    /** What the power line recorded, or null on a trip that recorded no power. */
+    private fun measuredTotals(summary: EnergyTripSummary?, standing: SpeedBand?): String? {
+        if (summary == null) return null
+        val consumed = summary.consumedKwh ?: return null
+        val regenerated = summary.regeneratedKwh ?: return null
+        val net = consumed - regenerated
+        val distanceKm = summary.recordedDistanceKm?.takeIf { it >= MIN_DISTANCE_KM } ?: return null
+        val totals = getString(
+            R.string.energy_breakdown_measured_totals,
+            consumed,
+            regenerated,
+            net,
+            distanceKm,
+            net * 100.0 / distanceKm,
+        )
+        val still = standing?.takeIf { it.durationMs >= 60_000L } ?: return totals
+        return totals + " " + getString(
+            R.string.energy_breakdown_measured_standing,
+            still.netKwh,
+            (still.durationMs / 60_000L).toInt(),
+        )
     }
 
     /** The gauge drop priced with the declared pack, or null when either is missing. */

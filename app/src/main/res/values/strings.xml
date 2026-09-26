@@ -152,6 +152,8 @@
     <string name="energy_breakdown_loading">Calculating from the bounded local trip record…</string>
     <string name="energy_breakdown_unavailable_title">Breakdown unavailable</string>
     <string name="energy_breakdown_declared_totals">Read off the gauge instead: %1$.1f %% of charge over %2$.1f km — about %3$.1f kWh, or %4$.1f kWh/100 km, at the pack size you declared. An estimate built on a figure you entered, not a measurement.</string>
+    <string name="energy_breakdown_measured_totals">Measured from battery power: %1$.2f kWh consumed, %2$.2f kWh regenerated, %3$.2f kWh net over %4$.1f km — %5$.1f kWh/100 km.</string>
+    <string name="energy_breakdown_measured_standing">Of that, %1$.2f kWh went while standing still, over %2$d min.</string>
     <string name="energy_breakdown_model_unavailable">No validated local model can produce this breakdown yet. No estimate is substituted.</string>
     <string name="energy_breakdown_missing_power">This trip has no complete retained power evidence for a breakdown. Recorded totals remain unchanged.</string>
     <string name="power_never_published">This vehicle never publishes battery power, so nothing here can be worked out from it — now or later. Charge planning uses state of charge instead.</string>
@@ -209,6 +211,10 @@
     <string name="speed_what_if_charge_unavailable">Unavailable: a motorway interval has no usable state-of-charge reading.</string>
     <string name="speed_what_if_charge_too_small">Unavailable: the charge gauge moved a step or less over the recorded motorway stretch, which is too coarse to measure anything.</string>
     <string name="speed_what_if_envelope_unavailable">Unavailable: none of 90, 100, 110, 120 or 130 km/h is inside the trained speed and temperature envelope.</string>
+    <string name="speed_what_if_measured_title">MEASURED · what each speed cost on your recorded trips, net of regeneration. Not a model: traffic, climate and slope also differ between rows.</string>
+    <string name="speed_what_if_measured_row">%1$s km/h · %2$.1f kWh/100 km over %3$.1f km</string>
+    <string name="speed_what_if_measured_row_trip">%1$s km/h · %2$.1f kWh/100 km over %3$.1f km · this trip %4$.1f kWh/100 km</string>
+    <string name="speed_what_if_measured_standing">Standing still · %1$d min · %2$.1f kW on average</string>
     <string name="trip_export_one_title">Export this trip</string>
     <string name="trip_export_all_title">Export all trips</string>
     <string name="trip_export_one_message">CSV exports the recorded totals. JSON also includes the retained sample track. The file stays in app-private storage until you share it.</string>

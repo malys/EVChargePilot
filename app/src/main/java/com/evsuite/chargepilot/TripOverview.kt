@@ -8,6 +8,15 @@ import com.evsuite.hardware.telemetry.TripSampleTrack
 /** A stretch of driving: how far, and what the pack gave for it net of regeneration. */
 data class DriveSegment(val distanceKm: Double, val netKwh: Double)
 
+/** Measured driving whose mean speed fell in `[fromKmh, toKmh)`; [toKmh] null for the top band. */
+data class SpeedBand(
+    val fromKmh: Int,
+    val toKmh: Int?,
+    val distanceKm: Double,
+    val durationMs: Long,
+    val netKwh: Double,
+)
+
 /**
  * What a group of trips adds up to, each figure summed over the trips that recorded it.
  *
@@ -84,6 +93,36 @@ object TripOverview {
         val powerA = a.batteryPowerKw ?: return null
         val powerB = b.batteryPowerKw ?: return null
         return DriveSegment((speedA + speedB) / 2.0 * hours, (powerA + powerB) / 2.0 * hours)
+    }
+
+    /** Below 1 km/h is standing still; the rest is cut where a driver reads the dial. */
+    val SPEED_BAND_EDGES_KMH = listOf(0, 1, 30, 50, 70, 90, 110)
+
+    /**
+     * What each speed band cost on [trips]' tracks, measured and not modelled: the same
+     * intervals as [segments], each filed under its mean speed. Bands nothing fell in are left
+     * out. Traffic, climate and slope differ between bands too, so a gap between two rows is
+     * what this driving cost, not what speed alone would.
+     */
+    fun speedBands(trips: List<StoredTrip>): List<SpeedBand> {
+        val edges = SPEED_BAND_EDGES_KMH
+        val km = DoubleArray(edges.size)
+        val ms = LongArray(edges.size)
+        val kwh = DoubleArray(edges.size)
+        for (trip in trips) {
+            for ((a, b) in trip.samples.orEmpty().zipWithNext()) {
+                val segment = segment(a, b) ?: continue
+                val gapMs = b.atMs - a.atMs
+                val speed = segment.distanceKm / (gapMs / 3_600_000.0)
+                val band = edges.indexOfLast { speed >= it }.coerceAtLeast(0)
+                km[band] += segment.distanceKm
+                ms[band] += gapMs
+                kwh[band] += segment.netKwh
+            }
+        }
+        return edges.indices.filter { ms[it] > 0L }.map {
+            SpeedBand(edges[it], edges.getOrNull(it + 1), km[it], ms[it], kwh[it])
+        }
     }
 
     /**
