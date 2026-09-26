@@ -49,6 +49,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The consumption models learn from town driving.** EVHardware now fits the power model on
+  one point per kilometre instead of per 5 s sample, so stop-and-go trips train it, and the
+  charge model cuts segments at the SWI68 gauge's 0.1 % step instead of waiting for 2 %. Twelve
+  kilometres at two speeds are enough for the speed comparison and the energy breakdown to
+  answer from a model.
 - **Finished-trip eco advice no longer drops persisted samples.** Trip tracks keep the first
   telemetry frame after each five-second boundary, commonly around 5.3 seconds apart. Replay used
   the stricter five-second live gap and discarded those intervals; it now uses the stored-track
