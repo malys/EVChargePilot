@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.speech.tts.TextToSpeech
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.saic.SaicTts
 import com.evsuite.hardware.telemetry.EcoAdvice
 import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EcoLever
@@ -130,6 +131,15 @@ class EcoCoach(context: Context) {
         if (line == null || !voiceEnabled(app) || !adviceEnabled(app)) return
         if (speedKmh == null || speedKmh <= MOVING_KMH) return
         if (line == spokenLine || nowMs - lastSpokeAtMs < SPEAK_COOLDOWN_MS) return
+        // The car's own voice first, as EVTasker's Speaker does: the MG4 has no Android TTS
+        // engine, so the platform path below only ever speaks on a bench emulator. Queued
+        // rather than interrupting — a navigation instruction outranks the coach.
+        SaicTts.connect(app)
+        if (SaicTts.isAvailable && SaicTts.speak(line, interrupt = false, tag = app.packageName)) {
+            spokenLine = line
+            lastSpokeAtMs = nowMs
+            return
+        }
         val engine = speaker ?: TextToSpeech(app) { status ->
             speakerReady = status == TextToSpeech.SUCCESS && speaker?.let(::hasVoice) == true
         }.also {

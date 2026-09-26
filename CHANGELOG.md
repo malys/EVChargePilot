@@ -6,6 +6,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The eco coach speaks on the car.** Voice coaching went through the Android text-to-speech
+  engine only, and the MG4 has none: it talks through the SAIC vehicle voice service. The coach
+  now uses that service first, queued behind any announcement in progress, and keeps the Android
+  engine as the fallback for the emulator.
 - **The eco coach no longer waits forever on a calm drive.** It showed "a few minutes of driving
   are needed" for a whole drive whenever nothing crossed an advice threshold. After a minute of
   movement it now states the measured share of hard acceleration. The trip review keeps that
