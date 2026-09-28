@@ -129,6 +129,11 @@
             android:screenOrientation="landscape" />
 
         <activity
+            android:name=".ChargeHistoryActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+
+        <activity
             android:name=".ChargeStopActivity"
             android:exported="false"
             android:screenOrientation="landscape" />

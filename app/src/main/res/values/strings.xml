@@ -476,7 +476,25 @@ Spending %6$s %% per km</string>
     <string name="battery_health_calibration_unavailable">Nothing to say yet: this needs a few days of history.</string>
     <string name="battery_health_last_charge">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh at %4$.1f kW, from pack voltage × current integrated here.</string>
     <string name="battery_health_last_charge_unwatched">Last charge: +%1$.0f points in %2$.1f h. No energy figure for it: this app was not sampling for part of it.</string>
-    <string name="battery_health_last_charge_none">No charge measured yet. A charge appears here once this app has watched one from start to finish with the car standing still.</string>
+    <string name="battery_health_last_charge_none">No charge recorded yet. A charge appears here once the app has seen the charge gauge rise between two of its readings, the car standing or plugged.</string>
+    <!-- CP-082. Charge history: every charge in the ledger, measured only, no cost. -->
+    <string name="charge_history_title">Charges</string>
+    <string name="charge_history_open">Charge history</string>
+    <string name="charge_history_analysis">Analysis</string>
+    <string name="charge_history_curve">Charge curve — measured pack power by charge level</string>
+    <string name="charge_history_list">Charges, newest first</string>
+    <string name="charge_history_empty">No charge recorded yet. A charge appears once the app has seen the charge gauge rise between two of its readings — also across a night the head unit slept through.</string>
+    <string name="charge_history_summary">%1$d charges, %2$d watched from start to finish. +%3$.0f points put back in total.</string>
+    <string name="charge_history_typical">Median charge: +%1$.0f points at %2$.1f points an hour. Fastest: %3$.1f points an hour.</string>
+    <string name="charge_history_energy">Watched charges: %1$.1f kWh into the pack, mean %2$.1f kW, peak step %3$.1f kW.</string>
+    <string name="charge_history_verdicts">Pack current sign across a charge: %1$s. Car kWh counters: %2$s. Charging status values seen: %3$s.</string>
+    <string name="charge_history_temperature">Outside temperature, not the pack’s: the car does not publish the pack temperature.</string>
+    <string name="charge_history_band">%1$d–%2$d %%: %3$.1f kW over %4$.1f h</string>
+    <string name="charge_history_curve_empty">No watched charge yet. The curve fills in once the head unit stays awake through a charge (battery page or dashboard open, or automatic detection on).</string>
+    <string name="charge_history_row">%1$s → %2$s · %3$.0f → %4$.0f %% (+%5$.0f pt) · %6$.1f h · %7$.1f pt/h</string>
+    <string name="charge_history_row_watched">≈ %1$.1f kWh in, mean %2$.1f kW, peak %3$.1f kW — pack voltage × current integrated here.</string>
+    <string name="charge_history_row_unwatched">Head unit asleep for part of it: no energy or power, and the duration is the span between two readings.</string>
+    <string name="charge_history_row_temperature">Outside %1$.0f to %2$.0f °C.</string>
     <string name="battery_health_exposure_dwell">%1$.0f %% of the recorded time above %2$.0f %% charge, %3$.0f %% below %4$.0f %%. Mean charge %5$.0f %%.</string>
     <string name="battery_health_exposure_cycles">%1$.1f equivalent full cycles over %2$.0f days.</string>
     <string name="battery_health_exposure_km">%1$.0f km per equivalent cycle.</string>

@@ -64,17 +64,17 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val value = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = value
-            if (ChargeLearningDefaults.AUTO_REFRESH) {
-                loadedBatteryRevision = value.batteryRevision
-                load()
-            }
+            // Every variant, not only unstable: binding this page is what starts the sampler
+            // after a night asleep, and its first sample — the morning reading that closes the
+            // overnight charge — lands after onCreate's load. Without this reload the page
+            // showed the evening's ledger and said no charge had been measured. One ledger read
+            // per point of charge moved, never a 1 Hz poll.
+            loadedBatteryRevision = value.batteryRevision
+            load()
             value.setListener(this@BatteryHealthActivity) { snapshot ->
                 speedKmh = snapshot.speedKmh
                 speedObservedAtMs = snapshot.timestampMs
-                if (
-                    ChargeLearningDefaults.AUTO_REFRESH &&
-                    value.batteryRevision != loadedBatteryRevision
-                ) {
+                if (value.batteryRevision != loadedBatteryRevision) {
                     loadedBatteryRevision = value.batteryRevision
                     load()
                 }
@@ -98,6 +98,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         binding = ActivityBatteryHealthBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.applyAction.setOnClickListener { apply() }
+        binding.chargeHistoryAction.setOnClickListener {
+            startActivity(Intent(this, ChargeHistoryActivity::class.java))
+        }
         load()
     }
 

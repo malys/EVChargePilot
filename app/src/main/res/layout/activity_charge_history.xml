@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Impeccable direction contract
+  THESIS: every charge the ledger holds, and what the watched ones measured, never a cost.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or chart.
+  STORY: read the charge curve and the verdicts, then scroll the charges newest first.
+  FIRST VIEWPORT: the analysis anchors the left pane; the scrolling list owns the right.
+  FORM: two-pane evidence ledger extending the battery page; seed key cp082-20260928.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chargepilot_bar_height"
+        android:background="@drawable/bg_topbar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/charge_history_title"
+            android:textAppearance="@style/Text.EV.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="@string/action_back" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/chargepilot_bar_gap"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <ScrollView
+            style="@style/Widget.EV.Readout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:padding="@dimen/spacing_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Text.EV.ReadoutLabel"
+                    android:text="@string/charge_history_analysis" />
+
+                <TextView
+                    android:id="@+id/analysisFacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:fontFeatureSettings="tnum"
+                    android:textAppearance="@style/Text.EV.Body" />
+
+                <TextView
+                    style="@style/Text.EV.ReadoutLabel"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="@string/charge_history_curve" />
+
+                <TextView
+                    android:id="@+id/curveFacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:fontFeatureSettings="tnum"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            style="@style/Widget.EV.Readout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_weight="3"
+            android:padding="@dimen/spacing_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Text.EV.ReadoutLabel"
+                    android:text="@string/charge_history_list" />
+
+                <TextView
+                    android:id="@+id/chargeList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:fontFeatureSettings="tnum"
+                    android:lineSpacingMultiplier="1.15"
+                    android:textAppearance="@style/Text.EV.Body" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>

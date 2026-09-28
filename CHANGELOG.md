@@ -4,6 +4,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **Charges — a list of every charge, and what the watched ones measured (CP-082).** The battery
+  page gains a *Charge history* button. The screen lists every charge newest first — start and
+  end, charge before and after, duration, mean points per hour, outside temperature range and,
+  for a charge the app watched, the energy into the pack with its mean and peak power. The
+  analysis pane adds the median charge, the fastest one, totals, the pack-current sign and the
+  car-counter verdicts, and the **charge curve**: measured pack power per 10-point band of charge,
+  which is where the taper above 80 % shows. No cost, no charger type, no capacity from the charge
+  side — measured only. The exported `[charge_energy]` section carries the same per-charge peak,
+  step count and bands.
+
 ### Fixed
 
 - **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service
@@ -11,6 +23,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   on its own worker thread. Turning the voice on says a test line at once; if neither the car's
   voice nor an Android engine answers, the settings screen says so under the switch, and the
   diagnostic report carries `vehicle_voice_bound`.
+
+- **An overnight charge now appears the next morning (CP-082).** Two causes. EVHardware
+  `3417b30`: a rise across a night the head unit slept through was filed as regeneration whenever
+  the odometer differed between the evening and morning entries, which it does as soon as the
+  drive home went unrecorded; a rise is now a charge when the odometer stood still, the car
+  reported a non-zero charging status, or it is at least 10 points and no one watched the car
+  move. And the battery page loaded the ledger before the sampler it had just started wrote the
+  morning reading that closes the charge; stable now reloads on a new ledger entry the way
+  unstable already did.
 
 ### Added
 

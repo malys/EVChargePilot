@@ -470,7 +470,25 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_exposure_km">%1$.0f km par cycle équivalent.</string>
     <string name="battery_health_last_charge">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh à %4$.1f kW, d’après la tension × le courant du pack intégrés ici.</string>
     <string name="battery_health_last_charge_unwatched">Dernière charge : +%1$.0f points en %2$.1f h. Pas de valeur d’énergie : l’application n’échantillonnait pas pendant une partie de la charge.</string>
-    <string name="battery_health_last_charge_none">Aucune charge mesurée pour l’instant. Une charge apparaît ici une fois que l’application en a suivi une du début à la fin, voiture à l’arrêt.</string>
+    <string name="battery_health_last_charge_none">Aucune charge enregistrée pour l’instant. Une charge apparaît ici dès que l’application a vu la jauge monter entre deux de ses relevés, voiture à l’arrêt ou branchée.</string>
+    <!-- CP-082. Historique des charges : mesuré uniquement, sans coût. -->
+    <string name="charge_history_title">Charges</string>
+    <string name="charge_history_open">Historique des charges</string>
+    <string name="charge_history_analysis">Analyse</string>
+    <string name="charge_history_curve">Courbe de charge — puissance mesurée du pack par niveau de charge</string>
+    <string name="charge_history_list">Charges, la plus récente d’abord</string>
+    <string name="charge_history_empty">Aucune charge enregistrée pour l’instant. Une charge apparaît dès que l’application a vu la jauge monter entre deux de ses relevés — y compris sur une nuit où l’écran était en veille.</string>
+    <string name="charge_history_summary">%1$d charges, dont %2$d suivies du début à la fin. +%3$.0f points remis au total.</string>
+    <string name="charge_history_typical">Charge médiane : +%1$.0f points à %2$.1f points par heure. La plus rapide : %3$.1f points par heure.</string>
+    <string name="charge_history_energy">Charges suivies : %1$.1f kWh entrés dans le pack, moyenne %2$.1f kW, pic %3$.1f kW.</string>
+    <string name="charge_history_verdicts">Signe du courant pack pendant une charge : %1$s. Compteurs kWh de la voiture : %2$s. Valeurs d’état de charge vues : %3$s.</string>
+    <string name="charge_history_temperature">Température extérieure, pas celle du pack : la voiture ne publie pas la température du pack.</string>
+    <string name="charge_history_band">%1$d–%2$d %% : %3$.1f kW sur %4$.1f h</string>
+    <string name="charge_history_curve_empty">Aucune charge suivie pour l’instant. La courbe se remplit quand l’écran reste allumé pendant une charge (page Batterie ou tableau de bord ouverts, ou détection automatique active).</string>
+    <string name="charge_history_row">%1$s → %2$s · %3$.0f → %4$.0f %% (+%5$.0f pt) · %6$.1f h · %7$.1f pt/h</string>
+    <string name="charge_history_row_watched">≈ %1$.1f kWh entrés, moyenne %2$.1f kW, pic %3$.1f kW — tension × courant du pack intégrés ici.</string>
+    <string name="charge_history_row_unwatched">Écran en veille pendant une partie de la charge : ni énergie ni puissance, et la durée est l’écart entre deux relevés.</string>
+    <string name="charge_history_row_temperature">Extérieur de %1$.0f à %2$.0f °C.</string>
     <string name="battery_health_exposure_sessions">%1$d sessions de charge, la plus rapide à %2$.0f points par heure.</string>
     <string name="battery_health_exposure_unavailable">Rien d’enregistré pour l’instant. Cela se remplit à mesure que l’application lit la voiture.</string>
     <string name="battery_health_read_only">Cette application ne change rien sur la voiture : ni limite de charge, ni programmation, ni préchauffage. Elle mesure et elle dit ce qu’elle voit.</string>
