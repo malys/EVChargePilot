@@ -493,7 +493,7 @@ Consommation %6$s %% par km</string>
     <string name="language_system">Système</string>
     <string name="language_english">English</string>
     <string name="language_french">Français</string>
-    <string name="eco_settings_note">Le verdict sur l’écran énergie est toujours affiché. Les conseils et la voix restent désactivés tant qu’ils ne sont pas demandés, et la voix ne parle que lorsque le conseil change, voiture en mouvement.</string>
+    <string name="eco_settings_note">Le verdict sur l’écran énergie est toujours affiché. Les conseils et la voix restent désactivés tant qu’ils ne sont pas demandés. En roulant, la voix ne parle que lorsque le conseil change, et une fois en P à la fin de chaque trajet, avec ce que le trajet aurait pu économiser.</string>
     <string name="diagnostics_eco_driving">Éco-conduite</string>
     <!-- CP-075. Le bilan du trajet : un verdict, puis au plus trois constats chiffrés. -->
     <string name="trip_eco_verdict">Ce trajet : %1$s, %2$+d %% par rapport à votre propre moyenne à cette vitesse et à cette température.</string>
@@ -535,4 +535,33 @@ Consommation %6$s %% par km</string>
     <string name="trip_a_reset_undo">Annuler</string>
     <string name="trip_a_reset_moving">Arrêtez la voiture pour remettre trajet A à zéro.</string>
     <string name="action_chart_full_screen">Plein écran</string>
+    <string name="eco_voice_test">Voix d’éco-conduite activée. Les conseils seront dits à l’arrêt, en P, à la fin de chaque trajet.</string>
+    <string name="eco_voice_testing">Test de la voix…</string>
+    <string name="eco_voice_test_spoken">Test vocal envoyé. Si rien n’a été entendu, vérifiez le volume de la voix du véhicule.</string>
+    <string name="eco_voice_test_failed">Aucune voix disponible : ni le service vocal du véhicule ni un moteur de synthèse Android n’a répondu.</string>
+    <string name="eco_amount_kwh">%1$.1f kWh</string>
+    <string name="eco_amount_soc">%1$.1f points de charge</string>
+    <string name="eco_trip_saving">Vous auriez pu économiser environ %1$d %% (%2$s) sur ce trajet</string>
+    <string name="eco_trip_saving_percent">Vous auriez pu économiser environ %1$d %% sur ce trajet</string>
+    <string name="eco_clause_or">" ou "</string>
+    <string name="eco_clause_smoother">en accélérant et en freinant moins franchement pendant %1$d min</string>
+    <string name="eco_clause_eco_mode">en passant en mode Éco</string>
+    <string name="eco_clause_motorway">en roulant à %1$d km/h sur voie rapide</string>
+    <string name="eco_trip_better">Trajet économe : %1$d %% sous votre propre moyenne.</string>
+    <string name="eco_trip_worse">Trajet gourmand : %1$d %% au-dessus de votre propre moyenne.</string>
+    <string name="eco_trip_typical">Trajet habituel, dans votre propre moyenne.</string>
+    <string name="eco_trip_no_verdict">Pas encore assez de trajets comparables pour un bilan éco.</string>
+    <string name="eco_tip_smoother">Accélérations et freinages francs pendant %1$d min, %2$d %% de la conduite : une conduite plus souple consommerait moins.</string>
+    <string name="eco_tip_eco_mode">Le mode Éco conviendrait mieux à cette conduite que le mode %1$s.</string>
+    <string name="eco_tip_eco_mode_unknown">Le mode Éco, s’il n’est pas déjà choisi, adoucirait cette conduite.</string>
+    <string name="eco_tip_snow_mode">Par %1$d °C, le mode Snow adoucit aussi les accélérations.</string>
+    <string name="eco_history_title">Conseils éco sur vos derniers trajets</string>
+    <string name="eco_history_waiting">Pas encore de conseil : il faut quelques trajets enregistrés pour établir votre propre moyenne.</string>
+    <string name="eco_history_heavier">%1$d des %2$d derniers trajets analysés ont consommé plus que votre moyenne : environ %3$s auraient pu être économisés.</string>
+    <string name="eco_history_heavier_count">%1$d des %2$d derniers trajets analysés ont consommé plus que votre moyenne.</string>
+    <string name="eco_history_on_average">Les %1$d derniers trajets analysés restent dans votre moyenne ou en dessous.</string>
+    <string name="eco_history_style">Accélérations et freinages francs : %1$d min, %2$d %% de la conduite. Une conduite plus souple, ou le mode Éco, consommerait moins.</string>
+    <string name="eco_history_motorway_kwh">10 km/h de moins sur voie rapide : environ %1$.1f kWh de moins sur %2$d trajets.</string>
+    <string name="eco_history_motorway_soc">10 km/h de moins sur voie rapide : environ %1$.1f points de charge de moins sur %2$d trajets.</string>
+    <string name="eco_history_cabin">Chauffage et climatisation : en moyenne %1$d %% de l’énergie des trajets où ils ont compté.</string>
 </resources>

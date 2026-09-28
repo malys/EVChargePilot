@@ -232,3 +232,19 @@ fun reviewHistory(filesDir: File, trips: List<StoredTrip>): ReviewedHistory {
     }
     return ReviewedHistory(attributions, reviews)
 }
+
+/**
+ * One trip reviewed against the fits the whole history supports — the same answer
+ * [reviewHistory] gives for it, without attributing every other trip. Call off the main thread.
+ */
+fun reviewTrip(filesDir: File, trips: List<StoredTrip>, trip: StoredTrip): EcoTripReview {
+    val evidence = trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence }
+    val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
+    val socModel = (SocConsumptionFitter().fit(trips) as? SocConsumptionFitResult.Ready)?.model
+    return EcoTripReviewer.review(
+        trip,
+        socModel,
+        EnergyAttributionCalculator.calculate(trip, model),
+        SpeedWhatIfCalculator.calculate(trip, model, socModel),
+    )
+}

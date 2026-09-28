@@ -1,10 +1,7 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.speech.tts.TextToSpeech
 import com.evsuite.hardware.FirmwareInfo
-import com.evsuite.hardware.saic.SaicTts
 import com.evsuite.hardware.telemetry.EcoAdvice
 import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EcoLever
@@ -36,6 +33,8 @@ import kotlin.math.roundToInt
  * switches off in a week. It speaks when the advice becomes different advice, at most once per
  * [SPEAK_COOLDOWN_MS], and never while the car is stopped — a stationary car needs no cruising
  * speed and a passenger reading the screen is not being talked over.
+ * The one spoken line a stopped car gets is the end-of-trip review, said once when the trip closes
+ * in P ([EcoTripAdvice]); the speaking itself is [EcoVoice], the car's own voice first.
  */
 class EcoCoach(context: Context) {
 
@@ -48,8 +47,6 @@ class EcoCoach(context: Context) {
     private var lastComputedAtMs = 0L
     private var verdict = EcoVerdict(Provenanced.unavailable(UnavailableReason.MODEL_NOT_TRAINED))
 
-    private var speaker: TextToSpeech? = null
-    private var speakerReady = false
     private var spokenLine: String? = null
     private var lastSpokeAtMs = 0L
 
@@ -131,53 +128,9 @@ class EcoCoach(context: Context) {
         if (line == null || !voiceEnabled(app) || !adviceEnabled(app)) return
         if (speedKmh == null || speedKmh <= MOVING_KMH) return
         if (line == spokenLine || nowMs - lastSpokeAtMs < SPEAK_COOLDOWN_MS) return
-        // The car's own voice first, as EVTasker's Speaker does: the MG4 has no Android TTS
-        // engine, so the platform path below only ever speaks on a bench emulator. Queued
-        // rather than interrupting — a navigation instruction outranks the coach.
-        SaicTts.connect(app)
-        if (SaicTts.isAvailable && SaicTts.speak(line, interrupt = false, tag = app.packageName)) {
-            spokenLine = line
-            lastSpokeAtMs = nowMs
-            return
-        }
-        val engine = speaker ?: TextToSpeech(app) { status ->
-            speakerReady = status == TextToSpeech.SUCCESS && speaker?.let(::hasVoice) == true
-        }.also {
-            // The head unit ducks the radio for an assistant rather than stopping it, and a
-            // coach is not a media stream competing with the music the driver chose.
-            it.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ASSISTANT)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build()
-            )
-            speaker = it
-        }
-        if (!speakerReady) return
         spokenLine = line
         lastSpokeAtMs = nowMs
-        engine.speak(line, TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID)
-    }
-
-    /**
-     * Gives the engine the language the line was written in, and says whether it has that voice.
-     *
-     * The locale comes from the resources the line itself was resolved against, so the two can
-     * never disagree. Where the engine has no voice for it the coach stays silent: a French
-     * sentence read with English phonemes is not a degraded reading, it is an unparseable one,
-     * and it would arrive at 110 km/h with no way to ask for it again.
-     */
-    private fun hasVoice(engine: TextToSpeech): Boolean {
-        val result = engine.setLanguage(app.resources.configuration.locales[0])
-        return result != TextToSpeech.LANG_MISSING_DATA &&
-            result != TextToSpeech.LANG_NOT_SUPPORTED
-    }
-
-    /** Releases the engine with the screen. Nothing of this app keeps talking in the background. */
-    fun close() {
-        speaker?.shutdown()
-        speaker = null
-        speakerReady = false
+        EcoVoice.say(app, line)
     }
 
     /** Consequence with a number in it. No imperative is written here, in any language. */
@@ -206,7 +159,6 @@ class EcoCoach(context: Context) {
         /** Two minutes between two spoken lines, however often the advice changes. */
         private const val SPEAK_COOLDOWN_MS = 120_000L
 
-        private const val UTTERANCE_ID = "chargepilot-eco"
         private const val DASH = "—"
 
         private const val PREFERENCES = "eco_coach"

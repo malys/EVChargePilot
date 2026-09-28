@@ -192,8 +192,6 @@ class MainActivity : PrimaryNavigationActivity() {
         recorder?.clearListener(this)
         recorder = null
         unbindService(connection)
-        // The engine goes with the screen: nothing of this app talks in the background.
-        eco.close()
         super.onStop()
     }
 

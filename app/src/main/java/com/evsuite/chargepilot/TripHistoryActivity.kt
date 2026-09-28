@@ -248,8 +248,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val latest = recorder?.latest
         val windowKm = selectedWindowKm()
         val tripAFromMs = overviewPrefs.getLong(KEY_TRIP_A, 0L)
+        val reviewed = reviews
         disk.execute {
-            val value = buildOverview(trips, latest, windowKm, tripAFromMs)
+            val value = buildOverview(trips, reviewed, latest, windowKm, tripAFromMs)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 renderOverview(value)
@@ -260,6 +261,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     /** Off the UI thread: the whole kept history is walked for the last card's trace. */
     private fun buildOverview(
         stored: List<StoredTrip>,
+        reviewed: Map<Long, EcoTripReview>,
         latest: EnergySnapshot?,
         windowKm: Double,
         tripAFromMs: Long,
@@ -293,6 +295,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             sinceCharge = sinceCharge?.let(::card),
             tripA = card(all.filter { it.summary.startedAtMs >= tripAFromMs }),
             history = card(all),
+            ecoAdvice = EcoTripAdvice.history(stored, reviewed),
         )
     }
 
@@ -336,6 +339,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         binding.overviewTrace.setTrace(value.trace, value.reference, value.coveredKm)
         binding.overviewTrace.contentDescription =
             getString(R.string.trip_overview_trace_description, distance(value.coveredKm))
+        binding.overviewEcoAdvice.text =
+            EcoAdviceText(this).history(value.ecoAdvice).joinToString("\n\n")
 
         renderCard(
             binding.cardCurrent,
@@ -793,6 +798,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val sinceCharge: OverviewCard?,
         val tripA: OverviewCard,
         val history: OverviewCard,
+        val ecoAdvice: HistoryAdvice,
     )
 
     private data class TripRow(

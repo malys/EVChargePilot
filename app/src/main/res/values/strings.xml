@@ -503,7 +503,7 @@ Spending %6$s %% per km</string>
     <string name="language_system">System</string>
     <string name="language_english">English</string>
     <string name="language_french">Français</string>
-    <string name="eco_settings_note">The band on the energy screen is always shown. Advice and voice are off until asked for, and the voice speaks only when the advice changes, while the car is moving.</string>
+    <string name="eco_settings_note">The band on the energy screen is always shown. Advice and voice are off until asked for. The voice speaks while driving only when the advice changes, and once more in P at the end of each trip, with what the trip could have saved.</string>
     <string name="diagnostics_eco_driving">Eco driving</string>
     <!-- CP-075. The trip review: one verdict line, then at most three findings, each carrying the
          number that earned it and the unit that number was measured in. -->
@@ -549,4 +549,33 @@ Spending %6$s %% per km</string>
     <string name="trip_window_15" translatable="false">15 km</string>
     <string name="trip_window_150" translatable="false">150 km</string>
     <string name="trip_window_300" translatable="false">300 km</string>
+    <string name="eco_voice_test">Eco-driving voice on. Advice will be spoken when the car is parked at the end of each trip.</string>
+    <string name="eco_voice_testing">Testing the voice…</string>
+    <string name="eco_voice_test_spoken">Voice test sent. If nothing was heard, check the car’s voice volume.</string>
+    <string name="eco_voice_test_failed">No voice available: neither the car’s voice service nor an Android speech engine answered.</string>
+    <string name="eco_amount_kwh">%1$.1f kWh</string>
+    <string name="eco_amount_soc">%1$.1f points of charge</string>
+    <string name="eco_trip_saving">You could have saved about %1$d %% (%2$s) on this trip</string>
+    <string name="eco_trip_saving_percent">You could have saved about %1$d %% on this trip</string>
+    <string name="eco_clause_or">" or "</string>
+    <string name="eco_clause_smoother">by accelerating and braking less sharply for %1$d min</string>
+    <string name="eco_clause_eco_mode">by driving in Eco mode</string>
+    <string name="eco_clause_motorway">by driving at %1$d km/h on fast roads</string>
+    <string name="eco_trip_better">Economical trip: %1$d %% below your own average.</string>
+    <string name="eco_trip_worse">Heavy trip: %1$d %% above your own average.</string>
+    <string name="eco_trip_typical">Usual trip, in line with your own average.</string>
+    <string name="eco_trip_no_verdict">Not enough comparable trips yet for an eco verdict.</string>
+    <string name="eco_tip_smoother">Sharp acceleration and braking for %1$d min, %2$d %% of the driving: a smoother drive would use less.</string>
+    <string name="eco_tip_eco_mode">Eco mode would suit this drive better than %1$s mode.</string>
+    <string name="eco_tip_eco_mode_unknown">Eco mode, if not already selected, would soften this drive.</string>
+    <string name="eco_tip_snow_mode">At %1$d °C, Snow mode also softens acceleration.</string>
+    <string name="eco_history_title">Eco advice from your recent trips</string>
+    <string name="eco_history_waiting">No advice yet: a few recorded trips are needed before your own average exists.</string>
+    <string name="eco_history_heavier">%1$d of the last %2$d reviewed trips used more than your own average: about %3$s could have been saved.</string>
+    <string name="eco_history_heavier_count">%1$d of the last %2$d reviewed trips used more than your own average.</string>
+    <string name="eco_history_on_average">The last %1$d reviewed trips stay at or below your own average.</string>
+    <string name="eco_history_style">Sharp acceleration and braking: %1$d min, %2$d %% of the driving. A smoother drive, or Eco mode, would use less.</string>
+    <string name="eco_history_motorway_kwh">10 km/h slower on fast roads: about %1$.1f kWh less over %2$d trips.</string>
+    <string name="eco_history_motorway_soc">10 km/h slower on fast roads: about %1$.1f points of charge less over %2$d trips.</string>
+    <string name="eco_history_cabin">Cabin heating and cooling: on average %1$d %% of the energy of the trips where it counted.</string>
 </resources>

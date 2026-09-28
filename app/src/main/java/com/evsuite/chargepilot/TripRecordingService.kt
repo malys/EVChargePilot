@@ -9,14 +9,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.content.res.Configuration
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
+import android.os.LocaleList
 import android.os.Looper
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.evsuite.hardware.AppLogger
+import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.telemetry.BatteryLedgerRecorder
 import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -272,6 +276,8 @@ class TripRecordingService : Service() {
                         AppLogger.w(TAG, "local energy model refresh failed: ${it.message}")
                     }
                     historyRevisionCounter.incrementAndGet()
+                    runCatching { speakTripAdvice(recorded.summary.startedAtMs) }
+                        .onFailure { AppLogger.w(TAG, "trip advice failed: ${it.message}") }
                     AppLogger.i(
                         TAG,
                         "trip recording saved; started_epoch_ms=${recorded.summary.startedAtMs}; " +
@@ -291,6 +297,35 @@ class TripRecordingService : Service() {
             AppLogger.w(TAG, "trip history write could not be scheduled: ${it.message}")
             stopWhenNobodyNeedsIt()
         }
+    }
+
+    /**
+     * The trip just closed in P: say what it cost against the driver's own average, and what
+     * would have made it cheaper. Once per trip, only when both coach switches are on, and only
+     * with the car stopped — the one spoken line a parked car gets. Runs on the sampler thread.
+     */
+    private fun speakTripAdvice(startedAtMs: Long) {
+        if (!EcoCoach.adviceEnabled(this) || !EcoCoach.voiceEnabled(this)) return
+        val speed = latestSnapshot?.speedKmh
+        if (speed != null && speed > STOPPED_KMH) return
+        val trips = tripStore.read()
+        val trip = trips.firstOrNull { it.summary.startedAtMs == startedAtMs } ?: return
+        // The mode the car is parked in is the mode it was driven in, unless changed at a stop.
+        val mode = runCatching { EVHardware.getDriveMode() }.getOrNull()
+        val advice = EcoTripAdvice.advise(trip, reviewTrip(filesDir, trips, trip), mode)
+        EcoVoice.say(this, EcoAdviceText(inAppLanguage()).spoken(advice))
+    }
+
+    /**
+     * CP-077's language, which AppCompat applies to activities only: a service keeps the head
+     * unit's, and the line would be written in one language and read in another.
+     */
+    private fun inAppLanguage(): Context {
+        val locales = AppCompatDelegate.getApplicationLocales()
+        if (locales.isEmpty) return this
+        val config = Configuration(resources.configuration)
+        config.setLocales(LocaleList.forLanguageTags(locales.toLanguageTags()))
+        return createConfigurationContext(config)
     }
 
     // Reached from both threads — the binder callbacks arrive on the main one, and automatic
@@ -512,6 +547,8 @@ class TripRecordingService : Service() {
         private const val NOTIFICATION_SAMPLES = 10
         /** Ten one-second misses allow startup settling, then end unsupported background polling. */
         private const val MISSING_SPEED_SAMPLE_LIMIT = 10
+        /** The trip-end line is for a stopped car; the live coach owns a moving one. */
+        private const val STOPPED_KMH = 1f
 
         /**
          * Starting is an intent rather than a binder call: it is what makes the service a

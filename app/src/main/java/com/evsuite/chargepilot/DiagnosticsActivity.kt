@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.evsuite.chargepilot.databinding.ActivityDiagnosticsBinding
 import com.evsuite.chargepilot.update.UpdateHook
+import com.evsuite.hardware.saic.SaicTts
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.EVHardware
@@ -293,6 +294,9 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine(getString(R.string.diagnostics_eco_driving))
             appendLine("advice_enabled=${EcoCoach.adviceEnabled(this@DiagnosticsActivity)}")
             appendLine("voice_enabled=${EcoCoach.voiceEnabled(this@DiagnosticsActivity)}")
+            // CP-081: whether the SAIC voice service is bound. False with the voice on means
+            // every line fell back to an Android engine the car does not have.
+            appendLine("vehicle_voice_bound=${SaicTts.isAvailable}")
             DashboardFrame.eco.describe().forEach(::appendLine)
             appendLine()
             // CP-075. The same verdict the trip screen shows for the newest drive, so a bundle

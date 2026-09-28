@@ -6,6 +6,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service
+  to bind before speaking instead of asking it in the same instant it starts binding, and speaks
+  on its own worker thread. Turning the voice on says a test line at once; if neither the car's
+  voice nor an Android engine answers, the settings screen says so under the switch, and the
+  diagnostic report carries `vehicle_voice_bound`.
+
+### Added
+
+- **Eco advice when the trip ends in P.** With advice and voice on, the car says what the trip
+  cost against the driver's own average and what would have made it cheaper: "You could have
+  saved about 12 % (1.1 kWh) on this trip by accelerating and braking less sharply for 6 min or
+  by driving in Eco mode." Hard braking now counts beside hard acceleration; Eco mode is named
+  only when the car was not already in it, Snow mode only for a sharp drive at 3 °C or below.
+- **General eco advice beside the trip graphs.** The trips overview adds a card over the last 20
+  trips: how many used more than the driver's own average and what the excess added up to, time
+  spent accelerating and braking sharply, the fast-road saving at 10 km/h less, and the cabin's
+  mean share.
+
 - **The eco coach speaks on the car.** Voice coaching went through the Android text-to-speech
   engine only, and the MG4 has none: it talks through the SAIC vehicle voice service. The coach
   now uses that service first, queued behind any announcement in progress, and keeps the Android

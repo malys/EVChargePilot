@@ -368,6 +368,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:text="@string/eco_settings_voice" />
+
+                <!-- The voice test's outcome, so a refusal is read rather than guessed. -->
+                <TextView
+                    android:id="@+id/ecoVoiceStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:accessibilityLiveRegion="polite"
+                    android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
 
             <LinearLayout

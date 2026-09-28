@@ -115,9 +115,28 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.ecoAdviceSwitch.setOnCheckedChangeListener { _, checked ->
             EcoCoach.storeAdviceEnabled(this, checked)
             binding.ecoVoiceSwitch.isEnabled = checked
+            if (checked && binding.ecoVoiceSwitch.isChecked) testVoice()
         }
         binding.ecoVoiceSwitch.setOnCheckedChangeListener { _, checked ->
             EcoCoach.storeVoiceEnabled(this, checked)
+            if (checked) testVoice()
+        }
+    }
+
+    /**
+     * Says one line the moment the voice is switched on, so the driver hears whether it works
+     * rather than finding out on the next drive. A failure is written under the switch: a
+     * silent refusal reads exactly like a voice that is merely waiting for advice.
+     */
+    private fun testVoice() {
+        binding.ecoVoiceStatus.text = getString(R.string.eco_voice_testing)
+        EcoVoice.say(this, getString(R.string.eco_voice_test), interrupt = true) { spoken ->
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                binding.ecoVoiceStatus.text = getString(
+                    if (spoken) R.string.eco_voice_test_spoken else R.string.eco_voice_test_failed
+                )
+            }
         }
     }
 
