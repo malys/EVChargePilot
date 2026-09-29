@@ -2,8 +2,8 @@
 <!--
   Impeccable direction contract
   THESIS: every charge the ledger holds, and what the watched ones measured, never a cost.
-  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, no shadow or chart.
-  STORY: read the charge curve and the verdicts, then scroll the charges newest first.
+  OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, flat bars, no shadow.
+  STORY: three figures and the charge curve, then scroll the charges newest first (CP-085).
   FIRST VIEWPORT: the analysis anchors the left pane; the scrolling list owns the right.
   FORM: two-pane evidence ledger extending the battery page; seed key cp082-20260928.
 -->
@@ -65,25 +65,55 @@
                     style="@style/Text.EV.ReadoutLabel"
                     android:text="@string/charge_history_analysis" />
 
+                <!-- CP-085. Three figures read at a glance; the rates and energy under them. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:id="@+id/countValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:maxLines="1" android:text="@string/value_unavailable" android:textAppearance="@style/Text.EV.Display" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/charge_history_count_label" android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:id="@+id/addedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:maxLines="1" android:text="@string/value_unavailable" android:textAppearance="@style/Text.EV.Display" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/charge_history_added_label" android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:id="@+id/medianValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:maxLines="1" android:text="@string/value_unavailable" android:textAppearance="@style/Text.EV.Display" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/charge_history_median_label" android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/analysisFacts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:layout_marginTop="@dimen/spacing_md"
                     android:fontFeatureSettings="tnum"
-                    android:textAppearance="@style/Text.EV.Body" />
+                    android:textAppearance="@style/Text.EV.Secondary" />
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
                     android:layout_marginTop="@dimen/spacing_md"
                     android:text="@string/charge_history_curve" />
 
+                <!-- One bar per charge-level band, its length the mean pack power. -->
+                <LinearLayout
+                    android:id="@+id/curveBands"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="vertical" />
+
                 <TextView
                     android:id="@+id/curveFacts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:fontFeatureSettings="tnum"
                     android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
         </ScrollView>
@@ -105,14 +135,19 @@
                     style="@style/Text.EV.ReadoutLabel"
                     android:text="@string/charge_history_list" />
 
-                <TextView
-                    android:id="@+id/chargeList"
+                <LinearLayout
+                    android:id="@+id/chargeRows"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:fontFeatureSettings="tnum"
-                    android:lineSpacingMultiplier="1.15"
-                    android:textAppearance="@style/Text.EV.Body" />
+                    android:orientation="vertical" />
+
+                <!-- Said once for the whole list rather than under every row. -->
+                <TextView
+                    android:id="@+id/chargeNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

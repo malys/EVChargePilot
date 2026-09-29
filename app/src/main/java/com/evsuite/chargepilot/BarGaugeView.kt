@@ -19,8 +19,13 @@ class BarGaugeView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
-    /** One filled span, [from] to [to] in 0..1 of the track. */
-    data class Span(val from: Float, val to: Float, @ColorRes val color: Int)
+    /** One filled span, [from] to [to] in 0..1 of the track; [alpha] lighter for a band. */
+    data class Span(
+        val from: Float,
+        val to: Float,
+        @ColorRes val color: Int,
+        val alpha: Int = OPAQUE,
+    )
 
     private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.ev_surface_raised)
@@ -55,6 +60,7 @@ class BarGaugeView @JvmOverloads constructor(
             val to = it.to.coerceIn(0f, 1f)
             if (to <= from) return@forEach
             spanPaint.color = ContextCompat.getColor(context, it.color)
+            spanPaint.alpha = it.alpha
             bar.set(left + span * from, 0f, left + span * to, height.toFloat())
             canvas.drawRoundRect(bar, radius, radius, spanPaint)
         }
@@ -64,7 +70,9 @@ class BarGaugeView @JvmOverloads constructor(
         }
     }
 
-    private companion object {
-        const val MARK_WIDTH_DP = 3f
+    companion object {
+        private const val MARK_WIDTH_DP = 3f
+        const val OPAQUE = 255
+        const val LIGHT = 110
     }
 }

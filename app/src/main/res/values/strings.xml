@@ -469,9 +469,7 @@ Spending %6$s %% per km</string>
     <string name="battery_health_apply_parked_only">The vehicle figures change while parked only.</string>
     <string name="battery_health_apply_speed_unknown">Speed cannot be read, so the figure stays as it is.</string>
     <string name="battery_health_declared">Your declared figure: %1$.0f %% of %2$.1f kWh.</string>
-    <string name="battery_health_calibration_settled">Settled. The gauge saw a full charge %1$.0f days ago, which is what it corrects itself against.</string>
-    <string name="battery_health_calibration_watch">Worth watching. The last full charge was %1$.0f days ago.</string>
-    <string name="battery_health_calibration_re_anchor" formatted="false">A full charge would help. Charging to 100 % and leaving the car plugged in until it stops drawing is what lets the pack re-anchor its own charge estimate.</string>
+    <string name="battery_health_calibration_re_anchor" formatted="false">Charging to 100 % and leaving the car plugged in until it stops drawing is what lets the pack re-anchor its own charge estimate.</string>
     <string name="battery_health_calibration_never_full">This app has never seen this car charged above %1$.0f %%.</string>
     <string name="battery_health_calibration_steps">%1$d charge step(s) nothing explains, the largest %2$.0f points while parked. That is the gauge re-estimating, not the pack losing charge.</string>
     <string name="battery_health_calibration_cycles">%1$.1f equivalent full cycles since then.</string>
@@ -486,23 +484,32 @@ Spending %6$s %% per km</string>
     <string name="charge_history_curve">Charge curve — measured pack power by charge level</string>
     <string name="charge_history_list">Charges, newest first</string>
     <string name="charge_history_empty">No charge recorded yet. A charge appears once the app has seen the charge gauge rise between two of its readings — also across a night the head unit slept through.</string>
-    <string name="charge_history_summary">%1$d charges, %2$d watched from start to finish. +%3$.0f points put back in total.</string>
-    <string name="charge_history_typical">Median charge: +%1$.0f points at %2$.1f points an hour. Fastest: %3$.1f points an hour.</string>
+    <string name="charge_history_summary">%1$d watched from start to finish. Median %2$.1f points an hour, fastest %3$.1f.</string>
     <string name="charge_history_energy">Watched charges: %1$.1f kWh into the pack, mean %2$.1f kW, peak step %3$.1f kW.</string>
-    <string name="charge_history_verdicts">Pack current sign across a charge: %1$s. Car kWh counters: %2$s. Charging status values seen: %3$s.</string>
     <string name="charge_history_temperature">Outside temperature, not the pack’s: the car does not publish the pack temperature.</string>
-    <string name="charge_history_band">%1$d–%2$d %%: %3$.1f kW over %4$.1f h</string>
     <string name="charge_history_curve_empty">No watched charge yet. The curve fills in once the head unit stays awake through a charge (battery page or dashboard open, or automatic detection on).</string>
-    <string name="charge_history_row">%1$s → %2$s · %3$.0f → %4$.0f %% (+%5$.0f pt) · %6$.1f h · %7$.1f pt/h</string>
-    <string name="charge_history_row_watched">≈ %1$.1f kWh in, mean %2$.1f kW, peak %3$.1f kW — pack voltage × current integrated here.</string>
-    <string name="charge_history_row_unwatched">Head unit asleep for part of it: no energy or power, and the duration is the span between two readings.</string>
-    <string name="charge_history_row_temperature">Outside %1$.0f to %2$.0f °C.</string>
-    <string name="battery_health_exposure_dwell">%1$.0f %% of the recorded time above %2$.0f %% charge, %3$.0f %% below %4$.0f %%. Mean charge %5$.0f %%.</string>
-    <string name="battery_health_exposure_cycles">%1$.1f equivalent full cycles over %2$.0f days.</string>
-    <string name="battery_health_exposure_km">%1$.0f km per equivalent cycle.</string>
+    <string name="charge_history_count_label">Charges</string>
+    <string name="charge_history_added_label">Points put back</string>
+    <string name="charge_history_median_label">Median charge, points</string>
+    <string name="charge_history_partial">Partial</string>
+    <string name="charge_history_partial_note">Partial: the head unit slept through part of that charge, so it has no energy or power figure and its duration is the span between two readings.</string>
+    <string name="charge_history_band_range" translatable="false">%1$d–%2$d %%</string>
+    <string name="charge_history_band_power" translatable="false">%1$.1f kW · %2$.1f h</string>
+    <string name="charge_history_row_levels" translatable="false">%1$.0f → %2$.0f %%</string>
+    <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · outside %3$.0f to %4$.0f °C</string>
+    <string name="charge_history_row_gain" translatable="false">+%1$.0f pts · %2$.1f h</string>
+    <string name="charge_history_row_energy" translatable="false">≈ %1$.1f kWh · %2$.1f kW</string>
     <string name="battery_health_exposure_sessions">%1$d charge sessions, fastest %2$.0f points an hour.</string>
     <string name="battery_health_exposure_unavailable">Nothing recorded yet. This fills in as the app samples the car.</string>
     <string name="battery_health_read_only">This app changes nothing on the car: no charge limit, no schedule, no preheat. It measures and it says what it sees.</string>
+    <string name="battery_health_calibration_state_settled">Settled</string>
+    <string name="battery_health_calibration_state_watch">Worth watching</string>
+    <string name="battery_health_calibration_state_re_anchor">Full charge advised</string>
+    <string name="battery_health_calibration_last_full">Last full charge %1$.0f days ago.</string>
+    <string name="battery_health_exposure_split">Recorded time: below %1$.0f %%: %2$.0f %% · between: %3$.0f %% · above %4$.0f %%: %5$.0f %%</string>
+    <string name="battery_health_exposure_cycles_label">full cycles in %1$.0f days</string>
+    <string name="battery_health_exposure_km_label">km per cycle</string>
+    <string name="battery_health_exposure_mean_label">mean charge</string>
     <!-- CP-074. Eco-driving coach: a band, a signed delta, and one consequence with a number in
          it. No imperative is written in either locale, and nothing here is a command. -->
     <string name="label_eco">THIS DRIVE</string>

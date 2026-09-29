@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
+import androidx.core.content.ContextCompat
 import com.evsuite.chargepilot.databinding.ActivityBatteryHealthBinding
 import com.evsuite.hardware.telemetry.BatteryExposure
 import com.evsuite.hardware.telemetry.BatteryExposureReport
@@ -166,9 +167,11 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                     text.render(estimate.stateOfHealthPercent, PATTERN_SOC)
                 binding.healthTrend.text = trendText(estimate)
                 binding.healthEvidence.text = evidenceText(estimate, text)
+                binding.healthBar.show(healthSpans(estimate), declaredMark())
             }
             is StateOfHealthResult.Unavailable, null -> {
                 val seen = (current as? StateOfHealthResult.Unavailable)?.windowsSeen ?: 0
+                binding.healthBar.show(emptyList(), declaredMark())
                 binding.healthValue.text = getString(R.string.value_unavailable)
                 binding.healthTrend.text = getString(R.string.battery_health_read_only)
                 binding.healthEvidence.text = if (seen == 0 && current != null) {
@@ -184,6 +187,20 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             }
         }
     }
+
+    /** Solid to the low end of the band, lighter across the band itself. */
+    private fun healthSpans(estimate: StateOfHealthEstimate): List<BarGaugeView.Span> {
+        val value = estimate.stateOfHealthPercent.value ?: return emptyList()
+        val band = estimate.stateOfHealthPercent.uncertainty ?: 0.0
+        val low = ((value - band) / 100.0).toFloat()
+        val high = ((value + band) / 100.0).toFloat()
+        return listOf(
+            BarGaugeView.Span(0f, low, R.color.ev_accent),
+            BarGaugeView.Span(low, high, R.color.ev_accent, BarGaugeView.LIGHT),
+        )
+    }
+
+    private fun declaredMark() = (declared.stateOfHealthPercent / 100.0).toFloat()
 
     private fun trendText(estimate: StateOfHealthEstimate): String {
         val trend = estimate.trendPercentPoints
@@ -231,28 +248,51 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
 
     private fun renderCalibration() {
         val report = drift
-        if (report == null) {
+        val days = report?.daysSinceFullCharge
+        val state = when {
+            report == null -> null
+            report.verdict == CalibrationVerdict.RE_ANCHOR_SUGGESTED -> Triple(
+                GLYPH_RE_ANCHOR, R.string.battery_health_calibration_state_re_anchor, R.color.ev_warn,
+            )
+            report.verdict == CalibrationVerdict.WATCH && days != null -> Triple(
+                GLYPH_WATCH, R.string.battery_health_calibration_state_watch, R.color.ev_warn,
+            )
+            days != null -> Triple(
+                GLYPH_SETTLED, R.string.battery_health_calibration_state_settled, R.color.ev_accent,
+            )
+            else -> null
+        }
+        binding.calibrationIcon.text = state?.first.orEmpty()
+        binding.calibrationState.text = state?.let { getString(it.second) }.orEmpty()
+        state?.let {
+            val color = ContextCompat.getColor(this, it.third)
+            binding.calibrationIcon.setTextColor(color)
+            binding.calibrationState.setTextColor(color)
+        }
+        if (report == null || state == null) {
             binding.calibrationVerdict.text =
                 getString(R.string.battery_health_calibration_unavailable)
+        }
+        if (report == null) {
             binding.calibrationFacts.text = ""
             return
         }
-        val days = report.daysSinceFullCharge
-        binding.calibrationVerdict.text = when {
-            report.verdict == CalibrationVerdict.RE_ANCHOR_SUGGESTED ->
-                getString(R.string.battery_health_calibration_re_anchor)
-            report.verdict == CalibrationVerdict.WATCH && days != null ->
-                getString(R.string.battery_health_calibration_watch, days)
-            days != null -> getString(R.string.battery_health_calibration_settled, days)
-            else -> getString(R.string.battery_health_calibration_unavailable)
-        }
         val facts = ArrayList<String>()
-        if (days == null) {
-            facts += getString(
-                R.string.battery_health_calibration_never_full,
-                CalibrationDrift.FULL_SOC_PERCENT,
-            )
+        val never = getString(
+            R.string.battery_health_calibration_never_full,
+            CalibrationDrift.FULL_SOC_PERCENT,
+        )
+        if (state != null) {
+            binding.calibrationVerdict.text = days
+                ?.let { getString(R.string.battery_health_calibration_last_full, it) }
+                ?: never
         } else {
+            facts += never
+        }
+        if (report.verdict == CalibrationVerdict.RE_ANCHOR_SUGGESTED) {
+            facts += getString(R.string.battery_health_calibration_re_anchor)
+        }
+        if (days != null) {
             facts += getString(
                 R.string.battery_health_calibration_cycles,
                 report.equivalentCyclesSinceFullCharge,
@@ -307,26 +347,35 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
     private fun renderExposure() {
         val report = exposure
         if (report == null || report.observedHours <= 0.0) {
+            binding.exposureBar.show(emptyList())
+            binding.exposureLegend.text = ""
             binding.exposureFacts.text = getString(R.string.battery_health_exposure_unavailable)
             return
         }
-        val lines = ArrayList<String>()
-        lines += getString(
-            R.string.battery_health_exposure_dwell,
-            report.hoursAboveHighSoc * 100.0 / report.observedHours,
-            BatteryExposure.HIGH_SOC_PERCENT,
-            report.hoursBelowLowSoc * 100.0 / report.observedHours,
+        val below = (report.hoursBelowLowSoc / report.observedHours).toFloat()
+        val above = (report.hoursAboveHighSoc / report.observedHours).toFloat()
+        binding.exposureBar.show(
+            listOf(
+                BarGaugeView.Span(0f, below, R.color.ev_warn),
+                BarGaugeView.Span(below, 1f - above, R.color.ev_accent),
+                BarGaugeView.Span(1f - above, 1f, R.color.ev_warn),
+            ),
+        )
+        binding.exposureLegend.text = getString(
+            R.string.battery_health_exposure_split,
             BatteryExposure.LOW_SOC_PERCENT,
-            report.meanSocPercent,
+            below * 100.0,
+            (1f - below - above) * 100.0,
+            BatteryExposure.HIGH_SOC_PERCENT,
+            above * 100.0,
         )
-        lines += getString(
-            R.string.battery_health_exposure_cycles,
-            report.equivalentFullCycles,
-            report.spanDays,
-        )
-        report.kmPerEquivalentCycle?.let {
-            lines += getString(R.string.battery_health_exposure_km, it)
-        }
+        binding.cyclesValue.text = format("%.1f", report.equivalentFullCycles)
+        binding.cyclesLabel.text =
+            getString(R.string.battery_health_exposure_cycles_label, report.spanDays)
+        binding.kmPerCycleValue.text =
+            report.kmPerEquivalentCycle?.let { format("%.0f", it) } ?: getString(R.string.value_unavailable)
+        binding.meanSocValue.text = format("%.0f %%", report.meanSocPercent)
+        val lines = ArrayList<String>()
         if (report.sessions.isNotEmpty()) {
             lines += getString(
                 R.string.battery_health_exposure_sessions,
@@ -337,6 +386,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         lines += getString(R.string.battery_health_read_only)
         binding.exposureFacts.text = lines.joinToString("\n")
     }
+
+    private fun format(pattern: String, vararg args: Any) =
+        String.format(Locale.getDefault(), pattern, *args)
 
     /**
      * The suggestion, and the gate in front of it.
@@ -409,5 +461,8 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
 
     companion object {
         private const val PATTERN_TREND = "%+.1f pt"
+        private const val GLYPH_SETTLED = "✓"
+        private const val GLYPH_WATCH = "!"
+        private const val GLYPH_RE_ANCHOR = "↻"
     }
 }

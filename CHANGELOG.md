@@ -33,6 +33,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **The trips summary reads at a glance (CP-084).** Estimated range and consumption side by side
   in large figures, the gap to the reference on one line; the explanation of the estimate and of
   the chart moved behind an ⓘ.
+- **The battery page draws what it says (CP-085).** The health figure is large over a bar with its
+  ± band lighter and a mark at your declared figure; calibration is a state and one line; the
+  exposure is a bar of time below 10 %, between and above 80 %, with cycles, km per cycle and mean
+  charge as figures. Charge history is a filled button.
+- **Charge history as rows, not paragraphs (CP-085).** Three figures (charges, points put back,
+  median charge) and the charge curve as bars; each charge is a date, a 0–100 % track with the
+  charged segment, "+32 pts · 81 h" and its energy or a "Partial" badge, explained once under the
+  list. The pack-sign and counter verdicts stay in the diagnostic report only.
+
 ### Fixed
 
 - **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service
