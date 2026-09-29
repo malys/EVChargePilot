@@ -90,7 +90,7 @@ class TripExporterTest {
             setOf(
                 "atMs", "speedKmh", "batteryPowerKw", "socPercent", "outsideTempCelsius",
                 "cabinTempCelsius", "batteryTempCelsius", "climatePowerOn", "climateAcOn",
-                "climateFanLevel",
+                "climateFanLevel", "widestWindowPercent",
             ),
             exportedSample.keySet(),
         )

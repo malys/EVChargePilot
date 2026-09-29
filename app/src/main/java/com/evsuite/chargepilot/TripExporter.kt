@@ -171,6 +171,8 @@ class TripExporter(
         addNullable("climateAcOn", sample.climateAcOn)
         sample.climateFanLevel?.let { addProperty("climateFanLevel", it) }
             ?: add("climateFanLevel", JsonNull.INSTANCE)
+        sample.widestWindowPercent?.let { addProperty("widestWindowPercent", it) }
+            ?: add("widestWindowPercent", JsonNull.INSTANCE)
     }
 
     private fun JsonObject.addFiniteOrNull(name: String, value: Double?) {

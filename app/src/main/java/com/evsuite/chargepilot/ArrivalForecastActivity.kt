@@ -247,6 +247,9 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
         )
         bind(binding.rangeValue, R.string.label_range, readings.range, PATTERN_DISTANCE)
         renderClimate(readings.climate, value.firmware)
+        bindWith(binding.windowsValue, R.string.label_windows, Provenanced.measured(value.widestWindowPercent)) {
+            getString(R.string.windows_value, it)
+        }
         bind(binding.tripDistanceValue, R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE)
         bind(binding.tripEnergyValue, R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY)
         bind(binding.tripRegenValue, R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY)

@@ -24,6 +24,7 @@
     <string name="label_climate">CLIMATE</string>
     <string name="label_outside_temp">OUTSIDE</string>
     <string name="label_cabin_temp">CABIN</string>
+    <string name="label_windows">WINDOWS</string>
     <string name="label_battery_temp">BATTERY TEMP.</string>
     <string name="label_climate_power">HVAC</string>
     <string name="label_climate_ac">A/C</string>
@@ -72,6 +73,7 @@
     <string name="state_on">On</string>
     <string name="state_off">Off</string>
     <string name="climate_fan_value">%1$d / %2$d</string>
+    <string name="windows_value">%1$d %%</string>
     <string name="climate_state_only">Vehicle state only — no HVAC power is measured</string>
     <string name="climate_missing_waiting">— = waiting for vehicle data</string>
     <string name="climate_missing_signal">— = signal unavailable right now</string>
@@ -144,6 +146,7 @@
     <string name="trip_attribution_climate_active">Climate active</string>
     <string name="trip_attribution_climate_inactive">Climate inactive / other model error</string>
     <string name="trip_attribution_climate_unknown">Climate state unknown</string>
+    <string name="trip_attribution_windows_open">Windows open</string>
     <string name="trip_attribution_residual">%1$s residual: ESTIMATED %2$s</string>
     <string name="trip_attribution_residual_indistinguishable">%1$s residual: not distinguishable from zero (%2$s)</string>
     <string name="trip_attribution_residual_negative">%1$s residual: negative model error, not hidden (%2$s)</string>
@@ -167,6 +170,7 @@
     <string name="energy_breakdown_residual_active">CLIMATE-ACTIVE RESIDUAL</string>
     <string name="energy_breakdown_residual_inactive">CLIMATE-OFF / MODEL ERROR</string>
     <string name="energy_breakdown_residual_unknown">UNKNOWN-STATE RESIDUAL</string>
+    <string name="energy_breakdown_residual_windows">WINDOWS-OPEN RESIDUAL</string>
     <string name="energy_breakdown_claim_derived_power">DERIVED · integrated measured battery power</string>
     <string name="energy_breakdown_claim_derived_net">DERIVED · consumed minus regenerated</string>
     <string name="energy_breakdown_claim_discrepancy">DERIVED · measured total outside modelled intervals</string>
@@ -543,6 +547,7 @@ Spending %6$s %% per km</string>
     <string name="trip_eco_finding_motorway_energy">At %1$d km/h over the %2$.0f km of fast road: about %3$.1f to %4$.1f kWh less.</string>
     <string name="trip_eco_finding_motorway_soc">At %1$d km/h over the %2$.0f km of fast road: about %3$.1f to %4$.1f points of charge less.</string>
     <string name="trip_eco_finding_cabin">Cabin: about %1$.1f kWh, %2$.0f %% of this trip.</string>
+    <string name="trip_eco_finding_windows">Open windows: about %1$.1f kWh, %2$.0f %% of this trip, %3$.0f km above 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Hard acceleration on %1$d %% of this drive.</string>
     <string name="diagnostics_eco_trip_review">Latest trip, reviewed</string>
     <string name="vehicle_hint_reference">Reference consumption (kWh/100 km)</string>
@@ -609,4 +614,5 @@ Spending %6$s %% per km</string>
     <string name="eco_history_motorway_kwh">10 km/h slower on fast roads: about %1$.1f kWh less over %2$d trips.</string>
     <string name="eco_history_motorway_soc">10 km/h slower on fast roads: about %1$.1f points of charge less over %2$d trips.</string>
     <string name="eco_history_cabin">Cabin heating and cooling: on average %1$d %% of the energy of the trips where it counted.</string>
+    <string name="eco_history_windows">Open windows: on average %1$d %% of the energy of the trips where they counted.</string>
 </resources>

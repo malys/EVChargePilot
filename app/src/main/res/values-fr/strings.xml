@@ -20,6 +20,7 @@
     <string name="label_climate">CLIMATISATION</string>
     <string name="label_outside_temp">EXTÉRIEUR</string>
     <string name="label_cabin_temp">HABITACLE</string>
+    <string name="label_windows">FENÊTRES</string>
     <string name="label_battery_temp">TEMP. BATTERIE</string>
     <string name="label_climate_power">CLIM.</string>
     <string name="label_climate_ac">A/C</string>
@@ -68,6 +69,7 @@
     <string name="state_on">Active</string>
     <string name="state_off">Arrêtée</string>
     <string name="climate_fan_value">%1$d / %2$d</string>
+    <string name="windows_value">%1$d %%</string>
     <string name="climate_state_only">État du véhicule uniquement — aucune puissance CVC n’est mesurée</string>
     <string name="climate_missing_waiting">— = en attente des données véhicule</string>
     <string name="climate_missing_signal">— = signal actuellement indisponible</string>
@@ -139,6 +141,7 @@
     <string name="trip_attribution_climate_active">Climatisation active</string>
     <string name="trip_attribution_climate_inactive">Climatisation inactive / autre erreur modèle</string>
     <string name="trip_attribution_climate_unknown">État de climatisation inconnu</string>
+    <string name="trip_attribution_windows_open">Fenêtres ouvertes</string>
     <string name="trip_attribution_residual">Résiduel %1$s : ESTIMATION %2$s</string>
     <string name="trip_attribution_residual_indistinguishable">Résiduel %1$s : impossible à distinguer de zéro (%2$s)</string>
     <string name="trip_attribution_residual_negative">Résiduel %1$s : erreur modèle négative, non masquée (%2$s)</string>
@@ -162,6 +165,7 @@
     <string name="energy_breakdown_residual_active">RÉSIDUEL CLIMATISATION ACTIVE</string>
     <string name="energy_breakdown_residual_inactive">CLIMATISATION ARRÊTÉE / ERREUR MODÈLE</string>
     <string name="energy_breakdown_residual_unknown">RÉSIDUEL À ÉTAT INCONNU</string>
+    <string name="energy_breakdown_residual_windows">RÉSIDUEL FENÊTRES OUVERTES</string>
     <string name="energy_breakdown_claim_derived_power">DÉRIVÉE · intégration de la puissance batterie mesurée</string>
     <string name="energy_breakdown_claim_derived_net">DÉRIVÉE · consommée moins récupérée</string>
     <string name="energy_breakdown_claim_discrepancy">DÉRIVÉE · total mesuré hors intervalles modélisés</string>
@@ -525,6 +529,7 @@ Consommation %6$s %% par km</string>
     <string name="trip_eco_finding_motorway_energy">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f kWh de moins.</string>
     <string name="trip_eco_finding_motorway_soc">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f points de charge de moins.</string>
     <string name="trip_eco_finding_cabin">Habitacle : environ %1$.1f kWh, soit %2$.0f %% de ce trajet.</string>
+    <string name="trip_eco_finding_windows">Fenêtres ouvertes : environ %1$.1f kWh, soit %2$.0f %% de ce trajet, %3$.0f km au-delà de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Accélérations franches sur %1$d %% de ce trajet.</string>
     <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>
     <string name="vehicle_hint_reference">Consommation de référence (kWh/100 km)</string>
@@ -587,4 +592,5 @@ Consommation %6$s %% par km</string>
     <string name="eco_history_motorway_kwh">10 km/h de moins sur voie rapide : environ %1$.1f kWh de moins sur %2$d trajets.</string>
     <string name="eco_history_motorway_soc">10 km/h de moins sur voie rapide : environ %1$.1f points de charge de moins sur %2$d trajets.</string>
     <string name="eco_history_cabin">Chauffage et climatisation : en moyenne %1$d %% de l’énergie des trajets où ils ont compté.</string>
+    <string name="eco_history_windows">Fenêtres ouvertes : en moyenne %1$d %% de l’énergie des trajets où elles ont compté.</string>
 </resources>

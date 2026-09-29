@@ -83,6 +83,7 @@ sealed interface EcoTip {
     data class EcoMode(val current: DriveMode?) : EcoTip
     data class SnowMode(val outsideTempCelsius: Int) : EcoTip
     data class Cabin(val finding: EcoFinding.Cabin) : EcoTip
+    data class Windows(val finding: EcoFinding.Windows) : EcoTip
 }
 
 /** The end-of-trip advice. [band] null when the fit refused; the tips may still stand. */
@@ -104,9 +105,11 @@ data class HistoryAdvice(
     val motorwayBasis: SpeedWhatIfBasis?,
     val motorwayTrips: Int,
     val cabinMeanPercent: Double?,
+    val windowsMeanPercent: Double?,
 ) {
     val hasAdvice: Boolean
-        get() = heavierTrips > 0 || style != null || motorwaySaving != null || cabinMeanPercent != null
+        get() = heavierTrips > 0 || style != null || motorwaySaving != null ||
+            cabinMeanPercent != null || windowsMeanPercent != null
 }
 
 /**
@@ -146,6 +149,7 @@ object EcoTripAdvice {
                 cold <= SNOW_MAX_OUTSIDE_CELSIUS
             ) add(EcoTip.SnowMode(cold.roundToInt()))
             findings.filterIsInstance<EcoFinding.Cabin>().forEach { add(EcoTip.Cabin(it)) }
+            findings.filterIsInstance<EcoFinding.Windows>().forEach { add(EcoTip.Windows(it)) }
         }.take(MAX_TIPS)
         return TripAdvice(
             band = band,
@@ -195,6 +199,7 @@ object EcoTripAdvice {
         var style = DrivingStyle.NONE
         val motorway = ArrayList<EcoFinding.MotorwaySpeed>()
         val cabin = ArrayList<Double>()
+        val windows = ArrayList<Double>()
         for (trip in recent) {
             style += DrivingStyle.measure(trip.samples.orEmpty())
             val ready = reviews[trip.summary.startedAtMs] as? EcoTripReview.Ready ?: continue
@@ -208,6 +213,7 @@ object EcoTripAdvice {
                 when (finding) {
                     is EcoFinding.MotorwaySpeed -> motorway += finding
                     is EcoFinding.Cabin -> cabin += finding.sharePercent
+                    is EcoFinding.Windows -> windows += finding.sharePercent
                     is EcoFinding.Steadiness -> Unit
                 }
             }
@@ -228,6 +234,7 @@ object EcoTripAdvice {
             motorwayTrips = sameBasis.size,
             // One cabin-heavy trip is weather; two are a habit worth naming.
             cabinMeanPercent = cabin.takeIf { it.size >= 2 }?.average(),
+            windowsMeanPercent = windows.takeIf { it.size >= 2 }?.average(),
         )
     }
 
@@ -308,6 +315,9 @@ class EcoAdviceText(context: Context) {
         advice.cabinMeanPercent?.let {
             lines += app.getString(R.string.eco_history_cabin, it.roundToInt())
         }
+        advice.windowsMeanPercent?.let {
+            lines += app.getString(R.string.eco_history_windows, it.roundToInt())
+        }
         return lines
     }
 
@@ -329,7 +339,7 @@ class EcoAdviceText(context: Context) {
         is EcoTip.EcoMode -> app.getString(R.string.eco_clause_eco_mode)
         is EcoTip.SlowerMotorway ->
             app.getString(R.string.eco_clause_motorway, tip.finding.referenceSpeedKmh)
-        is EcoTip.SnowMode, is EcoTip.Cabin -> null
+        is EcoTip.SnowMode, is EcoTip.Cabin, is EcoTip.Windows -> null
     }
 
     private fun sentence(tip: EcoTip): String = when (tip) {
@@ -351,5 +361,11 @@ class EcoAdviceText(context: Context) {
         )
         is EcoTip.Cabin ->
             app.getString(R.string.trip_eco_finding_cabin, tip.finding.kwh, tip.finding.sharePercent)
+        is EcoTip.Windows -> app.getString(
+            R.string.trip_eco_finding_windows,
+            tip.finding.kwh,
+            tip.finding.sharePercent,
+            tip.finding.openDistanceKm,
+        )
     }
 }

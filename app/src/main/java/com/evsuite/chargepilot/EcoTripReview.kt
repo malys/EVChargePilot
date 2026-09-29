@@ -40,6 +40,17 @@ sealed interface EcoFinding {
         val sharePercent: Double,
     ) : EcoFinding
 
+    /**
+     * CP-086. The window-open intervals' fitted share of this trip, and how far the car went
+     * open above [EcoTripReviewer.WINDOWS_SPEED_KMH], where the drag is what an open window costs.
+     */
+    data class Windows(
+        val kwh: Double,
+        val uncertaintyKwh: Double,
+        val sharePercent: Double,
+        val openDistanceKm: Double,
+    ) : EcoFinding
+
     /** The share of moving time spent accelerating hard, from the track's speed channel. */
     data class Steadiness(val harshSharePercent: Double) : EcoFinding
 }
@@ -70,7 +81,7 @@ sealed interface EcoTripReview {
  * **Ranked by how strong the evidence is, not by a common cost.** A saving in kilowatt-hours, a
  * fitted cabin share and a percentage of a drive have no exchange rate, and inventing one to sort
  * them would invent the most important of the three. Order is therefore fixed and stated: the
- * measured saving first, the fitted share next, the style share last.
+ * measured saving first, the fitted shares next (cabin, then windows), the style share last.
  *
  * **What it refuses.** A model that has not trained, an attribution that could not reconcile, a
  * what-if with no motorway in the trip, a track that was never recorded — each drops its own
@@ -84,6 +95,13 @@ object EcoTripReviewer {
 
     /** Below this the cabin is inside the fit's own error and saying so would be noise. */
     const val MIN_CABIN_SHARE_PERCENT = 5.0
+
+    /** CP-086. Below this an open window is air, above it the drag starts to count. */
+    const val WINDOWS_SPEED_KMH = 60.0
+
+    /** Two samples further apart than this are a gap in the track, not a distance driven. */
+    private const val MAX_SAMPLE_GAP_MS = 120_000L
+    private const val MILLIS_PER_HOUR = 3_600_000.0
 
     fun review(
         trip: StoredTrip,
@@ -102,6 +120,7 @@ object EcoTripReviewer {
         val findings = listOfNotNull(
             motorway(whatIf),
             cabin(attribution),
+            windows(trip, attribution),
             steadiness(monitor),
         ).take(MAX_FINDINGS)
         if (verdict.band.value == null && findings.isEmpty()) {
@@ -140,6 +159,11 @@ object EcoTripReviewer {
             " kwh=${format(finding.kwh)}" +
             " uncertainty_kwh=${format(finding.uncertaintyKwh)}" +
             " share_percent=${format(finding.sharePercent)}"
+        is EcoFinding.Windows -> "finding=WINDOWS" +
+            " kwh=${format(finding.kwh)}" +
+            " uncertainty_kwh=${format(finding.uncertaintyKwh)}" +
+            " share_percent=${format(finding.sharePercent)}" +
+            " open_km_above_60=${format(finding.openDistanceKm)}"
         is EcoFinding.Steadiness ->
             "finding=STEADINESS harsh_share_percent=${format(finding.harshSharePercent)}"
     }
@@ -190,6 +214,47 @@ object EcoTripReviewer {
             sharePercent = share,
         )
     }
+
+    /**
+     * CP-086. The same test as [cabin], on the window-open residual: distinguishable and above the
+     * same minimum share, or nothing.
+     */
+    private fun windows(trip: StoredTrip, attribution: EnergyAttributionResult?): EcoFinding.Windows? {
+        val ready = attribution as? EnergyAttributionResult.Ready ?: return null
+        val open = ready.attribution.residuals.filter {
+            it.context == ResidualContext.WINDOWS_OPEN &&
+                it.finding == ResidualFinding.DISTINGUISHABLE
+        }
+        if (open.isEmpty()) return null
+        val kwh = open.sumOf { it.estimate.valueKwh }
+        val total = ready.attribution.totalConsumedKwh.value ?: return null
+        if (total <= 0.0) return null
+        val share = kwh / total * 100.0
+        if (share < MIN_CABIN_SHARE_PERCENT) return null
+        return EcoFinding.Windows(
+            kwh = kwh,
+            uncertaintyKwh = open.sumOf { it.estimate.uncertaintyKwh },
+            sharePercent = share,
+            openDistanceKm = openFastDistanceKm(trip),
+        )
+    }
+
+    /** Trapezoid distance over the intervals open and above the speed at both ends. */
+    private fun openFastDistanceKm(trip: StoredTrip): Double =
+        trip.samples.orEmpty().zipWithNext().sumOf { (previous, current) ->
+            val durationMs = current.atMs - previous.atMs
+            val from = previous.speedKmh?.toDouble()
+            val to = current.speedKmh?.toDouble()
+            val open = (previous.widestWindowPercent ?: 0) > 0 &&
+                (current.widestWindowPercent ?: 0) > 0
+            if (!open || from == null || to == null || durationMs !in 1..MAX_SAMPLE_GAP_MS ||
+                from <= WINDOWS_SPEED_KMH || to <= WINDOWS_SPEED_KMH
+            ) {
+                0.0
+            } else {
+                (from + to) / 2.0 * durationMs / MILLIS_PER_HOUR
+            }
+        }
 
     /**
      * Whatever the share, once the track holds a minute of movement. A calm drive is a result

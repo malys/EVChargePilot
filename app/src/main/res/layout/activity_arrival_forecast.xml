@@ -119,6 +119,12 @@
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_passenger_target" />
                         <TextView android:id="@+id/climatePassengerTargetValue" style="@style/Text.EV.ClimateValue" />
                     </LinearLayout>
+                    <!-- CP-086. The widest opening: an open window is a consumption factor, like
+                         the climate beside it. -->
+                    <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
+                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_windows" />
+                        <TextView android:id="@+id/windowsValue" style="@style/Text.EV.ClimateValue" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <View

@@ -564,6 +564,12 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         )
         is EcoFinding.Cabin ->
             getString(R.string.trip_eco_finding_cabin, finding.kwh, finding.sharePercent)
+        is EcoFinding.Windows -> getString(
+            R.string.trip_eco_finding_windows,
+            finding.kwh,
+            finding.sharePercent,
+            finding.openDistanceKm,
+        )
         is EcoFinding.Steadiness -> getString(
             R.string.trip_eco_finding_steadiness,
             finding.harshSharePercent.roundToInt(),
@@ -623,6 +629,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 ResidualContext.CLIMATE_ACTIVE -> R.string.trip_attribution_climate_active
                 ResidualContext.CLIMATE_INACTIVE -> R.string.trip_attribution_climate_inactive
                 ResidualContext.CLIMATE_UNKNOWN -> R.string.trip_attribution_climate_unknown
+                ResidualContext.WINDOWS_OPEN -> R.string.trip_attribution_windows_open
             },
         )
         return getString(

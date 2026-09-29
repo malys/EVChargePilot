@@ -34,6 +34,7 @@ internal object DiagnosticSnapshotFormatter {
             "climate.fan_level_max=${climate.fanLevelMax.value()}",
             "climate.driver_target_c=${climate.driverTargetCelsius.value()}",
             "climate.passenger_target_c=${climate.passengerTargetCelsius.value()}",
+            "windows.widest_percent=${snapshot.widestWindowPercent.value()}",
             "tire.front_left_kpa=${tires.frontLeftKpa.value()}",
             "tire.front_right_kpa=${tires.frontRightKpa.value()}",
             "tire.rear_left_kpa=${tires.rearLeftKpa.value()}",

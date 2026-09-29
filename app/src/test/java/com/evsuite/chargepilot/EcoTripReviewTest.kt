@@ -54,9 +54,8 @@ class EcoTripReviewTest {
         samples = samples,
     )
 
-    private fun track(speedKmh: Float = 100f) = (0..1_800).map { second ->
-        sample(second * 1_000L, speedKmh)
-    }
+    private fun track(speedKmh: Float = 100f, windowPercent: Int? = null) =
+        (0..1_800).map { second -> sample(second * 1_000L, speedKmh, windowPercent) }
 
     /** A drive spent starting and stopping: the steadiness finding has something to measure. */
     private fun harshTrack(): List<TripSample> {
@@ -71,7 +70,7 @@ class EcoTripReviewTest {
         return samples
     }
 
-    private fun sample(atMs: Long, speedKmh: Float) = TripSample(
+    private fun sample(atMs: Long, speedKmh: Float, windowPercent: Int? = null) = TripSample(
         atMs = atMs,
         speedKmh = speedKmh,
         batteryPowerKw = null,
@@ -82,6 +81,7 @@ class EcoTripReviewTest {
         climatePowerOn = null,
         climateAcOn = null,
         climateFanLevel = null,
+        widestWindowPercent = windowPercent,
     )
 
     private fun whatIf(saving: Double = 1.2) = SpeedWhatIfResult.Ready(
@@ -181,6 +181,32 @@ class EcoTripReviewTest {
         val small = attribution(climateKwh = 0.2)
         val result = review(attribution = small) as EcoTripReview.Ready
         assertTrue(result.findings.none { it is EcoFinding.Cabin })
+    }
+
+    @Test
+    fun `an open-window residual is its own finding, with the distance driven open and fast`() {
+        val open = attribution(context = ResidualContext.WINDOWS_OPEN)
+        val result = review(
+            trip = trip(samples = track(windowPercent = 30)),
+            attribution = open,
+        ) as EcoTripReview.Ready
+        val windows = result.findings.filterIsInstance<EcoFinding.Windows>().single()
+        assertEquals(2.0, windows.kwh, 1e-9)
+        assertEquals(50.0, windows.openDistanceKm, 1e-6)
+        assertTrue(result.findings.none { it is EcoFinding.Cabin })
+    }
+
+    @Test
+    fun `open windows below the speed cost no distance, and a small share no line`() {
+        val slow = review(
+            trip = trip(samples = track(speedKmh = 50f, windowPercent = 30)),
+            attribution = attribution(context = ResidualContext.WINDOWS_OPEN),
+        ) as EcoTripReview.Ready
+        assertEquals(0.0, slow.findings.filterIsInstance<EcoFinding.Windows>().single().openDistanceKm, 1e-9)
+        val small = review(
+            attribution = attribution(climateKwh = 0.2, context = ResidualContext.WINDOWS_OPEN),
+        ) as EcoTripReview.Ready
+        assertTrue(small.findings.none { it is EcoFinding.Windows })
     }
 
     @Test

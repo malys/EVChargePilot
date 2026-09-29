@@ -6,6 +6,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Open windows, measured and counted (CP-086).** A Windows tile in the Details climate grid
+  shows the widest opening in percent. The trip review adds a Windows finding when the window-open
+  residual is distinguishable and above the cabin's minimum share: its kWh, its share, and the
+  distance driven open above 60 km/h. The trip-end advice in P and the general advice card count
+  it, and the energy breakdown, the trip attribution, the diagnostic report and the trip export
+  carry it.
+
 - **Charges — a list of every charge, and what the watched ones measured (CP-082).** The battery
   page gains a *Charge history* button. The screen lists every charge newest first — start and
   end, charge before and after, duration, mean points per hour, outside temperature range and,

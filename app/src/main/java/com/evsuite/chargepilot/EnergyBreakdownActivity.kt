@@ -299,6 +299,7 @@ class EnergyBreakdownActivity : AppCompatActivity() {
         ResidualContext.CLIMATE_ACTIVE -> R.string.energy_breakdown_residual_active
         ResidualContext.CLIMATE_INACTIVE -> R.string.energy_breakdown_residual_inactive
         ResidualContext.CLIMATE_UNKNOWN -> R.string.energy_breakdown_residual_unknown
+        ResidualContext.WINDOWS_OPEN -> R.string.energy_breakdown_residual_windows
     }
 
     private fun residualValue(value: ResidualAttribution): String = when (value.finding) {
