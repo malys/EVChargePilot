@@ -63,6 +63,7 @@ class EcoCoach(context: Context) {
      * is recomputed on [RECOMPUTE_MS], because a band that changes under the driver's eyes at
      * 1 Hz is a band nobody believes.
      */
+    @Synchronized
     fun update(snapshot: EnergySnapshot): EcoVerdict {
         monitor.add(snapshot.timestampMs, snapshot.speedKmh)
         if (snapshot.timestampMs - lastComputedAtMs >= RECOMPUTE_MS) {
@@ -77,6 +78,7 @@ class EcoCoach(context: Context) {
     }
 
     /** The trip ended: the next drive is judged on its own, not on the last one's window. */
+    @Synchronized
     fun reset() {
         monitor.reset()
         lastComputedAtMs = 0L
@@ -107,6 +109,7 @@ class EcoCoach(context: Context) {
      * there and nothing crossed a threshold, the line says so with the figure it measured —
      * a calm drive kept "a few minutes are needed" on screen for the whole of it.
      */
+    @Synchronized
     fun line(verdict: EcoVerdict): String? {
         if (!adviceEnabled(app)) return null
         verdict.advice?.let(::sentence)?.let { return it }
@@ -123,6 +126,7 @@ class EcoCoach(context: Context) {
      * @param speedKmh the car's own speed, re-read here rather than trusted from the verdict:
      *   the gate is "the car is moving", and it is checked at the moment of speaking.
      */
+    @Synchronized
     fun speak(verdict: EcoVerdict, speedKmh: Float?, nowMs: Long) {
         val line = sentence(verdict.advice ?: return)
         if (line == null || !voiceEnabled(app) || !adviceEnabled(app)) return

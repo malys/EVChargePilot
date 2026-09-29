@@ -23,7 +23,9 @@ import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.BatteryPowerEvidence
 import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.FirmwareInfo
+import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.AdaptiveRangeEstimator
+import com.evsuite.hardware.telemetry.ArrivalSocForecast
 import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ConsumptionCalculator
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -31,7 +33,7 @@ import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.Provenanced
-import com.evsuite.hardware.telemetry.TripDetector
+import com.evsuite.hardware.telemetry.SocRateEstimator
 import com.evsuite.hardware.telemetry.UnavailableReason
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -55,7 +57,6 @@ class MainActivity : PrimaryNavigationActivity() {
      */
     private val drift by lazy { DriftCompanion(this) }
 
-    private val eco by lazy { EcoCoach(this) }
     /** Bounded history parsing and the drift fit never run on the main thread. */
     private val background = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-background")
@@ -75,7 +76,11 @@ class MainActivity : PrimaryNavigationActivity() {
     private var trustedTripsSource: List<EnergyTripSummary> = emptyList()
     private var trustedTripsEvidence: BatteryPowerEvidence? = null
     private var trustedTripsCache: List<EnergyTripSummary> = emptyList()
-    private var updatingAutomaticSwitch = false
+
+    /** CP-083. The charge on arrival while a route is guided; null when there is no route. */
+    @Volatile private var arrival: Provenanced<Double>? = null
+    @Volatile private var arrivalRoute: String? = null
+    private var arrivalReadAtMs = 0L
 
     private val vehiclePermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -88,28 +93,10 @@ class MainActivity : PrimaryNavigationActivity() {
         }
     }
 
-    /**
-     * CP-062. The destination the driver just chose, on its way to the plan.
-     *
-     * Choosing where you are going was a page of its own in the top bar, which put the most
-     * frequent question in this app two taps and a page change away from the screen the driver
-     * lands on. It is now the dashboard's own action: the chooser opens, and the plan for what
-     * they picked opens after it. A cancel is silence — they went to look and came back.
-     */
-    private val destination = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val place = DestinationActivity.place(result.data) ?: return@registerForActivityResult
-        startActivity(
-            DestinationActivity.carry(Intent(this, ChargeStopActivity::class.java), place)
-        )
-    }
-
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val bound = (service as? TripRecordingService.LocalBinder)?.service ?: return
             recorder = bound
-            setAutomaticSwitchChecked(bound.automaticDetectionEnabled)
             bound.setListener(this@MainActivity, ::render)
             bound.latest?.let(::render)
         }
@@ -125,14 +112,6 @@ class MainActivity : PrimaryNavigationActivity() {
         setContentView(binding.root)
 
         provenance = ProvenanceText(this)
-        binding.chooseDestinationAction.setOnClickListener {
-            destination.launch(DestinationActivity.intent(this))
-        }
-        binding.tripAction.setOnClickListener { toggleTrip() }
-        setAutomaticSwitchChecked(TripRecordingService.isAutomaticDetectionEnabled(this))
-        binding.automaticDetection.setOnCheckedChangeListener { _, enabled ->
-            if (!updatingAutomaticSwitch) changeAutomaticDetection(enabled)
-        }
         binding.driftLine.setOnClickListener { forgetPlan() }
         binding.aboutAction.text = getString(R.string.about_version_badge, appVersion())
         binding.aboutAction.setOnClickListener { showAbout() }
@@ -200,25 +179,6 @@ class MainActivity : PrimaryNavigationActivity() {
         super.onDestroy()
     }
 
-    private fun toggleTrip() {
-        val service = recorder
-        if (EnergyTripSession.isRecording) {
-            if (service == null) {
-                AppLogger.w(TAG, "trip stop ignored: recorder not bound")
-                return
-            }
-            service.stopTrip {
-                loadedHistoryRevision = service.historyRevision
-                loadRecentTrips()
-            }
-            // The next drive is judged on its own window, not on the one that just ended.
-            eco.reset()
-            service.latest?.let(::render)
-        } else {
-            TripRecordingService.start(this)
-        }
-    }
-
     private fun render(value: EnergySnapshot) {
         latestSnapshot = value
         recorder?.historyRevision?.let { revision ->
@@ -226,7 +186,6 @@ class MainActivity : PrimaryNavigationActivity() {
                 loadedHistoryRevision = revision
             } else if (revision != loadedHistoryRevision) {
                 loadedHistoryRevision = revision
-                eco.reset()
                 loadRecentTrips()
             }
         }
@@ -258,20 +217,11 @@ class MainActivity : PrimaryNavigationActivity() {
         val hasVehicleData = value.hasVehicleData
         renderDataStatus(hasVehicleData)
 
-        // Recording controls are for a parked driver. Live values remain passive and readable
-        // while moving; the app never presents an overlay or asks for attention.
         val parked = value.speedKmh?.let { it <= 0.1f } == true
-        binding.tripAction.isEnabled = parked
-        binding.automaticDetection.isEnabled = parked
-        val automatic = recorder?.automaticDetectionEnabled
-            ?: TripRecordingService.isAutomaticDetectionEnabled(this)
-        setAutomaticSwitchChecked(automatic)
-        binding.tripAction.text = getString(
-            if (EnergyTripSession.isRecording) R.string.action_stop_trip else R.string.action_start_trip
-        )
-        binding.tripHint.text = tripHint(value, parked, automatic)
+        refreshArrival(value)
+        renderReach(readings)
         renderDrift(value, parked)
-        renderEco(value)
+        renderEco()
     }
 
     /**
@@ -298,18 +248,18 @@ class MainActivity : PrimaryNavigationActivity() {
      * The verdict, and — only if it was asked for — the advice.
      *
      * The band is always drawn, because it is a statement about the drive and not an
-     * instruction; the line and the voice are two separate opt-ins on top of it. The coach
-     * gates its own recomputation, so this runs on every frame and computes on almost none.
+     * instruction; the line and the voice are two separate opt-ins on top of it. The recorder
+     * feeds the coach and speaks (CP-083), so the voice carries on behind the map; this only
+     * draws the verdict it last published.
      */
-    private fun renderEco(value: EnergySnapshot) {
-        val verdict = eco.update(value)
-        DashboardFrame.publish(verdict)
+    private fun renderEco() {
+        val eco = recorder?.eco ?: return
+        val verdict = DashboardFrame.eco
         binding.ecoValue.text = eco.band(verdict)
         binding.ecoDelta.text = eco.delta(verdict)
         val line = eco.line(verdict)
         binding.ecoAdviceLine.visibility = if (line == null) View.GONE else View.VISIBLE
         binding.ecoAdviceLine.text = line.orEmpty()
-        eco.speak(verdict, value.speedKmh, value.timestampMs)
     }
 
     /** Parked only, and re-checked here rather than trusted from the last frame. */
@@ -321,173 +271,81 @@ class MainActivity : PrimaryNavigationActivity() {
         Toast.makeText(this, R.string.drift_forgotten, Toast.LENGTH_SHORT).show()
     }
 
-    private fun tripHint(value: EnergySnapshot, parked: Boolean, automatic: Boolean): String {
-        val recording = EnergyTripSession.isRecording
-        if (automatic && value.speedKmh == null) {
-            return getString(
-                if (recording) R.string.trip_automatic_recording_speed_unavailable
-                else R.string.trip_automatic_speed_unavailable
-            )
-        }
-        if (automatic) {
-            return getString(
-                when (recorder?.detectorState ?: TripDetector.State.IDLE) {
-                    TripDetector.State.IDLE -> R.string.trip_automatic_waiting
-                    TripDetector.State.ARMED -> R.string.trip_automatic_confirming_motion
-                    TripDetector.State.RECORDING -> R.string.trip_recording
-                    TripDetector.State.ENDING -> R.string.trip_automatic_confirming_end
-                }
-            )
-        }
-        return getString(
-            when {
-                value.speedKmh == null -> R.string.trip_control_speed_unavailable
-                !parked -> R.string.trip_control_park_to_change
-                recording -> R.string.trip_recording
-                else -> R.string.trip_ready
-            }
-        )
-    }
-
-    private fun changeAutomaticDetection(enabled: Boolean) {
-        val service = recorder
-        val parked = service?.latest?.speedKmh?.let { it <= 0.1f } == true
-        if (!parked) {
-            setAutomaticSwitchChecked(
-                service?.automaticDetectionEnabled
-                    ?: TripRecordingService.isAutomaticDetectionEnabled(this)
-            )
-            return
-        }
-        TripRecordingService.storeAutomaticDetectionEnabled(this, enabled)
-        service.setAutomaticDetectionEnabled(enabled)
-        if (enabled) TripRecordingService.monitorAutomaticTrips(this)
-        service.latest?.let(::render)
-    }
-
-    private fun setAutomaticSwitchChecked(checked: Boolean) {
-        updatingAutomaticSwitch = true
-        binding.automaticDetection.isChecked = checked
-        updatingAutomaticSwitch = false
-    }
-
     private fun renderReadings(
         readings: DashboardReadings,
         firmware: FirmwareInfo.Gen? = null,
     ) {
         bind(binding.socValue, R.string.label_soc, readings.soc, PATTERN_SOC, SOC_UNAVAILABLE)
-        bind(binding.rangeValue, R.string.label_range, readings.range, PATTERN_DISTANCE)
-        bind(
-            binding.adaptiveRangeValue,
-            R.string.label_adaptive_range,
-            readings.adaptiveRange,
-            PATTERN_DISTANCE,
-            DISTANCE_UNAVAILABLE,
-        )
-        bind(binding.speedValue, R.string.label_speed, readings.speed, PATTERN_SPEED)
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
         renderPowerFlow(readings.power, firmware)
-        renderClimate(readings.climate, firmware)
         bind(
             binding.instantConsumptionValue,
             R.string.label_instant_consumption,
             readings.instantConsumption,
             PATTERN_CONSUMPTION,
         )
-        bind(binding.tripDistanceValue, R.string.label_distance, readings.tripDistance, PATTERN_DISTANCE)
-        bind(binding.tripEnergyValue, R.string.label_energy_used, readings.tripEnergy, PATTERN_ENERGY)
-        bind(binding.tripRegenValue, R.string.label_regenerated, readings.tripRegen, PATTERN_ENERGY)
         bind(
             binding.tripConsumptionValue, R.string.label_trip_average_consumption,
             readings.tripConsumption, PATTERN_CONSUMPTION,
         )
-        val recorded = provenance.renderWith(readings.tripDuration, transform = ::duration)
-        binding.tripDurationValue.text = recorded
-        binding.tripDurationValue.contentDescription =
-            provenance.describe(getString(R.string.label_duration), readings.tripDuration, recorded)
     }
 
-    private fun renderClimate(readings: ClimateReadings, firmware: FirmwareInfo.Gen?) {
-        bind(
-            binding.outsideTempValue,
-            R.string.label_outside_temp,
-            readings.outsideTemp,
-            PATTERN_TEMP,
-        )
-        bind(
-            binding.cabinTempValue,
-            R.string.label_cabin_temp,
-            readings.cabinTemp,
-            PATTERN_TEMP,
-        )
-        bind(
-            binding.batteryTempValue,
-            R.string.label_battery_temp,
-            readings.batteryTemp,
-            PATTERN_TEMP,
-        )
-        bindState(binding.climatePowerValue, R.string.label_climate_power, readings.hvacOn)
-        bindState(binding.climateAcValue, R.string.label_climate_ac, readings.acOn)
-        bindState(binding.climateAutoValue, R.string.label_climate_auto, readings.autoOn)
-        bindWith(binding.climateFanValue, R.string.label_climate_fan, readings.fan) {
-            getString(R.string.climate_fan_value, it.level, it.maximum)
+    /**
+     * CP-083. The middle hero answers "will I make it": the charge on arrival while the car's
+     * navigation guides a route, the adaptive range otherwise. Same figure and same refusal as
+     * the Details page; a refused forecast shows its dash rather than falling back to a range,
+     * because a range under the arrival label would read as an arrival.
+     */
+    private fun renderReach(readings: DashboardReadings) {
+        val forecast = arrival
+        if (forecast == null) {
+            binding.reachLabel.setText(R.string.label_adaptive_range)
+            bind(
+                binding.reachValue,
+                R.string.label_adaptive_range,
+                readings.adaptiveRange,
+                PATTERN_DISTANCE_WHOLE,
+                DISTANCE_UNAVAILABLE,
+            )
+            binding.reachDetail.text = ""
+            return
         }
-        bind(
-            binding.climateDriverTargetValue,
-            R.string.label_climate_driver_target,
-            readings.driverTarget,
-            PATTERN_TEMP,
-        )
-        bind(
-            binding.climatePassengerTargetValue,
-            R.string.label_climate_passenger_target,
-            readings.passengerTarget,
-            PATTERN_TEMP,
-        )
-        bindState(binding.climateEconValue, R.string.label_climate_econ, readings.econOn)
-        bindState(
-            binding.climateRecirculationValue,
-            R.string.label_climate_recirculation,
-            readings.recirculationOn,
-        )
-        binding.climateAvailability.text = climateAvailability(readings, firmware)
+        binding.reachLabel.setText(R.string.label_arrival)
+        bind(binding.reachValue, R.string.arrival_label, forecast, PATTERN_SOC_WHOLE, SOC_UNAVAILABLE)
+        binding.reachDetail.text = arrivalRoute.orEmpty()
     }
 
-    private fun bindState(view: TextView, label: Int, value: Provenanced<Boolean>) =
-        bindWith(view, label, value) {
-            getString(if (it) R.string.state_on else R.string.state_off)
-        }
-
-    private fun <T : Any> bindWith(
-        view: TextView,
-        label: Int,
-        value: Provenanced<T>,
-        transform: (T) -> String,
-    ) {
-        val rendered = provenance.renderWith(value, transform = transform)
-        view.text = rendered
-        view.contentDescription = provenance.describe(getString(label), value, rendered)
-    }
-
-    private fun climateAvailability(
-        readings: ClimateReadings,
-        firmware: FirmwareInfo.Gen?,
-    ): String = buildList {
-        add(getString(R.string.climate_state_only))
-        if (firmware == null) {
-            add(getString(R.string.climate_missing_waiting))
-        } else {
-            readings.unavailableReasons.forEach { reason ->
-                add(when (reason) {
-                    UnavailableReason.UNSUPPORTED_FIRMWARE ->
-                        getString(R.string.climate_missing_unsupported)
-                    UnavailableReason.UNVALIDATED_FIRMWARE ->
-                        getString(R.string.climate_missing_unvalidated, firmware.name)
-                    else -> getString(R.string.climate_missing_signal)
-                })
+    /**
+     * Reads the guidance off the main thread, at the Details page's own pace: a route shortens by
+     * metres a second and this is not a speedometer. The rate is the one the Details page uses —
+     * the driver's recorded trips, or the car's own range when they do not vouch for one.
+     */
+    private fun refreshArrival(value: EnergySnapshot) {
+        if (value.timestampMs - arrivalReadAtMs < ARRIVAL_REFRESH_MS) return
+        arrivalReadAtMs = value.timestampMs
+        val trips = recentTrips
+        runCatching {
+            background.execute {
+                SaicNavGuidance.connect(applicationContext)
+                val generation = FirmwareInfo.getGeneration()
+                val guidance = runCatching { SaicNavGuidance.readNow() }.getOrNull()
+                val remainingKm = guidance?.remainingDistanceKm(generation)
+                if (guidance == null || remainingKm == null) {
+                    arrival = null
+                    return@execute
+                }
+                val socPercent = value.socPercent?.toDouble()
+                val rate = SocRateEstimator.fromTrips(trips, generation)
+                    ?: SocRateEstimator.fromVehicleRange(socPercent, value.rangeKm?.toDouble())
+                arrivalRoute = getString(
+                    R.string.reach_route_detail,
+                    format("%.0f", remainingKm),
+                    guidance.remainingMinutes?.toString() ?: DASH,
+                )
+                arrival = ArrivalSocForecast.of(socPercent, remainingKm, rate)
             }
         }
-    }.distinct().joinToString(" · ")
+    }
 
     private fun renderPowerFlow(power: Provenanced<Float>, firmware: FirmwareInfo.Gen?) {
         binding.powerFlow.showPower(power.value)
@@ -576,14 +434,6 @@ class MainActivity : PrimaryNavigationActivity() {
         consumption.reset()
         renderReadings(DashboardFrame.readings)
         renderDataStatus(false)
-        binding.tripAction.isEnabled = false
-        binding.automaticDetection.isEnabled = false
-        val automatic = TripRecordingService.isAutomaticDetectionEnabled(this)
-        setAutomaticSwitchChecked(automatic)
-        binding.tripHint.text = getString(
-            if (automatic) R.string.trip_automatic_speed_unavailable
-            else R.string.trip_control_speed_unavailable
-        )
     }
 
     private fun trustedRecentTrips(
@@ -603,7 +453,6 @@ class MainActivity : PrimaryNavigationActivity() {
         runCatching {
             background.execute {
                 val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
-                eco.load(trips)
                 val summaries = trips.map { it.summary }
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
@@ -612,11 +461,6 @@ class MainActivity : PrimaryNavigationActivity() {
                 }
             }
         }
-    }
-
-    private fun duration(milliseconds: Long): String {
-        val totalMinutes = milliseconds / 60_000L
-        return format("%d:%02d", totalMinutes / 60L, totalMinutes % 60L)
     }
 
     private fun format(pattern: String, vararg args: Any): String =
@@ -634,5 +478,6 @@ class MainActivity : PrimaryNavigationActivity() {
         const val SOC_UNAVAILABLE = "— %"
         const val POWER_UNAVAILABLE = "— kW"
         const val DISTANCE_UNAVAILABLE = "— km"
+        const val ARRIVAL_REFRESH_MS = 5_000L
     }
 }

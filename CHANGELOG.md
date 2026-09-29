@@ -16,6 +16,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   side — measured only. The exported `[charge_energy]` section carries the same per-charge peak,
   step count and bands.
 
+### Changed
+
+- **The energy page is a driving companion (CP-083).** Three large figures — battery charge, the
+  charge on arrival while the car's navigation guides a route (adaptive range otherwise), and the
+  instantaneous consumption — over the eco verdict, the trip average and battery power. Speed,
+  the manufacturer range, the climate values and the trip controls moved to the second page,
+  now called *Details*, next to the arrival explanation.
+- **The eco coach speaks behind the map (CP-083).** The coach lives in the trip recorder instead of
+  the energy screen, so its voice carries on while MG4 Navigator or any other app is in front, as
+  long as a trip records or automatic detection is on.
+
 ### Fixed
 
 - **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service

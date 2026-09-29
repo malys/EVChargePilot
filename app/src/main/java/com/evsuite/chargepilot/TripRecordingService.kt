@@ -69,6 +69,14 @@ class TripRecordingService : Service() {
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
     private lateinit var batteryLedger: BatteryLedgerRecorder
+
+    /**
+     * CP-083: the coach lives here, not in the dashboard. In the activity it stopped hearing the
+     * car the moment the map came to the front, and a companion that falls silent behind the
+     * navigation is no companion. The dashboard draws what this one computed.
+     */
+    lateinit var eco: EcoCoach
+        private set
     private val detector = TripDetector()
     private val pendingHistoryWrites = AtomicInteger()
     private val historyRevisionCounter = AtomicInteger()
@@ -105,6 +113,11 @@ class TripRecordingService : Service() {
             BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME))
         )
         automaticDetectionEnabled = isAutomaticDetectionEnabled(this)
+        eco = EcoCoach(this)
+        sampler.execute {
+            runCatching { eco.load(tripStore.read()) }
+                .onFailure { AppLogger.w(TAG, "eco model load failed: ${it.message}") }
+        }
         createNotificationChannel()
         AppLogger.i(TAG, "service created; automatic=$automaticDetectionEnabled")
     }
@@ -233,6 +246,8 @@ class TripRecordingService : Service() {
         val endedAt = latestSnapshot?.timestampMs ?: System.currentTimeMillis()
         val recorded = EnergyTripSession.stop(endedAt)
         detector.reset()
+        // The next drive is judged on its own window, not on the one that just ended.
+        eco.reset()
         if (!automaticDetectionEnabled) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         }
@@ -272,6 +287,7 @@ class TripRecordingService : Service() {
                             it.summary.batteryPowerEvidence
                         }
                         LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
+                        eco.load(trips)
                     }.onFailure {
                         AppLogger.w(TAG, "local energy model refresh failed: ${it.message}")
                     }
@@ -353,6 +369,14 @@ class TripRecordingService : Service() {
         // blanked the screen, and left the driver with three empty energy tiles instead.
         latestSnapshot = value
         EnergyTripSession.add(value)
+        // Every sample, whoever is on screen: the verdict is recomputed on the coach's own
+        // cadence, and it speaks only when the advice changes. An exception thrown here would
+        // stop the fixed-delay schedule for good, so it is caught like its neighbours.
+        runCatching {
+            val verdict = eco.update(value)
+            DashboardFrame.publish(verdict)
+            eco.speak(verdict, value.speedKmh, value.timestampMs)
+        }.onFailure { AppLogger.w(TAG, "eco coach failed: ${it.message}") }
         // The battery ledger spans what trips cannot: the parking, the overnight standing and
         // the charge that happens between two drives, which is where a health estimate's
         // windows begin and end. It writes only when the sample earned an entry — a point of

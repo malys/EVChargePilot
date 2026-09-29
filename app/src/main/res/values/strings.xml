@@ -18,6 +18,8 @@
     <string name="power_state_waiting">Waiting for firmware detection</string>
     <string name="label_range">VEHICLE RANGE</string>
     <string name="label_adaptive_range">ADAPTIVE ESTIMATE</string>
+    <string name="label_arrival">ON ARRIVAL</string>
+    <string name="reach_route_detail" translatable="false">%1$s km · %2$s min</string>
     <string name="label_speed">SPEED</string>
     <string name="label_climate">CLIMATE</string>
     <string name="label_outside_temp">OUTSIDE</string>
@@ -43,7 +45,7 @@
     <string name="action_stop_trip">Stop and save trip</string>
     <string name="action_automatic_trips">Automatic trips</string>
     <string name="tab_energy">Energy</string>
-    <string name="tab_arrival">Arrival</string>
+    <string name="tab_arrival">Details</string>
     <string name="tab_trips">Trips</string>
     <string name="tab_battery">Battery</string>
     <string name="tab_diagnostics">Diagnostics</string>

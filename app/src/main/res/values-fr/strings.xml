@@ -15,6 +15,7 @@
     <string name="power_state_waiting">En attente de l’identification du firmware</string>
     <string name="label_range">AUTONOMIE VÉHICULE</string>
     <string name="label_adaptive_range">ESTIMATION ADAPTATIVE</string>
+    <string name="label_arrival">À L’ARRIVÉE</string>
     <string name="label_speed">VITESSE</string>
     <string name="label_climate">CLIMATISATION</string>
     <string name="label_outside_temp">EXTÉRIEUR</string>
@@ -40,7 +41,7 @@
     <string name="action_stop_trip">Arrêter et enregistrer</string>
     <string name="action_automatic_trips">Trajets automatiques</string>
     <string name="tab_energy">Énergie</string>
-    <string name="tab_arrival">Arrivée</string>
+    <string name="tab_arrival">Détails</string>
     <string name="tab_trips">Trajets</string>
     <string name="tab_battery">Batterie</string>
     <string name="tab_diagnostics">Diagnostic</string>
