@@ -25,6 +25,7 @@ import com.evsuite.hardware.telemetry.model.EnergyAttributionResult
 import com.evsuite.hardware.telemetry.model.ResidualAttribution
 import com.evsuite.hardware.telemetry.model.ResidualContext
 import com.evsuite.hardware.telemetry.model.ResidualFinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.text.DateFormat
@@ -58,6 +59,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private var bound = false
     private val overviewPrefs by lazy { getSharedPreferences(OVERVIEW_FILE, MODE_PRIVATE) }
     private var showOverview = true
+    /** CP-084: what the info mark says — how the range is estimated and how the chart reads. */
+    private var overviewExplanation = ""
     private var loaded = false
     private var lastOverviewMs = 0L
 
@@ -111,6 +114,13 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             loadOverview()
         }
         binding.resetTripAAction.setOnClickListener { resetTripAIfParked() }
+        binding.overviewInfo.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.trip_overview_info)
+                .setMessage(overviewExplanation)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
         listOf(
             binding.overviewTrace,
             binding.cardCurrent.cardTrace,
@@ -309,18 +319,13 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
 
     private fun renderOverview(value: Overview) {
         val window = format("%.0f km", value.windowKm)
-        binding.overviewRange.text = getString(
-            R.string.trip_overview_range,
-            value.rangeKm?.let { format("%.0f km", it) } ?: DASH,
-        )
-        binding.overviewRangeBasis.text = getString(R.string.trip_overview_range_basis, window)
-        binding.overviewConsumption.text = value.consumption?.let(::consumption) ?: DASH
+        binding.overviewRange.text = value.rangeKm?.let { format("%.0f km", it) } ?: "$DASH km"
+        overviewExplanation = getString(R.string.trip_overview_range_basis, window) + "\n\n" +
+            getString(R.string.trip_overview_legend, consumption(value.reference))
+        binding.overviewConsumption.text = value.consumption?.let { format("%.1f", it) } ?: DASH
         val delta = value.consumption?.minus(value.reference)
         binding.overviewDelta.text = delta?.let {
-            getString(
-                if (it > 0.0) R.string.trip_overview_above else R.string.trip_overview_below,
-                consumption(abs(it)),
-            )
+            getString(R.string.trip_overview_delta, format("%+.1f", it))
         }.orEmpty()
         binding.overviewDelta.setTextColor(
             getColor(if ((delta ?: 0.0) > 0.0) R.color.ev_warn else R.color.ev_accent)
@@ -334,8 +339,6 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 distance(value.coveredKm),
             )
         }
-        binding.overviewLegend.text =
-            getString(R.string.trip_overview_legend, consumption(value.reference))
         binding.overviewTrace.setTrace(value.trace, value.reference, value.coveredKm)
         binding.overviewTrace.contentDescription =
             getString(R.string.trip_overview_trace_description, distance(value.coveredKm))

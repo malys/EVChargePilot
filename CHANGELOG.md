@@ -27,6 +27,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   the energy screen, so its voice carries on while MG4 Navigator or any other app is in front, as
   long as a trip records or automatic detection is on.
 
+- **A gauge instead of "nothing to say yet" (CP-084).** When no advice applies, the energy page
+  draws the share of hard acceleration as a bar, with a mark where the steadiness advice starts
+  and one word beside it ("Smooth · 4 %", "Coach listening" before a minute of driving).
+- **The trips summary reads at a glance (CP-084).** Estimated range and consumption side by side
+  in large figures, the gap to the reference on one line; the explanation of the estimate and of
+  the chart moved behind an ⓘ.
 ### Fixed
 
 - **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service

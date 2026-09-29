@@ -501,8 +501,10 @@ Consommation %6$s %% par km</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">À %1$d plutôt que %2$d km/h, cette route coûte environ %3$d %% de moins.</string>
     <string name="eco_advice_steadiness">Accélérations franches sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
-    <string name="eco_advice_waiting">Rien à dire pour l’instant — il faut quelques minutes de route avant qu’un conseil apparaisse ici.</string>
-    <string name="eco_advice_calm">Rien à signaler : accélérations fortes sur %1$d %% de la conduite récente.</string>
+    <string name="eco_gauge_listening">Coach à l’écoute</string>
+    <string name="eco_gauge_smooth">Souple · %1$d %%</string>
+    <string name="eco_gauge_harsh">Brusque · %1$d %%</string>
+    <string name="eco_gauge_description">Accélérations franches sur %1$d %% de la conduite récente ; conseil à partir de %2$d %%.</string>
     <string name="eco_settings_title">Assistant d’éco-conduite</string>
     <string name="eco_settings_advice">Afficher les conseils de conduite</string>
     <string name="eco_settings_voice">Énoncer les conseils</string>
@@ -528,10 +530,10 @@ Consommation %6$s %% par km</string>
     <string name="vehicle_refused_reference">Consommation de référence refusée : elle doit être un nombre entre 5 et 50 kWh/100 km.</string>
     <string name="trip_view_overview">Synthèse</string>
     <string name="trip_view_ledger">Journal</string>
-    <string name="trip_overview_range">Autonomie est. : %1$s</string>
+    <string name="trip_overview_range_label">Autonomie est.</string>
+    <string name="trip_overview_info">Comment ces chiffres sont calculés</string>
     <string name="trip_overview_range_basis">Estimée à partir de l\'énergie restante et de la consommation nette des derniers %1$s.</string>
-    <string name="trip_overview_above">%1$s au-dessus de la référence</string>
-    <string name="trip_overview_below">%1$s en dessous de la référence</string>
+    <string name="trip_overview_delta">%1$s kWh/100 km par rapport à votre référence</string>
     <string name="trip_overview_window_energy">%1$s nets au cours des derniers %2$s</string>
     <string name="trip_overview_no_driving">Aucune conduite avec vitesse et puissance enregistrées sur cette fenêtre.</string>
     <string name="trip_overview_legend">Pointillés : votre référence, %1$s. Ambre au-dessus, bleu en dessous. Double tap sur un graphique pour le plein écran.</string>

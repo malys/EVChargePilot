@@ -184,5 +184,35 @@
             android:padding="@dimen/spacing_md"
             android:textAppearance="@style/Text.EV.Title"
             android:visibility="gone" />
+
+        <!-- CP-084. In place of the advice when no lever applies: the harsh-acceleration share
+             as a bar, the mark where the steadiness advice starts, and a word that says it. -->
+        <LinearLayout
+            android:id="@+id/ecoGauge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/touch_target"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_md"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/ecoGaugeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:maxLines="1"
+                android:textAppearance="@style/Text.EV.Title" />
+
+            <com.evsuite.chargepilot.BarGaugeView
+                android:id="@+id/ecoGaugeBar"
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="@dimen/spacing_lg"
+                android:layout_weight="1" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

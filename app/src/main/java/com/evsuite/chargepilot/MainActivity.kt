@@ -28,6 +28,7 @@ import com.evsuite.hardware.telemetry.AdaptiveRangeEstimator
 import com.evsuite.hardware.telemetry.ArrivalSocForecast
 import com.evsuite.hardware.telemetry.BatteryCapacityConfig
 import com.evsuite.hardware.telemetry.ConsumptionCalculator
+import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSession
@@ -40,6 +41,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
+import kotlin.math.roundToInt
 
 class MainActivity : PrimaryNavigationActivity() {
     override val primaryPage = PrimaryPage.ENERGY
@@ -260,6 +262,41 @@ class MainActivity : PrimaryNavigationActivity() {
         val line = eco.line(verdict)
         binding.ecoAdviceLine.visibility = if (line == null) View.GONE else View.VISIBLE
         binding.ecoAdviceLine.text = line.orEmpty()
+        val gauge = line == null && EcoCoach.adviceEnabled(this)
+        binding.ecoGauge.visibility = if (gauge) View.VISIBLE else View.GONE
+        if (gauge) renderEcoGauge(eco.harshShare())
+    }
+
+    /** CP-084. Empty and grey before a minute of movement; amber once past the advice mark. */
+    private fun renderEcoGauge(share: Double?) {
+        val threshold = EcoDrivingMonitor.MIN_HARSH_SHARE_PERCENT
+        val mark = (threshold / ECO_GAUGE_FULL_PERCENT).toFloat()
+        if (share == null) {
+            binding.ecoGaugeLabel.text = getString(R.string.eco_gauge_listening)
+            binding.ecoGaugeBar.show(emptyList(), mark)
+            binding.ecoGauge.contentDescription = binding.ecoGaugeLabel.text
+            return
+        }
+        val harsh = share >= threshold
+        binding.ecoGaugeLabel.text = getString(
+            if (harsh) R.string.eco_gauge_harsh else R.string.eco_gauge_smooth,
+            share.roundToInt(),
+        )
+        binding.ecoGaugeBar.show(
+            listOf(
+                BarGaugeView.Span(
+                    0f,
+                    (share / ECO_GAUGE_FULL_PERCENT).toFloat(),
+                    if (harsh) R.color.ev_warn else R.color.ev_accent,
+                ),
+            ),
+            mark,
+        )
+        binding.ecoGauge.contentDescription = getString(
+            R.string.eco_gauge_description,
+            share.roundToInt(),
+            threshold.roundToInt(),
+        )
     }
 
     /** Parked only, and re-checked here rather than trusted from the last frame. */
@@ -479,5 +516,7 @@ class MainActivity : PrimaryNavigationActivity() {
         const val POWER_UNAVAILABLE = "— kW"
         const val DISTANCE_UNAVAILABLE = "— km"
         const val ARRIVAL_REFRESH_MS = 5_000L
+        /** The full gauge: two and a half times the advice mark, so the mark sits left of centre. */
+        const val ECO_GAUGE_FULL_PERCENT = 30.0
     }
 }

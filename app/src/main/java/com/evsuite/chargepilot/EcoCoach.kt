@@ -99,23 +99,22 @@ class EcoCoach(context: Context) {
     }
 
     /**
-     * The advice line, or null when the driver never asked for one.
+     * The advice sentence, or null when the driver never asked for one or no lever applies.
      *
      * A driver who turned the switch on and reads nothing cannot tell an app with no advice from
-     * an app that ignored the switch, so the enabled-but-silent case says which it is — the same
-     * rule every other unavailable value on this screen follows. It stays a statement about the
-     * measurement rather than a promise: the levers need either a fitted model or a few minutes
-     * of movement, and neither is a thing the driver can press. Once that minute of movement is
-     * there and nothing crossed a threshold, the line says so with the figure it measured —
-     * a calm drive kept "a few minutes are needed" on screen for the whole of it.
+     * an app that ignored the switch, so the enabled-but-silent case still shows something —
+     * CP-084: the smoothness gauge, drawn from [harshShare], instead of a sentence about having
+     * nothing to say.
      */
     @Synchronized
     fun line(verdict: EcoVerdict): String? {
         if (!adviceEnabled(app)) return null
-        verdict.advice?.let(::sentence)?.let { return it }
-        val share = monitor.harshSharePercent() ?: return app.getString(R.string.eco_advice_waiting)
-        return app.getString(R.string.eco_advice_calm, share.roundToInt())
+        return verdict.advice?.let(::sentence)
     }
+
+    /** The share of harsh acceleration the gauge draws; null before a minute of movement. */
+    @Synchronized
+    fun harshShare(): Double? = monitor.harshSharePercent()
 
     /**
      * Says the line when it has become a different line.

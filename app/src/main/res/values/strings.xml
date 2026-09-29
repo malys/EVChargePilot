@@ -512,8 +512,11 @@ Spending %6$s %% per km</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">At %1$d rather than %2$d km/h, this road costs about %3$d %% less.</string>
     <string name="eco_advice_steadiness">Hard acceleration on %1$d %% of this drive; the same road at a steady speed costs less.</string>
-    <string name="eco_advice_waiting">Nothing to say yet — a few minutes of driving are needed before a line appears here.</string>
-    <string name="eco_advice_calm">Nothing to point out: hard acceleration on %1$d %% of recent driving.</string>
+    <!-- CP-084. The gauge's word; the bar beside it is the share, the mark the advice threshold. -->
+    <string name="eco_gauge_listening">Coach listening</string>
+    <string name="eco_gauge_smooth">Smooth · %1$d %%</string>
+    <string name="eco_gauge_harsh">Abrupt · %1$d %%</string>
+    <string name="eco_gauge_description">Hard acceleration on %1$d %% of recent driving; advice starts at %2$d %%.</string>
     <string name="eco_settings_title">Eco-driving coach</string>
     <string name="eco_settings_advice">Show driving advice</string>
     <string name="eco_settings_voice">Speak the advice</string>
@@ -540,10 +543,11 @@ Spending %6$s %% per km</string>
     <string name="vehicle_refused_reference">Reference consumption refused: it must be a number between 5 and 50 kWh/100 km.</string>
     <string name="trip_view_overview">Overview</string>
     <string name="trip_view_ledger">Ledger</string>
-    <string name="trip_overview_range">Est. range: %1$s</string>
+    <string name="trip_overview_range_label">Est. range</string>
+    <string name="trip_overview_consumption_label" translatable="false">kWh/100 km</string>
+    <string name="trip_overview_info">How these figures are made</string>
     <string name="trip_overview_range_basis">Estimated from the charge left and the net consumption of the last %1$s.</string>
-    <string name="trip_overview_above">%1$s above your reference</string>
-    <string name="trip_overview_below">%1$s below your reference</string>
+    <string name="trip_overview_delta">%1$s kWh/100 km vs your reference</string>
     <string name="trip_overview_window_energy">%1$s net over the last %2$s</string>
     <string name="trip_overview_no_driving">No driving with speed and power recorded in this window yet.</string>
     <string name="trip_overview_legend">Dashed line: your reference, %1$s. Amber above it, blue below. Double-tap a graph for full screen.</string>
