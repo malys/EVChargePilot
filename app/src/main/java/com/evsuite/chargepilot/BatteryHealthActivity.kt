@@ -102,6 +102,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         binding.chargeHistoryAction.setOnClickListener {
             startActivity(Intent(this, ChargeHistoryActivity::class.java))
         }
+        binding.adviceHistoryAction.setOnClickListener {
+            startActivity(Intent(this, AdviceHistoryActivity::class.java))
+        }
         load()
     }
 

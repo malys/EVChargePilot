@@ -21,6 +21,7 @@ import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
 import com.evsuite.hardware.telemetry.BatteryExposure
+import com.evsuite.hardware.telemetry.BatteryDigestStore
 import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.ChargeEnergyAnalyzer
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -304,6 +305,15 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine("[eco_trip_review]")
             appendLine(getString(R.string.diagnostics_eco_trip_review))
             latestTripReviewLines().forEach(::appendLine)
+            appendLine()
+            // CP-087. The last week of daily battery digests and the newest advice as it was
+            // given, so a bundle shows what the companion concluded and what it told the driver.
+            appendLine("[battery_advice]")
+            appendLine("notifications_enabled=${BatteryAdvisor.notificationsEnabled(this@DiagnosticsActivity)}")
+            BatteryDigestStore(File(filesDir, BatteryDigestStore.FILE_NAME)).read().takeLast(7)
+                .forEach { appendLine("digest=$it") }
+            AdviceJournal.of(filesDir).read().takeLast(20)
+                .forEach { appendLine("advice=${it.atMs} ${it.kind} notified=${it.notified} ${it.text}") }
             appendLine()
             appendLine("[property_probe]")
             appendLine(getString(R.string.diagnostics_properties))

@@ -69,6 +69,7 @@ class TripRecordingService : Service() {
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
     private lateinit var batteryLedger: BatteryLedgerRecorder
+    private lateinit var batteryAdvisor: BatteryAdvisor
 
     /**
      * CP-083: the coach lives here, not in the dashboard. In the activity it stopped hearing the
@@ -112,6 +113,7 @@ class TripRecordingService : Service() {
         batteryLedger = BatteryLedgerRecorder(
             BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME))
         )
+        batteryAdvisor = BatteryAdvisor(this, ::inAppLanguage)
         automaticDetectionEnabled = isAutomaticDetectionEnabled(this)
         eco = EcoCoach(this)
         sampler.execute {
@@ -317,11 +319,12 @@ class TripRecordingService : Service() {
 
     /**
      * The trip just closed in P: say what it cost against the driver's own average, and what
-     * would have made it cheaper. Once per trip, only when both coach switches are on, and only
-     * with the car stopped — the one spoken line a parked car gets. Runs on the sampler thread.
+     * would have made it cheaper. Once per trip, only when the advice switch is on, and only
+     * with the car stopped. The line goes to the advice history; it is spoken — the one spoken
+     * line a parked car gets — only when the voice switch is on too. Runs on the sampler thread.
      */
     private fun speakTripAdvice(startedAtMs: Long) {
-        if (!EcoCoach.adviceEnabled(this) || !EcoCoach.voiceEnabled(this)) return
+        if (!EcoCoach.adviceEnabled(this)) return
         val speed = latestSnapshot?.speedKmh
         if (speed != null && speed > STOPPED_KMH) return
         val trips = tripStore.read()
@@ -329,7 +332,10 @@ class TripRecordingService : Service() {
         // The mode the car is parked in is the mode it was driven in, unless changed at a stop.
         val mode = runCatching { EVHardware.getDriveMode() }.getOrNull()
         val advice = EcoTripAdvice.advise(trip, reviewTrip(filesDir, trips, trip), mode)
-        EcoVoice.say(this, EcoAdviceText(inAppLanguage()).spoken(advice))
+        val line = EcoAdviceText(inAppLanguage()).spoken(advice)
+        // CP-087: kept whether or not it is said out loud.
+        batteryAdvisor.record(AdviceKind.TRIP_END, line, trip.summary.endedAtMs)
+        if (EcoCoach.voiceEnabled(this)) EcoVoice.say(this, line)
     }
 
     /**
@@ -401,6 +407,9 @@ class TripRecordingService : Service() {
             }
             batteryRevisionCounter.incrementAndGet()
         }
+        // CP-087. The daily digest and the parked notification; both cost one comparison on
+        // every other sample.
+        batteryAdvisor.onSample(value)
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state

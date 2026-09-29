@@ -593,4 +593,18 @@ Consommation %6$s %% par km</string>
     <string name="eco_history_motorway_soc">10 km/h de moins sur voie rapide : environ %1$.1f points de charge de moins sur %2$d trajets.</string>
     <string name="eco_history_cabin">Chauffage et climatisation : en moyenne %1$d %% de l’énergie des trajets où ils ont compté.</string>
     <string name="eco_history_windows">Fenêtres ouvertes : en moyenne %1$d %% de l’énergie des trajets où elles ont compté.</string>
+
+    <!-- CP-087 : historique des conseils et notifications du compagnon batterie. -->
+    <string name="advice_history_title">Conseils</string>
+    <string name="advice_history_open">Historique des conseils</string>
+    <string name="advice_history_list">Conseils, du plus récent au plus ancien, tels que donnés</string>
+    <string name="advice_history_empty">Aucun conseil pour l’instant. La phrase de fin de trajet et ce qui change d’un jour à l’autre dans les analyses de la batterie sont gardés ici.</string>
+    <string name="advice_settings_notify">Notifier les conseils batterie à l’arrêt</string>
+    <string name="advice_notification_title">Compagnon batterie</string>
+    <string name="advice_channel">Conseils batterie</string>
+    <string name="advice_channel_description">Ce qui a changé dans les analyses de la batterie, envoyé seulement voiture à l’arrêt, au plus un de chaque sorte par jour.</string>
+    <string name="advice_health_first">Première estimation de la santé de la batterie : %1$.1f %% ± %2$.1f points. Elle se resserre à chaque charge suivie du début à la fin.</string>
+    <string name="advice_health_narrowed">Santé de la batterie %1$.1f %%, connue désormais à ± %2$.1f points (± %3$.1f avant).</string>
+    <string name="advice_health_moved">Santé de la batterie %1$.1f %% ± %2$.1f points, contre %3$.1f %% : un écart plus grand que la marge de l’estimation.</string>
+    <string name="advice_calibration">Calage de la jauge de charge : %1$s.</string>
 </resources>

@@ -377,6 +377,16 @@
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:accessibilityLiveRegion="polite"
                     android:textAppearance="@style/Text.EV.Secondary" />
+
+                <!-- CP-087. Battery advice is always kept in its history; this only decides
+                     whether it also reaches the driver as a notification when parked. -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/adviceNotifySwitch"
+                    style="@style/Widget.EV.Switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/advice_settings_notify" />
             </LinearLayout>
 
             <LinearLayout

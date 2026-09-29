@@ -121,6 +121,10 @@ class SettingsActivity : PrimaryNavigationActivity() {
             EcoCoach.storeVoiceEnabled(this, checked)
             if (checked) testVoice()
         }
+        binding.adviceNotifySwitch.isChecked = BatteryAdvisor.notificationsEnabled(this)
+        binding.adviceNotifySwitch.setOnCheckedChangeListener { _, checked ->
+            BatteryAdvisor.storeNotificationsEnabled(this, checked)
+        }
     }
 
     /**

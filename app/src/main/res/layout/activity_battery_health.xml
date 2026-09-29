@@ -103,6 +103,14 @@
                 android:layout_marginTop="@dimen/spacing_sm"
                 android:text="@string/charge_history_open" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/adviceHistoryAction"
+                style="@style/Widget.EV.Button"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/advice_history_open" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

@@ -615,4 +615,18 @@ Spending %6$s %% per km</string>
     <string name="eco_history_motorway_soc">10 km/h slower on fast roads: about %1$.1f points of charge less over %2$d trips.</string>
     <string name="eco_history_cabin">Cabin heating and cooling: on average %1$d %% of the energy of the trips where it counted.</string>
     <string name="eco_history_windows">Open windows: on average %1$d %% of the energy of the trips where they counted.</string>
+
+    <!-- CP-087: the battery companion's advice history and notifications. -->
+    <string name="advice_history_title">Advice</string>
+    <string name="advice_history_open">Advice history</string>
+    <string name="advice_history_list">Advice, newest first, as it was given</string>
+    <string name="advice_history_empty">No advice given yet. The trip-end line and what changes in the battery analyses from one day to the next are kept here.</string>
+    <string name="advice_settings_notify">Notify battery advice when parked</string>
+    <string name="advice_notification_title">Battery companion</string>
+    <string name="advice_channel">Battery advice</string>
+    <string name="advice_channel_description">What changed in the battery analyses, sent only with the car stopped, at most one of each kind a day.</string>
+    <string name="advice_health_first">First battery health estimate: %1$.1f %% ± %2$.1f points. It narrows with every charge the app watches from start to finish.</string>
+    <string name="advice_health_narrowed">Battery health %1$.1f %%, now known to ± %2$.1f points (was ± %3$.1f).</string>
+    <string name="advice_health_moved">Battery health now %1$.1f %% ± %2$.1f points, was %3$.1f %%: a move larger than the estimate’s own band.</string>
+    <string name="advice_calibration">Charge-gauge calibration: %1$s.</string>
 </resources>

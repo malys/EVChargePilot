@@ -6,6 +6,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **A battery companion that speaks up once a day (CP-087).** At the first sample of each local
+  day the service recomputes the battery analyses in both flavors and stores the day's digest.
+  What moved past its own band since the day before — a first health estimate, a band that
+  narrowed, health that moved, a calibration verdict that changed — becomes advice. Every
+  advice, the trip-end line included, is kept word for word in an advice history (Battery page,
+  "Advice history", newest first) and in the diagnostic bundle (`[battery_advice]`). With the car
+  parked, a "Battery advice" notification carries it, at most one per kind a day; a Settings
+  switch turns it off. No new permission: the head unit's API 28 needs none, and on API 33+ the
+  advice stays in the history only.
 - **Open windows, measured and counted (CP-086).** A Windows tile in the Details climate grid
   shows the widest opening in percent. The trip review adds a Windows finding when the window-open
   residual is distinguishable and above the cabin's minimum share: its kWh, its share, and the
