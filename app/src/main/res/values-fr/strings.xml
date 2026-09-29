@@ -612,4 +612,15 @@ Consommation %6$s %% par km</string>
     <string name="advice_limit_unread">Une limite de charge à %1$d %% couvrirait %2$.0f %% de vos %3$d derniers jours de route, réserve de 15 points comprise. La limite de la voiture n’a pas pu être lue pour comparer.</string>
     <string name="advice_dwell">La voiture est restée %1$.0f h à %2$.0f %% ou plus. Les longues heures à charge haute usent le plus le pack : charger aussi haut juste avant de partir les évite.</string>
     <string name="advice_heat">Garée à %1$.0f %% avec %2$.0f °C dehors. C’est la température extérieure — la voiture ne publie pas celle du pack. Chaleur et charge haute ensemble usent le pack le plus vite : l’ombre ou une charge plus basse aident.</string>
+    <string name="charge_live_via_eighty">En charge : 80 %% à %1$s, %2$d %% à %3$s (entre %4$s et %5$s d’après vos charges passées).</string>
+    <string name="charge_live_until">En charge : %1$d %% à %2$s (entre %3$s et %4$s d’après vos charges passées).</string>
+    <string name="charge_live_at_target">En charge : à la limite de %1$d %%.</string>
+    <string name="charge_live_no_history">En charge : pas d’heure de fin — aucune charge observée pour la mesurer.</string>
+    <string name="charge_live_missing_band">En charge : pas d’heure de fin — aucune charge observée n’a encore traversé %1$d–%2$d %%.</string>
+    <string name="advice_charge_last_stretch">La dernière ligne droite jusqu’à %1$d %% prend %2$.1f h, autant que les %3$.1f h d’avant.</string>
+    <string name="advice_charge_slower">La charge de %1$d à %2$d %% a pris %3$.1f min par point, plus lent que vos %4$.1f–%5$.1f min habituelles à ce niveau (%6$d charges passées).</string>
+    <string name="advice_charge_end">Charge : +%1$.0f points en %2$.1f h. %3$s</string>
+    <string name="advice_charge_curve_usual">La courbe était celle d’habitude.</string>
+    <string name="advice_charge_curve_slower">Une partie de la courbe était plus lente que d’habitude.</string>
+    <string name="advice_charge_curve_unchecked">Courbe non vérifiée : moins de trois charges passées ont traversé une tranche entière.</string>
 </resources>

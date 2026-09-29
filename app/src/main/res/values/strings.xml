@@ -634,4 +634,15 @@ Spending %6$s %% per km</string>
     <string name="advice_limit_unread">A %1$d %% charge limit would cover %2$.0f %% of your last %3$d driving days, a 15-point reserve included. The car’s own limit could not be read to compare.</string>
     <string name="advice_dwell">The car stood %1$.0f h at %2$.0f %% or more. Long hours at a high charge age the pack most: charging that high just before leaving avoids them.</string>
     <string name="advice_heat">Parked at %1$.0f %% with %2$.0f °C outside. That is the outside temperature — the car does not publish the pack’s. Heat and a high charge together age the pack fastest: shade or a lower charge help.</string>
+    <string name="charge_live_via_eighty">Charging: 80 %% at %1$s, %2$d %% at %3$s (between %4$s and %5$s by your past charges).</string>
+    <string name="charge_live_until">Charging: %1$d %% at %2$s (between %3$s and %4$s by your past charges).</string>
+    <string name="charge_live_at_target">Charging: at the %1$d %% limit.</string>
+    <string name="charge_live_no_history">Charging: no end time — no watched charge to measure it from yet.</string>
+    <string name="charge_live_missing_band">Charging: no end time — no watched charge has crossed %1$d–%2$d %% yet.</string>
+    <string name="advice_charge_last_stretch">The last stretch to %1$d %% takes %2$.1f h, as long as the %3$.1f h before it.</string>
+    <string name="advice_charge_slower">Charging %1$d–%2$d %% took %3$.1f min a point, slower than your usual %4$.1f–%5$.1f min at this level (%6$d past charges).</string>
+    <string name="advice_charge_end">Charge: +%1$.0f points in %2$.1f h. %3$s</string>
+    <string name="advice_charge_curve_usual">The curve was your usual one.</string>
+    <string name="advice_charge_curve_slower">Part of the curve was slower than usual.</string>
+    <string name="advice_charge_curve_unchecked">The curve was not checked: fewer than three past charges crossed a whole band.</string>
 </resources>

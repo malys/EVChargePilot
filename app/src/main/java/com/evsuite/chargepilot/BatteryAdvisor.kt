@@ -23,6 +23,7 @@ import com.evsuite.hardware.telemetry.EnergySnapshot
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId
+import java.util.TimeZone
 
 /**
  * The battery companion's daily round and its one way of speaking up unasked (CP-087).
@@ -49,8 +50,18 @@ internal class BatteryAdvisor(
     private val digests = BatteryDigestStore(File(filesDir, BatteryDigestStore.FILE_NAME))
     private var digestDay: String? = null
     private var pending = true
+    private val charge = ChargeCompanion(
+        history = {
+            val learned = LocalBatteryLearning.latest
+                ?: LocalBatteryLearning.refresh(filesDir, VehicleSettings.read(context).usableCapacityKwhWhenNew)
+            learned.charge.pluggedCharges
+        },
+        limit = { runCatching { SaicCharging.chargeLimitPercent() }.getOrNull() },
+    )
 
     fun onSample(value: EnergySnapshot) {
+        runCatching { charging(value) }
+            .onFailure { AppLogger.w(TAG, "charge companion failed: ${it.message}") }
         val day = Instant.ofEpochMilli(value.timestampMs).atZone(zone).toLocalDate().toString()
         if (day != digestDay) {
             digestDay = day
@@ -62,6 +73,27 @@ internal class BatteryAdvisor(
         if (gate != ParkedDeletionGate.PARKED) return
         runCatching { flush(value.timestampMs) }
             .onFailure { AppLogger.w(TAG, "advice notification failed: ${it.message}") }
+    }
+
+    /** CP-089. The charge in progress: its end time for the Battery page, and its lines. */
+    private fun charging(value: EnergySnapshot) {
+        val events = charge.observe(
+            value.timestampMs,
+            value.socPercent?.toDouble(),
+            value.speedKmh,
+            value.outsideTempCelsius?.toDouble(),
+        )
+        ChargeCompanion.latest = charge.live
+        if (events.isEmpty()) return
+        val words = ChargeCompanionText(text(), TimeZone.getTimeZone(zone))
+        events.forEach { event ->
+            val line = when (event) {
+                is ChargeCompanion.Event.Started -> words.started(event.live)
+                is ChargeCompanion.Event.Slower -> words.slower(event.check)
+                is ChargeCompanion.Event.Ended -> words.ended(event)
+            } ?: return@forEach
+            record(AdviceKind.CHARGING, line, value.timestampMs)
+        }
     }
 
     /** Anything the app says — the trip-end line included — is kept, then notified when parked. */

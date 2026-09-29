@@ -6,6 +6,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **The charge in progress and when it ends (CP-089).** While the car stands still and its charge
+  rises, the Battery page shows "80 % at 21:40, 100 % at 23:10", with the range the driver's own
+  watched charges allow, to the car's limit (else 100 %). The time is recomputed each time the
+  charge enters a new 10-point band, not every sample. A band no watched charge crossed gives no
+  time and says which band is missing. The journal gets the opening line (with the last stretch
+  above 80 % when it takes as long as the rest), a note when a whole band took longer than the
+  slowest of at least three past charges, and a closing line: points added, duration, and whether
+  the curve was usual. The app reads no charging state it trusts, so a charge is the ledger's: a
+  rise with the car still. It closes when the car moves or after 45 minutes without a rise.
 - **Advice on how the car is left parked (CP-088).** The daily round now proposes a charge limit
   from the driver's own days — the 95th-percentile driving day in charge points, measured from
   the ledger's odometer and charge steps, plus a 15-point reserve, rounded up to 5, floor 60 % —

@@ -323,6 +323,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
      * still open.
      */
     private fun renderCharge() {
+        val live = ChargeCompanion.latest
+        binding.chargeLive.visibility = if (live != null) View.VISIBLE else View.GONE
+        if (live != null) binding.chargeLive.text = ChargeCompanionText(this).live(live)
         val last = charge?.lastPluggedCharge
         if (last == null) {
             binding.chargeFacts.text = getString(R.string.battery_health_last_charge_none)
