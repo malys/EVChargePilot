@@ -607,4 +607,9 @@ Consommation %6$s %% par km</string>
     <string name="advice_health_narrowed">Santé de la batterie %1$.1f %%, connue désormais à ± %2$.1f points (± %3$.1f avant).</string>
     <string name="advice_health_moved">Santé de la batterie %1$.1f %% ± %2$.1f points, contre %3$.1f %% : un écart plus grand que la marge de l’estimation.</string>
     <string name="advice_calibration">Calage de la jauge de charge : %1$s.</string>
+    <string name="advice_limit_lower">Une limite de charge à %1$d %% couvrirait %2$.0f %% de vos %3$d derniers jours de route, réserve de 15 points comprise ; la voiture s’arrête à %4$d %%. Les heures passées à charge haute usent le plus le pack. La limite se règle dans la voiture, pas ici.</string>
+    <string name="advice_limit_raise">La voiture arrête la charge à %1$d %%, sous les %2$d %% que demandent vos jours les plus longs, réserve de 15 points comprise (ce qui couvrirait %3$.0f %% de vos %4$d derniers jours de route).</string>
+    <string name="advice_limit_unread">Une limite de charge à %1$d %% couvrirait %2$.0f %% de vos %3$d derniers jours de route, réserve de 15 points comprise. La limite de la voiture n’a pas pu être lue pour comparer.</string>
+    <string name="advice_dwell">La voiture est restée %1$.0f h à %2$.0f %% ou plus. Les longues heures à charge haute usent le plus le pack : charger aussi haut juste avant de partir les évite.</string>
+    <string name="advice_heat">Garée à %1$.0f %% avec %2$.0f °C dehors. C’est la température extérieure — la voiture ne publie pas celle du pack. Chaleur et charge haute ensemble usent le pack le plus vite : l’ombre ou une charge plus basse aident.</string>
 </resources>

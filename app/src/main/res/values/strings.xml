@@ -629,4 +629,9 @@ Spending %6$s %% per km</string>
     <string name="advice_health_narrowed">Battery health %1$.1f %%, now known to ± %2$.1f points (was ± %3$.1f).</string>
     <string name="advice_health_moved">Battery health now %1$.1f %% ± %2$.1f points, was %3$.1f %%: a move larger than the estimate’s own band.</string>
     <string name="advice_calibration">Charge-gauge calibration: %1$s.</string>
+    <string name="advice_limit_lower">A %1$d %% charge limit would cover %2$.0f %% of your last %3$d driving days, a 15-point reserve included; the car stops at %4$d %%. Hours spent at a high charge age the pack most. The limit is changed in the car, not here.</string>
+    <string name="advice_limit_raise">The car stops charging at %1$d %%, below the %2$d %% your longer days need, a 15-point reserve included (it would cover %3$.0f %% of your last %4$d driving days).</string>
+    <string name="advice_limit_unread">A %1$d %% charge limit would cover %2$.0f %% of your last %3$d driving days, a 15-point reserve included. The car’s own limit could not be read to compare.</string>
+    <string name="advice_dwell">The car stood %1$.0f h at %2$.0f %% or more. Long hours at a high charge age the pack most: charging that high just before leaving avoids them.</string>
+    <string name="advice_heat">Parked at %1$.0f %% with %2$.0f °C outside. That is the outside temperature — the car does not publish the pack’s. Heat and a high charge together age the pack fastest: shade or a lower charge help.</string>
 </resources>

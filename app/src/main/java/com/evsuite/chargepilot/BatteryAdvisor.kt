@@ -13,8 +13,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.evsuite.hardware.AppLogger
+import com.evsuite.hardware.saic.SaicCharging
 import com.evsuite.hardware.telemetry.BatteryDigest
 import com.evsuite.hardware.telemetry.BatteryDigestStore
+import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import com.evsuite.hardware.telemetry.CalibrationVerdict
 import com.evsuite.hardware.telemetry.DigestChange
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -75,6 +77,57 @@ internal class BatteryAdvisor(
         val previous = digests.upsert(today)
         if (alreadyToday) return
         BatteryDigest.changes(previous, today).forEach { record(AdviceKind.BATTERY, describe(it), nowMs) }
+        parked(nowMs)
+    }
+
+    /**
+     * CP-088. How the car is left parked: the charge limit against the driver's own days, a long
+     * dwell at high charge, a hot day at high charge. Each is said once; a cause that has not
+     * changed since it was said stays quiet.
+     */
+    private fun parked(nowMs: Long) {
+        val entries = BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME)).read()
+        val prefs = context.applicationContext.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+        val said = prefs.edit()
+        val res = text()
+        ParkedBatteryAdvice.limitProposal(entries, nowMs, zone)?.let { proposal ->
+            val limit = runCatching { SaicCharging.chargeLimitPercent() }.getOrNull()
+            val verdict = ParkedBatteryAdvice.limitVerdict(proposal, limit)
+            val key = verdict?.let { "$it:${proposal.proposedPercent}:$limit" }.orEmpty()
+            if (key == prefs.getString(PREF_LIMIT_SAID, "")) return@let
+            said.putString(PREF_LIMIT_SAID, key)
+            val covered = proposal.coveredShare * 100.0
+            val line = when (verdict) {
+                ParkedBatteryAdvice.LimitVerdict.LOWER -> res.getString(
+                    R.string.advice_limit_lower, proposal.proposedPercent, covered, proposal.drivingDays, limit,
+                )
+                ParkedBatteryAdvice.LimitVerdict.RAISE -> res.getString(
+                    R.string.advice_limit_raise, limit, proposal.proposedPercent, covered, proposal.drivingDays,
+                )
+                ParkedBatteryAdvice.LimitVerdict.UNREAD -> res.getString(
+                    R.string.advice_limit_unread, proposal.proposedPercent, covered, proposal.drivingDays,
+                )
+                null -> return@let
+            }
+            record(AdviceKind.PARKED, line, nowMs)
+        }
+        // Only what ended recently: a first run must not replay the whole ledger as news.
+        val dwellSaidMs = prefs.getLong(PREF_DWELL_SAID, 0L)
+        ParkedBatteryAdvice.dwells(entries)
+            .lastOrNull { it.startMs > dwellSaidMs && it.endMs >= nowMs - RECENT_MS }
+            ?.let {
+                said.putLong(PREF_DWELL_SAID, it.startMs)
+                record(AdviceKind.PARKED, res.getString(R.string.advice_dwell, it.hours, it.socPercent), nowMs)
+            }
+        val yesterday = ParkedBatteryAdvice.day(nowMs - RECENT_MS, zone)
+        val heatSaidDay = prefs.getString(PREF_HEAT_SAID, "").orEmpty()
+        ParkedBatteryAdvice.heat(entries, zone)
+            .lastOrNull { it.day > heatSaidDay && it.day >= yesterday }
+            ?.let {
+                said.putString(PREF_HEAT_SAID, it.day)
+                record(AdviceKind.PARKED, res.getString(R.string.advice_heat, it.socPercent, it.outsideCelsius), nowMs)
+            }
+        said.apply()
     }
 
     private fun describe(change: DigestChange): String {
@@ -179,6 +232,10 @@ internal class BatteryAdvisor(
         private const val NOTIFICATION_BASE_ID = 100
         private const val PREFERENCES = "battery_advice"
         private const val PREF_NOTIFY = "notifications_enabled"
+        private const val PREF_LIMIT_SAID = "limit_said"
+        private const val PREF_DWELL_SAID = "dwell_said_start_ms"
+        private const val PREF_HEAT_SAID = "heat_said_day"
+        private const val RECENT_MS = 36 * 3_600_000L
 
         fun notificationsEnabled(context: Context): Boolean = context.applicationContext
             .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getBoolean(PREF_NOTIFY, true)

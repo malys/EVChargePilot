@@ -6,6 +6,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Advice on how the car is left parked (CP-088).** The daily round now proposes a charge limit
+  from the driver's own days — the 95th-percentile driving day in charge points, measured from
+  the ledger's odometer and charge steps, plus a 15-point reserve, rounded up to 5, floor 60 % —
+  and says so when the car's limit sits 10 points above it, or below what the longer days need.
+  It also says a stand of 12 h or more at 90 % or more, and a day parked at 80 % or more with
+  30 °C or more outside. Each is said once while its cause is unchanged. The limit is read,
+  never written.
 - **A battery companion that speaks up once a day (CP-087).** At the first sample of each local
   day the service recomputes the battery analyses in both flavors and stores the day's digest.
   What moved past its own band since the day before — a first health estimate, a band that
