@@ -36,3 +36,14 @@
 # where the capture and the trip history read fine. A validation drive costs a drive.
 -keep class com.evsuite.chargepilot.ValidationArtifact { *; }
 -keep class com.evsuite.chargepilot.ValidationArtifact$Answer { *; }
+
+# CP-087's two stores, left out like CP-055's artifact was. Unkept, R8 dropped the generic
+# signature of each envelope's list, Gson read the entries back as maps, and the first one
+# touched threw a ClassCastException: the Diagnostics page died as soon as a digest existed.
+# The enums are kept too, since their persisted names are the schema.
+-keep class com.evsuite.hardware.telemetry.BatteryDigest { *; }
+-keep class com.evsuite.hardware.telemetry.BatteryDigestStore$Envelope { *; }
+-keep class com.evsuite.hardware.telemetry.CalibrationVerdict { *; }
+-keep class com.evsuite.chargepilot.AdviceEntry { *; }
+-keep class com.evsuite.chargepilot.AdviceKind { *; }
+-keep class com.evsuite.chargepilot.AdviceJournal$Envelope { *; }

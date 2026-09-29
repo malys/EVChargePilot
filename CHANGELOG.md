@@ -81,6 +81,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The Diagnostics page opens again on a release build.** The battery digest and the advice
+  history (CP-087) were saved with Gson but had no keep rule, so the minified build read their
+  entries back as maps and the report crashed as soon as a digest existed. Files written by the
+  broken build are set aside once and a new history starts.
 - **The eco voice can be heard, and checked.** The coach now waits for the vehicle voice service
   to bind before speaking instead of asking it in the same instant it starts binding, and speaks
   on its own worker thread. Turning the voice on says a test line at once; if neither the car's
