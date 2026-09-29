@@ -2,6 +2,7 @@ package com.evsuite.chargepilot
 
 import android.content.Context
 import com.evsuite.hardware.model.DriveMode
+import com.evsuite.hardware.telemetry.DrivingStress
 import com.evsuite.hardware.telemetry.EcoBand
 import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EcoVerdict
@@ -278,6 +279,16 @@ class EcoAdviceText(context: Context) {
         return sentences.joinToString(" ")
     }
 
+    /**
+     * CP-090. The clause for hard power at a low charge or in the cold, added to the spoken line;
+     * none under [STRESS_MINUTES], and none when the trip cannot say.
+     */
+    fun stress(samples: List<TripSample>): String? {
+        val stress = DrivingStress.of(samples) ?: return null
+        if (stress.stressedMinutes < STRESS_MINUTES) return null
+        return app.getString(R.string.eco_trip_stress, stress.stressedMinutes)
+    }
+
     /** Lines for the overview under the trip diagrams, or the reason there are none. */
     fun history(advice: HistoryAdvice): List<String> {
         if (advice.reviewedTrips == 0 && !advice.hasAdvice) {
@@ -367,5 +378,10 @@ class EcoAdviceText(context: Context) {
             tip.finding.sharePercent,
             tip.finding.openDistanceKm,
         )
+    }
+
+    private companion object {
+        /** Under this, a hard start or two: not worth a sentence. */
+        const val STRESS_MINUTES = 2.0
     }
 }

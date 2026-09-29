@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Battery stress while driving (CP-090).** When a trip spent 2 minutes or more pulling hard
+  (above 60 % of its own peak) at a low charge (under 20 %) or below 0 °C outside, the trip-end
+  line gains one clause, through the same voice, gate and advice history. The Battery page's
+  exposure card adds this month's stressed minutes over the trips that could measure it, and the
+  energy regenerated below 0 °C; a month with none says so instead of showing zero.
 - **The charge in progress and when it ends (CP-089).** While the car stands still and its charge
   rises, the Battery page shows "80 % at 21:40, 100 % at 23:10", with the range the driver's own
   watched charges allow, to the car's limit (else 100 %). The time is recomputed each time the

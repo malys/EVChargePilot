@@ -15,10 +15,16 @@ import com.evsuite.hardware.telemetry.CalibrationDrift
 import com.evsuite.hardware.telemetry.CalibrationDriftReport
 import com.evsuite.hardware.telemetry.CalibrationVerdict
 import com.evsuite.hardware.telemetry.ChargeEnergyReport
+import com.evsuite.hardware.telemetry.DrivingStress
+import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
+import com.evsuite.hardware.telemetry.MonthlyDrivingStress
 import com.evsuite.hardware.telemetry.SohEnergySource
 import com.evsuite.hardware.telemetry.StateOfHealthEstimate
 import com.evsuite.hardware.telemetry.StateOfHealthEstimator
 import com.evsuite.hardware.telemetry.StateOfHealthResult
+import java.io.File
+import java.time.YearMonth
+import java.time.ZoneId
 import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.math.abs
@@ -56,6 +62,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
     private var drift: CalibrationDriftReport? = null
     private var exposure: BatteryExposureReport? = null
     private var charge: ChargeEnergyReport? = null
+    private var stress: List<MonthlyDrivingStress> = emptyList()
     private var declared = VehicleSettings.Values()
     private var applied: String? = null
 
@@ -141,12 +148,17 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                 filesDir,
                 settings.usableCapacityKwhWhenNew,
             )
+            val monthly = DrivingStress.monthly(
+                EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read(),
+                ZoneId.systemDefault(),
+            )
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 declared = settings
                 health = learned.health
                 drift = learned.drift
                 exposure = learned.exposure
+                stress = monthly
                 charge = learned.charge
                 render()
             }
@@ -389,8 +401,18 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                 report.sessions.maxOf { it.peakPercentPerHour },
             )
         }
+        lines += stressText()
         lines += getString(R.string.battery_health_read_only)
         binding.exposureFacts.text = lines.joinToString("\n")
+    }
+
+    /** CP-090. This month's hard power at a low charge or in the cold, beside the charge split. */
+    private fun stressText(): String {
+        val month = stress.lastOrNull { it.month == YearMonth.now() }
+            ?: return getString(R.string.battery_health_stress_unknown)
+        val minutes = getString(R.string.battery_health_stress, month.stressedMinutes, month.trips)
+        val regen = month.coldRegeneratedKwh ?: return minutes
+        return minutes + " " + getString(R.string.battery_health_stress_cold_regen, regen)
     }
 
     private fun format(pattern: String, vararg args: Any) =
@@ -467,6 +489,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
 
     companion object {
         private const val PATTERN_TREND = "%+.1f pt"
+        private const val HISTORY_FILE = "trips.json"
         private const val GLYPH_SETTLED = "✓"
         private const val GLYPH_WATCH = "!"
         private const val GLYPH_RE_ANCHOR = "↻"

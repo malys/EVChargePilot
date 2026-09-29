@@ -504,6 +504,9 @@ Spending %6$s %% per km</string>
     <string name="charge_history_row_gain" translatable="false">+%1$.0f pts · %2$.1f h</string>
     <string name="charge_history_row_energy" translatable="false">≈ %1$.1f kWh · %2$.1f kW</string>
     <string name="battery_health_exposure_sessions">%1$d charge sessions, fastest %2$.0f points an hour.</string>
+    <string name="battery_health_stress">Hard power at a low charge (under 20 %%) or below 0 °C this month: %1$.0f min (trips measured: %2$d).</string>
+    <string name="battery_health_stress_cold_regen">%1$.2f kWh regenerated below 0 °C.</string>
+    <string name="battery_health_stress_unknown">Hard power at a low charge or in the cold this month: — no trip could measure it yet.</string>
     <string name="battery_health_exposure_unavailable">Nothing recorded yet. This fills in as the app samples the car.</string>
     <string name="battery_health_read_only">This app changes nothing on the car: no charge limit, no schedule, no preheat. It measures and it says what it sees.</string>
     <string name="battery_health_calibration_state_settled">Settled</string>
@@ -601,6 +604,7 @@ Spending %6$s %% per km</string>
     <string name="eco_trip_worse">Heavy trip: %1$d %% above your own average.</string>
     <string name="eco_trip_typical">Usual trip, in line with your own average.</string>
     <string name="eco_trip_no_verdict">Not enough comparable trips yet for an eco verdict.</string>
+    <string name="eco_trip_stress">%1$.0f min of hard power at a low charge or below 0 °C outside: that is when the pack is strained most, and gentler pulls there spare it.</string>
     <string name="eco_tip_smoother">Sharp acceleration and braking for %1$d min, %2$d %% of the driving: a smoother drive would use less.</string>
     <string name="eco_tip_eco_mode">Eco mode would suit this drive better than %1$s mode.</string>
     <string name="eco_tip_eco_mode_unknown">Eco mode, if not already selected, would soften this drive.</string>

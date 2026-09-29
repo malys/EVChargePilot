@@ -332,7 +332,9 @@ class TripRecordingService : Service() {
         // The mode the car is parked in is the mode it was driven in, unless changed at a stop.
         val mode = runCatching { EVHardware.getDriveMode() }.getOrNull()
         val advice = EcoTripAdvice.advise(trip, reviewTrip(filesDir, trips, trip), mode)
-        val line = EcoAdviceText(inAppLanguage()).spoken(advice)
+        val text = EcoAdviceText(inAppLanguage())
+        // CP-090: the same voice, gate and journal carry the pack-stress clause.
+        val line = listOfNotNull(text.spoken(advice), text.stress(trip.samples.orEmpty())).joinToString(" ")
         // CP-087: kept whether or not it is said out loud.
         batteryAdvisor.record(AdviceKind.TRIP_END, line, trip.summary.endedAtMs)
         if (EcoCoach.voiceEnabled(this)) EcoVoice.say(this, line)

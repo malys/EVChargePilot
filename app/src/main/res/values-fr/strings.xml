@@ -489,6 +489,9 @@ Consommation %6$s %% par km</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · extérieur %3$.0f à %4$.0f °C</string>
     <string name="charge_history_partial_note">Partielle : l’écran était en veille pendant une partie de cette charge, elle n’a donc ni énergie ni puissance, et sa durée est l’écart entre deux relevés.</string>
     <string name="battery_health_exposure_sessions">%1$d sessions de charge, la plus rapide à %2$.0f points par heure.</string>
+    <string name="battery_health_stress">Forte puissance à charge basse (sous 20 %%) ou sous 0 °C ce mois-ci : %1$.0f min (trajets mesurés : %2$d).</string>
+    <string name="battery_health_stress_cold_regen">%1$.2f kWh régénérés sous 0 °C.</string>
+    <string name="battery_health_stress_unknown">Forte puissance à charge basse ou dans le froid ce mois-ci : — aucun trajet n’a encore pu la mesurer.</string>
     <string name="battery_health_exposure_unavailable">Rien d’enregistré pour l’instant. Cela se remplit à mesure que l’application lit la voiture.</string>
     <string name="battery_health_read_only">Cette application ne change rien sur la voiture : ni limite de charge, ni programmation, ni préchauffage. Elle mesure et elle dit ce qu’elle voit.</string>
     <string name="battery_health_calibration_state_settled">Stable</string>
@@ -579,6 +582,7 @@ Consommation %6$s %% par km</string>
     <string name="eco_trip_worse">Trajet gourmand : %1$d %% au-dessus de votre propre moyenne.</string>
     <string name="eco_trip_typical">Trajet habituel, dans votre propre moyenne.</string>
     <string name="eco_trip_no_verdict">Pas encore assez de trajets comparables pour un bilan éco.</string>
+    <string name="eco_trip_stress">%1$.0f min de forte puissance à charge basse ou sous 0 °C dehors : c’est là que le pack souffre le plus, et des accélérations plus douces l’épargneraient.</string>
     <string name="eco_tip_smoother">Accélérations et freinages francs pendant %1$d min, %2$d %% de la conduite : une conduite plus souple consommerait moins.</string>
     <string name="eco_tip_eco_mode">Le mode Éco conviendrait mieux à cette conduite que le mode %1$s.</string>
     <string name="eco_tip_eco_mode_unknown">Le mode Éco, s’il n’est pas déjà choisi, adoucirait cette conduite.</string>
