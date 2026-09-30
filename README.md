@@ -105,7 +105,7 @@ and recording continue when the driver opens another app. On firmware where spee
 unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
 performs a bounded retry. Active trips remain fail-closed and under manual control. The unstable
 The unstable build keeps every automatically detected trip with a positive trustworthy
-distance. The shared store still caps history at 200 trips and 512 KiB, discarding oldest
+distance. The shared store still caps history at 200 trips and 2 MiB, discarding oldest
 sample tracks before oldest summaries. Each successful save refreshes the local model.
 Manual recordings are always kept.
 trip's reported duration is the time actually covered by usable samples, not wall clock: a suspended
