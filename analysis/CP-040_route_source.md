@@ -5,8 +5,8 @@ Date: 2026-09-02
 Decision: **build on the OEM adapter's guidance**, proven on the vehicle 2026-09-04. The
 network question at the end of this document is a separate one and remains the owner's.
 
-Firmware examined: `saicadapterservice_overseas_eh32` (R69 EH32), decompiled sources under
-workspace `apks/`.
+Interface examined: `saicadapterservice_overseas_eh32` (R69 EH32) runtime service, as observed on
+the head unit.
 
 ## Verdict in one line
 

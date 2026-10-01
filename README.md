@@ -2,34 +2,62 @@
 
 [![Tests](https://github.com/malys/EVChargePilot/actions/workflows/tests.yml/badge.svg)](https://github.com/malys/EVChargePilot/actions/workflows/tests.yml)
 [![Security](https://github.com/malys/EVChargePilot/actions/workflows/security.yml/badge.svg)](https://github.com/malys/EVChargePilot/actions/workflows/security.yml)
-[![Release](https://img.shields.io/github/v/release/malys/EVChargePilot?sort=semver)](https://github.com/malys/EVChargePilot/releases)
+[![Unstable](https://github.com/malys/EVChargePilot/actions/workflows/unstable.yml/badge.svg)](https://github.com/malys/EVChargePilot/actions/workflows/unstable.yml)
+[![Release](https://img.shields.io/github/v/release/malys/EVChargePilot?include_prereleases&sort=semver)](https://github.com/malys/EVChargePilot/releases)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue.svg)](LICENSE)
+[![Part of EVSuite](https://img.shields.io/badge/part%20of-EVSuite-2f81f7)](https://malys.github.io/EVSuite/)
+
+> ⚠️ **This app is a read-only dashboard, but it is used on a car: never operate it while driving, and
+> never rely on it alone for a range or charging decision.** Telemetry may be wrong, delayed or
+> unavailable. Read [DISCLAIMER.md](DISCLAIMER.md) before installing. No warranty, no liability.
+> MG and MG4 are third-party marks used only to identify compatibility; this independent
+> project is not affiliated with or approved by SAIC Motor or MG Motor.
 
 Read-only live energy dashboard and local trip analyser for the SAIC MG4 head unit.
+
+EVChargePilot is **independent**. It reads the vehicle through the shared
+[EVHardware](https://github.com/malys/EVHardware) layer and needs no other EVSuite app installed.
+
+## Part of EVSuite
+
+EVChargePilot is one app of [**EVSuite**](https://malys.github.io/EVSuite/), a family of independent,
+offline-first apps for the MG4 head unit (Android Automotive OS 9). Each app installs on its
+own — pick only what you need. User guides and install instructions:
+<https://malys.github.io/EVSuite/>.
+
+Discover the rest of the suite:
+
+[![EVProfile](https://img.shields.io/badge/EVProfile-settings%20%26%20drive%20profiles-2f81f7?logo=github)](https://github.com/malys/EVProfile)
+[![EVTasker](https://img.shields.io/badge/EVTasker-rule%20automation-2f81f7?logo=github)](https://github.com/malys/EVTasker)
+[![EVABRPUploader](https://img.shields.io/badge/EVABRPUploader-ABRP%20telemetry-2f81f7?logo=github)](https://github.com/malys/EVABRPUploader)
+[![EVLauncher](https://img.shields.io/badge/EVLauncher-home%20launcher-2f81f7?logo=github)](https://github.com/malys/EVLauncher)
+[![EVSwipe](https://img.shields.io/badge/EVSwipe-swipe%20shortcuts-2f81f7?logo=github)](https://github.com/malys/EVSwipe)
+[![EVHardware](https://img.shields.io/badge/EVHardware-shared%20vehicle%20library-2f81f7?logo=github)](https://github.com/malys/EVHardware)
+
+---
+
+## Contents
+
+- [Screenshots](#screenshots)
+- [Overview](#overview)
+- [How it works](#how-it-works)
+- [Requirements](#requirements)
+- [Features](#features)
+- [Trip export formats](#trip-export-formats)
+- [Configuration](#configuration)
+- [Install](#install)
+- [Building](#building)
+- [Project documents](#project-documents)
+- [Security](#security)
+- [Contributing](#contributing)
+- [Legal](#legal)
+
+## Screenshots
 
 <p align="center">
   <img src="artifacts/dashboard-dark-1920x720.png" width="49%" alt="Dashboard, dark">
   <img src="artifacts/dashboard-light-1920x720.png" width="49%" alt="Dashboard, light">
 </p>
-
-> ⚠️ **No warranty, no liability.** Telemetry may be wrong, delayed or unavailable. Never
-> use this app as the sole basis for a range or charging decision. See [DISCLAIMER.md](DISCLAIMER.md).
-
-## Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [How it works](#how-it-works)
-- [Trip export formats](#trip-export-formats)
-- [Install](#install)
-- [Configuration](#configuration)
-- [Building](#building)
-- [Project layout](#project-layout)
-- [Project documents](#project-documents)
-- [Security](#security)
-- [Contributing](#contributing)
-- [Legal](#legal)
 
 ## Overview
 
@@ -39,6 +67,57 @@ It does not write to the vehicle and contains no update code. Every dashboard, t
 diagnostic screen works with no network at all; the route planner is the one feature that
 uses one, with a key the driver supplies, and it carries a route and never vehicle data
 (see [SECURITY.md](SECURITY.md) and `analysis/CP-043_network_and_location.md`).
+
+## How it works
+
+EVHardware's `EnergyTelemetryReader` produces one coherent nullable snapshot per second.
+Battery power is not integrated into normal trip history, and every dashboard calculation
+derived from it remains unavailable, until the checked-in evidence catalogue validates the
+signal's scale and sign on that exact firmware generation. A trusted energy summary stores the
+exact firmware and conversion version as a small metadata tag; legacy and mismatched totals are
+excluded from adaptive models. The bounded unstable CP-003 recorder is the separate raw-evidence
+path used to establish that validation. It stores aggregated signal statistics rather than a raw
+sample stream and retains only the eight newest app-private JSON files.
+The dashboard states `+` battery output and `−` regeneration/charging in text as well as on a
+static centred scale; it never animates that passive display while driving.
+The thermal/climate block is likewise passive and keeps each field independently nullable, so a
+firmware that publishes only part of the climate snapshot still shows the usable readings and an
+explained `—` for every gap. Battery temperature remains hidden as unvalidated until CP-003 proves
+its unit and semantics for the exact firmware generation. HVAC and AC indicators describe state
+only: the vehicle has not supplied an HVAC power measurement, and the app does not infer one.
+Its shared `TripDetector` starts after five continuous seconds at or above 5 km/h and stops
+after 120 continuous seconds at or below 1 km/h, with park or charge-port confirmation when
+either signal exists. Missing speed and observation gaps over five seconds invalidate partial
+evidence rather than inventing a boundary. `EnergyTripAccumulator` likewise rejects integration
+gaps longer than five seconds, and `EnergyTripHistoryStore` writes a bounded history through a
+unique temporary file and atomic rename.
+
+Automatic detection is enabled by default. A foreground service owns the sampler so detection
+and recording continue when the driver opens another app. On firmware where speed stays
+unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
+performs a bounded retry. Active trips remain fail-closed and under manual control. The unstable build keeps every automatically detected trip with a positive trustworthy
+distance. The shared store still caps history at 200 trips and 2 MiB, discarding oldest
+sample tracks before oldest summaries. Each successful save refreshes the local model.
+Manual recordings are always kept. A trip's reported duration is the time actually covered by usable samples, not wall clock: a suspended
+sampler adds nothing to duration, distance or energy, so consumption averages compare values
+measured over the same interval.
+
+The diagnostics dialog exports one self-contained ZIP to a removable USB volume: runtime/APK and
+signer identity, exact firmware, service and last-sample state, property/provenance probes,
+bounded recent log, previous crash, and up to eight newest unstable CP-003 evidence JSON files.
+Its manifest records byte counts and SHA-256 per artifact. The app offers every volume it can
+already list except primary emulated storage, and can fall back only to its own folder on the
+volume that was chosen; it never writes to internal AAOS storage and declares no storage
+permission. Export requires a
+fresh readable speed at or below 0.1 km/h, runs off the main thread, caps the text report at
+128 KiB, each evidence file at 64 KiB and the ZIP at 768 KiB, then atomically renames a synced
+temporary file on USB. No archive copy accumulates on AAOS.
+
+## Requirements
+
+- SAIC MG4 head unit running Android Automotive OS 9 or a compatible test device.
+- Android API 28 or newer.
+- Platform signing for privileged car-property permissions where required by the firmware.
 
 ## Features
 
@@ -70,59 +149,6 @@ uses one, with a key the driver supplies, and it carries a route and never vehic
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
 never zero. Charger data and energy-source attribution remain outside this initial milestone.
 
-## Requirements
-
-- SAIC MG4 head unit running Android Automotive OS 9 or a compatible test device.
-- Android API 28 or newer.
-- Platform signing for privileged car-property permissions where required by the firmware.
-
-## How it works
-
-EVHardware's `EnergyTelemetryReader` produces one coherent nullable snapshot per second.
-Battery power is not integrated into normal trip history, and every dashboard calculation
-derived from it remains unavailable, until the checked-in evidence catalogue validates the
-signal's scale and sign on that exact firmware generation. A trusted energy summary stores the
-exact firmware and conversion version as a small metadata tag; legacy and mismatched totals are
-excluded from adaptive models. The bounded unstable CP-003 recorder is the separate raw-evidence
-path used to establish that validation. It stores aggregated signal statistics rather than a raw
-sample stream and retains only the eight newest app-private JSON files.
-The dashboard states `+` battery output and `−` regeneration/charging in text as well as on a
-static centred scale; it never animates that passive display while driving.
-The thermal/climate block is likewise passive and keeps each field independently nullable, so a
-firmware that publishes only part of the climate snapshot still shows the usable readings and an
-explained `—` for every gap. Battery temperature remains hidden as unvalidated until CP-003 proves
-its unit and semantics for the exact firmware generation. HVAC and AC indicators describe state
-only: the vehicle has not supplied an HVAC power measurement, and the app does not infer one.
-Its shared `TripDetector` starts after five continuous seconds at or above 5 km/h and stops
-after 120 continuous seconds at or below 1 km/h, with park or charge-port confirmation when
-either signal exists. Missing speed and observation gaps over five seconds invalidate partial
-evidence rather than inventing a boundary. `EnergyTripAccumulator` likewise rejects integration
-gaps longer than five seconds, and `EnergyTripHistoryStore` writes a bounded history through a
-unique temporary file and atomic rename.
-
-Automatic detection is enabled by default. A foreground service owns the sampler so detection
-and recording continue when the driver opens another app. On firmware where speed stays
-unavailable, ten consecutive misses suspend idle background polling; opening the dashboard
-performs a bounded retry. Active trips remain fail-closed and under manual control. The unstable
-The unstable build keeps every automatically detected trip with a positive trustworthy
-distance. The shared store still caps history at 200 trips and 2 MiB, discarding oldest
-sample tracks before oldest summaries. Each successful save refreshes the local model.
-Manual recordings are always kept.
-trip's reported duration is the time actually covered by usable samples, not wall clock: a suspended
-sampler adds nothing to duration, distance or energy, so consumption averages compare values
-measured over the same interval.
-
-The diagnostics dialog exports one self-contained ZIP to a removable USB volume: runtime/APK and
-signer identity, exact firmware, service and last-sample state, property/provenance probes,
-bounded recent log, previous crash, and up to eight newest unstable CP-003 evidence JSON files.
-Its manifest records byte counts and SHA-256 per artifact. The app offers every volume it can
-already list except primary emulated storage, and can fall back only to its own folder on the
-volume that was chosen; it never writes to internal AAOS storage and declares no storage
-permission. Export requires a
-fresh readable speed at or below 0.1 km/h, runs off the main thread, caps the text report at
-128 KiB, each evidence file at 64 KiB and the ZIP at 768 KiB, then atomically renames a synced
-temporary file on USB. No archive copy accumulates on AAOS.
-
 ## Trip export formats
 
 The trip history can export one trip or the full bounded ledger without network or storage
@@ -148,19 +174,14 @@ readings are likewise explicit `null`.
 Both formats are limited to the history ceiling of 200 trips and 2 MiB per export. The export
 directory retains the eight newest generated files so repeated exports cannot grow without bound.
 
-## Install
-
-Install only a signed APK you trust, while the vehicle is parked. Stable releases do not
-self-update.
-
 ## Configuration
 
 Automatic trip detection is enabled by default. Its switch, and the manual start/stop action,
+can be changed only while the vehicle reports zero speed. If speed is unavailable, the controls
+fail closed and the dashboard explains why.
 
 Unstable shows the live eco-advice line by default so a fresh install starts learning without a
 setup step. Stable keeps that line opt-in. Spoken advice remains opt-in in both channels.
-can be changed only while the vehicle reports zero speed. If speed is unavailable, the controls
-fail closed and the dashboard explains why.
 
 ### Routing key
 
@@ -240,8 +261,13 @@ Charger records are shown with their data provider and the date the record was l
 because a charger dataset is out of date the day it is published and hiding that turns a
 suggestion into a promise. User-contributed Open Charge Map data is CC BY 4.0; imported records
 keep their original provider's licence, which is why the provider is named on screen next to
-each charger. Both licences permit use in this MIT-licensed app as long as the attribution is
+each charger. Both licences permit use in this app as long as the attribution is
 displayed, and it is.
+
+## Install
+
+Install only a signed APK you trust, while the vehicle is parked. Stable releases do not
+self-update.
 
 ## Building
 
@@ -253,6 +279,12 @@ mise run bootstrap
 mise run test
 mise run build
 ```
+
+### Layout
+
+- `app/src/main/` — driver dashboard, lifecycle, presentation and diagnostics.
+- `app/src/main/res/` — EVSuite driver interface.
+- `EVHardware/` — shared vehicle abstraction, telemetry model, trip maths and storage.
 
 ### Emulator profiles
 
@@ -274,19 +306,15 @@ telemetry is the expected fail-safe behaviour, not simulated vehicle data.
 Release signing reads `EV_KEYSTORE`, `EV_KEYSTORE_PASSWORD`, `EV_KEY_ALIAS` and
 `EV_KEY_PASSWORD`, or their local `gradle.properties` equivalents. Never commit credentials.
 
-## Project layout
-
-- `app/src/main/` — driver dashboard, lifecycle, presentation and diagnostics.
-- `app/src/main/res/` — EVSuite driver interface.
-- `EVHardware/` — shared vehicle abstraction, telemetry model, trip maths and storage.
-
 ## Project documents
 
-- [DESIGN.md](DESIGN.md) — normative EVSuite interface rules.
-- [SECURITY.md](SECURITY.md) — capability boundary and disclosure.
-- [CONTRIBUTING.md](CONTRIBUTING.md) — development expectations.
-- [DISCLAIMER.md](DISCLAIMER.md) — vehicle-safety disclaimer.
-- [CHANGELOG.md](CHANGELOG.md) — release history.
+| Document | What it covers |
+| --- | --- |
+| [DESIGN.md](DESIGN.md) | Normative EVSuite interface rules |
+| [SECURITY.md](SECURITY.md) | Capability boundary and disclosure |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Development expectations |
+| [DISCLAIMER.md](DISCLAIMER.md) | Vehicle-safety disclaimer |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
 
 ## Security
 
@@ -306,4 +334,4 @@ JVM tests for decisions, and on-vehicle confirmation before release.
 ## Legal
 
 Source-available under the PolyForm Noncommercial License 1.0.0. Commercial use is not
-permitted. Not affiliated with, endorsed by or supported by SAIC Motor or MG Motor.
+permitted. See [LICENSE](LICENSE) and [LICENSE.md](LICENSE.md).
