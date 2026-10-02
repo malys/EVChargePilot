@@ -81,6 +81,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The eco coach's smoothness gauge was too optimistic.** It counted hard acceleration only,
+  while the trip summary counted hard braking too; the live gauge, the steadiness line and its voice
+  now count both, through EVHardware's `EcoDrivingMonitor`, and their wording says so.
 - **The Diagnostics page opens again on a release build.** The battery digest and the advice
   history (CP-087) were saved with Gson but had no keep rule, so the minified build read their
   entries back as maps and the report crashed as soon as a digest existed. Files written by the

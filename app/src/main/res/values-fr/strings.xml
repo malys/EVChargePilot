@@ -509,11 +509,11 @@ Consommation %6$s %% par km</string>
     <string name="eco_band_worse">Gourmand</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">À %1$d plutôt que %2$d km/h, cette route coûte environ %3$d %% de moins.</string>
-    <string name="eco_advice_steadiness">Accélérations franches sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
+    <string name="eco_advice_steadiness">Accélérations ou freinages francs sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
     <string name="eco_gauge_listening">Coach à l’écoute</string>
     <string name="eco_gauge_smooth">Souple · %1$d %%</string>
     <string name="eco_gauge_harsh">Brusque · %1$d %%</string>
-    <string name="eco_gauge_description">Accélérations franches sur %1$d %% de la conduite récente ; conseil à partir de %2$d %%.</string>
+    <string name="eco_gauge_description">Accélérations ou freinages francs sur %1$d %% de la conduite récente ; conseil à partir de %2$d %%.</string>
     <string name="eco_settings_title">Assistant d’éco-conduite</string>
     <string name="eco_settings_advice">Afficher les conseils de conduite</string>
     <string name="eco_settings_voice">Énoncer les conseils</string>

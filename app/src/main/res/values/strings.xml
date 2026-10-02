@@ -525,12 +525,12 @@ Spending %6$s %% per km</string>
     <string name="eco_band_worse">Heavy</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">At %1$d rather than %2$d km/h, this road costs about %3$d %% less.</string>
-    <string name="eco_advice_steadiness">Hard acceleration on %1$d %% of this drive; the same road at a steady speed costs less.</string>
+    <string name="eco_advice_steadiness">Hard acceleration or braking on %1$d %% of this drive; the same road at a steady speed costs less.</string>
     <!-- CP-084. The gauge's word; the bar beside it is the share, the mark the advice threshold. -->
     <string name="eco_gauge_listening">Coach listening</string>
     <string name="eco_gauge_smooth">Smooth · %1$d %%</string>
     <string name="eco_gauge_harsh">Abrupt · %1$d %%</string>
-    <string name="eco_gauge_description">Hard acceleration on %1$d %% of recent driving; advice starts at %2$d %%.</string>
+    <string name="eco_gauge_description">Hard acceleration or braking on %1$d %% of recent driving; advice starts at %2$d %%.</string>
     <string name="eco_settings_title">Eco-driving coach</string>
     <string name="eco_settings_advice">Show driving advice</string>
     <string name="eco_settings_voice">Speak the advice</string>
