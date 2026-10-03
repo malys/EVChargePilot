@@ -510,6 +510,8 @@ Consommation %6$s %% par km</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">À %1$d plutôt que %2$d km/h, cette route coûte environ %3$d %% de moins.</string>
     <string name="eco_advice_steadiness">Accélérations ou freinages francs sur %1$d %% de ce trajet ; la même route à vitesse stable coûte moins.</string>
+    <string name="eco_voice_cruise">%1$d au lieu de %2$d km/h : %3$d %% de moins.</string>
+    <string name="eco_voice_steadiness">Conduite brusque, %1$d %% du temps.</string>
     <string name="eco_gauge_listening">Coach à l’écoute</string>
     <string name="eco_gauge_smooth">Souple · %1$d %%</string>
     <string name="eco_gauge_harsh">Brusque · %1$d %%</string>
@@ -583,6 +585,18 @@ Consommation %6$s %% par km</string>
     <string name="eco_trip_typical">Trajet habituel, dans votre propre moyenne.</string>
     <string name="eco_trip_no_verdict">Pas encore assez de trajets comparables pour un bilan éco.</string>
     <string name="eco_trip_stress">%1$.0f min de forte puissance à charge basse ou sous 0 °C dehors : c’est là que le pack souffre le plus, et des accélérations plus douces l’épargneraient.</string>
+    <string name="eco_voice_trip_gain">%1$d %% à gagner sur ce trajet.</string>
+    <string name="eco_voice_trip_gain_by">%1$d %% à gagner : %2$s.</string>
+    <string name="eco_voice_trip_better">Trajet économe, %1$d %% sous la moyenne.</string>
+    <string name="eco_voice_trip_worse">Trajet gourmand, %1$d %% au-dessus de la moyenne.</string>
+    <string name="eco_voice_trip_typical">Trajet habituel.</string>
+    <string name="eco_voice_lever">Levier : %1$s.</string>
+    <string name="eco_lever_smoother">conduite plus souple</string>
+    <string name="eco_lever_eco_mode">mode Éco</string>
+    <string name="eco_lever_motorway">%1$d km/h sur voie rapide</string>
+    <string name="eco_lever_snow_mode">mode Snow</string>
+    <string name="eco_lever_cabin">moins de chauffage ou de clim</string>
+    <string name="eco_lever_windows">fenêtres fermées</string>
     <string name="eco_tip_smoother">Accélérations et freinages francs pendant %1$d min, %2$d %% de la conduite : une conduite plus souple consommerait moins.</string>
     <string name="eco_tip_eco_mode">Le mode Éco conviendrait mieux à cette conduite que le mode %1$s.</string>
     <string name="eco_tip_eco_mode_unknown">Le mode Éco, s’il n’est pas déjà choisi, adoucirait cette conduite.</string>

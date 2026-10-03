@@ -526,6 +526,9 @@ Spending %6$s %% per km</string>
     <string name="eco_delta">%1$+d %%</string>
     <string name="eco_advice_cruise">At %1$d rather than %2$d km/h, this road costs about %3$d %% less.</string>
     <string name="eco_advice_steadiness">Hard acceleration or braking on %1$d %% of this drive; the same road at a steady speed costs less.</string>
+    <!-- Spoken forms: a few words a driver can take in without looking. -->
+    <string name="eco_voice_cruise">%1$d instead of %2$d km/h: %3$d %% less.</string>
+    <string name="eco_voice_steadiness">Jerky driving, %1$d %% of the time.</string>
     <!-- CP-084. The gauge's word; the bar beside it is the share, the mark the advice threshold. -->
     <string name="eco_gauge_listening">Coach listening</string>
     <string name="eco_gauge_smooth">Smooth · %1$d %%</string>
@@ -605,6 +608,18 @@ Spending %6$s %% per km</string>
     <string name="eco_trip_typical">Usual trip, in line with your own average.</string>
     <string name="eco_trip_no_verdict">Not enough comparable trips yet for an eco verdict.</string>
     <string name="eco_trip_stress">%1$.0f min of hard power at a low charge or below 0 °C outside: that is when the pack is strained most, and gentler pulls there spare it.</string>
+    <string name="eco_voice_trip_gain">%1$d %% to gain on this trip.</string>
+    <string name="eco_voice_trip_gain_by">%1$d %% to gain: %2$s.</string>
+    <string name="eco_voice_trip_better">Economical trip, %1$d %% below average.</string>
+    <string name="eco_voice_trip_worse">Heavy trip, %1$d %% above average.</string>
+    <string name="eco_voice_trip_typical">Usual trip.</string>
+    <string name="eco_voice_lever">Lever: %1$s.</string>
+    <string name="eco_lever_smoother">smoother driving</string>
+    <string name="eco_lever_eco_mode">Eco mode</string>
+    <string name="eco_lever_motorway">%1$d km/h on fast roads</string>
+    <string name="eco_lever_snow_mode">Snow mode</string>
+    <string name="eco_lever_cabin">less heating or cooling</string>
+    <string name="eco_lever_windows">windows closed</string>
     <string name="eco_tip_smoother">Sharp acceleration and braking for %1$d min, %2$d %% of the driving: a smoother drive would use less.</string>
     <string name="eco_tip_eco_mode">Eco mode would suit this drive better than %1$s mode.</string>
     <string name="eco_tip_eco_mode_unknown">Eco mode, if not already selected, would soften this drive.</string>

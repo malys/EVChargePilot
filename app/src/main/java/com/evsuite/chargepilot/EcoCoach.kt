@@ -127,7 +127,7 @@ class EcoCoach(context: Context) {
      */
     @Synchronized
     fun speak(verdict: EcoVerdict, speedKmh: Float?, nowMs: Long) {
-        val line = sentence(verdict.advice ?: return)
+        val line = sentence(verdict.advice ?: return, spoken = true)
         if (line == null || !voiceEnabled(app) || !adviceEnabled(app)) return
         if (speedKmh == null || speedKmh <= MOVING_KMH) return
         if (line == spokenLine || nowMs - lastSpokeAtMs < SPEAK_COOLDOWN_MS) return
@@ -136,17 +136,20 @@ class EcoCoach(context: Context) {
         EcoVoice.say(app, line)
     }
 
-    /** Consequence with a number in it. No imperative is written here, in any language. */
-    private fun sentence(advice: EcoAdvice): String? {
+    /**
+     * Consequence with a number in it. No imperative is written here, in any language.
+     * [spoken] picks the few-word form: a driver takes in a short line, not a sentence.
+     */
+    private fun sentence(advice: EcoAdvice, spoken: Boolean = false): String? {
         return when (advice.lever) {
             EcoLever.CRUISE_SPEED -> app.getString(
-                R.string.eco_advice_cruise,
+                if (spoken) R.string.eco_voice_cruise else R.string.eco_advice_cruise,
                 advice.toSpeedKmh?.roundToInt() ?: return null,
                 advice.fromSpeedKmh?.roundToInt() ?: return null,
                 advice.savingPercent?.roundToInt() ?: return null,
             )
             EcoLever.STEADINESS -> app.getString(
-                R.string.eco_advice_steadiness,
+                if (spoken) R.string.eco_voice_steadiness else R.string.eco_advice_steadiness,
                 advice.harshSharePercent?.roundToInt() ?: return null,
             )
         }

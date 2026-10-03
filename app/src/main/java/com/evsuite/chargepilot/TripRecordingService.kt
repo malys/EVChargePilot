@@ -337,7 +337,9 @@ class TripRecordingService : Service() {
         val line = listOfNotNull(text.spoken(advice), text.stress(trip.samples.orEmpty())).joinToString(" ")
         // CP-087: kept whether or not it is said out loud.
         batteryAdvisor.record(AdviceKind.TRIP_END, line, trip.summary.endedAtMs)
-        if (EcoCoach.voiceEnabled(this)) EcoVoice.say(this, line)
+        // Spoken short: headline and one lever; the stress clause stays in the journal.
+        val voice = text.voice(advice)
+        if (EcoCoach.voiceEnabled(this) && voice.isNotEmpty()) EcoVoice.say(this, voice)
     }
 
     /**

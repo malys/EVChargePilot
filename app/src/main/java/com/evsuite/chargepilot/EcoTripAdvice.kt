@@ -253,7 +253,32 @@ class EcoAdviceText(context: Context) {
     // Not the application context: the service hands in one carrying the app's own language.
     private val app = context
 
-    /** The line spoken when the trip closes in P. */
+    /**
+     * What is said out loud when the trip closes in P: one headline and the first lever, nothing
+     * the driver has to hold in memory. Empty when there is nothing worth saying. The full
+     * [spoken] text stays in the advice journal.
+     */
+    fun voice(advice: TripAdvice): String {
+        val lever = advice.tips.firstOrNull()?.let(::lever)
+        val saving = advice.saving?.percent?.roundToInt()
+        val delta = advice.deltaPercent?.let { abs(it).roundToInt() }
+        if (saving != null && lever != null) {
+            return app.getString(R.string.eco_voice_trip_gain_by, saving, lever)
+        }
+        val head = when {
+            saving != null -> app.getString(R.string.eco_voice_trip_gain, saving)
+            advice.band == EcoBand.BETTER && delta != null ->
+                app.getString(R.string.eco_voice_trip_better, delta)
+            advice.band == EcoBand.WORSE && delta != null ->
+                app.getString(R.string.eco_voice_trip_worse, delta)
+            advice.band != null -> app.getString(R.string.eco_voice_trip_typical)
+            else -> null
+        }
+        return listOfNotNull(head, lever?.let { app.getString(R.string.eco_voice_lever, it) })
+            .joinToString(" ")
+    }
+
+    /** The full line for the advice journal when the trip closes in P. */
     fun spoken(advice: TripAdvice): String {
         val saving = advice.saving
         val sentences = ArrayList<String>()
@@ -351,6 +376,17 @@ class EcoAdviceText(context: Context) {
         is EcoTip.SlowerMotorway ->
             app.getString(R.string.eco_clause_motorway, tip.finding.referenceSpeedKmh)
         is EcoTip.SnowMode, is EcoTip.Cabin, is EcoTip.Windows -> null
+    }
+
+    /** A tip in two or three words, for the voice. */
+    private fun lever(tip: EcoTip): String = when (tip) {
+        is EcoTip.Smoother -> app.getString(R.string.eco_lever_smoother)
+        is EcoTip.EcoMode -> app.getString(R.string.eco_lever_eco_mode)
+        is EcoTip.SlowerMotorway ->
+            app.getString(R.string.eco_lever_motorway, tip.finding.referenceSpeedKmh)
+        is EcoTip.SnowMode -> app.getString(R.string.eco_lever_snow_mode)
+        is EcoTip.Cabin -> app.getString(R.string.eco_lever_cabin)
+        is EcoTip.Windows -> app.getString(R.string.eco_lever_windows)
     }
 
     private fun sentence(tip: EcoTip): String = when (tip) {
