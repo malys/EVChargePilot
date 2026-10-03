@@ -117,7 +117,7 @@ After every pull:
 |---|---|---|---|---|
 | pending | stationary-hvac-off | pending | pending | not tested |
 | pending | stationary-hvac-max | pending | pending | not tested |
-| pending | urban | pending | pending | not tested |
+| SWI68 | urban | `evidence-SWI68-urban-accel-regen-20261003-150003-435.json` | not recorded | not tested — 18 s parked, labelled urban by mistake |
 | pending | motorway-110 | pending | pending | not tested |
 | pending | motorway-130 | pending | pending | not tested |
 | pending | grade-uphill | pending | pending | not tested |
@@ -149,6 +149,8 @@ all and enough to settle the two unit questions below, and it is *not* enough to
 cadence or a working range for anything: nothing changed while the car stood still. Rows below
 say `not observed` where that is the honest answer rather than guessing from one value.
 
+**What the 2026-10-03 evidence adds.** Two bundles labelled `urban-accel-regen`, both exported about 20 s after the app started, parked, HVAC off, 17 samples each, adapter odometer 23138 km unchanged and every `saic_*_since_start` counter at 0. No drive is in them; the urban scenario stays `not tested`. They do give the one thing the 2026-09-04 set lacked: `batteryPowerKw` now publishes on SWI68 through the vendor pack fallback, at a parked baseline of +0,25 to +0,27 kW. `IVehicleChargingService` answers in the same bundle (pack 386,25 V, `getChargingCurrent=4`, `getElecCsumpPerKm=82.3` with its validity flag set); the units of the last two are unknown, and neither matches the pack power nor the 110 Wh/km net the recorded trips average.
+
 The scenarios the protocol asks for and this evidence does not have: HVAC on max, urban
 accelerate/regen, motorway at 110 and 130, a gradient, and a charging session.
 
@@ -157,7 +159,7 @@ accelerate/regen, motorway at 110 and 130, a gradient, and a charging session.
 | socPercent | SWI68-29958-1300R67 | available | percent of charge | n/a | not observed (0 changes, stationary capture) | 56,1 % held; full range not exercised | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | rangeKm | SWI68-29958-1300R67 | available | km, the vehicle's own remaining range | n/a | not observed (0 changes, stationary capture) | 278 km at 56,1 %; not exercised | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | speedKmh | SWI68-29958-1300R67 | validated | **km/h at the property** — not m/s as AAOS specifies | magnitude taken; signed in reverse | 1000 ms (sampler-bound) | 0 at standstill; 34–36 km/h mean over two town drives | 2026-09-04 bundle: `trips-SWI68-*.json`, `evidence-SWI68-*.json` |
-| batteryPowerKw | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
+| batteryPowerKw | SWI68 | available — standard `EV_INSTANTANEOUS_CHARGE_RATE` still never published; value is the vendor pack voltage × current (`EVHardware.getVendorBatteryPowerKw`) | kW, pack V × A / 1000 | +0,25…+0,27 kW parked, HVAC off: positive reads as discharge; HVAC-max check still pending | 2140 ms (1065–3488 ms) | parked baseline only; driving range not captured | 2026-10-03 bundles (2): `evidence-SWI68-urban-accel-regen-20261003-*.json`; 2026-09-04 bundles for the standard property |
 | batteryTempCelsius | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | batteryEnergyKwh | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
 | batteryCapacityKwh | SWI68-29958-1300R67 | **never published** — declared, no `CarPropertyValue` in 51 samples | n/a | n/a | n/a | n/a | 2026-09-04 bundles (3): `evidence-SWI68-*.json` |
