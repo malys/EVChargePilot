@@ -159,6 +159,12 @@ object ValidationProbe {
         }
     }
 
+    /** Every question has at least one line: the bundle is worth exporting now. */
+    fun allAnswered(): Boolean = allAnswered(synchronized(rings) { rings.keys.toSet() })
+
+    internal fun allAnswered(answered: Set<ValidationQuestion>): Boolean =
+        answered.containsAll(ValidationQuestion.entries)
+
     /**
      * The car has a destination of its own and is guiding to it — the moment CP-051 asks about.
      *

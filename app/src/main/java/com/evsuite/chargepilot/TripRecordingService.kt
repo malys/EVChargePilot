@@ -414,6 +414,8 @@ class TripRecordingService : Service() {
         // CP-087. The daily digest and the parked notification; both cost one comparison on
         // every other sample.
         batteryAdvisor.onSample(value)
+        // CP-055: once every validation question has answered, ask the parked driver to export.
+        EvidenceCaptureHook.onSample(this, ::inAppLanguage, value)
         if (automaticDetectionEnabled) {
             updateAutomaticMonitorAvailability(value)
             val previousState = detector.state

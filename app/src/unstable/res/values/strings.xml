@@ -33,6 +33,9 @@
     <string name="validation_arm">Arm validation drive</string>
     <string name="validation_disarm">Disarm validation drive</string>
     <string name="validation_on">Validation mode on. Every open question records itself; export to USB when you are back.</string>
+    <string name="validation_ready_channel">Validation drive</string>
+    <string name="validation_ready_title">Validation results complete</string>
+    <string name="validation_ready_text">Every probe question has recorded its answer. Export the diagnostic to USB now so this drive is not lost.</string>
     <string name="validation_off">Validation mode off. Nothing is recorded until it is armed.</string>
     <string name="update_title">Unstable build available</string>
     <string name="update_ready">%1$s has been downloaded to:\n%2$s\n\nEVChargePilot cannot install it. Open it from the head unit’s file manager when the car is parked.</string>

@@ -33,6 +33,9 @@
     <string name="validation_arm">Armer le trajet de validation</string>
     <string name="validation_disarm">Désarmer le trajet de validation</string>
     <string name="validation_on">Mode validation actif. Chaque question ouverte s’enregistre seule ; exportez vers l’USB au retour.</string>
+    <string name="validation_ready_channel">Trajet de validation</string>
+    <string name="validation_ready_title">Résultats de validation complets</string>
+    <string name="validation_ready_text">Toutes les questions des sondes ont enregistré leur réponse. Exportez le diagnostic vers l’USB maintenant pour ne pas perdre ce trajet.</string>
     <string name="validation_off">Mode validation inactif. Rien n’est enregistré tant qu’il n’est pas armé.</string>
     <string name="update_title">Version instable disponible</string>
     <string name="update_ready">%1$s a été téléchargé dans :\n%2$s\n\nEVChargePilot ne peut pas l’installer. Ouvrez-le depuis le gestionnaire de fichiers du head unit, véhicule à l’arrêt.</string>

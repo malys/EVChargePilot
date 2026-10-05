@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.probe.RuntimeInterfaceProbe
+import com.evsuite.hardware.telemetry.EnergySnapshot
 import java.io.File
 
 /** Unstable channel: the capture screen exists and is reachable from the dashboard. */
@@ -35,6 +36,10 @@ object EvidenceCaptureHook {
         // survey on the export path is reading services that have been up for the session.
         RuntimeInterfaceProbe.connect(context)
     }
+
+    /** Each trip sample: tells the parked driver once that every validation answer is in. */
+    fun onSample(context: Context, text: () -> Context, value: EnergySnapshot) =
+        ValidationReadyNotice.onSample(context, text, value)
 
     /**
      * Writes every always-on probe artifact into the folder the diagnostic export bundles.

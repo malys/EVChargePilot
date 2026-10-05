@@ -2,6 +2,7 @@ package com.evsuite.chargepilot
 
 import android.app.Activity
 import android.content.Context
+import com.evsuite.hardware.telemetry.EnergySnapshot
 
 /**
  * Stable channel: no evidence capture, by construction.
@@ -19,6 +20,9 @@ object EvidenceCaptureHook {
 
     /** Does nothing. Stable arms no probe. */
     fun startProbes(context: Context) = Unit
+
+    /** Does nothing. Stable has no validation answer to announce. */
+    fun onSample(context: Context, text: () -> Context, value: EnergySnapshot) = Unit
 
     /** Does nothing. Stable has no probe artifact to write. */
     fun saveProbeArtifacts(context: Context) = Unit

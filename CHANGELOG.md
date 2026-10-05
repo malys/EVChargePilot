@@ -6,6 +6,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **"Validation results complete" notice (unstable, CP-055).** Once every validation question
+  has recorded at least one answer, a notification asks the driver to export the diagnostic to
+  USB; tapping it opens Diagnostics. Posted once per process, only with the car read as stopped.
 - **Battery stress while driving (CP-090).** When a trip spent 2 minutes or more pulling hard
   (above 60 % of its own peak) at a low charge (under 20 %) or below 0 °C outside, the trip-end
   line gains one clause, through the same voice, gate and advice history. The Battery page's
