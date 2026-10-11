@@ -47,3 +47,11 @@
 -keep class com.evsuite.chargepilot.AdviceEntry { *; }
 -keep class com.evsuite.chargepilot.AdviceKind { *; }
 -keep class com.evsuite.chargepilot.AdviceJournal$Envelope { *; }
+
+# The battery ledger, left out like the stores above. Unkept, R8 dropped the schema version the
+# writer stamps and stripped the reader's envelope of both its fields, so every read saw schema 0,
+# quarantined the file and came back empty: the ledger never held more than one entry on the
+# car, no rise in charge was ever seen, and the charge history stayed empty after a real charge.
+-keep class com.evsuite.hardware.telemetry.BatteryLedgerEntry { *; }
+-keep class com.evsuite.hardware.telemetry.BatteryLedgerFile { *; }
+-keep class com.evsuite.hardware.telemetry.BatteryLedgerStore$LedgerEnvelope { *; }

@@ -84,6 +84,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **The charge history stays empty after a real charge (release builds).** R8 stripped the
+  battery ledger's stored classes, so every read saw schema 0, quarantined the file and came back
+  empty: the ledger never held more than one entry on the car. Keep rules added. EVHardware also
+  drops ledger readings taken on the head unit's factory clock, which split a night charge.
 - **The eco coach's smoothness gauge was too optimistic.** It counted hard acceleration only,
   while the trip summary counted hard braking too; the live gauge, the steadiness line and its voice
   now count both, through EVHardware's `EcoDrivingMonitor`, and their wording says so.
