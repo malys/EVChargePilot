@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.evsuite.chargepilot.databinding.ActivityMainBinding
 import com.evsuite.chargepilot.update.UpdateHook
 import com.evsuite.hardware.AppLogger
@@ -67,6 +68,8 @@ class MainActivity : PrimaryNavigationActivity() {
     /** The recorder owns the sampler; this screen is one of its readers. */
     private var recorder: TripRecordingService? = null
     private var loadedHistoryRevision = -1
+    /** The page tint as drawn, 0..1, eased towards [EcoCoach.harshTint] each frame. */
+    private var ecoTint = 0f
     /** Exact normalized service frame; the parked-only actions re-read it rather than the UI. */
     @Volatile private var latestSnapshot: EnergySnapshot? = null
 
@@ -265,6 +268,24 @@ class MainActivity : PrimaryNavigationActivity() {
         val gauge = line == null && EcoCoach.adviceEnabled(this)
         binding.ecoGauge.visibility = if (gauge) View.VISIBLE else View.GONE
         if (gauge) renderEcoGauge(eco.harshShare())
+        renderEcoTint(if (EcoCoach.adviceEnabled(this)) eco.harshShare() else null)
+    }
+
+    /**
+     * The page itself warms towards the warning colour as the driving hardens, so a glance
+     * catches it without reading the gauge. Only the background between the cards is tinted:
+     * every figure stays on its own surface and keeps its contrast. Eased per frame, never
+     * flashed, and the gauge's word stays the carrier of the meaning.
+     */
+    private fun renderEcoTint(share: Double?) {
+        ecoTint += (EcoCoach.harshTint(share) - ecoTint) * ECO_TINT_EASE
+        binding.root.setBackgroundColor(
+            ColorUtils.blendARGB(
+                ContextCompat.getColor(this, R.color.ev_background),
+                ContextCompat.getColor(this, R.color.ev_warn),
+                ecoTint * ECO_TINT_MAX,
+            ),
+        )
     }
 
     /** CP-084. Empty and grey before a minute of movement; amber once past the advice mark. */
@@ -518,5 +539,9 @@ class MainActivity : PrimaryNavigationActivity() {
         const val ARRIVAL_REFRESH_MS = 5_000L
         /** The full gauge: two and a half times the advice mark, so the mark sits left of centre. */
         const val ECO_GAUGE_FULL_PERCENT = 30.0
+        /** Share of the way to the target tint covered each frame: a few seconds to settle. */
+        const val ECO_TINT_EASE = 0.25f
+        /** The strongest blend of the warning colour into the page background. */
+        const val ECO_TINT_MAX = 0.6f
     }
 }

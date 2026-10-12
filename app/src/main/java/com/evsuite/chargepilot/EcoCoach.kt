@@ -171,6 +171,18 @@ class EcoCoach(context: Context) {
         private const val PREF_ADVICE = "advice_enabled"
         private const val PREF_VOICE = "voice_enabled"
 
+        /**
+         * How far the Energy page leans towards the warning colour: nothing up to half the
+         * advice mark, all the way at twice it. A ramp rather than a switch, so the page warms
+         * as the driving hardens instead of flipping on one sample; null (not a minute of
+         * movement yet) is no tint, never a guess.
+         */
+        fun harshTint(share: Double?): Float {
+            val mark = EcoDrivingMonitor.MIN_HARSH_SHARE_PERCENT
+            share ?: return 0f
+            return ((share - mark / 2) / (mark * 1.5)).coerceIn(0.0, 1.0).toFloat()
+        }
+
         fun adviceEnabled(context: Context): Boolean =
             prefs(context).getBoolean(PREF_ADVICE, EcoCoachDefaults.ADVICE_ENABLED)
 

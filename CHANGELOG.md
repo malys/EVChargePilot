@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Energy page warms when driving is not smooth.** With eco advice on, the page background
+  between the cards blends gradually towards the warning colour as the harsh-acceleration share
+  rises: none up to 6 %, full at 24 % (the advice mark is 12 %). Eased over a few seconds,
+  never flashed; the cards keep their own surface, so no figure loses contrast, and the gauge's
+  word still carries the meaning.
 - **"Validation results complete" notice (unstable, CP-055).** Once every validation question
   has recorded at least one answer, a notification asks the driver to export the diagnostic to
   USB; tapping it opens Diagnostics. Posted once per process, only with the car read as stopped.
