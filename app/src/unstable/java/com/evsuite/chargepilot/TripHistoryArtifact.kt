@@ -1,6 +1,7 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import com.evsuite.hardware.telemetry.DrivingStress
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSummary
 import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
@@ -30,11 +31,20 @@ internal data class TripHistoryArtifact(
     val socModelFit: String,
     val notes: List<String> = NOTES,
     val summaries: List<EnergyTripSummary>,
+    /** CP-090: [DrivingStress] for each exported trip that kept a sample track. */
+    val drivingStress: List<TripStress>,
 ) {
+    /** Both figures null when [DrivingStress.of] could not say; Gson then omits them. */
+    data class TripStress(
+        val startedAtMs: Long,
+        val stressedMinutes: Double?,
+        val coldRegeneratedKwh: Double?,
+    )
+
     fun toJson(): String = GSON.toJson(this)
 
     companion object {
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 3
         const val PROBE = "trip-history"
         const val KIND = "trips"
 
@@ -53,6 +63,10 @@ internal data class TripHistoryArtifact(
                 "from the navigation adapter rather than from PERF_ODOMETER. Its span over a " +
                 "drive is a distance nothing derived from speed, so max minus min there " +
                 "against distanceKm here is the speed-scale check that needs no observer.",
+            "drivingStress has one entry per exported trip with a sample track, by " +
+                "startedAtMs. No stressedMinutes means the measurement could not say for that " +
+                "trip; no coldRegeneratedKwh means the outside temperature was never read. " +
+                "Neither is a zero.",
         )
 
         fun of(
@@ -76,6 +90,16 @@ internal data class TripHistoryArtifact(
                 speedScaleCheck = SpeedScaleCheck.of(odometerSpanKm, integratedKm),
                 socModelFit = SocConsumptionFitter().describe(history),
                 summaries = summaries.take(MAX_SUMMARIES),
+                drivingStress = history.take(MAX_SUMMARIES)
+                    .filter { !it.samples.isNullOrEmpty() }
+                    .map { trip ->
+                        val stress = DrivingStress.of(trip.samples.orEmpty())
+                        TripStress(
+                            trip.summary.startedAtMs,
+                            stress?.stressedMinutes,
+                            stress?.coldRegeneratedKwh,
+                        )
+                    },
             )
         }
     }

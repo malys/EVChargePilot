@@ -1,11 +1,13 @@
 package com.evsuite.chargepilot
 
+import android.app.ActivityManager
 import android.content.Context
 import android.media.AudioAttributes
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.saic.SaicTts
+import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -33,6 +35,45 @@ object EcoVoice {
     private const val INIT_TIMEOUT_SECONDS = 5L
     private const val SPEAK_TIMEOUT_SECONDS = 30L
 
+    /** CP-081/083: enough to cover a drive's coach lines and the test, bounded against a loop. */
+    private const val MAX_EVENTS = 20
+
+    /** Who asked for a line. */
+    enum class Origin { TEST, COACH, TRIP_END }
+
+    /** Which voice took it; [NONE] when neither did. */
+    enum class Path { VEHICLE, PLATFORM, NONE }
+
+    /**
+     * One dispatch and what became of it, for the diagnostic report.
+     *
+     * The vendor prompt has no completion callback, so [Path.VEHICLE] means the car's voice
+     * service accepted the line, never that it was heard. [importance] is this process's own at
+     * dispatch: above `IMPORTANCE_FOREGROUND` (100) the app was not in front.
+     */
+    data class Event(
+        val atMs: Long,
+        val origin: Origin,
+        val path: Path,
+        val bound: Boolean,
+        val waitedMs: Long,
+        val importance: Int?,
+    ) {
+        fun line(): String = "voice_event=$atMs origin=${origin.name.lowercase()} " +
+            "path=${path.name.lowercase()} bound=$bound waited_ms=$waitedMs importance=$importance"
+    }
+
+    /** In memory only, guarded by itself: the report reads it, the worker writes it. */
+    private val events = ArrayDeque<Event>()
+
+    /** The newest [MAX_EVENTS] outcomes, oldest first. */
+    fun recentEvents(): List<Event> = synchronized(events) { events.toList() }
+
+    private fun remember(event: Event) = synchronized(events) {
+        if (events.size >= MAX_EVENTS) events.removeFirst()
+        events.addLast(event)
+    }
+
     private val worker = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-voice").apply { isDaemon = true }
     }
@@ -46,12 +87,14 @@ object EcoVoice {
     /**
      * Speaks [text] and reports, on the worker thread, whether anything took it.
      *
+     * @param origin who asked, recorded with the outcome.
      * @param interrupt true only for the driver's own test from the settings screen; a coach line
      *   queues behind whatever the car is already announcing.
      */
     fun say(
         context: Context,
         text: String,
+        origin: Origin,
         interrupt: Boolean = false,
         onResult: ((Boolean) -> Unit)? = null,
     ) {
@@ -60,17 +103,30 @@ object EcoVoice {
             return
         }
         val app = context.applicationContext
+        val atMs = System.currentTimeMillis()
+        val importance = runCatching {
+            ActivityManager.RunningAppProcessInfo()
+                .also { ActivityManager.getMyMemoryState(it) }.importance
+        }.getOrNull()
         runCatching {
             worker.execute {
-                val spoken = runCatching { speakBlocking(app, text, interrupt) }
+                val outcome = runCatching { speakBlocking(app, text, interrupt) }
                     .onFailure { AppLogger.w(TAG, "speech failed: ${it.message}") }
-                    .getOrDefault(false)
+                    .getOrNull()
+                remember(
+                    Event(
+                        atMs, origin, outcome?.first ?: Path.NONE,
+                        SaicTts.isAvailable, outcome?.second ?: 0L, importance,
+                    )
+                )
+                val spoken = outcome != null && outcome.first != Path.NONE
                 runCatching { onResult?.invoke(spoken) }
             }
         }.onFailure { onResult?.invoke(false) }
     }
 
-    private fun speakBlocking(app: Context, text: String, interrupt: Boolean): Boolean {
+    /** The path that took the line, and how long the vendor bind was waited for. */
+    private fun speakBlocking(app: Context, text: String, interrupt: Boolean): Pair<Path, Long> {
         connect(app)
         var waited = 0L
         while (!SaicTts.isAvailable && waited < BIND_WAIT_MS) {
@@ -79,9 +135,9 @@ object EcoVoice {
         }
         if (SaicTts.isAvailable && SaicTts.speak(text, interrupt, app.packageName)) {
             AppLogger.d(TAG, "spoken by the vehicle voice service")
-            return true
+            return Path.VEHICLE to waited
         }
-        return speakWithPlatformEngine(app, text)
+        return (if (speakWithPlatformEngine(app, text)) Path.PLATFORM else Path.NONE) to waited
     }
 
     /**

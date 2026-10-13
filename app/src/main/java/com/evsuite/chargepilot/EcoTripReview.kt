@@ -239,6 +239,23 @@ object EcoTripReviewer {
         )
     }
 
+    /**
+     * CP-086. The window-open inputs and residual as computed, finding or not. Null where the
+     * attribution produced no window-open residual.
+     */
+    fun describeWindows(trip: StoredTrip, attribution: EnergyAttributionResult?): List<String> {
+        val residual = (attribution as? EnergyAttributionResult.Ready)?.attribution?.residuals
+            ?.firstOrNull { it.context == ResidualContext.WINDOWS_OPEN }
+        val openSamples = trip.samples.orEmpty().count { (it.widestWindowPercent ?: 0) > 0 }
+        val distinguishable = residual?.let { it.finding == ResidualFinding.DISTINGUISHABLE }
+        return listOf(
+            "windows_open_samples=$openSamples",
+            "windows_open_fast_km=${format(openFastDistanceKm(trip))}",
+            "windows_residual_kwh=${residual?.let { format(it.estimate.valueKwh) }}",
+            "windows_distinguishable=$distinguishable",
+        )
+    }
+
     /** Trapezoid distance over the intervals open and above the speed at both ends. */
     private fun openFastDistanceKm(trip: StoredTrip): Double =
         trip.samples.orEmpty().zipWithNext().sumOf { (previous, current) ->

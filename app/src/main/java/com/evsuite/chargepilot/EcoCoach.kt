@@ -133,7 +133,7 @@ class EcoCoach(context: Context) {
         if (line == spokenLine || nowMs - lastSpokeAtMs < SPEAK_COOLDOWN_MS) return
         spokenLine = line
         lastSpokeAtMs = nowMs
-        EcoVoice.say(app, line)
+        EcoVoice.say(app, line, EcoVoice.Origin.COACH)
     }
 
     /**

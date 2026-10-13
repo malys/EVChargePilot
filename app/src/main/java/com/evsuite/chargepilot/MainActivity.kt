@@ -191,6 +191,7 @@ class MainActivity : PrimaryNavigationActivity() {
                 loadedHistoryRevision = revision
             } else if (revision != loadedHistoryRevision) {
                 loadedHistoryRevision = revision
+                ValidationProbe.monitor(value) { "dashboard reloaded history revision $revision" }
                 loadRecentTrips()
             }
         }

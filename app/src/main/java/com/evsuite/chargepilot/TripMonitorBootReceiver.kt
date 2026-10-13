@@ -24,7 +24,11 @@ class TripMonitorBootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent?.action != Intent.ACTION_BOOT_COMPLETED) return
-        if (!TripRecordingService.isAutomaticDetectionEnabled(context)) {
+        val detection = TripRecordingService.isAutomaticDetectionEnabled(context)
+        ValidationProbe.monitor(null) {
+            "boot received, detection=${if (detection) "on" else "off"}"
+        }
+        if (!detection) {
             AppLogger.i("EVChargePilot", "boot: automatic trip detection is off, nothing started")
             return
         }

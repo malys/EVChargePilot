@@ -18,6 +18,12 @@ data class AdviceEntry(
     val kind: AdviceKind,
     val text: String,
     val notified: Boolean = false,
+    /**
+     * When the notification for this entry was posted (CP-087). Null for an entry that was not
+     * posted — held back by the daily cap, or not yet flushed — and for every entry written
+     * before this field existed, which is why it needs no schema bump.
+     */
+    val notifiedAtMs: Long? = null,
 )
 
 /**
@@ -49,11 +55,27 @@ class AdviceJournal(
     @Synchronized
     fun append(entry: AdviceEntry): Boolean = write((read() + entry).takeLast(maxEntries))
 
-    /** Marks the given entries as notified; the rest stay as they are. */
+    /**
+     * Marks the given entries as notified, and stamps [nowMs] on those that were [posted]; the
+     * rest stay as they are.
+     */
     @Synchronized
-    fun markNotified(entries: Collection<AdviceEntry>): Boolean {
+    fun markNotified(
+        entries: Collection<AdviceEntry>,
+        posted: Collection<AdviceEntry> = emptyList(),
+        nowMs: Long? = null,
+    ): Boolean {
         val marked = entries.toSet()
-        return write(read().map { if (it in marked) it.copy(notified = true) else it })
+        val stamped = posted.toSet()
+        return write(
+            read().map {
+                when (it) {
+                    in stamped -> it.copy(notified = true, notifiedAtMs = nowMs)
+                    in marked -> it.copy(notified = true)
+                    else -> it
+                }
+            }
+        )
     }
 
     private fun write(entries: List<AdviceEntry>): Boolean {

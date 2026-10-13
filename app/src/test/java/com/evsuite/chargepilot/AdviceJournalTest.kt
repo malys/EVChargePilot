@@ -24,6 +24,26 @@ class AdviceJournalTest {
     }
 
     @Test
+    fun `a file written before notifiedAtMs reads, and a posted entry is stamped`() {
+        val dir = Files.createTempDirectory("advice").toFile()
+        val file = File(dir, AdviceJournal.FILE_NAME).apply {
+            writeText(
+                """{"schemaVersion":1,"entries":[""" +
+                    """{"atMs":1,"kind":"BATTERY","text":"held","notified":false},""" +
+                    """{"atMs":2,"kind":"BATTERY","text":"posted","notified":false}]}"""
+            )
+        }
+        val journal = AdviceJournal(file)
+        val old = journal.read()
+        assertEquals(listOf(null, null), old.map { it.notifiedAtMs })
+        journal.markNotified(old, posted = listOf(old[1]), nowMs = 99L)
+        val marked = journal.read()
+        assertEquals(listOf(true, true), marked.map { it.notified })
+        assertEquals(listOf(null, 99L), marked.map { it.notifiedAtMs })
+        dir.deleteRecursively()
+    }
+
+    @Test
     fun `an unreadable file is set aside, not overwritten`() {
         val dir = Files.createTempDirectory("advice").toFile()
         val file = File(dir, AdviceJournal.FILE_NAME).apply { writeText("{not json") }

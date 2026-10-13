@@ -134,7 +134,9 @@ class SettingsActivity : PrimaryNavigationActivity() {
      */
     private fun testVoice() {
         binding.ecoVoiceStatus.text = getString(R.string.eco_voice_testing)
-        EcoVoice.say(this, getString(R.string.eco_voice_test), interrupt = true) { spoken ->
+        EcoVoice.say(
+            this, getString(R.string.eco_voice_test), EcoVoice.Origin.TEST, interrupt = true,
+        ) { spoken ->
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 binding.ecoVoiceStatus.text = getString(

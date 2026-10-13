@@ -6,6 +6,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Read-only evidence probes for the open on-car tickets (CP-055, CP-078–CP-081, CP-083,
+  CP-086, CP-087, CP-090).** Nothing new is read from or written to the car.
+  - *Monitor journal (unstable, CP-078/079/080).* A persistent, bounded (200 lines), atomically
+    written `monitor-journal.json` records process start, boot received (with detection on/off),
+    monitor start/suspension/self-stop/destroy, every trip end (automatic, km, stored, history
+    revision), every battery ledger entry, and dashboard / battery page reloads, each with
+    wall clock, uptime, odometer and charge. It reaches the existing validation file as block
+    Q11; the bundle gains no file.
+  - *Q1 on the proven guidance signal (CP-055).* When `isMapNavigating` turns true the
+    destination probe fires, instead of waiting for a guidance flag never seen on the car.
+  - *Voice outcomes (CP-081/083).* The last 20 voice dispatches (origin, voice path, bind state,
+    wait, process importance) are listed as `voice_event=` in the diagnostic `[eco_driving]`.
+  - *Windows factor (CP-086).* `[eco_trip_review]` always prints the newest trip's open-window
+    samples, open distance above 60 km/h, window residual and whether it was distinguishable.
+  - *Notification time (CP-087).* Advice history entries record when their notification was
+    posted (`notified_at_ms=` in `[battery_advice]`); older files read unchanged.
+  - *Driving stress per trip (unstable, CP-090).* The trips artifact (schema 3) carries
+    `drivingStress` for each exported trip with a track.
 - **Energy page warms when driving is not smooth.** With eco advice on, the page background
   between the cards blends gradually towards the warning colour as the harsh-acceleration share
   rises: none up to 6 %, full at 24 % (the advice mark is 12 %). Eased over a few seconds,

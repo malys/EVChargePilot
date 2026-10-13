@@ -83,4 +83,13 @@ enum class ValidationQuestion(
         "the charge-stop screen opens, and again when a route is asked for while the fine " +
             "grant or the position is missing",
     ),
+    MONITOR_JOURNAL(
+        "Q11",
+        "CP-080",
+        "Was the trip monitor alive whenever the car moved, and if not, did the head unit boot, " +
+            "resume or kill the process in between?",
+        "the process starts, the head unit boots, the monitor starts, suspends or stops, a trip " +
+            "ends, the battery ledger writes, or a dashboard or battery page reloads; kept " +
+            "across processes in monitor-journal.json",
+    ),
 }

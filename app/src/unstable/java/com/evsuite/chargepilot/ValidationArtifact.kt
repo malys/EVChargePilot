@@ -124,7 +124,10 @@ internal data class ValidationArtifact(
         private val NOTES = listOf(
             "CP-055. One drive, every question that needed a car. Read it beside " +
                 "analysis/CP-055_validation_drive.md, which says what the drive was.",
-            "Each line is prefixed with the seconds elapsed since the probes were armed.",
+            "Each line is prefixed with the seconds elapsed since the probes were armed, " +
+                "except Q11's, which outlive the process: wall-clock ms, elapsedRealtime ms, " +
+                "the adapter odometer and the charge last read (null before the first sample), " +
+                "then the event.",
             "What is deliberately absent: the API keys, the destination text the driver " +
                 "typed, and any coordinate of the origin. None of it is recorded here.",
             "What is deliberately present, and travels on the USB stick: the names of roads " +

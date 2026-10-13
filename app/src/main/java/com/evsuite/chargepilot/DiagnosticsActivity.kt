@@ -298,6 +298,9 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             // CP-081: whether the SAIC voice service is bound. False with the voice on means
             // every line fell back to an Android engine the car does not have.
             appendLine("vehicle_voice_bound=${SaicTts.isAvailable}")
+            // CP-081/083: the last outcomes, in memory since this process started. path=vehicle is
+            // the car's voice service accepting the line, not proof it was heard.
+            EcoVoice.recentEvents().forEach { appendLine(it.line()) }
             DashboardFrame.eco.describe().forEach(::appendLine)
             appendLine()
             // CP-075. The same verdict the trip screen shows for the newest drive, so a bundle
@@ -313,7 +316,12 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             BatteryDigestStore(File(filesDir, BatteryDigestStore.FILE_NAME)).read().takeLast(7)
                 .forEach { appendLine("digest=$it") }
             AdviceJournal.of(filesDir).read().takeLast(20)
-                .forEach { appendLine("advice=${it.atMs} ${it.kind} notified=${it.notified} ${it.text}") }
+                .forEach {
+                    appendLine(
+                        "advice=${it.atMs} ${it.kind} notified=${it.notified} " +
+                            "notified_at_ms=${it.notifiedAtMs} ${it.text}"
+                    )
+                }
             appendLine()
             appendLine("[property_probe]")
             appendLine(getString(R.string.diagnostics_properties))
@@ -348,10 +356,17 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
         val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
         val latest = trips.maxByOrNull { it.summary.startedAtMs }
             ?: return listOf("no_trip_recorded")
-        val review = reviewHistory(filesDir, trips).reviews[latest.summary.startedAtMs]
+        val history = reviewHistory(filesDir, trips)
+        val review = history.reviews[latest.summary.startedAtMs]
             ?: return listOf("no_trip_recorded")
         listOf("started_at_epoch_ms=${latest.summary.startedAtMs}") +
-            EcoTripReviewer.describe(review)
+            EcoTripReviewer.describe(review) +
+            // CP-086: whether or not a finding was made, so "never open" and "not
+            // distinguishable" read apart.
+            EcoTripReviewer.describeWindows(
+                latest,
+                history.attributions[latest.summary.startedAtMs],
+            )
     }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
     /**

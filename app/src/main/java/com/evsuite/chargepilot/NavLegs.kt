@@ -101,6 +101,9 @@ object NavLegs {
         val guiding = guidingNow() ?: return
         if (guiding != lastGuiding) {
             lastGuiding = guiding
+            // CP-055 Q1: this flag is the guidance signal proven on the car, where the guidance
+            // recorder's own never turned true. Once per process inside the probe.
+            if (guiding) ValidationProbe.onGuidanceHeard()
             ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
                 "after the handoff, isMapNavigating=$guiding" +
                     (chain?.let { " (a chain is armed)" } ?: " (nothing to chain)")

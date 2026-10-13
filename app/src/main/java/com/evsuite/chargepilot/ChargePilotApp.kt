@@ -12,6 +12,8 @@ class ChargePilotApp : Application() {
         // Unstable arms the validation probes here so a drive is recorded without anyone
         // opening a screen first; stable does nothing, and contains none of this.
         EvidenceCaptureHook.startProbes(this)
+        // CP-080: a small elapsedRealtime here is a fresh boot; a large one, a restarted process.
+        ValidationProbe.monitor(null) { "process start" }
         // The vehicle voice binds asynchronously; asking now means the first coach line, or the
         // settings test, finds it bound. Idempotent, and a car without it just falls back.
         if (EcoCoach.voiceEnabled(this)) EcoVoice.connect(this)

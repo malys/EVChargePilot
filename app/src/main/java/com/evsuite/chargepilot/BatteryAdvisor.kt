@@ -220,7 +220,11 @@ internal class BatteryAdvisor(
             .filterKeys { it !in spent }
             .map { (kind, list) -> post(manager, kind, list.last()); list.last() }
         // What the cap held back is still in the history; it is not queued for tomorrow.
-        journal.markNotified(waiting.filter { entry -> posted.any { it.kind == entry.kind } } + posted)
+        journal.markNotified(
+            waiting.filter { entry -> posted.any { it.kind == entry.kind } } + posted,
+            posted,
+            nowMs,
+        )
     }
 
     // The head unit runs API 28, where no permission gates a notification. POST_NOTIFICATIONS is

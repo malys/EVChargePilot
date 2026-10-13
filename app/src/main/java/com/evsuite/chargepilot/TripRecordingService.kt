@@ -163,6 +163,7 @@ class TripRecordingService : Service() {
         samplingTask = null
         sampler.shutdownNow()
         AppLogger.i(TAG, "service destroyed")
+        ValidationProbe.monitor(latestSnapshot) { "service destroyed" }
         super.onDestroy()
     }
 
@@ -254,12 +255,20 @@ class TripRecordingService : Service() {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         }
         if (recorded == null) {
+            ValidationProbe.monitor(latestSnapshot) {
+                "trip end automatic=$automaticallyDetected nothing recorded"
+            }
             if (automaticDetectionEnabled) updateNotification()
             stopWhenNobodyNeedsIt()
             return
         }
         TripAverageEvidence.record(recorded.summary)
         if (!AutomaticTripRetention.shouldStore(automaticallyDetected, recorded.summary)) {
+            ValidationProbe.monitor(latestSnapshot) {
+                "trip end automatic=$automaticallyDetected " +
+                    "km=${recorded.summary.recordedDistanceKm} stored=false " +
+                    "historyRevision=${historyRevisionCounter.get()}"
+            }
             AppLogger.i(
                 TAG,
                 "automatic trip not stored; distance_km=${recorded.summary.recordedDistanceKm}",
@@ -302,6 +311,11 @@ class TripRecordingService : Service() {
                             "ended_epoch_ms=${recorded.summary.endedAtMs}",
                     )
                 }
+                ValidationProbe.monitor(latestSnapshot) {
+                    "trip end automatic=$automaticallyDetected " +
+                        "km=${recorded.summary.recordedDistanceKm} stored=true saved=$saved " +
+                        "historyRevision=${historyRevisionCounter.get()}"
+                }
                 pendingHistoryWrites.decrementAndGet()
                 main.post {
                     runCatching { onSaved?.invoke() }
@@ -339,7 +353,9 @@ class TripRecordingService : Service() {
         batteryAdvisor.record(AdviceKind.TRIP_END, line, trip.summary.endedAtMs)
         // Spoken short: headline and one lever; the stress clause stays in the journal.
         val voice = text.voice(advice)
-        if (EcoCoach.voiceEnabled(this) && voice.isNotEmpty()) EcoVoice.say(this, voice)
+        if (EcoCoach.voiceEnabled(this) && voice.isNotEmpty()) {
+            EcoVoice.say(this, voice, EcoVoice.Origin.TRIP_END)
+        }
     }
 
     /**
@@ -409,7 +425,11 @@ class TripRecordingService : Service() {
                     AppLogger.w(TAG, "battery learning refresh failed: ${it.message}")
                 }
             }
-            batteryRevisionCounter.incrementAndGet()
+            val revision = batteryRevisionCounter.incrementAndGet()
+            ValidationProbe.monitor(value) {
+                "ledger entry soc=${value.socPercent} charging=${value.chargingStatus} " +
+                    "revision=$revision"
+            }
         }
         // CP-087. The daily digest and the parked notification; both cost one comparison on
         // every other sample.
@@ -451,6 +471,9 @@ class TripRecordingService : Service() {
         samplingTask?.cancel(false)
         samplingTask = null
         AppLogger.i(TAG, "telemetry sampler stopped; no active consumer")
+        ValidationProbe.monitor(latestSnapshot) {
+            "service stopping itself, suspended=$automaticMonitoringSuspended"
+        }
         stopSelf()
     }
 
@@ -478,9 +501,13 @@ class TripRecordingService : Service() {
             }
             return
         }
-        if (missingSpeedSamples.incrementAndGet() == MISSING_SPEED_SAMPLE_LIMIT) {
+        val missing = missingSpeedSamples.incrementAndGet()
+        if (missing == MISSING_SPEED_SAMPLE_LIMIT) {
             automaticMonitoringSuspended = true
             AppLogger.w(TAG, "automatic trip monitor suspended: speed unavailable")
+            ValidationProbe.monitor(value) {
+                "monitor suspended: speed unavailable, missing=$missing"
+            }
             main.post {
                 ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
                 stopWhenNobodyNeedsIt()
@@ -512,6 +539,7 @@ class TripRecordingService : Service() {
     private fun startAutomaticMonitor() {
         automaticMonitoringSuspended = false
         missingSpeedSamples.set(0)
+        ValidationProbe.monitor(latestSnapshot) { "monitor started" }
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(), foregroundTypes())
         ensureSampling()
     }

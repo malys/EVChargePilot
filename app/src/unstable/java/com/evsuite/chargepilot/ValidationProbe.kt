@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.SaicNav
 import com.evsuite.hardware.saic.SaicNavGuidance
+import com.evsuite.hardware.telemetry.EnergySnapshot
 import java.util.ArrayDeque
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -61,6 +63,11 @@ object ValidationProbe {
      */
     private val prober = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-validation")
+    }
+
+    /** Journal writes, kept off the prober: its binder reads can sleep and stall. */
+    private val journalWriter = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "chargepilot-monitor-journal").apply { isDaemon = true }
     }
 
     @Volatile
@@ -159,8 +166,13 @@ object ValidationProbe {
         }
     }
 
-    /** Every question has at least one line: the bundle is worth exporting now. */
-    fun allAnswered(): Boolean = allAnswered(synchronized(rings) { rings.keys.toSet() })
+    /**
+     * Every question has at least one line: the bundle is worth exporting now. Q11 reads the
+     * persistent journal, which this process's own `process start` line has already filled.
+     */
+    fun allAnswered(): Boolean = allAnswered(
+        synchronized(rings) { rings.keys.toSet() } + ValidationQuestion.MONITOR_JOURNAL
+    )
 
     internal fun allAnswered(answered: Set<ValidationQuestion>): Boolean =
         answered.containsAll(ValidationQuestion.entries)
@@ -168,14 +180,36 @@ object ValidationProbe {
     /**
      * The car has a destination of its own and is guiding to it — the moment CP-051 asks about.
      *
-     * Called from the guidance recorder's tick, at most once per process, and the work leaves
-     * that thread immediately.
+     * Called from the guidance recorder's tick and from [NavLegs] when `isMapNavigating` turns
+     * true, at most once per process, and the work leaves that thread immediately.
      */
     fun onGuidanceHeard() {
         if (!enabled || probedWhileGuiding) return
         val app = appContext ?: return
         probedWhileGuiding = true
         probeDestinationLater(app, "guidance heard, so the car's own navigation has a destination")
+    }
+
+    /**
+     * One line in the persistent monitor journal (CP-080, Q11), stamped now with what [snapshot]
+     * last read; null where the caller has no reading.
+     *
+     * Cheap on the calling thread — two clock reads and the lambda — and the write happens on
+     * the journal's own thread. Nothing here may throw into a service or a boot receiver.
+     */
+    fun monitor(snapshot: EnergySnapshot?, event: () -> String) {
+        if (!enabled) return
+        val app = appContext ?: return
+        runCatching {
+            val entry = MonitorJournal.Entry(
+                wallMs = System.currentTimeMillis(),
+                elapsedRealtimeMs = SystemClock.elapsedRealtime(),
+                odometerKm = snapshot?.odometerKm,
+                socPercent = snapshot?.socPercent,
+                event = event(),
+            )
+            journalWriter.execute { runCatching { MonitorJournal.of(app.filesDir).append(entry) } }
+        }
     }
 
     /** The state of every question as the file the export bundles. */
@@ -187,9 +221,10 @@ object ValidationProbe {
         // background thread, and a probe answering after the file is written answers into the
         // next export instead of this one.
         if (enabled) probeDestination(context.applicationContext, "at export")
+        val journal = MonitorJournal.of(context.filesDir).read().map { it.line() }
         val recorded = synchronized(rings) {
             ValidationQuestion.entries.associateWith { rings[it]?.toList().orEmpty() }
-        }
+        } + (ValidationQuestion.MONITOR_JOURNAL to journal)
         return ValidationArtifact.of(
             savedAtMs = nowMs,
             firmware = FirmwareInfo.getGeneration().name,

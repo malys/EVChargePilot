@@ -84,6 +84,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                 speedObservedAtMs = snapshot.timestampMs
                 if (value.batteryRevision != loadedBatteryRevision) {
                     loadedBatteryRevision = value.batteryRevision
+                    ValidationProbe.monitor(snapshot) {
+                        "battery page reloaded revision ${value.batteryRevision}"
+                    }
                     load()
                 }
                 renderApply()

@@ -1,6 +1,7 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import com.evsuite.hardware.telemetry.EnergySnapshot
 
 /**
  * Stable channel: nothing is recorded, because nothing here records.
@@ -20,4 +21,10 @@ object ValidationProbe {
 
     /** Does nothing, and does not evaluate [line]. */
     fun record(question: ValidationQuestion, line: () -> String) = Unit
+
+    /** Does nothing. */
+    fun onGuidanceHeard() = Unit
+
+    /** Does nothing, and does not evaluate [event]: stable keeps no monitor journal. */
+    fun monitor(snapshot: EnergySnapshot?, event: () -> String) = Unit
 }

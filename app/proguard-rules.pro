@@ -55,3 +55,9 @@
 -keep class com.evsuite.hardware.telemetry.BatteryLedgerEntry { *; }
 -keep class com.evsuite.hardware.telemetry.BatteryLedgerFile { *; }
 -keep class com.evsuite.hardware.telemetry.BatteryLedgerStore$LedgerEnvelope { *; }
+
+# The monitor journal (CP-080) and the trip artifact's stress rows (CP-090), kept for the
+# same reasons as the stores and artifacts above: persisted by Gson, read by a person.
+-keep class com.evsuite.chargepilot.MonitorJournal$Entry { *; }
+-keep class com.evsuite.chargepilot.MonitorJournal$Envelope { *; }
+-keep class com.evsuite.chargepilot.TripHistoryArtifact$TripStress { *; }
