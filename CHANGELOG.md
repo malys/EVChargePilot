@@ -4,6 +4,21 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **Eco score out of 100, with a record, a run and a weekly challenge (CP-093).** Anticipation
+  (hard stops per 10 km), smoothness and efficiency against your own expectation. The Trips page
+  shows the score, your best and this week's target — a fifth fewer hard stops than last week;
+  the trip detail shows the three parts; the voice in P starts with the score and a record.
+- A new lever, *anticipate braking*, when hard stops reach two per 10 km.
+
+### Changed
+
+- **The eco coach is less kind (CP-093).** The verdict's "typical" zone is one residual wide
+  instead of the 95 % band; a trip is no longer part of the fit it is judged against; hard
+  driving is counted at 1 Hz instead of replayed from the 5 s track; a heavy trip is called heavy
+  out loud; the drive mode advice uses the mode the trip was driven in, recorded with it.
+
 ### Fixed
 
 - **Automatic trips are saved before the head unit powers off (CP-080).** The car switches the

@@ -542,7 +542,7 @@ Consommation %6$s %% par km</string>
     <string name="trip_eco_finding_motorway_soc">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f points de charge de moins.</string>
     <string name="trip_eco_finding_cabin">Habitacle : environ %1$.1f kWh, soit %2$.0f %% de ce trajet.</string>
     <string name="trip_eco_finding_windows">Fenêtres ouvertes : environ %1$.1f kWh, soit %2$.0f %% de ce trajet, %3$.0f km au-delà de 60 km/h.</string>
-    <string name="trip_eco_finding_steadiness">Accélérations franches sur %1$d %% de ce trajet.</string>
+    <string name="trip_eco_finding_steadiness">Accélérations ou freinages francs sur %1$d %% de ce trajet.</string>
     <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>
     <string name="vehicle_hint_reference">Consommation de référence (kWh/100 km)</string>
     <string name="vehicle_helper_reference">La ligne à laquelle la synthèse des trajets compare la conduite. Vide = %1$s kWh/100 km.</string>
@@ -592,12 +592,24 @@ Consommation %6$s %% par km</string>
     <string name="eco_trip_typical">Trajet habituel, dans votre propre moyenne.</string>
     <string name="eco_trip_no_verdict">Pas encore assez de trajets comparables pour un bilan éco.</string>
     <string name="eco_trip_stress">%1$.0f min de forte puissance à charge basse ou sous 0 °C dehors : c’est là que le pack souffre le plus, et des accélérations plus douces l’épargneraient.</string>
-    <string name="eco_voice_trip_gain">%1$d %% à gagner sur ce trajet.</string>
-    <string name="eco_voice_trip_gain_by">%1$d %% à gagner : %2$s.</string>
     <string name="eco_voice_trip_better">Trajet économe, %1$d %% sous la moyenne.</string>
     <string name="eco_voice_trip_worse">Trajet gourmand, %1$d %% au-dessus de la moyenne.</string>
     <string name="eco_voice_trip_typical">Trajet habituel.</string>
     <string name="eco_voice_lever">Levier : %1$s.</string>
+    <string name="eco_score">Note %1$d.</string>
+    <string name="eco_score_versus">Note %1$d, %2$+d sur votre moyenne.</string>
+    <string name="eco_score_record">Nouveau record.</string>
+    <string name="eco_score_streak">%1$d trajets de suite au-dessus de votre moyenne.</string>
+    <string name="eco_score_best">Record personnel : %1$d.</string>
+    <string name="eco_challenge">Défi de la semaine : au plus %1$.1f freinages brusques aux 10 km (semaine dernière : %2$.1f).</string>
+    <string name="eco_challenge_met">En ce moment %1$.1f : réussi.</string>
+    <string name="eco_challenge_now">En ce moment : %1$.1f.</string>
+    <string name="eco_challenge_none_yet">Pas encore assez de route cette semaine.</string>
+    <string name="eco_clause_anticipate">en anticipant %1$d freinages brusques</string>
+    <string name="eco_lever_anticipate">anticiper les freinages</string>
+    <string name="eco_tip_anticipate">%1$d freinages brusques, %2$.1f aux 10 km : lever le pied plus tôt laisse la régénération récupérer cette énergie.</string>
+    <string name="trip_eco_finding_brakings">%1$d freinages brusques, %2$.1f aux 10 km.</string>
+    <string name="trip_eco_score">Note %1$d / 100 · anticipation %2$s · souplesse %3$s · efficacité %4$s</string>
     <string name="eco_lever_smoother">conduite plus souple</string>
     <string name="eco_lever_eco_mode">mode Éco</string>
     <string name="eco_lever_motorway">%1$d km/h sur voie rapide</string>

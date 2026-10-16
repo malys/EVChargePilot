@@ -3,6 +3,7 @@ package com.evsuite.chargepilot
 import android.content.Context
 import com.evsuite.hardware.model.DriveMode
 import com.evsuite.hardware.telemetry.DrivingStress
+import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EcoBand
 import com.evsuite.hardware.telemetry.EcoDrivingMonitor
 import com.evsuite.hardware.telemetry.EcoVerdict
@@ -42,6 +43,17 @@ data class DrivingStyle(
 
     companion object {
         val NONE = DrivingStyle(0L, 0L, 0L)
+
+        /**
+         * The trip's own 1 Hz counts where it was recorded with them, the 5 s track otherwise.
+         * The track averages a two-second hard stop over five seconds and calls it gentle.
+         */
+        fun of(trip: StoredTrip): DrivingStyle {
+            val moving = trip.summary.movingMs
+            val harsh = trip.summary.harshMs
+            return if (moving != null && harsh != null) DrivingStyle(moving, harsh, 0L)
+            else measure(trip.samples.orEmpty())
+        }
         private const val MAX_GAP_MS = TripSampleTrack.DEFAULT_INTERVAL_MS * 2
         private const val KMH_PER_MS = 3.6
 
@@ -78,6 +90,9 @@ data class TripSaving(
 /** One thing that would have made the drive cheaper, each with the number that earned it. */
 sealed interface EcoTip {
     data class Smoother(val harshMinutes: Int, val sharePercent: Int) : EcoTip
+
+    /** Hard stops, counted: each one is energy regeneration could not take back. */
+    data class Anticipate(val brakings: Int, val per10Km: Double) : EcoTip
     data class SlowerMotorway(val finding: EcoFinding.MotorwaySpeed) : EcoTip
 
     /** [current] null means the mode could not be read, and the line says "if not already". */
@@ -136,17 +151,21 @@ object EcoTripAdvice {
         val ready = review as? EcoTripReview.Ready
         val verdict = ready?.verdict
         val band = verdict?.band?.value
-        val smoother = smoother(DrivingStyle.measure(trip.samples.orEmpty()))
+        val smoother = smoother(DrivingStyle.of(trip))
         val findings = ready?.findings.orEmpty()
+        // The mode the trip was driven in, recorded with it; the one read in P only for trips
+        // recorded before the mode was, and that one misses a change made at a stop.
+        val mode = DriveMode.ofRaw(trip.summary.driveModeRaw) ?: driveMode
         val tips = buildList {
+            anticipate(trip)?.let(::add)
             if (smoother != null) add(smoother)
             findings.filterIsInstance<EcoFinding.MotorwaySpeed>().forEach { add(EcoTip.SlowerMotorway(it)) }
             val softer = smoother != null || band == EcoBand.WORSE
-            if (softer && driveMode != DriveMode.ECO && driveMode != DriveMode.SNOW) {
-                add(EcoTip.EcoMode(driveMode))
+            if (softer && mode != DriveMode.ECO && mode != DriveMode.SNOW) {
+                add(EcoTip.EcoMode(mode))
             }
             val cold = meanOutsideCelsius(trip)
-            if (smoother != null && driveMode != DriveMode.SNOW && cold != null &&
+            if (smoother != null && mode != DriveMode.SNOW && cold != null &&
                 cold <= SNOW_MAX_OUTSIDE_CELSIUS
             ) add(EcoTip.SnowMode(cold.roundToInt()))
             findings.filterIsInstance<EcoFinding.Cabin>().forEach { add(EcoTip.Cabin(it)) }
@@ -177,6 +196,18 @@ object EcoTripAdvice {
         )
     }
 
+    /** Two hard stops every 10 km is a habit; one is a junction. */
+    const val MIN_BRAKINGS_PER_10_KM = 2.0
+
+    fun anticipate(trip: StoredTrip): EcoTip.Anticipate? {
+        val brakings = trip.summary.harshBrakings ?: return null
+        val km = trip.summary.recordedDistanceKm?.takeIf { it >= EcoScore.MIN_DISTANCE_KM }
+            ?: return null
+        val per10Km = brakings / km * 10.0
+        if (per10Km < MIN_BRAKINGS_PER_10_KM) return null
+        return EcoTip.Anticipate(brakings, per10Km)
+    }
+
     fun smoother(style: DrivingStyle): EcoTip.Smoother? {
         val share = style.harshSharePercent ?: return null
         if (share < EcoDrivingMonitor.MIN_HARSH_SHARE_PERCENT) return null
@@ -202,7 +233,7 @@ object EcoTripAdvice {
         val cabin = ArrayList<Double>()
         val windows = ArrayList<Double>()
         for (trip in recent) {
-            style += DrivingStyle.measure(trip.samples.orEmpty())
+            style += DrivingStyle.of(trip)
             val ready = reviews[trip.summary.startedAtMs] as? EcoTripReview.Ready ?: continue
             if (ready.verdict.band.value != null) reviewed++
             saving(ready.verdict, trip.summary)?.let { saving ->
@@ -258,15 +289,12 @@ class EcoAdviceText(context: Context) {
      * the driver has to hold in memory. Empty when there is nothing worth saying. The full
      * [spoken] text stays in the advice journal.
      */
-    fun voice(advice: TripAdvice): String {
+    fun voice(advice: TripAdvice, progress: EcoProgress? = null): String {
         val lever = advice.tips.firstOrNull()?.let(::lever)
-        val saving = advice.saving?.percent?.roundToInt()
         val delta = advice.deltaPercent?.let { abs(it).roundToInt() }
-        if (saving != null && lever != null) {
-            return app.getString(R.string.eco_voice_trip_gain_by, saving, lever)
-        }
+        // Said as it is: a heavy drive was announced as "18 % to gain", and the word for it
+        // never reached the driver.
         val head = when {
-            saving != null -> app.getString(R.string.eco_voice_trip_gain, saving)
             advice.band == EcoBand.BETTER && delta != null ->
                 app.getString(R.string.eco_voice_trip_better, delta)
             advice.band == EcoBand.WORSE && delta != null ->
@@ -274,8 +302,43 @@ class EcoAdviceText(context: Context) {
             advice.band != null -> app.getString(R.string.eco_voice_trip_typical)
             else -> null
         }
-        return listOfNotNull(head, lever?.let { app.getString(R.string.eco_voice_lever, it) })
-            .joinToString(" ")
+        return listOfNotNull(
+            progress?.let(::scoreLine),
+            head,
+            lever?.let { app.getString(R.string.eco_voice_lever, it) },
+        ).joinToString(" ")
+    }
+
+    /** "Score 63, +6 on your average. New record." — the game, in one sentence. */
+    fun scoreLine(progress: EcoProgress): String? {
+        val score = progress.score ?: return null
+        val parts = ArrayList<String>()
+        parts += progress.averageBefore?.let {
+            app.getString(R.string.eco_score_versus, score.total, score.total - it)
+        } ?: app.getString(R.string.eco_score, score.total)
+        if (progress.isRecord) parts += app.getString(R.string.eco_score_record)
+        else if (progress.streak >= MIN_STREAK) parts += app.getString(R.string.eco_score_streak, progress.streak)
+        return parts.joinToString(" ")
+    }
+
+    /** The Trips page's eco lines: score, record, run and the week's target. */
+    fun progress(progress: EcoProgress): List<String> {
+        val lines = ArrayList<String>()
+        scoreLine(progress)?.let(lines::add)
+        progress.personalBest?.let { lines += app.getString(R.string.eco_score_best, it) }
+        progress.challenge?.let {
+            lines += app.getString(
+                R.string.eco_challenge,
+                it.targetPer10Km,
+                it.lastWeekPer10Km,
+            ) + " " + (it.thisWeekPer10Km?.let { now ->
+                app.getString(
+                    if (now <= it.targetPer10Km) R.string.eco_challenge_met else R.string.eco_challenge_now,
+                    now,
+                )
+            } ?: app.getString(R.string.eco_challenge_none_yet))
+        }
+        return lines
     }
 
     /** The full line for the advice journal when the trip closes in P. */
@@ -372,6 +435,7 @@ class EcoAdviceText(context: Context) {
     /** The tips that finish "you could have saved … by …"; the others stand alone. */
     private fun clause(tip: EcoTip): String? = when (tip) {
         is EcoTip.Smoother -> app.getString(R.string.eco_clause_smoother, tip.harshMinutes)
+        is EcoTip.Anticipate -> app.getString(R.string.eco_clause_anticipate, tip.brakings)
         is EcoTip.EcoMode -> app.getString(R.string.eco_clause_eco_mode)
         is EcoTip.SlowerMotorway ->
             app.getString(R.string.eco_clause_motorway, tip.finding.referenceSpeedKmh)
@@ -381,6 +445,7 @@ class EcoAdviceText(context: Context) {
     /** A tip in two or three words, for the voice. */
     private fun lever(tip: EcoTip): String = when (tip) {
         is EcoTip.Smoother -> app.getString(R.string.eco_lever_smoother)
+        is EcoTip.Anticipate -> app.getString(R.string.eco_lever_anticipate)
         is EcoTip.EcoMode -> app.getString(R.string.eco_lever_eco_mode)
         is EcoTip.SlowerMotorway ->
             app.getString(R.string.eco_lever_motorway, tip.finding.referenceSpeedKmh)
@@ -392,6 +457,8 @@ class EcoAdviceText(context: Context) {
     private fun sentence(tip: EcoTip): String = when (tip) {
         is EcoTip.Smoother ->
             app.getString(R.string.eco_tip_smoother, tip.harshMinutes, tip.sharePercent)
+        is EcoTip.Anticipate ->
+            app.getString(R.string.eco_tip_anticipate, tip.brakings, tip.per10Km)
         is EcoTip.EcoMode -> app.getString(
             if (tip.current == null) R.string.eco_tip_eco_mode_unknown else R.string.eco_tip_eco_mode,
             tip.current?.let { app.getString(it.labelRes) }.orEmpty(),
@@ -419,5 +486,8 @@ class EcoAdviceText(context: Context) {
     private companion object {
         /** Under this, a hard start or two: not worth a sentence. */
         const val STRESS_MINUTES = 2.0
+
+        /** A run of two is a coincidence; three is worth saying out loud. */
+        const val MIN_STREAK = 3
     }
 }

@@ -3,6 +3,7 @@ package com.evsuite.chargepilot
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.EcoBand
 import com.evsuite.hardware.telemetry.EcoDrivingMonitor
+import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.StoredTrip
 import com.evsuite.hardware.telemetry.UnavailableReason
@@ -52,7 +53,15 @@ sealed interface EcoFinding {
     ) : EcoFinding
 
     /** The share of moving time spent accelerating hard, from the track's speed channel. */
-    data class Steadiness(val harshSharePercent: Double) : EcoFinding
+    /**
+     * Hard acceleration or braking, either sign, and the hard stops counted at 1 Hz where the
+     * trip was recorded with them (null on older trips).
+     */
+    data class Steadiness(
+        val harshSharePercent: Double,
+        val hardBrakings: Int? = null,
+        val hardBrakingsPer10Km: Double? = null,
+    ) : EcoFinding
 }
 
 /** The band as a word. One mapping for the live tile and the trip review both. */
@@ -110,18 +119,12 @@ object EcoTripReviewer {
         whatIf: SpeedWhatIfResult?,
         generation: FirmwareInfo.Gen = FirmwareInfo.getGeneration(),
     ): EcoTripReview {
-        val monitor = EcoDrivingMonitor.forReplay().replay(trip.samples.orEmpty())
-        val verdict = monitor.verdict(
-            socModel,
-            trip.summary,
-            meanOutsideTempCelsius(trip),
-            generation,
-        )
+        val verdict = verdict(trip, socModel, generation)
         val findings = listOfNotNull(
             motorway(whatIf),
             cabin(attribution),
             windows(trip, attribution),
-            steadiness(monitor),
+            steadiness(trip),
         ).take(MAX_FINDINGS)
         if (verdict.band.value == null && findings.isEmpty()) {
             return EcoTripReview.Unavailable(
@@ -165,7 +168,8 @@ object EcoTripReviewer {
             " share_percent=${format(finding.sharePercent)}" +
             " open_km_above_60=${format(finding.openDistanceKm)}"
         is EcoFinding.Steadiness ->
-            "finding=STEADINESS harsh_share_percent=${format(finding.harshSharePercent)}"
+            "finding=STEADINESS harsh_share_percent=${format(finding.harshSharePercent)}" +
+                " hard_brakings=${finding.hardBrakings ?: "unavailable"}"
     }
 
     /**
@@ -278,8 +282,20 @@ object EcoTripReviewer {
      * too: below the live advice threshold it used to drop out, and a calm drive with no fitted
      * model yet then read "nothing measurable" although its whole track had been measured.
      */
-    private fun steadiness(monitor: EcoDrivingMonitor): EcoFinding.Steadiness? =
-        monitor.harshSharePercent()?.let(EcoFinding::Steadiness)
+    /** The verdict alone, for a score: what [review] says about the drive's charge. */
+    fun verdict(
+        trip: StoredTrip,
+        socModel: SocConsumptionModel?,
+        generation: FirmwareInfo.Gen = FirmwareInfo.getGeneration(),
+    ): EcoVerdict = EcoDrivingMonitor.forReplay().replay(trip.samples.orEmpty())
+        .verdict(socModel, trip.summary, meanOutsideTempCelsius(trip), generation)
+
+    private fun steadiness(trip: StoredTrip): EcoFinding.Steadiness? {
+        val share = DrivingStyle.of(trip).harshSharePercent ?: return null
+        val brakings = trip.summary.harshBrakings
+        val km = trip.summary.recordedDistanceKm?.takeIf { it >= EcoScore.MIN_DISTANCE_KM }
+        return EcoFinding.Steadiness(share, brakings, brakings?.let { b -> km?.let { b / it * 10.0 } })
+    }
 
     private fun format(value: Double): String = String.format(Locale.ROOT, "%.2f", value)
 }
@@ -307,7 +323,7 @@ fun reviewHistory(filesDir: File, trips: List<StoredTrip>): ReviewedHistory {
     val reviews = trips.associate { trip ->
         trip.summary.startedAtMs to EcoTripReviewer.review(
             trip,
-            socModel,
+            socModelWithout(trips, trip),
             attributions[trip.summary.startedAtMs],
             SpeedWhatIfCalculator.calculate(trip, model, socModel),
         )
@@ -325,8 +341,32 @@ fun reviewTrip(filesDir: File, trips: List<StoredTrip>, trip: StoredTrip): EcoTr
     val socModel = (SocConsumptionFitter().fit(trips) as? SocConsumptionFitResult.Ready)?.model
     return EcoTripReviewer.review(
         trip,
-        socModel,
+        socModelWithout(trips, trip),
         EnergyAttributionCalculator.calculate(trip, model),
         SpeedWhatIfCalculator.calculate(trip, model, socModel),
     )
+}
+
+/**
+ * The expectation a trip is judged against, fitted on every trip but that one.
+ *
+ * Fitted with it, the trip pulls its own expectation towards itself: a heavy drive raised the
+ * bar it was measured against and came out "typical". One fit per trip reviewed, which on the
+ * few dozen trips a head unit keeps is milliseconds.
+ */
+private fun socModelWithout(trips: List<StoredTrip>, trip: StoredTrip): SocConsumptionModel? =
+    (SocConsumptionFitter().fit(trips.filter { it !== trip }) as? SocConsumptionFitResult.Ready)
+        ?.model
+
+/**
+ * The score of the newest trip, with its record, run and weekly target, from the
+ * [EcoTripAdvice.HISTORY_TRIPS] newest. Fits once per trip scored: call off the main thread.
+ */
+fun ecoProgress(tripsNewestFirst: List<StoredTrip>, nowMs: Long): EcoProgress {
+    val recent = tripsNewestFirst.take(EcoTripAdvice.HISTORY_TRIPS)
+    val verdicts = recent.associate { trip ->
+        trip.summary.startedAtMs to
+            EcoTripReviewer.verdict(trip, socModelWithout(tripsNewestFirst, trip))
+    }
+    return EcoProgress.of(recent, verdicts, nowMs)
 }

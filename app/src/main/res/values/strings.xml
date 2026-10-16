@@ -561,7 +561,7 @@ Spending %6$s %% per km</string>
     <string name="trip_eco_finding_motorway_soc">At %1$d km/h over the %2$.0f km of fast road: about %3$.1f to %4$.1f points of charge less.</string>
     <string name="trip_eco_finding_cabin">Cabin: about %1$.1f kWh, %2$.0f %% of this trip.</string>
     <string name="trip_eco_finding_windows">Open windows: about %1$.1f kWh, %2$.0f %% of this trip, %3$.0f km above 60 km/h.</string>
-    <string name="trip_eco_finding_steadiness">Hard acceleration on %1$d %% of this drive.</string>
+    <string name="trip_eco_finding_steadiness">Hard acceleration or braking on %1$d %% of this drive.</string>
     <string name="diagnostics_eco_trip_review">Latest trip, reviewed</string>
     <string name="vehicle_hint_reference">Reference consumption (kWh/100 km)</string>
     <string name="vehicle_helper_reference">The line the trip overview measures drives against. Empty = %1$s kWh/100 km.</string>
@@ -615,12 +615,24 @@ Spending %6$s %% per km</string>
     <string name="eco_trip_typical">Usual trip, in line with your own average.</string>
     <string name="eco_trip_no_verdict">Not enough comparable trips yet for an eco verdict.</string>
     <string name="eco_trip_stress">%1$.0f min of hard power at a low charge or below 0 °C outside: that is when the pack is strained most, and gentler pulls there spare it.</string>
-    <string name="eco_voice_trip_gain">%1$d %% to gain on this trip.</string>
-    <string name="eco_voice_trip_gain_by">%1$d %% to gain: %2$s.</string>
     <string name="eco_voice_trip_better">Economical trip, %1$d %% below average.</string>
     <string name="eco_voice_trip_worse">Heavy trip, %1$d %% above average.</string>
     <string name="eco_voice_trip_typical">Usual trip.</string>
     <string name="eco_voice_lever">Lever: %1$s.</string>
+    <string name="eco_score">Score %1$d.</string>
+    <string name="eco_score_versus">Score %1$d, %2$+d on your average.</string>
+    <string name="eco_score_record">New record.</string>
+    <string name="eco_score_streak">%1$d trips in a row above your average.</string>
+    <string name="eco_score_best">Personal best: %1$d.</string>
+    <string name="eco_challenge">This week\u2019s challenge: at most %1$.1f hard stops per 10 km (last week %2$.1f).</string>
+    <string name="eco_challenge_met">Now %1$.1f: met.</string>
+    <string name="eco_challenge_now">Now %1$.1f.</string>
+    <string name="eco_challenge_none_yet">Not enough driving this week yet.</string>
+    <string name="eco_clause_anticipate">by anticipating %1$d hard stops</string>
+    <string name="eco_lever_anticipate">anticipate braking</string>
+    <string name="eco_tip_anticipate">%1$d hard stops, %2$.1f per 10 km: lifting off earlier lets regeneration take that energy back.</string>
+    <string name="trip_eco_finding_brakings">%1$d hard stops, %2$.1f per 10 km.</string>
+    <string name="trip_eco_score">Score %1$d / 100 · anticipation %2$s · smoothness %3$s · efficiency %4$s</string>
     <string name="eco_lever_smoother">smoother driving</string>
     <string name="eco_lever_eco_mode">Eco mode</string>
     <string name="eco_lever_motorway">%1$d km/h on fast roads</string>

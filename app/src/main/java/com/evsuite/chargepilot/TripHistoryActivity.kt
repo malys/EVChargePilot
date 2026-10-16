@@ -13,6 +13,7 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
 import com.evsuite.chargepilot.databinding.ViewTripOverviewCardBinding
+import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
@@ -306,6 +307,11 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             tripA = card(all.filter { it.summary.startedAtMs >= tripAFromMs }),
             history = card(all),
             ecoAdvice = EcoTripAdvice.history(stored, reviewed),
+            ecoProgress = EcoProgress.of(
+                stored.take(EcoTripAdvice.HISTORY_TRIPS),
+                reviewed.mapValues { (it.value as? EcoTripReview.Ready)?.verdict },
+                System.currentTimeMillis(),
+            ),
         )
     }
 
@@ -342,8 +348,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         binding.overviewTrace.setTrace(value.trace, value.reference, value.coveredKm)
         binding.overviewTrace.contentDescription =
             getString(R.string.trip_overview_trace_description, distance(value.coveredKm))
-        binding.overviewEcoAdvice.text =
-            EcoAdviceText(this).history(value.ecoAdvice).joinToString("\n\n")
+        val ecoText = EcoAdviceText(this)
+        binding.overviewEcoAdvice.text = (ecoText.progress(value.ecoProgress) +
+            ecoText.history(value.ecoAdvice)).joinToString("\n\n")
 
         renderCard(
             binding.cardCurrent,
@@ -522,13 +529,28 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private fun renderEcoReview(review: EcoTripReview?) {
         val text = when (review) {
             is EcoTripReview.Ready ->
-                (listOf(verdictLine(review.verdict)) + review.findings.map(::findingLine))
+                (listOfNotNull(scoreLine(review.verdict), verdictLine(review.verdict)) +
+                    review.findings.map(::findingLine))
                     .joinToString("\n")
             is EcoTripReview.Unavailable -> reviewUnavailable(review.reason)
             null -> reviewUnavailable(UnavailableReason.MODEL_NOT_TRAINED)
         }
         binding.detailEcoReview.text = text
         binding.detailEcoReview.contentDescription = text
+    }
+
+    /** The selected trip out of 100, with the three parts so the driver sees which one to work on. */
+    private fun scoreLine(verdict: EcoVerdict): String? {
+        val trip = adapter.items.firstOrNull { it.summary.startedAtMs == selectedStartedAtMs }
+            ?: return null
+        val score = EcoScore.of(trip.summary, verdict) ?: return null
+        return getString(
+            R.string.trip_eco_score,
+            score.total,
+            score.anticipation?.toString() ?: DASH,
+            score.smoothness?.toString() ?: DASH,
+            score.efficiency?.toString() ?: DASH,
+        )
     }
 
     private fun reviewUnavailable(reason: UnavailableReason): String = getString(
@@ -570,10 +592,14 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             finding.sharePercent,
             finding.openDistanceKm,
         )
-        is EcoFinding.Steadiness -> getString(
-            R.string.trip_eco_finding_steadiness,
-            finding.harshSharePercent.roundToInt(),
-        )
+        is EcoFinding.Steadiness -> listOfNotNull(
+            getString(R.string.trip_eco_finding_steadiness, finding.harshSharePercent.roundToInt()),
+            finding.hardBrakings?.let { count ->
+                finding.hardBrakingsPer10Km?.let {
+                    getString(R.string.trip_eco_finding_brakings, count, it)
+                }
+            },
+        ).joinToString(" ")
     }
 
     private fun renderAttribution(result: EnergyAttributionResult?) {
@@ -809,6 +835,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val tripA: OverviewCard,
         val history: OverviewCard,
         val ecoAdvice: HistoryAdvice,
+        val ecoProgress: EcoProgress,
     )
 
     private data class TripRow(

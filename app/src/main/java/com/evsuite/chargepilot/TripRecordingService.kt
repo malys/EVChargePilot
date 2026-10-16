@@ -350,12 +350,17 @@ class TripRecordingService : Service() {
         val mode = runCatching { EVHardware.getDriveMode() }.getOrNull()
         val advice = EcoTripAdvice.advise(trip, reviewTrip(filesDir, trips, trip), mode)
         val text = EcoAdviceText(inAppLanguage())
+        val progress = runCatching { ecoProgress(trips, System.currentTimeMillis()) }.getOrNull()
         // CP-090: the same voice, gate and journal carry the pack-stress clause.
-        val line = listOfNotNull(text.spoken(advice), text.stress(trip.samples.orEmpty())).joinToString(" ")
+        val line = listOfNotNull(
+            progress?.let(text::scoreLine),
+            text.spoken(advice),
+            text.stress(trip.samples.orEmpty()),
+        ).joinToString(" ")
         // CP-087: kept whether or not it is said out loud.
         batteryAdvisor.record(AdviceKind.TRIP_END, line, trip.summary.endedAtMs)
         // Spoken short: headline and one lever; the stress clause stays in the journal.
-        val voice = text.voice(advice)
+        val voice = text.voice(advice, progress)
         if (EcoCoach.voiceEnabled(this) && voice.isNotEmpty()) {
             EcoVoice.say(this, voice, EcoVoice.Origin.TRIP_END)
         }
