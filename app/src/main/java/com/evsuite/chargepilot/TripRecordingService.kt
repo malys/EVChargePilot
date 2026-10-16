@@ -236,6 +236,9 @@ class TripRecordingService : Service() {
         detector.markRecording()
         samplesSinceNotification = 0
         AppLogger.i(TAG, "trip recording started; sample_epoch_ms=${sample.timestampMs}")
+        // CP-080: without it the journal shows a drive's odometer move and no trip, and cannot
+        // say whether the trip never started or started and died before its end.
+        ValidationProbe.monitor(sample) { "trip start" }
         ensureSampling()
         updateNotification()
     }

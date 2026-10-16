@@ -4,6 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Automatic trips are saved before the head unit powers off (CP-080).** The car switches the
+  screen off about twelve seconds after P, and the trip end waited two minutes; EVHardware
+  1a05d5b now ends a trip two seconds after P. The monitor journal also records `trip start`.
+- **The consumption model trains on SWI68.** The 2026-10-16 bundle refused it for a negative
+  weather term alone; the fit now drops that term instead, so the eco verdict, speed what-if,
+  route what-if and energy breakdown can fill in.
+- **"This vehicle never publishes battery power" is gone on SWI68.** The pack fallback reads it;
+  the screens now say it is not validated yet.
+
 ### Added
 
 - **Read-only evidence probes for the open on-car tickets (CP-055, CP-078–CP-081, CP-083,
