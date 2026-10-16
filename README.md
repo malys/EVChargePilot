@@ -140,8 +140,9 @@ temporary file on USB. No archive copy accumulates on AAOS.
   (see [Configuration](#configuration)); without one, every other screen still works.
 - On that same plan: what slowing down would change. Where the road ahead is fast, the app
   shows what 130, 120, 110, 100 and 90 km/h would save in charge and cost in minutes, and
-  names the mildest slowdown that removes the charging stop. A second road comes back with the
-  same request and is compared on distance, time and charge. It never recommends a speed.
+  names the mildest slowdown that removes the charging stop. A second road, and a motorway-free
+  one when the plan needs a stop, are compared on distance, time and charge; pick one and the
+  plan and the hand-off to the car follow it. It never recommends a speed or a road.
 - A battery page: the pack's state of health measured rather than declared, how long since its
   charge gauge last had a full charge to anchor itself on, what the pack has been subjected to,
   and what the last charge cost — points gained, duration, and approximate energy and mean power

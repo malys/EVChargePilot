@@ -311,8 +311,6 @@ Spending %6$s %% per km</string>
     <!-- CP-049. Every saving is stated with the delay it costs, in the same sentence. -->
     <string name="route_what_if_headline">At %1$d km/h you would not need to charge, for about %2$d min more on the road.</string>
     <string name="route_what_if_row">%1$d km/h over %2$s km · +%3$d min · saves an estimated %4$s to %5$s %% of charge</string>
-    <string name="route_what_if_alternative">Via %1$s: %2$s km, %3$s min, an estimated %4$s to %5$s %% of charge.</string>
-    <string name="route_what_if_alternative_unnamed">Another road: %1$s km, %2$s min, an estimated %3$s to %4$s %% of charge.</string>
     <string name="route_what_if_unavailable_model">Slowing down: no comparison. This firmware has never trained a consumption model.</string>
     <string name="route_what_if_unavailable_temperature">Slowing down: no comparison. No usable outside-temperature reading.</string>
     <string name="route_what_if_unavailable_road">Slowing down: no comparison. Nothing on this route is driven fast enough to slow down from.</string>
@@ -374,10 +372,8 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_charger">%1$s\u2009· %2$s km along · %3$s kW · %4$s</string>
     <!-- CP-057. Three ways to the same place. Every row carries both a charge and a time, or
          neither: a saving with its price left off is a recommendation wearing a fact's clothes. -->
-    <string name="route_choices_title">Three ways there</string>
-    <string name="route_choices_planned">As routed · %1$s km · %2$s min</string>
+    <string name="route_choices_title">Ways there</string>
     <string name="route_choices_slower">At %1$d km/h on the fast sections · %2$s km · +%3$s min</string>
-    <string name="route_choices_no_motorway">Avoiding motorways · %1$s km · %2$s min · %3$s</string>
     <string name="route_choices_stop">one charging stop after %1$s km, about %2$s %% left on reaching it</string>
     <string name="route_choices_stop_unknown">one charging stop after %1$s km</string>
     <string name="route_choices_no_stop">no charging stop, about %1$s %% left on arrival</string>
@@ -385,9 +381,20 @@ Spending %6$s %% per km</string>
     <string name="route_choices_refused">could not be worked out: %1$s</string>
     <string name="route_choices_slower_absent">No speed on this road removes the charging stop.</string>
     <string name="route_choices_no_motorway_absent">No motorway-free road came back for this trip.</string>
-    <string name="route_choices_delta_faster">%1$s min quicker</string>
     <string name="route_choices_delta_slower">+%1$s min</string>
     <string name="route_choices_requests">This plan used %1$d route request(s) of your key\u2019s allowance.</string>
+    <string name="route_choices_chosen">Chosen · %1$s</string>
+    <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
+    <string name="route_choices_delta_fastest">fastest</string>
+    <string name="route_choices_versus">%1$s km against the routed road, an estimated %2$s to %3$s %% of charge</string>
+    <string name="route_choices_second_not_offered">Past 100 km the routing service offers no second road.</string>
+    <string name="route_choices_estimated">Every figure here is estimated from your recorded trips, never measured.</string>
+    <string name="route_choices_action">%1$s</string>
+    <string name="route_choices_action_chosen">Chosen: %1$s</string>
+    <string name="route_choices_name_planned">As routed</string>
+    <string name="route_choices_name_via">Via %1$s</string>
+    <string name="route_choices_name_second">Other road</string>
+    <string name="route_choices_name_no_motorway">No motorway</string>
     <!-- CP-056. The handoff. Its note is never folded into the button label: a driver reads a
          button as a promise, and "geo:" carries one point, so a route planned through a charging
          stop cannot be pinned by its endpoint. -->

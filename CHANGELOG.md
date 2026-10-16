@@ -12,6 +12,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **The consumption model trains on SWI68.** The 2026-10-16 bundle refused it for a negative
   weather term alone; the fit now drops that term instead, so the eco verdict, speed what-if,
   route what-if and energy breakdown can fill in.
+- **Route choices can be chosen (CP-057).** The second road the routing service sends back is a
+  row of the comparison, with its stops and its charge against the routed road; one button per
+  road re-plans the screen on it, and *Go* hands that road to the car. Past 100 km the second
+  road is no longer asked for, which saves a refused request and its retry.
 - **"This vehicle never publishes battery power" is gone on SWI68.** The pack fallback reads it;
   the screens now say it is not validated yet.
 

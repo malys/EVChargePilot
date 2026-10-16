@@ -304,8 +304,6 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_grade">Montée et descente : %1$s %% de charge estimés, ± %2$s. Modélisé d’après le profil de l’itinéraire, jamais mesuré.</string>
     <string name="route_what_if_headline">À %1$d km/h vous n’auriez pas besoin de recharger, pour environ %2$d min de plus sur la route.</string>
     <string name="route_what_if_row">%1$d km/h sur %2$s km · +%3$d min · économise %4$s à %5$s %% de charge estimés</string>
-    <string name="route_what_if_alternative">Par %1$s : %2$s km, %3$s min, %4$s à %5$s %% de charge estimés.</string>
-    <string name="route_what_if_alternative_unnamed">Autre route : %1$s km, %2$s min, %3$s à %4$s %% de charge estimés.</string>
     <string name="route_what_if_unavailable_model">Ralentir : pas de comparaison. Ce micrologiciel n’a jamais entraîné de modèle de consommation.</string>
     <string name="route_what_if_unavailable_temperature">Ralentir : pas de comparaison. Aucune température extérieure exploitable.</string>
     <string name="route_what_if_unavailable_road">Ralentir : pas de comparaison. Rien sur cet itinéraire n’est parcouru assez vite pour ralentir.</string>
@@ -367,10 +365,8 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_charger">%1$s\u2009· à %2$s km · %3$s kW · %4$s</string>
     <!-- CP-057. Trois façons d’aller au même endroit. Chaque ligne porte une charge et un
          temps, ou aucun des deux : une économie sans son prix est un conseil déguisé en fait. -->
-    <string name="route_choices_title">Trois façons d\u2019y aller</string>
-    <string name="route_choices_planned">Itinéraire calculé · %1$s km · %2$s min</string>
+    <string name="route_choices_title">Façons d\u2019y aller</string>
     <string name="route_choices_slower">À %1$d km/h sur les sections rapides · %2$s km · +%3$s min</string>
-    <string name="route_choices_no_motorway">Sans autoroute · %1$s km · %2$s min · %3$s</string>
     <string name="route_choices_stop">un arrêt de recharge après %1$s km, environ %2$s %% restants en y arrivant</string>
     <string name="route_choices_stop_unknown">un arrêt de recharge après %1$s km</string>
     <string name="route_choices_no_stop">pas d\u2019arrêt de recharge, environ %1$s %% restants à l\u2019arrivée</string>
@@ -378,9 +374,20 @@ Consommation %6$s %% par km</string>
     <string name="route_choices_refused">non calculable : %1$s</string>
     <string name="route_choices_slower_absent">Aucune vitesse sur cette route ne supprime l\u2019arrêt de recharge.</string>
     <string name="route_choices_no_motorway_absent">Aucune route sans autoroute n\u2019est revenue pour ce trajet.</string>
-    <string name="route_choices_delta_faster">%1$s min de moins</string>
     <string name="route_choices_delta_slower">+%1$s min</string>
     <string name="route_choices_requests">Ce plan a utilisé %1$d requête(s) d\u2019itinéraire sur l\u2019allocation de votre clé.</string>
+    <string name="route_choices_chosen">Choisie · %1$s</string>
+    <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
+    <string name="route_choices_delta_fastest">la plus rapide</string>
+    <string name="route_choices_versus">%1$s km par rapport à l\u2019itinéraire calculé, %2$s à %3$s %% de charge estimés</string>
+    <string name="route_choices_second_not_offered">Au-delà de 100 km, le service d\u2019itinéraire ne propose pas de seconde route.</string>
+    <string name="route_choices_estimated">Tous ces chiffres sont estimés à partir de vos trajets enregistrés, jamais mesurés.</string>
+    <string name="route_choices_action">%1$s</string>
+    <string name="route_choices_action_chosen">Choisie : %1$s</string>
+    <string name="route_choices_name_planned">Itinéraire calculé</string>
+    <string name="route_choices_name_via">Par %1$s</string>
+    <string name="route_choices_name_second">Autre route</string>
+    <string name="route_choices_name_no_motorway">Sans autoroute</string>
     <!-- CP-056. Le passage de relais. La note n’est jamais repliée dans le libellé du bouton :
          un conducteur lit un bouton comme une promesse, et « geo: » ne porte qu’un point. -->
     <string name="charge_stop_navigate">Y aller</string>

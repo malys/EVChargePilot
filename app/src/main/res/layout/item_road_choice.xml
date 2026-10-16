@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One road of CP-057's comparison. Outlined, a 72dp target, and the chosen one says so in
+     its label rather than in a colour. -->
+<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.EV.Button.Outlined"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:layout_marginEnd="@dimen/spacing_md"
+    android:minHeight="72dp" />

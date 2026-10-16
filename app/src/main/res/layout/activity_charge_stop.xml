@@ -172,6 +172,16 @@
                 android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone" />
 
+            <!-- One button per road, filled in code. Choosing one re-plans the trip on it, and
+                 "Go" then hands that road to the car (CP-057 rule 6). -->
+            <LinearLayout
+                android:id="@+id/roadChoiceActions"
+                android:layout_width="1400dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/chargeStopAttribution"
                 android:layout_width="1400dp"
