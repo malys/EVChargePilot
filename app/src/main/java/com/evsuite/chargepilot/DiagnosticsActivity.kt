@@ -323,6 +323,11 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
                     )
                 }
             appendLine()
+            // CP-094. Whether the car's map can share the screen with the companion (embedded,
+            // 2/3) or only its guidance can (strip, 1/3). Read-only; the verdict is the last line.
+            appendLine("[split_screen]")
+            SplitScreenProbe.report(this@DiagnosticsActivity).forEach(::appendLine)
+            appendLine()
             appendLine("[property_probe]")
             appendLine(getString(R.string.diagnostics_properties))
             appendLine(getString(R.string.diagnostics_properties_hint))

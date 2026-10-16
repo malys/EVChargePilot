@@ -14,6 +14,8 @@ class ChargePilotApp : Application() {
         EvidenceCaptureHook.startProbes(this)
         // CP-080: a small elapsedRealtime here is a fresh boot; a large one, a restarted process.
         ValidationProbe.monitor(null) { "process start" }
+        // CP-094: displays appearing while the vendor launcher shows its map card; read-only.
+        SplitScreenProbe.watch(this)
         // The vehicle voice binds asynchronously; asking now means the first coach line, or the
         // settings test, finds it bound. Idempotent, and a car without it just falls back.
         if (EcoCoach.voiceEnabled(this)) EcoVoice.connect(this)

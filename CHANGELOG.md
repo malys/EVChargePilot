@@ -6,6 +6,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Split-screen probe (CP-094).** `diagnostic.txt` gains `[split_screen]`: whether the car's
+  map could be embedded beside the companion (hidden `ActivityView` present, platform signature,
+  launcher holding the embedding permission, map activities that allow embedding, displays added
+  while the launcher's map card is up) or only its guidance answers (map navigating, road,
+  remaining distance and time, next manoeuvre). Ends on `split_screen_verdict=`. Read-only, no
+  new permission, in stable builds.
 - **Eco score out of 100, with a record, a run and a weekly challenge (CP-093).** Anticipation
   (hard stops per 10 km), smoothness and efficiency against your own expectation. The Trips page
   shows the score, your best and this week's target — a fifth fewer hard stops than last week;
