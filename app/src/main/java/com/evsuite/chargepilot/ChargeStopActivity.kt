@@ -853,16 +853,9 @@ class ChargeStopActivity : AppCompatActivity() {
                     }
                 )
             )
+            // The headline — the speed that removes the stop — is the comparison card's row under
+            // the chosen road; written here too, the same sentence sat on two cards at once.
             is RouteWhatIf.Result.Ready -> {
-                whatIf.headline?.let {
-                    lines.add(
-                        getString(
-                            R.string.route_what_if_headline,
-                            it.speedKmh,
-                            it.delayMinutes.toInt(),
-                        )
-                    )
-                }
                 whatIf.options.mapTo(lines) {
                     getString(
                         R.string.route_what_if_row,

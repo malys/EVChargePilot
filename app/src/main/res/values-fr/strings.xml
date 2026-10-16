@@ -302,7 +302,6 @@ Cette charge atteint environ %4$s à ce rythme</string>
 %2$s km · %3$d min · montée %4$s m · descente %5$s m
 Consommation %6$s %% par km</string>
     <string name="charge_stop_grade">Montée et descente : %1$s %% de charge estimés, ± %2$s. Modélisé d’après le profil de l’itinéraire, jamais mesuré.</string>
-    <string name="route_what_if_headline">À %1$d km/h vous n’auriez pas besoin de recharger, pour environ %2$d min de plus sur la route.</string>
     <string name="route_what_if_row">%1$d km/h sur %2$s km · +%3$d min · économise %4$s à %5$s %% de charge estimés</string>
     <string name="route_what_if_unavailable_model">Ralentir : pas de comparaison. Ce micrologiciel n’a jamais entraîné de modèle de consommation.</string>
     <string name="route_what_if_unavailable_temperature">Ralentir : pas de comparaison. Aucune température extérieure exploitable.</string>
