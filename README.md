@@ -44,6 +44,7 @@ Discover the rest of the suite:
 - [How it works](#how-it-works)
 - [Requirements](#requirements)
 - [Features](#features)
+- [What it will not do on SWI68](#what-it-will-not-do-on-swi68)
 - [Trip export formats](#trip-export-formats)
 - [Configuration](#configuration)
 - [Install](#install)
@@ -123,13 +124,13 @@ temporary file on USB. No archive copy accumulates on AAOS.
 ## Features
 
 - Vehicle-reported SOC and range.
-- A grouped thermal/climate state block: outside, cabin and evidence-gated battery
-  temperatures; HVAC, AC, auto, econ and recirculation states; fan level/maximum; and
-  driver/passenger targets when each signal is available.
+- A grouped thermal/climate state block: outside temperature; HVAC, AC, auto, econ and
+  recirculation states; fan level/maximum; and driver/passenger targets when each signal is
+  available.
 - Automatic trip detection plus parked-only manual controls and configuration.
 - Distance and duration calculated locally.
 - Evidence-gated signed battery power with a static traction/regeneration scale.
-- Pack temperature and charging state when exposed by the current firmware.
+- Charging state when exposed by the current firmware.
 - Energy and regeneration integration from the shared EVHardware power convention.
 - Parked-only, bounded diagnostic/evidence ZIP to an explicitly chosen removable USB volume.
 - Atomic, app-private trip history and in-app crash diagnostics.
@@ -149,6 +150,26 @@ temporary file on USB. No archive copy accumulates on AAOS.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
 never zero. Charger data and energy-source attribution remain outside this initial milestone.
+
+## What it will not do on SWI68
+
+Each of these was looked for on the car and found missing. None has a tile, a button or a
+screen, so nothing waits on a dash that can never fill in. The evidence is in
+[`analysis/CP-003_energy_signal_validation.md`](analysis/CP-003_energy_signal_validation.md)
+and the tickets named.
+
+| Not shown | Why | What the app uses instead |
+|---|---|---|
+| Cabin temperature | declared, never published (CP-003) | nothing; diagnostics still report it |
+| Battery temperature | declared, never published (CP-003, RI-002) | outside temperature for cold and heat advice |
+| Pack energy and capacity from the car | never published (CP-003) | the pack size declared in Settings |
+| Charge cable plugged in | never published (CP-003) | a rise in state of charge |
+| `PERF_ODOMETER` | no value on any read (CP-003) | the navigation adapter's odometer |
+| Grade from the car | no source (CP-031) | the routing service's elevation profile |
+| Climate power in kW | not measured anywhere | climate on/off and fan state, as context only |
+| The destination set in the car's own navigation | `IMapService` 38 and 39 answer an empty parcel (CP-051) | a destination typed in the app |
+| `geo:` and `google.navigation:` handoff | nothing on the head unit answers them (CP-055 Q9) | the adapter's route channel (CP-056, CP-060) |
+| Any vehicle setting write | read-only by design | none: charge limit, schedule and preheat stay on the car's screens |
 
 ## Trip export formats
 

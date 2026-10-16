@@ -28,9 +28,10 @@ data class ClimateReadings(
     val econOn: Provenanced<Boolean>,
     val recirculationOn: Provenanced<Boolean>,
 ) {
+    /** Of the readings on screen: cabin and battery temperature have no tile (CP-003). */
     val unavailableReasons: Set<UnavailableReason>
         get() = listOf(
-            outsideTemp, cabinTemp, batteryTemp, hvacOn, acOn, autoOn, fan,
+            outsideTemp, hvacOn, acOn, autoOn, fan,
             driverTarget, passengerTarget, econOn, recirculationOn,
         ).mapNotNullTo(linkedSetOf()) { it.reason }
 

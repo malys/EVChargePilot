@@ -58,6 +58,15 @@ class ClimateReadingsTest {
         assertEquals(UnavailableReason.UNVALIDATED_FIRMWARE, readings.batteryTemp.reason)
     }
 
+    @Test fun `temperatures with no tile add no excuse under the climate grid`() {
+        val readings = ClimateReadings.of(snapshot().copy(
+            outsideTempCelsius = 18f,
+            climate = ClimateSnapshot(true, false, true, false, false, 3, 7, 21f, 21f),
+        ))
+
+        assertEquals(emptySet<UnavailableReason>(), readings.unavailableReasons)
+    }
+
     @Test fun `unknown firmware explains every missing field as unsupported`() {
         val readings = ClimateReadings.of(snapshot(FirmwareInfo.Gen.UNKNOWN))
 

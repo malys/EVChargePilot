@@ -344,12 +344,6 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
             readings.outsideTemp,
             PATTERN_TEMP,
         )
-        bind(
-            binding.cabinTempValue,
-            R.string.label_cabin_temp,
-            readings.cabinTemp,
-            PATTERN_TEMP,
-        )
         bindState(binding.climatePowerValue, R.string.label_climate_power, readings.hvacOn)
         bindState(binding.climateAcValue, R.string.label_climate_ac, readings.acOn)
         bindState(binding.climateAutoValue, R.string.label_climate_auto, readings.autoOn)

@@ -105,12 +105,9 @@
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_outside_temp" />
                         <TextView android:id="@+id/outsideTempValue" style="@style/Text.EV.ClimateValue" />
                     </LinearLayout>
-                    <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
-                        <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_cabin_temp" />
-                        <TextView android:id="@+id/cabinTempValue" style="@style/Text.EV.ClimateValue" />
-                    </LinearLayout>
-                    <!-- No battery temperature: SWI68 declares EV_BATTERY_AVG_TEMP and never
-                         publishes it (RI-002), so the tile could only ever show a dash. -->
+                    <!-- No cabin or battery temperature: SWI68 declares the cabin property
+                         and EV_BATTERY_AVG_TEMP and publishes neither (CP-003, RI-002), so either
+                         tile could only ever show a dash. -->
                     <LinearLayout style="@style/Widget.EV.ClimateReadout" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_climate_driver_target" />
                         <TextView android:id="@+id/climateDriverTargetValue" style="@style/Text.EV.ClimateValue" />
