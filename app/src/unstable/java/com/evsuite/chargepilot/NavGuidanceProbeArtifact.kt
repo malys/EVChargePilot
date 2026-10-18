@@ -81,10 +81,11 @@ internal data class NavGuidanceProbeArtifact(
             "censusPayloadBytes is the size of the last parcel on each code. A decoded code " +
                 "reading zero while its parcel is larger than the descriptor plus four bytes is " +
                 "this build reading the wrong shape, not the car answering zero.",
-            "The transaction map was read from an R69 build. Traffic on undecoded codes, or " +
-                "silence on the decoded ones while guidance is clearly running, means this " +
-                "firmware numbers the interface differently and every reading is off by the " +
-                "same shift.",
+            "The transaction map was read from an R69 build. Traffic on undecoded codes is " +
+                "expected: the listener also hears network, time zone, speed limit and other " +
+                "non-guidance events (11 is network availability and the busiest). Silence on " +
+                "1, 2, 3, 12 and 13 while guidance is clearly running means this firmware " +
+                "numbers the interface differently and every reading is off by the same shift.",
         )
 
         fun of(
