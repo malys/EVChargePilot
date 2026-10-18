@@ -27,7 +27,6 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.Locale
 import java.util.concurrent.Executors
-import kotlin.math.abs
 
 /**
  * What the pack is worth today, what its gauge is anchored on, and what it has been through.
@@ -346,15 +345,23 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             binding.chargeFacts.text = getString(R.string.battery_health_last_charge_none)
             return
         }
-        val energy = last.packDeltaKwh?.takeIf { last.watched }
-        val power = last.meanPowerKw
-        binding.chargeFacts.text = if (energy != null && power != null) {
+        val estimate = ChargeEnergyEstimate.of(last, declared.pack)
+        binding.chargeFacts.text = if (estimate?.measured == true && estimate.powerKw != null) {
             getString(
                 R.string.battery_health_last_charge,
                 last.session.gainedPercent,
                 last.session.durationHours,
-                abs(energy),
-                power,
+                estimate.kwh,
+                estimate.powerKw,
+            )
+        } else if (estimate != null) {
+            // MG4Control's method for every charge, here only for one the app slept through.
+            getString(
+                R.string.battery_health_last_charge_estimated,
+                last.session.gainedPercent,
+                last.session.durationHours,
+                estimate.kwh,
+                declared.pack.usableCapacityKwhWhenNew,
             )
         } else {
             getString(

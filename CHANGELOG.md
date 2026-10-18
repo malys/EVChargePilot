@@ -4,6 +4,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Changed (charges)
+
+- **A charge the screen slept through gets an estimated energy instead of "Partial".** Points
+  gained × the declared usable capacity (±5 %), and a power derived from it over the session's
+  span — MG4Control's method (behaviour reference, v2.6.8, GPL: nothing copied), written as
+  *estimated* and *derived* on the charge list and the battery page. A watched charge keeps
+  its measured pack integral.
+
 ### Added (diagnostics)
 
 - **Diagnostics → Send to server.** The USB bundle, posted to an HTTPS address typed into the

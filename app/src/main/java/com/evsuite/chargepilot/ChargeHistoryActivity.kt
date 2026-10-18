@@ -19,15 +19,16 @@ import kotlin.math.abs
  *
  * The battery page has room for one line about charging; this screen is where the list lives.
  * Nothing new is sampled or inferred: rows come from [ChargeEnergyReport], the same report the
- * battery page and the diagnostic bundle read, so the three can never disagree. There is no
- * cost here on purpose — a tariff is a declaration, and every figure on this screen is measured.
+ * battery page and the diagnostic bundle read, so the three can never disagree.
  *
- * A charge the head unit slept through keeps its points and its span and shows no energy or
- * power: the integral did not move while nobody was integrating, and a zero would be a lie.
+ * A charge the head unit slept through has no measured energy: the integral did not move while
+ * nobody was integrating. It shows an estimate instead ([ChargeEnergyEstimate]: points × declared
+ * capacity, power over the span), written as estimated, never in the measured line's words.
  */
 class ChargeHistoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChargeHistoryBinding
+    private var pack = VehicleSettings.Values().pack
     private val disk = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "chargepilot-charge-history")
     }
@@ -42,6 +43,7 @@ class ChargeHistoryActivity : AppCompatActivity() {
             val report = LocalBatteryLearning.refresh(filesDir, settings.usableCapacityKwhWhenNew)
                 .charge
             runOnUiThread {
+                pack = settings.pack
                 if (!isFinishing && !isDestroyed) render(report)
             }
         }
@@ -66,7 +68,9 @@ class ChargeHistoryActivity : AppCompatActivity() {
         renderCurve(report)
         charges.asReversed().take(MAX_ROWS).forEach(::addRow)
         val notes = ArrayList<String>()
-        if (charges.any { !it.watched }) notes += getString(R.string.charge_history_partial_note)
+        if (charges.any { ChargeEnergyEstimate.of(it, pack)?.measured == false }) {
+            notes += getString(R.string.charge_history_estimated_note, pack.usableCapacityKwhWhenNew)
+        }
         if (charges.any { it.minOutsideTempCelsius != null }) {
             notes += getString(R.string.charge_history_temperature)
         }
@@ -94,6 +98,14 @@ class ChargeHistoryActivity : AppCompatActivity() {
                 energy,
                 if (hours > 0.0) energy / hours else 0.0,
                 watched.mapNotNull { it.peakPowerKw }.maxOrNull() ?: 0.0,
+            )
+        }
+        val estimated = charges.mapNotNull { ChargeEnergyEstimate.of(it, pack) }.filter { !it.measured }
+        if (estimated.isNotEmpty()) {
+            lines += getString(
+                R.string.charge_history_energy_estimated,
+                estimated.size,
+                estimated.sumOf { it.kwh },
             )
         }
         binding.analysisFacts.text = lines.joinToString("\n")
@@ -145,15 +157,18 @@ class ChargeHistoryActivity : AppCompatActivity() {
         )
         row.rowGain.text =
             getString(R.string.charge_history_row_gain, session.gainedPercent, session.durationHours)
-        val energy = charge.packDeltaKwh?.takeIf { charge.watched }
-        val power = charge.meanPowerKw
-        if (energy != null && power != null) {
-            row.rowEnergy.text = getString(R.string.charge_history_row_energy, abs(energy), power)
-            row.rowEnergy.setTextColor(ContextCompat.getColor(this, R.color.ev_text_secondary))
-        } else {
-            row.rowEnergy.text = getString(R.string.charge_history_partial)
-            row.rowEnergy.setTextColor(ContextCompat.getColor(this, R.color.ev_warn))
+        val estimate = ChargeEnergyEstimate.of(charge, pack)
+        row.rowEnergy.text = when {
+            estimate == null -> getString(R.string.charge_history_partial)
+            estimate.measured ->
+                getString(R.string.charge_history_row_energy, estimate.kwh, estimate.powerKw ?: 0.0)
+            estimate.powerKw != null ->
+                getString(R.string.charge_history_row_estimated, estimate.kwh, estimate.powerKw)
+            else -> getString(R.string.charge_history_row_estimated_energy, estimate.kwh)
         }
+        row.rowEnergy.setTextColor(
+            ContextCompat.getColor(this, if (estimate == null) R.color.ev_warn else R.color.ev_text_secondary),
+        )
     }
 
     private fun format(pattern: String, vararg args: Any) =
