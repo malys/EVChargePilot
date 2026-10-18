@@ -78,12 +78,17 @@ object MapApps {
      * itself on top of a running guidance session.
      */
     fun toForeground(context: Context): Boolean {
-        val component = installedComponent(context) ?: return false
-        val intent = Intent(Intent.ACTION_MAIN)
+        val intent = comeForward(context) ?: return false
+        return runCatching { context.startActivity(intent) }.isSuccess
+    }
+
+    /** The intent [toForeground] sends, for CP-094's map pane to send to its own display. */
+    fun comeForward(context: Context): Intent? {
+        val component = installedComponent(context) ?: return null
+        return Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_HOME)
             .setComponent(component)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return runCatching { context.startActivity(intent) }.isSuccess
     }
 
     /** The map package this car actually has, for the Q9 probe line. A package name, never a place. */

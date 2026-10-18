@@ -7,6 +7,14 @@ declares the car permissions needed to read speed, energy, exterior environment,
 vendor-extension data, plus network and location for route planning (CP-043). It has no
 overlay, no installer, no boot receiver and no vehicle-setting write path.
 
+### The map pane (CP-094)
+
+The manifest declares `INTERNAL_SYSTEM_WINDOW`. The permission is signature-level, so only the
+platform-signed build receives it. It would allow system windows, and the app adds none. The
+app uses it for one thing: `NavSplitActivity` starts the car's own map on the virtual display of
+an `ActivityView` it owns. Android 9 refuses that launch otherwise, because no map activity on
+the MG4 allows embedding. The pane shows the map and reads nothing from it.
+
 Trip history, evidence captures and crash reports stay in app-private storage. Telemetry never
 leaves the device. What leaves it for a route is origin, destination and road profile, and — only
 when a charging stop is needed — a window of road around that stop. Never a trip, a charge level,

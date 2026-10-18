@@ -1248,12 +1248,12 @@ class ChargeStopActivity : AppCompatActivity() {
             // and leaves the screen on this app, so the destination went over and the driver
             // watched a page that says *Transmission…*. The map comes up now and the polling
             // below only settles what the message will say.
-            if (route) MapApps.toForeground(this)
+            if (route) showMap()
             val routeGuided = route && !wasGuiding && carStartedGuiding()
             val goTo = if (routeGuided) false else target.point?.let {
                 runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
-            if (goTo && !route) MapApps.toForeground(this)
+            if (goTo && !route) showMap()
             val guided = goTo && !wasGuiding && carStartedGuiding()
             // Every rung in one line, so a drive that ends with nothing happening still says
             // which rung refused rather than leaving the next build to guess again.
@@ -1281,6 +1281,19 @@ class ChargeStopActivity : AppCompatActivity() {
                     else -> sendAsPoint(target, uri)
                 }
             }
+        }
+    }
+
+    /**
+     * CP-094: the map beside the companion where this head unit can host it, full screen where
+     * it cannot. [NavSplitActivity] falls back to full screen on its own if the pane fails.
+     */
+    private fun showMap() {
+        if (MapPane.possible(this)) {
+            runCatching { startActivity(Intent(this, NavSplitActivity::class.java)) }
+                .onFailure { MapApps.toForeground(this) }
+        } else {
+            MapApps.toForeground(this)
         }
     }
 

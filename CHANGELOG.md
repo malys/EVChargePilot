@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added (navigation)
+
+- **The map beside the companion (CP-094).** When "Aller à" hands a route to the car, the car's
+  map opens on the left two thirds of an EVChargePilot screen. The right third shows charge,
+  range, remaining distance and time, and the drift line. "Full-screen map", Back and any
+  failure of the pane all give the map back full screen, as before. The 2026-10-18 bundle read
+  `split_screen_verdict=MAP_EMBEDDABLE` from the platform signature. The pane needs
+  `INTERNAL_SYSTEM_WINDOW`, newly declared: see SECURITY.md. `[split_screen]` now reports
+  `embedding_permission_granted` and `map_pane_possible`. Not yet tried on the car.
+
 ### Changed (charges)
 
 - **A charge the screen slept through gets an estimated energy instead of "Partial".** Points

@@ -41,3 +41,8 @@ android.permission.FOREGROUND_SERVICE_LOCATION
 # own `Download` directory. The stable manifest does not declare it and the stable APK
 # contains no updater code. See SECURITY.md.
 android.permission.WRITE_EXTERNAL_STORAGE
+# CP-094, 2026-10-18, by the owner's request for the navigation split screen. Signature-level:
+# granted only because the build is platform-signed (`platform_signed=true` on SWI68). Used for
+# one thing: starting the car's own map on the virtual display of an ActivityView inside
+# NavSplitActivity. No overlay window is added, and nothing else is launched on that display.
+android.permission.INTERNAL_SYSTEM_WINDOW

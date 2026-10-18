@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CP-094: the car's map on the left two thirds, the companion on the right third.
+  Glance-only while moving: three readouts and a line, one button that hands the map back.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:id="@+id/mapPane"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
+
+        <TextView
+            style="@style/Text.EV.ReadoutLabel"
+            android:text="@string/label_battery" />
+
+        <TextView
+            android:id="@+id/splitSoc"
+            style="@style/Text.EVChargePilot.Hero" />
+
+        <TextView
+            style="@style/Text.EV.ReadoutLabel"
+            android:text="@string/label_range" />
+
+        <TextView
+            android:id="@+id/splitRange"
+            style="@style/Text.EVChargePilot.HeroSecondary" />
+
+        <TextView
+            android:id="@+id/splitRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:maxLines="2"
+            android:textAppearance="@style/Text.EV.Body" />
+
+        <TextView
+            android:id="@+id/splitDrift"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:maxLines="3"
+            android:textAppearance="@style/Text.EV.Secondary"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/splitFullMap"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:text="@string/nav_split_full_map" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -147,9 +147,11 @@ object SplitScreenProbe {
         lines += "platform_signed=$platformSigned"
         lines += "secondary_display_activities=$secondaryDisplays"
         lines += "process_uid=$uid"
-        // Not declared on purpose: the probe must not widen the manifest. A platform-signed build
-        // would be granted it the day it is declared.
-        lines += "embedding_permission_declared=false"
+        // CP-094 declares it for the map pane; granted only where the build is platform-signed.
+        lines += "embedding_permission_granted=" + (
+            pm.checkPermission(MapPane.SYSTEM_WINDOW, context.packageName) == PackageManager.PERMISSION_GRANTED
+        )
+        lines += "map_pane_possible=${MapPane.possible(context)}"
         lines += "multi_window_config=" + listOf(
             "config_supportsMultiWindow",
             "config_supportsSplitScreenMultiWindow",
