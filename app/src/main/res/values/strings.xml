@@ -97,6 +97,13 @@
     <string name="diagnostics_export_park_vehicle">Park the vehicle before exporting diagnostics</string>
     <string name="diagnostics_export_no_usb">No writable USB storage is available</string>
     <string name="diagnostics_export_failed">Could not write the diagnostic bundle to USB storage</string>
+    <string name="diagnostics_send">Send to server</string>
+    <string name="diagnostics_send_message">The diagnostic bundle goes to this address, over HTTPS. Nothing else is sent.</string>
+    <string name="diagnostics_send_hint">https://…/evsuite</string>
+    <string name="diagnostics_send_confirm">Send</string>
+    <string name="diagnostics_send_refused">Address refused: %1$s</string>
+    <string name="diagnostics_send_ok">Diagnostic bundle sent</string>
+    <string name="diagnostics_send_failed">Could not send: %1$s</string>
     <string name="diagnostics_export_ok">Diagnostic bundle exported to %1$s</string>
     <string name="diagnostics_firmware">Firmware generation: %1$s</string>
     <string name="diagnostics_read_only">Vehicle access: read-only</string>

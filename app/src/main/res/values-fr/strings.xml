@@ -93,6 +93,13 @@
     <string name="diagnostics_export_park_vehicle">Stationnez le véhicule avant d’exporter le diagnostic</string>
     <string name="diagnostics_export_no_usb">Aucun stockage USB accessible en écriture</string>
     <string name="diagnostics_export_failed">Impossible d’écrire le paquet de diagnostic sur la clé USB</string>
+    <string name="diagnostics_send">Envoyer au serveur</string>
+    <string name="diagnostics_send_message">Le paquet de diagnostic part vers cette adresse, en HTTPS. Rien d’autre n’est envoyé.</string>
+    <string name="diagnostics_send_hint">https://…/evsuite</string>
+    <string name="diagnostics_send_confirm">Envoyer</string>
+    <string name="diagnostics_send_refused">Adresse refusée : %1$s</string>
+    <string name="diagnostics_send_ok">Paquet de diagnostic envoyé</string>
+    <string name="diagnostics_send_failed">Envoi impossible : %1$s</string>
     <string name="diagnostics_export_ok">Paquet de diagnostic exporté vers %1$s</string>
     <string name="diagnostics_firmware">Génération du firmware : %1$s</string>
     <string name="diagnostics_read_only">Accès au véhicule : lecture seule</string>

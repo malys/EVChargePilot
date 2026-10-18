@@ -4,6 +4,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added (diagnostics)
+
+- **Diagnostics → Send to server.** The USB bundle, posted to an HTTPS address typed into the
+  dialog (your own inbox, such as the Node-RED flow in the workspace's `tools/nodered/`). Parked
+  only, like the USB export; the address is shown again before every send; no new permission.
+
 ### Fixed
 
 - **The trip-end line says one thing per sentence.** "Note 24, -40 sur votre moyenne. Trajet

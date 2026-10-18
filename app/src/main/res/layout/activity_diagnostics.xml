@@ -79,6 +79,15 @@
                 android:layout_weight="1"
                 android:text="@string/diagnostics_export_usb" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/diagnosticsSendAction"
+                style="@style/Widget.EV.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:text="@string/diagnostics_send" />
+
             <!-- Development instrument: absent from the stable APK, so absent from this row. -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/diagnosticsEvidenceAction"

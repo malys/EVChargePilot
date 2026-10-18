@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import android.view.WindowInsets
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.evsuite.chargepilot.databinding.ActivityDiagnosticsBinding
@@ -20,6 +21,7 @@ import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.diag.CrashLogger
+import com.evsuite.hardware.diag.DiagnosticInbox
 import com.evsuite.hardware.telemetry.BatteryExposure
 import com.evsuite.hardware.telemetry.BatteryDigestStore
 import com.evsuite.hardware.telemetry.BatteryLedgerStore
@@ -72,6 +74,7 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
         setContentView(binding.root)
         provenance = ProvenanceText(this)
         binding.diagnosticsExportAction.setOnClickListener { exportDiagnostics() }
+        binding.diagnosticsSendAction.setOnClickListener { askInboxAddress() }
         binding.diagnosticsEvidenceAction.visibility =
             if (EvidenceCaptureHook.IS_SUPPORTED) View.VISIBLE else View.GONE
         binding.diagnosticsEvidenceAction.setOnClickListener { chooseEvidenceScenario() }
@@ -183,6 +186,79 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             }
             DiagnosticExportPolicy.Decision.ALLOWED -> false
         }
+
+    /**
+     * The address, shown every time: this is both where it is set and the confirmation that the
+     * bundle is about to leave the car. Parked only, like the USB export.
+     */
+    private fun askInboxAddress() {
+        if (showDiagnosticExportRefusal(diagnosticExportDecision(recorder?.latest))) return
+        val prefs = getSharedPreferences(INBOX_PREFS, MODE_PRIVATE)
+        val input = EditText(this).apply {
+            setSingleLine()
+            hint = getString(R.string.diagnostics_send_hint)
+            setText(prefs.getString(INBOX_URL, ""))
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.diagnostics_send)
+            .setMessage(R.string.diagnostics_send_message)
+            .setView(input)
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.diagnostics_send_confirm) { _, _ ->
+                val url = input.text.toString().trim()
+                val refused = DiagnosticInbox.refuse(url)
+                if (refused != null) {
+                    Toast.makeText(this, getString(R.string.diagnostics_send_refused, refused), Toast.LENGTH_LONG).show()
+                } else {
+                    prefs.edit().putString(INBOX_URL, url).apply()
+                    sendDiagnostic(url)
+                }
+            }
+            .show()
+    }
+
+    private fun sendDiagnostic(url: String) {
+        val appContext = applicationContext
+        val service = recorder
+        background.execute {
+            val decision = diagnosticExportDecision(service?.latest)
+            val outcome = if (decision == DiagnosticExportPolicy.Decision.ALLOWED) {
+                EvidenceCaptureHook.saveProbeArtifacts(appContext)
+                // The same zip the stick would get, built in the cache and gone once sent.
+                val staging = File(cacheDir, "inbox").apply { mkdirs() }
+                val bundle = DiagnosticExporter.writeBundle(
+                    diagnosticsReport(), File(appContext.filesDir, "evidence"), staging,
+                )
+                try {
+                    bundle?.let {
+                        DiagnosticInbox.send(
+                            url,
+                            DiagnosticInbox.Artifact(
+                                app = "EVChargePilot",
+                                version = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty(),
+                                name = it.name,
+                                createdAtMs = System.currentTimeMillis(),
+                                content = it.readBytes(),
+                            ),
+                        )
+                    } ?: DiagnosticInbox.Outcome.Failed("bundle not written")
+                } finally {
+                    bundle?.delete()
+                }
+            } else null
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                when (outcome) {
+                    null -> showDiagnosticExportRefusal(decision)
+                    is DiagnosticInbox.Outcome.Sent -> toastLong(R.string.diagnostics_send_ok)
+                    is DiagnosticInbox.Outcome.Failed -> {
+                        AppLogger.w(TAG, "diagnostic send failed; reason=${outcome.reason}")
+                        Toast.makeText(this, getString(R.string.diagnostics_send_failed, outcome.reason), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
 
     private fun toastLong(message: Int) =
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
@@ -453,6 +529,8 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
         const val MAX_LOG_MESSAGE_CHARS = 1_024
         const val MAX_LOG_SECTION_BYTES = 32 * 1_024
         const val MAX_INVENTORY_FILES = 64
+        private const val INBOX_PREFS = "diagnostic_inbox"
+        private const val INBOX_URL = "url"
         const val HISTORY_FILE = "trips.json"
     }
 }
