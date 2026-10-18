@@ -16,6 +16,9 @@ class ChargePilotApp : Application() {
         ValidationProbe.monitor(null) { "process start" }
         // CP-094: displays appearing while the vendor launcher shows its map card; read-only.
         SplitScreenProbe.watch(this)
+        // Leftover quarantine copies and cut writes; off the main thread, a few file deletes.
+        Thread({ runCatching { StorageHygiene.sweep(filesDir, System.currentTimeMillis()) } },
+            "chargepilot-hygiene").start()
         // The vehicle voice binds asynchronously; asking now means the first coach line, or the
         // settings test, finds it bound. Idempotent, and a car without it just falls back.
         if (EcoCoach.voiceEnabled(this)) EcoVoice.connect(this)

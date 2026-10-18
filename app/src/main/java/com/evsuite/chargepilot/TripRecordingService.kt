@@ -354,7 +354,7 @@ class TripRecordingService : Service() {
         // CP-090: the same voice, gate and journal carry the pack-stress clause.
         val line = listOfNotNull(
             progress?.let(text::scoreLine),
-            text.spoken(advice),
+            text.spoken(advice, scored = progress?.score != null),
             text.stress(trip.samples.orEmpty()),
         ).joinToString(" ")
         // CP-087: kept whether or not it is said out loud.

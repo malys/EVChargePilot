@@ -54,7 +54,7 @@ class EcoTripAdviceTest {
         var atMs = 0L
         var speed = 0f
         repeat(50) {
-            repeat(6) { speed += 8f; samples += sample(atMs, speed, outsideC); atMs += 1_000L }
+            repeat(6) { speed += 10f; samples += sample(atMs, speed, outsideC); atMs += 1_000L }
             repeat(18) { samples += sample(atMs, speed, outsideC); atMs += 1_000L }
             speed = 0f
         }

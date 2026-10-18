@@ -38,6 +38,12 @@ class ClimateReadingsTest {
         assertNull(readings.recirculationOn.value)
     }
 
+    @Test fun `a single-zone passenger setpoint is the driver's, derived not measured`() {
+        val readings = ClimateReadings.of(snapshot().copy(climate = climate(driverTargetCelsius = 24f)))
+        assertEquals(24f, readings.passengerTarget.value)
+        assertEquals(Provenance.DERIVED, readings.passengerTarget.provenance)
+    }
+
     @Test fun `fan requires both current level and maximum`() {
         val complete = ClimateReadings.of(snapshot().copy(
             climate = climate(fanLevel = 3, fanLevelMax = 8),

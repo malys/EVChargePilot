@@ -70,7 +70,10 @@ data class ClimateReadings(
                 autoOn = Provenanced.measured(climate.autoOn, absent),
                 fan = fan,
                 driverTarget = Provenanced.measured(climate.driverTargetCelsius, absent),
-                passengerTarget = Provenanced.measured(climate.passengerTargetCelsius, absent),
+                // Single zone: the car publishes no passenger setpoint, and that seat gets the
+                // driver's air. Shown as derived from the driver's, never as its own reading.
+                passengerTarget = climate.passengerTargetCelsius?.let { Provenanced.measured(it) }
+                    ?: Provenanced.derived(climate.driverTargetCelsius, absent),
                 econOn = Provenanced.measured(climate.econOn, absent),
                 recirculationOn = Provenanced.measured(climate.recirculationOn, absent),
             )

@@ -4,6 +4,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The trip-end line says one thing per sentence.** "Note 24, -40 sur votre moyenne. Trajet
+  habituel, dans votre propre moyenne." used *moyenne* for two different averages. The score now
+  reads "Note 24 sur 100, moyenne 64."; consumption is named as such and said only when it is away
+  from the usual; "not enough comparable trips" is said only when nothing else is; tips are shorter.
+- Hard stops are counted from 2.5 m/s² (EVHardware): lifting off into regeneration no longer
+  scores a calm town drive at zero for anticipation.
+- The passenger setpoint of a single-zone car is shown as derived from the driver's, no longer as
+  measured by the vehicle.
+- `[split_screen]` answers per route (`option.map_system_window`, `option.map_allowed_embedding`,
+  `option.split_screen`, `option.guidance`). It now counts the INTERNAL_SYSTEM_WINDOW route a
+  platform-signed build has, checks that secondary-display activities are on, and stops calling
+  an idle guidance service "answering": with no route running the verdict is `UNPROVEN`.
+- Leftover quarantine copies (more than 400 on the car, from the R8 ledger bug fixed on
+  2026-10-11) and writes cut by a power-off are swept at start: the newest five copies per file
+  stay, and any copy over 4 KB is never touched.
+
 ### Added
 
 - **Split-screen probe (CP-094).** `diagnostic.txt` gains `[split_screen]`: whether the car's

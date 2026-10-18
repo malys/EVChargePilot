@@ -30,16 +30,68 @@ import java.util.ArrayDeque
 @SuppressLint("PrivateApi", "DiscouragedPrivateApi", "SoonBlockedPrivateApi", "BlockedPrivateApi")
 object SplitScreenProbe {
 
-    enum class Verdict { MAP_EMBEDDABLE, GUIDANCE_ONLY, NEITHER }
+    enum class Verdict { MAP_EMBEDDABLE, GUIDANCE_ONLY, UNPROVEN, NEITHER }
 
-    /** The three facts the decision rests on, kept apart from Android so a JVM test covers it. */
-    internal fun verdict(
-        canEmbed: Boolean,
-        navAllowsEmbedding: Boolean,
-        guidanceAnswers: Boolean,
-    ): Verdict = when {
-        canEmbed && navAllowsEmbedding -> Verdict.MAP_EMBEDDABLE
-        guidanceAnswers -> Verdict.GUIDANCE_ONLY
+    /**
+     * The ways the map or its guidance could reach the companion, each answered on its own.
+     *
+     * Android 9 lets an activity onto a virtual display another app owns only if it is flagged
+     * `allowEmbedded` and the host holds ACTIVITY_EMBEDDING, unless the host holds
+     * INTERNAL_SYSTEM_WINDOW, or runs as the system uid, which skip both checks. Both permissions
+     * are signature-level: a platform-signed build is granted them the day it declares them, which
+     * this probe does not do. None of it works without secondary-display activities at all.
+     */
+    enum class Option { MAP_SYSTEM_WINDOW, MAP_ALLOWED_EMBEDDING, SPLIT_SCREEN, GUIDANCE }
+
+    /** What the options rest on, kept apart from Android so a JVM test covers it. */
+    internal data class Facts(
+        val activityView: Boolean,
+        val secondaryDisplays: Boolean,
+        val platformSigned: Boolean,
+        val systemUid: Boolean,
+        val navAllowsEmbedding: Boolean,
+        val splitScreenConfig: Boolean,
+        val navResizeable: Boolean,
+        val guidanceBound: Boolean,
+        val navigating: Boolean,
+        val guidanceAnswers: Boolean,
+    )
+
+    internal fun options(f: Facts): Map<Option, String> {
+        val host = when {
+            !f.activityView -> "no: no ActivityView on this firmware"
+            !f.secondaryDisplays -> "no: activities on secondary displays are off"
+            else -> null
+        }
+        return linkedMapOf(
+            Option.MAP_SYSTEM_WINDOW to (host ?: when {
+                f.systemUid -> "possible: runs as the system uid"
+                f.platformSigned -> "possible_if_declared: INTERNAL_SYSTEM_WINDOW"
+                else -> "no: not platform signed"
+            }),
+            Option.MAP_ALLOWED_EMBEDDING to (host ?: when {
+                !f.navAllowsEmbedding -> "no: no map activity allows embedding"
+                f.systemUid || f.platformSigned -> "possible_if_declared: ACTIVITY_EMBEDDING"
+                else -> "no: not platform signed"
+            }),
+            Option.SPLIT_SCREEN to when {
+                !f.splitScreenConfig -> "no: split screen is off in the framework"
+                !f.navResizeable -> "no: the map is not resizeable"
+                else -> "plausible: the map would have to be launched docked, unproven"
+            },
+            Option.GUIDANCE to when {
+                !f.guidanceBound -> "no: the guidance service is not bound"
+                f.navigating && f.guidanceAnswers -> "proven"
+                else -> "unproven: start a route in the car's navigation, then export"
+            },
+        )
+    }
+
+    internal fun verdict(options: Map<Option, String>): Verdict = when {
+        listOf(Option.MAP_SYSTEM_WINDOW, Option.MAP_ALLOWED_EMBEDDING)
+            .any { options[it]?.startsWith("possible") == true } -> Verdict.MAP_EMBEDDABLE
+        options[Option.GUIDANCE] == "proven" -> Verdict.GUIDANCE_ONLY
+        options[Option.GUIDANCE]?.startsWith("unproven") == true -> Verdict.UNPROVEN
         else -> Verdict.NEITHER
     }
 
@@ -87,9 +139,14 @@ object SplitScreenProbe {
         val activityView = runCatching { Class.forName("android.app.ActivityView") }.isSuccess
         val platformSigned =
             pm.checkSignatures("android", context.packageName) == PackageManager.SIGNATURE_MATCH
+        val secondaryDisplays =
+            pm.hasSystemFeature(PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS)
+        val uid = android.os.Process.myUid()
         lines += "firmware=${FirmwareInfo.getGeneration().name}"
         lines += "activity_view_class=$activityView"
         lines += "platform_signed=$platformSigned"
+        lines += "secondary_display_activities=$secondaryDisplays"
+        lines += "process_uid=$uid"
         // Not declared on purpose: the probe must not widen the manifest. A platform-signed build
         // would be granted it the day it is declared.
         lines += "embedding_permission_declared=false"
@@ -109,7 +166,8 @@ object SplitScreenProbe {
 
         val nav = MapApps.installedPackage(context)
         lines += "nav_package=${nav ?: "none"}"
-        val embeddable = nav?.let { navActivities(pm, it, lines) }.orEmpty()
+        var mainResizeMode: String? = null
+        val embeddable = nav?.let { navActivities(pm, it, lines) { mode -> mainResizeMode = mode } }.orEmpty()
         lines += "nav_embeddable=${embeddable.ifEmpty { listOf("none") }.joinToString(",")}"
 
         context.getSystemService(DisplayManager::class.java)?.displays.orEmpty()
@@ -126,14 +184,35 @@ object SplitScreenProbe {
             "next_turn_raw=${guidance.nextTurnDistanceRaw} icon=${guidance.nextTurnIcon} " +
             "direction_present=${guidance.direction != null}"
 
-        val guidanceAnswers = guidance.remainingDistanceRaw != null || guidance.road != null
-        lines += "split_screen_verdict=" +
-            verdict(activityView && platformSigned, embeddable.isNotEmpty(), guidanceAnswers).name
+        // A zero remaining distance with no route is the service's idle answer, not guidance.
+        val guidanceAnswers = (guidance.remainingDistanceRaw ?: 0) > 0 || guidance.road != null
+        val options = options(
+            Facts(
+                activityView = activityView,
+                secondaryDisplays = secondaryDisplays,
+                platformSigned = platformSigned,
+                systemUid = uid == android.os.Process.SYSTEM_UID,
+                navAllowsEmbedding = embeddable.isNotEmpty(),
+                splitScreenConfig = frameworkBool("config_supportsSplitScreenMultiWindow") == "true",
+                // 0 is RESIZE_MODE_UNRESIZEABLE; unreadable proves nothing either way.
+                navResizeable = mainResizeMode.let { it != null && it != "0" && it != "unreadable" },
+                guidanceBound = SaicNavGuidance.isAvailable,
+                navigating = navigating == true,
+                guidanceAnswers = guidanceAnswers,
+            )
+        )
+        options.forEach { (option, answer) -> lines += "option.${option.name.lowercase()}=$answer" }
+        lines += "split_screen_verdict=" + verdict(options).name
         lines
     }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
     /** Lists the map's activities that allow embedding, and records its size and main resize mode. */
-    private fun navActivities(pm: PackageManager, pkg: String, lines: MutableList<String>): List<String> {
+    private fun navActivities(
+        pm: PackageManager,
+        pkg: String,
+        lines: MutableList<String>,
+        mainResizeMode: (String) -> Unit,
+    ): List<String> {
         val activities = runCatching {
             pm.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES).activities
         }.getOrNull().orEmpty()
@@ -143,7 +222,8 @@ object SplitScreenProbe {
         }.getOrDefault(FLAG_ALLOW_EMBEDDED_FALLBACK)
         val launch = pm.getLaunchIntentForPackage(pkg)?.component?.className
         activities.firstOrNull { it.name == launch }?.let {
-            lines += "nav_main=${it.name.removePrefix(pkg)} resize_mode=${resizeMode(it)} exported=${it.exported}"
+            val mode = resizeMode(it).also(mainResizeMode)
+            lines += "nav_main=${it.name.removePrefix(pkg)} resize_mode=$mode exported=${it.exported}"
         }
         return activities.filter { (it.flags and flag) != 0 }.map { it.name.removePrefix(pkg) }
     }

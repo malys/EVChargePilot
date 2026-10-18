@@ -299,7 +299,7 @@ class EcoAdviceText(context: Context) {
                 app.getString(R.string.eco_voice_trip_better, delta)
             advice.band == EcoBand.WORSE && delta != null ->
                 app.getString(R.string.eco_voice_trip_worse, delta)
-            advice.band != null -> app.getString(R.string.eco_voice_trip_typical)
+            // A usual consumption is not news, and next to the score it read as a second verdict.
             else -> null
         }
         return listOfNotNull(
@@ -309,12 +309,12 @@ class EcoAdviceText(context: Context) {
         ).joinToString(" ")
     }
 
-    /** "Score 63, +6 on your average. New record." — the game, in one sentence. */
+    /** "Score 63 out of 100, average 57. New record." — the game, in one sentence. */
     fun scoreLine(progress: EcoProgress): String? {
         val score = progress.score ?: return null
         val parts = ArrayList<String>()
         parts += progress.averageBefore?.let {
-            app.getString(R.string.eco_score_versus, score.total, score.total - it)
+            app.getString(R.string.eco_score_versus, score.total, it)
         } ?: app.getString(R.string.eco_score, score.total)
         if (progress.isRecord) parts += app.getString(R.string.eco_score_record)
         else if (progress.streak >= MIN_STREAK) parts += app.getString(R.string.eco_score_streak, progress.streak)
@@ -341,8 +341,12 @@ class EcoAdviceText(context: Context) {
         return lines
     }
 
-    /** The full line for the advice journal when the trip closes in P. */
-    fun spoken(advice: TripAdvice): String {
+    /**
+     * The full line for the advice journal when the trip closes in P. [scored] says a score line
+     * goes in front of it, which is then the verdict: "not enough trips yet" is said only when
+     * nothing else would be.
+     */
+    fun spoken(advice: TripAdvice, scored: Boolean = false): String {
         val saving = advice.saving
         val sentences = ArrayList<String>()
         val rest: List<EcoTip>
@@ -360,10 +364,11 @@ class EcoAdviceText(context: Context) {
             }
             rest = advice.tips.filter { clause(it) == null }
         } else {
-            sentences += bandSentence(advice)
+            bandSentence(advice)?.let(sentences::add)
             rest = advice.tips
         }
         rest.mapTo(sentences, ::sentence)
+        if (sentences.isEmpty() && !scored) sentences += app.getString(R.string.eco_trip_no_verdict)
         return sentences.joinToString(" ")
     }
 
@@ -420,15 +425,13 @@ class EcoAdviceText(context: Context) {
         return lines
     }
 
-    private fun bandSentence(advice: TripAdvice): String {
-        val band = advice.band ?: return app.getString(R.string.eco_trip_no_verdict)
-        val delta = advice.deltaPercent?.let { abs(it).roundToInt() }
-        return when {
-            band == EcoBand.BETTER && delta != null ->
-                app.getString(R.string.eco_trip_better, delta)
-            band == EcoBand.WORSE && delta != null ->
-                app.getString(R.string.eco_trip_worse, delta)
-            else -> app.getString(R.string.eco_trip_typical)
+    /** Only a consumption away from the usual is worth a sentence. */
+    private fun bandSentence(advice: TripAdvice): String? {
+        val delta = advice.deltaPercent?.let { abs(it).roundToInt() } ?: return null
+        return when (advice.band) {
+            EcoBand.BETTER -> app.getString(R.string.eco_trip_better, delta)
+            EcoBand.WORSE -> app.getString(R.string.eco_trip_worse, delta)
+            else -> null
         }
     }
 
