@@ -13,6 +13,22 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   `split_screen_verdict=MAP_EMBEDDABLE` from the platform signature. The pane needs
   `INTERNAL_SYSTEM_WINDOW`, newly declared: see SECURITY.md. `[split_screen]` now reports
   `embedding_permission_granted` and `map_pane_possible`. Not yet tried on the car.
+- **The split screen's right third, as gauges (CP-094).** A ring for the charge with the range
+  beside it. A destination card with the km and time left, a bar for the trip's share of the
+  range, and the range left on arrival. The live eco score in a ring, with its band word and its
+  three parts. The roads the plan offered, one bar each, whose length is the travel time. The
+  drift line stays on the dashboard only.
+
+### Fixed (navigation)
+
+- **The map pane waits for the car to be guiding (CP-094).** On the 2026-10-19 drive, "Aller à"
+  turned the screen black and then left a frozen *MG4 Navigator* while guidance carried on. The
+  likely cause is that the pane moved the map while the car was still routing. The pane now
+  starts once `isMapNavigating` is true, plus 2 s, and logs how long it waited.
+- **The route handoff sends the charging stops only (CP-060).** The 8 shape points made Telenav
+  guide to the next point ("900 m" on a 7 km trip), and guidance dropped about 2 km in. With a
+  stop, the split screen computes the km to the destination as the road's length less the
+  distance driven since the tap.
 
 ### Changed (charges)
 

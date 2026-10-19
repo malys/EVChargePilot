@@ -1114,7 +1114,7 @@ class ChargeStopActivity : AppCompatActivity() {
         // way to it (CP-062 rule 8). Which of them the single-point channels get is
         // [ChargeStopHandoff]'s decision, tested there.
         val stops = if (plan is ChargeStopPlan.Plan.Stop) chargers.filterNotNull() else emptyList()
-        val target = ChargeStopHandoff.of(place, stops, route)
+        val target = ChargeStopHandoff.of(place, stops)
         handoff = target
         followed = follow(plan, chargers.firstOrNull(), route, rate, grade)
         binding.navigateNote.visibility = View.VISIBLE
@@ -1228,6 +1228,8 @@ class ChargeStopActivity : AppCompatActivity() {
         announce(getString(R.string.charge_stop_navigate_sending))
         // Whatever the previous tap left running stops being the plan the moment this one starts.
         NavLegs.disarm()
+        // Read here, on the main thread: the worker below must not race a road being chosen.
+        val split = splitRoads(target.toStop)
         // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
@@ -1248,12 +1250,12 @@ class ChargeStopActivity : AppCompatActivity() {
             // and leaves the screen on this app, so the destination went over and the driver
             // watched a page that says *Transmission…*. The map comes up now and the polling
             // below only settles what the message will say.
-            if (route) showMap()
+            if (route) showMap(split)
             val routeGuided = route && !wasGuiding && carStartedGuiding()
             val goTo = if (routeGuided) false else target.point?.let {
                 runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
-            if (goTo && !route) showMap()
+            if (goTo && !route) showMap(split)
             val guided = goTo && !wasGuiding && carStartedGuiding()
             // Every rung in one line, so a drive that ends with nothing happening still says
             // which rung refused rather than leaving the next build to guess again.
@@ -1288,13 +1290,33 @@ class ChargeStopActivity : AppCompatActivity() {
      * CP-094: the map beside the companion where this head unit can host it, full screen where
      * it cannot. [NavSplitActivity] falls back to full screen on its own if the pane fails.
      */
-    private fun showMap() {
+    private fun showMap(split: Intent) {
         if (MapPane.possible(this)) {
-            runCatching { startActivity(Intent(this, NavSplitActivity::class.java)) }
+            runCatching { startActivity(split) }
                 .onFailure { MapApps.toForeground(this) }
         } else {
             MapApps.toForeground(this)
         }
+    }
+
+    /**
+     * The split screen, carrying the roads this plan offered so the driver still sees the trade
+     * once the map is up. The charge band is against the routed road, so the routed road has none.
+     * With a stop, the car's remaining distance is to the stop, so the road's length goes too.
+     */
+    private fun splitRoads(toStop: Boolean): Intent {
+        val found = roads
+        val list = found?.list.orEmpty().map { road ->
+            NavSplitActivity.SplitRoad(
+                roadName(road),
+                road.route.distanceKm,
+                road.route.durationMinutes,
+                road.versus?.let { -it.savedPercentHigh },
+                road.versus?.let { -it.savedPercentLow },
+            )
+        }
+        val routeKm = found?.list?.getOrNull(chosen)?.route?.distanceKm
+        return NavSplitActivity.intent(this, list, chosen, toStop, routeKm)
     }
 
     /**

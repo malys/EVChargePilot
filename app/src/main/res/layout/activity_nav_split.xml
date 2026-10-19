@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   CP-094: the car's map on the left two thirds, the companion on the right third.
-  Glance-only while moving: three readouts and a line, one button that hands the map back.
+  Glance-only while moving: charge and range, the destination against the range, the drive's
+  eco score, the roads the plan offered, and one button that hands the map back.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
@@ -13,7 +15,18 @@
         android:id="@+id/mapPane"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2" />
+        android:layout_weight="2">
+
+        <!-- Under the map: what shows while the car routes, before the pane is started. -->
+        <TextView
+            android:id="@+id/mapWaiting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/nav_split_map_waiting"
+            android:textAppearance="@style/Text.EV.Secondary" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -22,45 +35,162 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_md">
 
-        <TextView
-            style="@style/Text.EV.ReadoutLabel"
-            android:text="@string/label_battery" />
-
-        <TextView
-            android:id="@+id/splitSoc"
-            style="@style/Text.EVChargePilot.Hero" />
-
-        <TextView
-            style="@style/Text.EV.ReadoutLabel"
-            android:text="@string/label_range" />
-
-        <TextView
-            android:id="@+id/splitRange"
-            style="@style/Text.EVChargePilot.HeroSecondary" />
-
-        <TextView
-            android:id="@+id/splitRoute"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_sm"
-            android:maxLines="2"
-            android:textAppearance="@style/Text.EV.Body" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none">
 
-        <TextView
-            android:id="@+id/splitDrift"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:maxLines="3"
-            android:textAppearance="@style/Text.EV.Secondary"
-            android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Charge in the ring, range beside it. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.evsuite.chargepilot.RingGaugeView
+                        android:id="@+id/splitSocRing"
+                        android:layout_width="112dp"
+                        android:layout_height="112dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.EV.ReadoutLabel"
+                            android:text="@string/label_range" />
+
+                        <TextView
+                            android:id="@+id/splitRange"
+                            style="@style/Text.EVChargePilot.Hero"
+                            tools:text="355 km" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- The destination against the range: the bar is the trip, the track the reach. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <TextView
+                        style="@style/Text.EV.ReadoutLabel"
+                        android:text="@string/nav_split_destination" />
+
+                    <TextView
+                        android:id="@+id/splitRoute"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Text.EV.Title"
+                        tools:text="0,8 km · 2 min" />
+
+                    <TextView
+                        android:id="@+id/splitRoad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAppearance="@style/Text.EV.Secondary"
+                        tools:text="Rue des Écoles" />
+
+                    <com.evsuite.chargepilot.BarGaugeView
+                        android:id="@+id/splitReach"
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp"
+                        android:layout_marginTop="@dimen/spacing_sm" />
+
+                    <TextView
+                        android:id="@+id/splitMargin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:textAppearance="@style/Text.EV.Secondary"
+                        tools:text="≈ 354 km d'autonomie à l'arrivée" />
+
+                </LinearLayout>
+
+                <!-- This drive's eco score, out of 100, with the part to work on. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.evsuite.chargepilot.RingGaugeView
+                        android:id="@+id/splitEcoRing"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.EV.ReadoutLabel"
+                            android:text="@string/nav_split_eco" />
+
+                        <TextView
+                            android:id="@+id/splitEcoBand"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/Text.EV.Title"
+                            tools:text="Économe" />
+
+                        <TextView
+                            android:id="@+id/splitEcoParts"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="2"
+                            android:textAppearance="@style/Text.EV.Secondary"
+                            tools:text="anticipation 80 · souplesse 70 · efficacité 60" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- The roads the plan offered, one bar each, length is time. -->
+                <LinearLayout
+                    android:id="@+id/splitRoads"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Text.EV.ReadoutLabel"
+                        android:text="@string/nav_split_roads" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/splitFullMap"
             style="@style/Widget.EV.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_marginTop="@dimen/spacing_sm"
             android:text="@string/nav_split_full_map" />
 
     </LinearLayout>

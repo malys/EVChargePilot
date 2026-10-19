@@ -669,4 +669,17 @@ Consommation %6$s %% par km</string>
     <string name="advice_charge_curve_slower">Une partie de la courbe était plus lente que d’habitude.</string>
     <string name="advice_charge_curve_unchecked">Courbe non vérifiée : moins de trois charges passées ont traversé une tranche entière.</string>
     <string name="nav_split_full_map">Carte plein écran</string>
+    <string name="nav_split_map_waiting">La voiture calcule l\u2019itinéraire…</string>
+    <string name="nav_split_destination">DESTINATION</string>
+    <string name="nav_split_route">%1$s km · %2$s min</string>
+    <string name="nav_split_route_stop">≈ %1$s km · arrêt de charge dans %2$s km</string>
+    <string name="nav_split_no_guidance">Aucun guidage en cours</string>
+    <string name="nav_split_margin">≈ %1$s km d\u2019autonomie à l\u2019arrivée</string>
+    <string name="nav_split_margin_short">Autonomie inférieure à la distance restante</string>
+    <string name="nav_split_battery">Batterie %1$s</string>
+    <string name="nav_split_eco">ÉCO-CONDUITE</string>
+    <string name="nav_split_eco_parts">anticipation %1$s · souplesse %2$s · efficacité %3$s</string>
+    <string name="nav_split_eco_waiting">Note après 2 km de conduite</string>
+    <string name="nav_split_roads">ITINÉRAIRES</string>
+    <string name="nav_split_road_charge">%1$s à %2$s %% de charge vs calculé</string>
 </resources>

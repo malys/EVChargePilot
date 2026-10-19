@@ -1,9 +1,7 @@
 package com.evsuite.chargepilot
 
 import com.evsuite.chargepilot.route.OpenChargeMap
-import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
-import com.evsuite.hardware.saic.NavigationHandoff
 import com.evsuite.hardware.telemetry.SocRate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -41,15 +39,6 @@ class ChargeStopHandoffTest {
 
     private fun found(alongKm: Double = 180.0) = Found(charger(), alongKm, arrivalPercent = 22.0)
 
-    /** Three degrees of latitude, about 333 km, on a road the router named the whole way. */
-    private fun route() = OrsDirections.Route(
-        distanceKm = 333.0,
-        durationMinutes = 200.0,
-        points = (0..30).map { OrsDirections.Point(4.0, 43.0 + it * 0.1, null) },
-        attribution = null,
-        sections = listOf(OrsDirections.Section(333.0, 200.0, "A7")),
-    )
-
     /** The driver's own trips, with a band narrow enough that the planner does not refuse. */
     private fun rate() = SocRate(
         percentPerKm = 0.25,
@@ -75,19 +64,12 @@ class ChargeStopHandoffTest {
     }
 
     @Test
-    fun `the pathway carries the road's shape, with the stop in its place along it`() {
-        val handoff = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 180.0)), route())
+    fun `the pathway is the stops alone, never points along the road`() {
+        // 2026-10-19: with shape points, Telenav guided to the next one and dropped guidance
+        // about 2 km in. Only places the driver stops at go in the pathway.
+        val handoff = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 180.0)))
 
-        // Every point the adapter will take, and no more: the stop plus the shape fills the cap.
-        assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
-        // The shape points are named by the road the router said they sit on.
-        assertEquals(7, handoff.pathway.count { it.name == "A7" })
-        // The stop keeps its place in the itinerary — 180 km along a 333 km route falls between
-        // the fourth waypoint and the fifth, and a pathway is driven in the order it is written.
-        assertEquals("Aire de Montélimar", handoff.pathway[4].name)
-
-        // Shape points are places the car passes, never legs: a chain that read one as an arrival
-        // would hand the next destination over in the middle of a motorway.
+        assertEquals(listOf("Aire de Montélimar"), handoff.pathway.map { it.name })
         assertEquals(listOf("Aire de Montélimar", "Marseille"), handoff.legs.map { it.name })
     }
 
@@ -100,28 +82,22 @@ class ChargeStopHandoffTest {
                 Found(charger(name = "Brive", latitude = 45.15, longitude = 1.53), 220.0, 15.0),
                 Found(charger(name = "Vierzon", latitude = 47.22, longitude = 2.07), 440.0, 14.0),
             ),
-            route(),
         )
 
         assertEquals(listOf("Brive", "Vierzon", "Marseille"), handoff.legs.map { it.name })
-        // Both stops are in the pathway, in road order, and the shape gives up points for them.
-        assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
-        assertTrue(
-            handoff.pathway.indexOfFirst { it.name == "Brive" } <
-                handoff.pathway.indexOfFirst { it.name == "Vierzon" }
-        )
+        // Both stops are in the pathway, in road order.
+        assertEquals(listOf("Brive", "Vierzon"), handoff.pathway.map { it.name })
         // The single-point channels still get the first stop: it is the leg about to be driven.
         assertEquals("Brive", handoff.label)
         assertEquals("Brive", handoff.point?.name)
     }
 
     @Test
-    fun `a trip with no stop still has its road pinned`() {
-        val handoff = ChargeStopHandoff.of(marseille, stops = emptyList(), route = route())
+    fun `a trip with no stop sends no waypoint`() {
+        val handoff = ChargeStopHandoff.of(marseille, stops = emptyList())
 
         assertFalse(handoff.toStop)
-        assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
-        assertTrue(handoff.pathway.all { it.name == "A7" })
+        assertTrue(handoff.pathway.isEmpty())
         assertEquals(listOf("Marseille"), handoff.legs.map { it.name })
     }
 
