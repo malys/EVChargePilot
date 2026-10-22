@@ -29,24 +29,24 @@
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
+        <!-- Page actions as icons, like the trip's own: the bar is the tabs' room. -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/exportAllAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="220dp"
+            style="@style/Widget.EVChargePilot.IconButton"
+            android:layout_width="@dimen/touch_target"
             android:layout_height="match_parent"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             android:layout_marginEnd="@dimen/spacing_sm"
-            android:text="@string/action_export_all_trips" />
-
+            android:contentDescription="@string/action_export_all_trips"
+            android:tooltipText="@string/action_export_all_trips"
+            app:icon="@drawable/ic_action_export" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteAllAction"
-            style="@style/Widget.EV.Button.Outlined"
-            android:layout_width="220dp"
+            style="@style/Widget.EVChargePilot.IconButton"
+            android:layout_width="@dimen/touch_target"
             android:layout_height="match_parent"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="@string/action_delete_all_trips" />
+            android:contentDescription="@string/action_delete_all_trips"
+            android:tooltipText="@string/action_delete_all_trips"
+            app:icon="@drawable/ic_action_delete" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/resetTripAAction"
@@ -198,28 +198,43 @@
                         android:layout_weight="1"
                         android:textAppearance="@style/Text.EV.Title" />
 
+                    <!-- One labelled action — what the eye should find — and two icons whose
+                         glyphs need no word beside a trip: export it, delete it. -->
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/speedWhatIfAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="220dp"
+                        android:id="@+id/tripDetailsAction"
+                        style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_target"
+                        android:minWidth="200dp"
+                        android:layout_marginEnd="@dimen/spacing_sm"
+                        android:text="@string/action_trip_details"
+                        app:icon="@drawable/ic_action_details" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/joinTripAction"
+                        style="@style/Widget.EVChargePilot.IconButton"
+                        android:layout_width="@dimen/touch_target"
                         android:layout_height="@dimen/touch_target"
                         android:layout_marginEnd="@dimen/spacing_sm"
-                        android:text="@string/action_speed_what_if" />
-
+                        android:contentDescription="@string/action_join_trip"
+                        android:tooltipText="@string/action_join_trip"
+                        app:icon="@drawable/ic_action_join" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/exportTripAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="220dp"
+                        style="@style/Widget.EVChargePilot.IconButton"
+                        android:layout_width="@dimen/touch_target"
                         android:layout_height="@dimen/touch_target"
                         android:layout_marginEnd="@dimen/spacing_sm"
-                        android:text="@string/action_export_trip" />
-
+                        android:contentDescription="@string/action_export_trip"
+                        android:tooltipText="@string/action_export_trip"
+                        app:icon="@drawable/ic_action_export" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/deleteTripAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="220dp"
+                        style="@style/Widget.EVChargePilot.IconButton"
+                        android:layout_width="@dimen/touch_target"
                         android:layout_height="@dimen/touch_target"
-                        android:text="@string/action_delete_trip" />
+                        android:contentDescription="@string/action_delete_trip"
+                        android:tooltipText="@string/action_delete_trip"
+                        app:icon="@drawable/ic_action_delete" />
                 </LinearLayout>
 
                 <!-- A floor, not a share. A weighted child is measured with an exact spec and never
@@ -267,31 +282,6 @@
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_regenerated" />
                         <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:layout_marginBottom="@dimen/spacing_sm"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/detailAttribution"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:maxLines="3"
-                        android:textAppearance="@style/Text.EV.Secondary" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/energyBreakdownAction"
-                        style="@style/Widget.EV.Button.Outlined"
-                        android:layout_width="280dp"
-                        android:layout_height="@dimen/touch_target"
-                        android:layout_marginStart="@dimen/spacing_md"
-                        android:text="@string/action_energy_breakdown" />
                 </LinearLayout>
 
                 <!-- CP-075. The answer to the question the readouts above never answer: was this

@@ -9,8 +9,9 @@
     android:baselineAligned="false"
     android:gravity="center_vertical"
     android:minHeight="@dimen/touch_target"
+    android:background="@drawable/bg_card"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_sm">
+    android:padding="@dimen/spacing_md">
 
     <LinearLayout
         android:layout_width="0dp"

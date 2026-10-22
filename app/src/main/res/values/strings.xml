@@ -124,7 +124,6 @@
     <string name="reason_insufficient_samples">not enough samples yet</string>
     <string name="reason_speed_too_low">vehicle speed is too low for stable distance-normalized consumption</string>
     <string name="reason_model_not_trained">the model has no fit to predict from</string>
-    <string name="reason_power_never_published">this vehicle never publishes battery power</string>
     <string name="diagnostics_charge_energy">What each recorded charge put back into the pack, and what the car’s own energy counters did while it happened. The sign is reported as observed, never corrected.</string>
     <string name="diagnostics_provenance">What each reading is, and why it is missing</string>
     <string name="label_soc">State of charge</string>
@@ -148,23 +147,7 @@
     <string name="trip_plot_legend">Speed on the left axis in km/h, charge on the right in percent over its own observed range, battery power around the centre line. Drag across the plot to read a moment.</string>
     <string name="trip_plot_climate_ac">A/C</string>
     <string name="label_plot_cursor_time">ELAPSED</string>
-    <string name="trip_attribution_intro">ESTIMATED RESIDUAL · Derived from integrated battery energy minus modelled traction; not a vehicle per-consumer measurement.</string>
-    <string name="trip_attribution_traction">Modelled traction: %1$s</string>
-    <string name="trip_attribution_climate_active">Climate active</string>
-    <string name="trip_attribution_climate_inactive">Climate inactive / other model error</string>
-    <string name="trip_attribution_climate_unknown">Climate state unknown</string>
-    <string name="trip_attribution_windows_open">Windows open</string>
-    <string name="trip_attribution_residual">%1$s residual: ESTIMATED %2$s</string>
-    <string name="trip_attribution_residual_indistinguishable">%1$s residual: not distinguishable from zero (%2$s)</string>
-    <string name="trip_attribution_residual_negative">%1$s residual: negative model error, not hidden (%2$s)</string>
-    <string name="trip_attribution_reconciliation">Regeneration: %1$.2f kWh · unmodelled discrepancy: %2$.2f kWh · reconciliation error: %3$.3f kWh</string>
-    <string name="trip_attribution_unavailable">Energy attribution unavailable: %1$s.</string>
-    <string name="action_energy_breakdown">Energy breakdown</string>
-    <string name="energy_breakdown_title">Post-trip energy breakdown</string>
     <string name="energy_breakdown_loading">Calculating from the bounded local trip record…</string>
-    <string name="energy_breakdown_unavailable_title">Breakdown unavailable</string>
-    <string name="energy_breakdown_declared_totals">Read off the gauge instead: %1$.1f %% of charge over %2$.1f km — about %3$.1f kWh, or %4$.1f kWh/100 km, at the pack size you declared. An estimate built on a figure you entered, not a measurement.</string>
-    <string name="energy_breakdown_measured_totals">Measured from battery power: %1$.2f kWh consumed, %2$.2f kWh regenerated, %3$.2f kWh net over %4$.1f km — %5$.1f kWh/100 km.</string>
     <string name="energy_breakdown_measured_standing">Of that, %1$.2f kWh went while standing still, over %2$d min.</string>
     <string name="energy_breakdown_model_unavailable">No validated local model can produce this breakdown yet. No estimate is substituted.</string>
     <string name="energy_breakdown_missing_power">This trip has no complete retained power evidence for a breakdown. Recorded totals remain unchanged.</string>
@@ -208,26 +191,37 @@
     <string name="energy_breakdown_charge_untrained" formatted="false">Not enough recorded driving yet to fit this car\'s charge model: it needs twelve stretches of at least 2 % and 2 km, across a range of speeds and temperatures. Nothing is estimated in its place.</string>
     <string name="energy_breakdown_charge_no_interval">This trip has no stretch with a speed, an outside temperature and a charge reading the model can speak about.</string>
     <string name="energy_breakdown_charge_too_small">The gauge moved two steps or less across this trip. Splitting that between driving and everything else would be splitting the gauge\'s own resolution.</string>
-    <string name="action_speed_what_if">Speed comparison</string>
-    <string name="speed_what_if_title">Motorway speed comparison</string>
     <string name="speed_what_if_loading">Loading the bounded local model…</string>
     <string name="speed_what_if_moving">Unavailable while the vehicle is moving. This post-trip comparison is parked-only.</string>
     <string name="speed_what_if_speed_unavailable">Unavailable until a fresh vehicle-speed reading confirms the vehicle is parked.</string>
     <string name="speed_what_if_ready">ESTIMATED · %1$.1f km of recorded motorway intervals. Positive differences mean the model estimates less energy at the reference speed.</string>
-    <string name="speed_what_if_row">%1$d km/h · ESTIMATED\nModelled energy %2$s\nEnergy difference %3$s · equivalent range %4$s</string>
     <string name="speed_what_if_no_motorway">Unavailable: no retained interval stayed at or above 90 km/h.</string>
     <string name="speed_what_if_energy_unavailable">Unavailable: a motorway interval has no usable battery-power reading.</string>
     <string name="speed_what_if_temperature_unavailable">Unavailable: a motorway interval has no usable outside-temperature reading.</string>
     <string name="speed_what_if_range_unavailable">Unavailable: the recorded trip has no usable consumption baseline for the range conversion.</string>
     <string name="speed_what_if_ready_charge">ESTIMATED · %1$.1f km of recorded motorway intervals, measured on the charge gauge. Positive differences mean the model estimates less charge spent at the reference speed.</string>
-    <string name="speed_what_if_row_charge">%1$d km/h · ESTIMATED\nModelled charge %2$s\nCharge difference %3$s · equivalent range %4$s</string>
     <string name="speed_what_if_charge_unavailable">Unavailable: a motorway interval has no usable state-of-charge reading.</string>
     <string name="speed_what_if_charge_too_small">Unavailable: the charge gauge moved a step or less over the recorded motorway stretch, which is too coarse to measure anything.</string>
     <string name="speed_what_if_envelope_unavailable">Unavailable: none of 90, 100, 110, 120 or 130 km/h is inside the trained speed and temperature envelope.</string>
-    <string name="speed_what_if_measured_title">MEASURED · what each speed cost on your recorded trips, net of regeneration. Not a model: traffic, climate and slope also differ between rows.</string>
-    <string name="speed_what_if_measured_row">%1$s km/h · %2$.1f kWh/100 km over %3$.1f km</string>
-    <string name="speed_what_if_measured_row_trip">%1$s km/h · %2$.1f kWh/100 km over %3$.1f km · this trip %4$.1f kWh/100 km</string>
     <string name="speed_what_if_measured_standing">Standing still · %1$d min · %2$.1f kW on average</string>
+    <!-- Trip details: the energy-breakdown and speed-comparison screens, merged and drawn. -->
+    <string name="action_trip_details">Details</string>
+    <string name="trip_details_title">Trip details</string>
+    <string name="trip_details_title_date">Trip details · %1$s</string>
+    <string name="trip_details_energy">Where the energy went</string>
+    <string name="trip_details_speed">What each speed cost</string>
+    <string name="trip_details_speed_legend">MEASURED on your recorded trips, net of regeneration. Bar: all of them · mark: this trip.</string>
+    <string name="trip_details_speed_none">No speed band has half a kilometre of recorded driving with energy yet.</string>
+    <string name="trip_details_band_label">%1$s km/h</string>
+    <string name="trip_details_band_value">%1$.1f kWh/100 km · %2$.0f km</string>
+    <string name="trip_details_band_value_trip">%1$.1f · this trip %2$.1f kWh/100 km</string>
+    <string name="trip_details_what_if">On the motorway, at another speed</string>
+    <string name="trip_details_what_if_speed">%1$d km/h</string>
+    <string name="trip_details_what_if_value">%1$s · range %2$s</string>
+    <string name="trip_details_net_value">%1$.2f kWh · %2$.1f kWh/100 km</string>
+    <string name="trip_details_gauge_claim">ESTIMATED · the gauge drop, priced at the pack size you declared — not a measurement.</string>
+    <string name="trip_details_gauge_value">%1$.0f → %2$.0f %% · ≈ %3$.1f kWh · %4$.1f kWh/100 km</string>
+    <string name="trip_details_gauge_value_bare">%1$.0f → %2$.0f %%</string>
     <string name="trip_export_one_title">Export this trip</string>
     <string name="trip_export_all_title">Export all trips</string>
     <string name="trip_export_one_message">CSV exports the recorded totals. JSON also includes the retained sample track. The file stays in app-private storage until you share it.</string>
@@ -317,7 +311,7 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_grade">Climb and descent: an estimated %1$s %% of charge, ± %2$s. Modelled from the route profile, never measured.</string>
     <!-- CP-049. Every saving is stated with the delay it costs, in the same sentence. -->
     <string name="route_what_if_row">%1$d km/h over %2$s km · +%3$d min · saves an estimated %4$s to %5$s %% of charge</string>
-    <string name="route_what_if_unavailable_model">Slowing down: no comparison. This firmware has never trained a consumption model.</string>
+    <string name="route_what_if_unavailable_model">Slowing down: no comparison yet. Your recorded trips do not fit a consumption model yet; the diagnostic export says why.</string>
     <string name="route_what_if_unavailable_temperature">Slowing down: no comparison. No usable outside-temperature reading.</string>
     <string name="route_what_if_unavailable_road">Slowing down: no comparison. Nothing on this route is driven fast enough to slow down from.</string>
     <string name="route_what_if_unavailable_envelope">Slowing down: no comparison. The speeds on this route sit outside the trained envelope.</string>
@@ -482,6 +476,9 @@ Spending %6$s %% per km</string>
     <string name="battery_health_unavailable">No health figure yet. It is the energy that left the pack over the charge it cost, so it needs complete discharges of at least %1$.0f points, and at least %2$d of them. Your history holds %3$d.</string>
     <string name="battery_health_unavailable_no_source">No health figure yet. This car published no usable energy for any discharge in the ledger — neither its own counters nor a pack reading this app could integrate.</string>
     <string name="battery_health_apply">Use this figure in my vehicle settings</string>
+    <string name="battery_action_charges">Charges</string>
+    <string name="battery_action_advice">Advice</string>
+    <string name="battery_last_charge_title">Last charge</string>
     <string name="battery_health_apply_done">Saved: the plan now uses %1$s. Your own figure is still yours to change in Settings.</string>
     <string name="battery_health_apply_parked_only">The vehicle figures change while parked only.</string>
     <string name="battery_health_apply_speed_unknown">Speed cannot be read, so the figure stays as it is.</string>
@@ -501,6 +498,7 @@ Spending %6$s %% per km</string>
     <string name="charge_history_analysis">Analysis</string>
     <string name="charge_history_curve">Charge curve — measured pack power by charge level</string>
     <string name="charge_history_list">Charges, newest first</string>
+    <string name="charge_history_columns_legend">Energy each charge put back, oldest on the left · solid measured, light estimated · tallest %1$.1f kWh</string>
     <string name="charge_history_empty">No charge recorded yet. A charge appears once the app has seen the charge gauge rise between two of its readings — also across a night the head unit slept through.</string>
     <string name="charge_history_summary">%1$d watched from start to finish. Median %2$.1f points an hour, fastest %3$.1f.</string>
     <string name="charge_history_energy">Watched charges: %1$.1f kWh into the pack, mean %2$.1f kW, peak step %3$.1f kW.</string>
@@ -558,8 +556,7 @@ Spending %6$s %% per km</string>
     <string name="language_settings_title">Language</string>
     <string name="language_settings_note">Applies to this app only. The car’s own language is unchanged.</string>
     <string name="language_system">System</string>
-    <string name="language_english">English</string>
-    <string name="language_french">Français</string>
+    <string name="language_settings_current">Language: %1$s</string>
     <string name="eco_settings_note">The band on the energy screen is always shown. Advice and voice are off until asked for. The voice speaks while driving only when the advice changes, and once more in P at the end of each trip, with what the trip could have saved.</string>
     <string name="diagnostics_eco_driving">Eco driving</string>
     <!-- CP-075. The trip review: one verdict line, then at most three findings, each carrying the
@@ -693,13 +690,28 @@ Spending %6$s %% per km</string>
     <string name="advice_charge_curve_unchecked">The curve was not checked: fewer than three past charges crossed a whole band.</string>
     <string name="nav_split_full_map">Full-screen map</string>
     <string name="nav_split_map_waiting">The car is calculating the route…</string>
+    <!-- Debug builds only, on the emulator: no translation needed. -->
+    <string name="nav_split_preview_map" translatable="false">Emulator preview — the car\'s map draws here on the head unit.</string>
     <string name="nav_split_destination">DESTINATION</string>
     <string name="nav_split_route">%1$s km · %2$s min</string>
+    <!-- Joining two trips the save at P split. -->
+    <string name="action_join_trip">Join with previous trip</string>
+    <string name="trip_join_title">Join with the previous trip?</string>
+    <string name="trip_join_message">The trip of %1$s and this one become one drive. The %2$d min stop between them counts in neither its time nor its distance. A join cannot be split again.</string>
+    <string name="trip_join_done">Trips joined.</string>
+    <string name="trip_join_refused">These two trips cannot be joined: the car charged in between, or they were measured differently.</string>
+    <string name="trip_join_moving">Stop the car to join trips.</string>
+    <string name="energy_arrival_at">Arrival %1$s</string>
+    <string name="energy_recent">%1$s · %2$s</string>
+    <string name="nav_split_route_eta">%1$s km · %2$s min · arrival %3$s</string>
     <string name="nav_split_route_stop">≈ %1$s km · charging stop in %2$s km</string>
     <string name="nav_split_no_guidance">No guidance running</string>
     <string name="nav_split_margin">≈ %1$s km of range left on arrival</string>
     <string name="nav_split_margin_short">Range shorter than the distance left</string>
     <string name="nav_split_battery">Battery %1$s</string>
+    <string name="nav_split_consumption">CONSUMPTION</string>
+    <string name="nav_split_consumption_span">last %1$.0f km</string>
+    <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">ECO-DRIVING</string>
     <string name="nav_split_eco_parts">anticipation %1$s · smoothness %2$s · efficiency %3$s</string>
     <string name="nav_split_eco_waiting">Score after 2 km of driving</string>

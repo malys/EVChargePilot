@@ -341,10 +341,26 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         binding.chargeLive.visibility = if (live != null) View.VISIBLE else View.GONE
         if (live != null) binding.chargeLive.text = ChargeCompanionText(this).live(live)
         val last = charge?.lastPluggedCharge
+        binding.chargeRange.visibility = if (last == null) View.GONE else View.VISIBLE
+        binding.chargeBar.visibility = binding.chargeRange.visibility
         if (last == null) {
             binding.chargeFacts.text = getString(R.string.battery_health_last_charge_none)
             return
         }
+        binding.chargeRange.text = format(
+            "%.0f → %.0f %%",
+            last.session.startSocPercent,
+            last.session.endSocPercent,
+        )
+        binding.chargeBar.show(
+            listOf(
+                BarGaugeView.Span(
+                    (last.session.startSocPercent / 100.0).toFloat(),
+                    (last.session.endSocPercent / 100.0).toFloat(),
+                    R.color.ev_accent,
+                ),
+            ),
+        )
         val estimate = ChargeEnergyEstimate.of(last, declared.pack)
         binding.chargeFacts.text = if (estimate?.measured == true && estimate.powerKw != null) {
             getString(

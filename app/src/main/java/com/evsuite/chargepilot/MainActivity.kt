@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.os.IBinder
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -40,6 +41,7 @@ import com.evsuite.hardware.telemetry.UnavailableReason
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
@@ -86,6 +88,9 @@ class MainActivity : PrimaryNavigationActivity() {
     @Volatile private var arrival: Provenanced<Double>? = null
     @Volatile private var arrivalRoute: String? = null
     private var arrivalReadAtMs = 0L
+    @Volatile private var arrivalAt: String? = null
+    private val recent by lazy { RecentConsumption(this) }
+    private var recentReadAtMs = 0L
 
     private val vehiclePermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -226,6 +231,8 @@ class MainActivity : PrimaryNavigationActivity() {
         val parked = value.speedKmh?.let { it <= 0.1f } == true
         refreshArrival(value)
         renderReach(readings)
+        renderEta()
+        refreshRecent(value)
         renderDrift(value, parked)
         renderEco()
     }
@@ -335,6 +342,18 @@ class MainActivity : PrimaryNavigationActivity() {
         firmware: FirmwareInfo.Gen? = null,
     ) {
         bind(binding.socValue, R.string.label_soc, readings.soc, PATTERN_SOC, SOC_UNAVAILABLE)
+        binding.socBar.show(
+            readings.soc.value?.let { soc ->
+                // Amber below a fifth, where a charge is due; the figure says it in words too.
+                listOf(
+                    BarGaugeView.Span(
+                        0f,
+                        soc / PERCENT,
+                        if (soc < LOW_SOC_PERCENT) R.color.ev_warn else R.color.ev_accent,
+                    ),
+                )
+            }.orEmpty(),
+        )
         bind(binding.powerValue, R.string.label_power, readings.power, PATTERN_POWER, POWER_UNAVAILABLE)
         renderPowerFlow(readings.power, firmware)
         bind(
@@ -367,7 +386,20 @@ class MainActivity : PrimaryNavigationActivity() {
                 DISTANCE_UNAVAILABLE,
             )
             binding.reachDetail.text = ""
+            binding.reachBar.visibility = View.INVISIBLE
             return
+        }
+        val now = readings.soc.value
+        val then = forecast.value
+        binding.reachBar.visibility = if (now != null && then != null) View.VISIBLE else View.INVISIBLE
+        if (now != null && then != null) {
+            val end = (then / PERCENT).toFloat().coerceAtLeast(0f)
+            binding.reachBar.show(
+                listOf(
+                    BarGaugeView.Span(0f, end, if (then < 0.0) R.color.ev_error else R.color.ev_accent),
+                    BarGaugeView.Span(end, now / PERCENT, R.color.ev_accent, BarGaugeView.LIGHT),
+                ),
+            )
         }
         binding.reachLabel.setText(R.string.label_arrival)
         bind(binding.reachValue, R.string.arrival_label, forecast, PATTERN_SOC_WHOLE, SOC_UNAVAILABLE)
@@ -391,7 +423,12 @@ class MainActivity : PrimaryNavigationActivity() {
                 val remainingKm = guidance?.remainingDistanceKm(generation)
                 if (guidance == null || remainingKm == null) {
                     arrival = null
+                    arrivalAt = null
                     return@execute
+                }
+                arrivalAt = guidance.remainingMinutes?.let { minutes ->
+                    DateFormat.getTimeFormat(this)
+                        .format(Date(System.currentTimeMillis() + minutes * 60_000L))
                 }
                 val socPercent = value.socPercent?.toDouble()
                 val rate = SocRateEstimator.fromTrips(trips, generation)
@@ -402,6 +439,39 @@ class MainActivity : PrimaryNavigationActivity() {
                     guidance.remainingMinutes?.toString() ?: DASH,
                 )
                 arrival = ArrivalSocForecast.of(socPercent, remainingKm, rate)
+            }
+        }
+    }
+
+    /** The arrival clock time while the car guides a route; nothing otherwise. */
+    private fun renderEta() {
+        val at = arrivalAt
+        binding.etaValue.visibility = if (at == null) View.GONE else View.VISIBLE
+        if (at != null) binding.etaValue.text = getString(R.string.energy_arrival_at, at)
+    }
+
+    /** The last kilometres under the instant figure, read every few seconds off the main thread. */
+    private fun refreshRecent(value: EnergySnapshot) {
+        if (value.timestampMs - recentReadAtMs < RECENT_REFRESH_MS) return
+        recentReadAtMs = value.timestampMs
+        runCatching {
+            background.execute {
+                val reading = recent.read(value.timestampMs)
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    binding.recentTrace.setTrace(
+                        reading.trace,
+                        reading.referenceKwhPer100Km,
+                        reading.coveredKm,
+                    )
+                    binding.recentLabel.text = reading.consumptionKwhPer100Km?.let {
+                        getString(
+                            R.string.energy_recent,
+                            getString(R.string.nav_split_consumption_span, reading.coveredKm),
+                            getString(R.string.nav_split_consumption_value, it),
+                        )
+                    }.orEmpty()
+                }
             }
         }
     }
@@ -511,6 +581,7 @@ class MainActivity : PrimaryNavigationActivity() {
     private fun loadRecentTrips() {
         runCatching {
             background.execute {
+                recent.invalidate()
                 val trips = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE)).read()
                 val summaries = trips.map { it.summary }
                 runOnUiThread {
@@ -538,6 +609,9 @@ class MainActivity : PrimaryNavigationActivity() {
         const val POWER_UNAVAILABLE = "— kW"
         const val DISTANCE_UNAVAILABLE = "— km"
         const val ARRIVAL_REFRESH_MS = 5_000L
+        const val RECENT_REFRESH_MS = 10_000L
+        const val LOW_SOC_PERCENT = 20f
+        const val PERCENT = 100f
         /** The full gauge: two and a half times the advice mark, so the mark sits left of centre. */
         const val ECO_GAUGE_FULL_PERCENT = 30.0
         /** Share of the way to the target tint covered each frame: a few seconds to settle. */

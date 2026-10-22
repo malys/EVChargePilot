@@ -27,7 +27,7 @@ class StringPercentTest {
     }
 
     private companion object {
-        val LOCALES = listOf("values", "values-fr")
+        val LOCALES = listOf("values", "values-de", "values-es", "values-fr", "values-it", "values-pt")
         val ARGUMENT = Regex("""%\d+\$""")
     }
 }

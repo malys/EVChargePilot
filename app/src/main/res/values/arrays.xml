@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Each language in its own name, as EVTasker lists them, so a driver who cannot read the
+         current one still finds theirs. Only the first entry is translated. Order matches
+         LANGUAGE_TAGS in SettingsActivity.kt. -->
+    <string-array name="language_names" translatable="false">
+        <item>@string/language_system</item>
+        <item>Deutsch</item>
+        <item>English</item>
+        <item>Español</item>
+        <item>Français</item>
+        <item>Italiano</item>
+        <item>Português</item>
+    </string-array>
+</resources>

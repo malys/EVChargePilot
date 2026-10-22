@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Impeccable direction contract
   THESIS: the pack's health is a trend this app measured, never a reading the car published.
   OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, flat bars, no shadow.
-  STORY: read the trend, then what it was measured from, then what the pack has been through.
-  FIRST VIEWPORT: the estimate anchors the left pane; calibration and exposure own the right.
-  FORM: two-pane evidence ledger extending the trip history; seed key cp070-20260916.
-  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md.
+  STORY: the estimate and what it rests on; the last charge; the gauge's calibration; what the
+         pack has been through. Four cards, each answering one question.
+  FIRST VIEWPORT: estimate top-left, exposure owning the right; history behind the bar actions.
+  FORM: the two histories were full-width buttons stacked mid-pane and the apply action floated
+        at the bottom, away from the figure it applies. The histories are page actions now, in
+        the bar where Trips and Settings keep theirs; the apply action sits under its figure.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -27,6 +29,27 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/chargeHistoryAction"
+            style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/charge_history_open"
+            android:minWidth="200dp"
+            android:text="@string/battery_action_charges"
+            app:icon="@drawable/ic_action_charges" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/adviceHistoryAction"
+            style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:contentDescription="@string/advice_history_open"
+            android:minWidth="200dp"
+            android:text="@string/battery_action_advice"
+            app:icon="@drawable/ic_action_advice" />
     </LinearLayout>
 
     <LinearLayout
@@ -41,104 +64,124 @@
         android:paddingBottom="@dimen/spacing_lg">
 
         <LinearLayout
-            style="@style/Widget.EV.Readout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="@dimen/spacing_md">
+            android:orientation="vertical">
 
-            <TextView
-                style="@style/Text.EV.ReadoutLabel"
-                android:text="@string/battery_health_state_of_health" />
-
-            <!-- CP-085. The hero style sized into a fixed box: the value always carries its band,
-                 and "≈ 97,2 % ± 1,6 %" shrinks to fit half the panel rather than wrap. -->
-            <TextView
-                android:id="@+id/healthValue"
-                style="@style/Text.EVChargePilot.Hero"
-                android:layout_height="96dp"
-                android:layout_weight="0"
-                android:layout_marginTop="@dimen/spacing_xs"
-                android:text="@string/value_unavailable" />
-
-            <!-- CP-085. The estimate on a 0–100 % track, its ± band lighter, and the mark at the
-                 figure the driver declared: the line under the evidence names the mark. -->
-            <com.evsuite.chargepilot.BarGaugeView
-                android:id="@+id/healthBar"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:importantForAccessibility="no" />
-
-            <TextView
-                android:id="@+id/healthTrend"
+            <!-- The estimate, its band on a 0–100 % track, the mark at the figure the driver
+                 declared, and — right under it — the action that copies it into the settings. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Body" />
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
 
-            <TextView
-                android:id="@+id/healthEvidence"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary" />
+                <TextView
+                    style="@style/Text.EV.ReadoutLabel"
+                    android:text="@string/battery_health_state_of_health" />
 
-            <!-- The charge side of the same ledger. It lives under the estimate rather than in
-                 the exposure pane because this pane is the one with room by construction: the
-                 space below the evidence exists only to push the apply button down. -->
-            <!-- CP-089. The charge in progress and when it ends; gone when none is. -->
-            <TextView
-                android:id="@+id/chargeLive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Body"
-                android:visibility="gone" />
+                <!-- CP-085. The hero style sized into a fixed box: the value always carries its
+                     band, and "≈ 97,2 % ± 1,6 %" shrinks to fit rather than wrap. -->
+                <TextView
+                    android:id="@+id/healthValue"
+                    style="@style/Text.EVChargePilot.Hero"
+                    android:layout_height="88dp"
+                    android:layout_weight="0"
+                    android:text="@string/value_unavailable" />
 
-            <TextView
-                android:id="@+id/chargeFacts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary" />
+                <com.evsuite.chargepilot.BarGaugeView
+                    android:id="@+id/healthBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:importantForAccessibility="no" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/chargeHistoryAction"
-                style="@style/Widget.EV.Button"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/charge_history_open" />
+                <TextView
+                    android:id="@+id/healthTrend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Body" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/adviceHistoryAction"
-                style="@style/Widget.EV.Button"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/advice_history_open" />
+                <TextView
+                    android:id="@+id/healthEvidence"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAppearance="@style/Text.EV.Secondary" />
 
-            <Space
+                <TextView
+                    android:id="@+id/applyStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/applyAction"
+                    style="@style/Widget.EV.Button.Outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/touch_target"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:maxWidth="880dp"
+                    android:text="@string/battery_health_apply"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- The charge side of the ledger: the one in progress, then the last one. The health
+                 estimate reads discharges only, so this is the half it never sees. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
 
-            <TextView
-                android:id="@+id/applyStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary" />
+                <TextView
+                    style="@style/Text.EV.ReadoutLabel"
+                    android:text="@string/battery_last_charge_title" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/applyAction"
-                style="@style/Widget.EV.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/touch_target"
-                android:text="@string/battery_health_apply"
-                android:visibility="gone" />
+                <!-- CP-089. The charge in progress and when it ends; gone when none is. -->
+                <TextView
+                    android:id="@+id/chargeLive"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Body"
+                    android:visibility="gone" />
+
+                <!-- Where on the gauge the last charge ran, as figures and as a span of 0–100 %. -->
+                <TextView
+                    android:id="@+id/chargeRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:fontFeatureSettings="tnum"
+                    android:maxLines="1"
+                    android:textAppearance="@style/Text.EV.Display"
+                    android:visibility="gone" />
+
+                <com.evsuite.chargepilot.BarGaugeView
+                    android:id="@+id/chargeBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/chargeFacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Body" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -149,10 +192,9 @@
             android:orientation="vertical">
 
             <LinearLayout
-                style="@style/Widget.EV.Readout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
@@ -164,7 +206,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:layout_marginTop="@dimen/spacing_xs"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -196,16 +238,16 @@
                     android:id="@+id/calibrationFacts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:layout_marginTop="@dimen/spacing_xs"
                     android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
 
             <LinearLayout
-                style="@style/Widget.EV.Readout"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="@dimen/spacing_md"
                 android:layout_weight="1"
+                android:background="@drawable/bg_card"
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
@@ -213,23 +255,7 @@
                     style="@style/Text.EV.ReadoutLabel"
                     android:text="@string/battery_health_exposure" />
 
-                <!-- CP-085. Recorded time split below, between and above the two thresholds. -->
-                <com.evsuite.chargepilot.BarGaugeView
-                    android:id="@+id/exposureBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="16dp"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:importantForAccessibility="no" />
-
-                <TextView
-                    android:id="@+id/exposureLegend"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_xs"
-                    android:fontFeatureSettings="tnum"
-                    android:maxLines="1"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-
+                <!-- Three figures first, the split bar under them, the details last. -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -252,6 +278,23 @@
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:text="@string/battery_health_exposure_mean_label" android:textAppearance="@style/Text.EV.Secondary" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <!-- CP-085. Recorded time split below, between and above the two thresholds. -->
+                <com.evsuite.chargepilot.BarGaugeView
+                    android:id="@+id/exposureBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/exposureLegend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:fontFeatureSettings="tnum"
+                    android:maxLines="1"
+                    android:textAppearance="@style/Text.EV.Secondary" />
 
                 <TextView
                     android:id="@+id/exposureFacts"

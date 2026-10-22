@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Impeccable direction contract
   THESIS: every charge the ledger holds, and what the watched ones measured, never a cost.
   OWN-WORLD: EVSuite tonal panes, one outline, one radius, Roboto readouts, flat bars, no shadow.
-  STORY: three figures and the charge curve, then scroll the charges newest first (CP-085).
-  FIRST VIEWPORT: the analysis anchors the left pane; the scrolling list owns the right.
+  STORY: three figures and the energy of each charge as columns; the charge curve; then the
+         charges newest first, each its own card (CP-085).
+  FIRST VIEWPORT: analysis and curve as two cards on the left; the scrolling list owns the right.
   FORM: two-pane evidence ledger extending the battery page; seed key cp082-20260928.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -49,27 +49,29 @@
         android:paddingEnd="@dimen/spacing_lg"
         android:paddingBottom="@dimen/spacing_lg">
 
-        <ScrollView
-            style="@style/Widget.EV.Readout"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-            android:padding="@dimen/spacing_md">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
                     android:text="@string/charge_history_analysis" />
 
-                <!-- CP-085. Three figures read at a glance; the rates and energy under them. -->
+                <!-- CP-085. Three figures read at a glance. -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:layout_marginTop="@dimen/spacing_xs"
                     android:baselineAligned="false"
                     android:orientation="horizontal">
 
@@ -89,17 +91,43 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <!-- The energy each charge put back, oldest on the left. It takes whatever height
+                     the card has left, so it is a chart on the panel and a strip on a short one. -->
+                <com.evsuite.chargepilot.ColumnChartView
+                    android:id="@+id/chargeColumns"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no"
+                    android:minHeight="48dp" />
+
+                <TextView
+                    android:id="@+id/chargeColumnsLegend"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
                 <TextView
                     android:id="@+id/analysisFacts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:fontFeatureSettings="tnum"
                     android:textAppearance="@style/Text.EV.Secondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
-                    android:layout_marginTop="@dimen/spacing_md"
                     android:text="@string/charge_history_curve" />
 
                 <!-- One bar per charge-level band, its length the mean pack power. -->
@@ -107,24 +135,24 @@
                     android:id="@+id/curveBands"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
                     android:orientation="vertical" />
 
                 <TextView
                     android:id="@+id/curveFacts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
                     android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
 
+        <!-- No card around the list: each charge is its own card, the gap between them is the
+             divider (DESIGN.md: a gap before a line). -->
         <ScrollView
-            style="@style/Widget.EV.Readout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/spacing_md"
-            android:layout_weight="3"
-            android:padding="@dimen/spacing_md">
+            android:layout_weight="3">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -133,6 +161,8 @@
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:text="@string/charge_history_list" />
 
                 <LinearLayout
@@ -146,7 +176,9 @@
                     android:id="@+id/chargeNotes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
                     android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginEnd="@dimen/spacing_md"
                     android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
         </ScrollView>

@@ -288,11 +288,17 @@ class TripRecordingService : Service() {
         pendingHistoryWrites.incrementAndGet()
         runCatching {
             sampler.execute {
-                val saved = runCatching {
-                    tripStore.append(recorded.summary, recorded.samples)
+                // A stop of a few minutes with no charge in it rejoins the drive it paused:
+                // the head unit is off ten seconds after P, so the trip had to be saved there.
+                val storedStartMs = runCatching {
+                    tripStore.appendOrJoin(recorded.summary, recorded.samples)
                 }.onFailure {
                     AppLogger.w(TAG, "trip history write failed: ${it.message}")
-                }.getOrDefault(false)
+                }.getOrNull()
+                val saved = storedStartMs != null
+                if (saved && storedStartMs != recorded.summary.startedAtMs) {
+                    AppLogger.i(TAG, "trip joined onto the one started at $storedStartMs")
+                }
                 if (!saved) AppLogger.w(TAG, "trip history could not be saved")
                 if (saved) {
                     runCatching {
@@ -306,7 +312,7 @@ class TripRecordingService : Service() {
                         AppLogger.w(TAG, "local energy model refresh failed: ${it.message}")
                     }
                     historyRevisionCounter.incrementAndGet()
-                    runCatching { speakTripAdvice(recorded.summary.startedAtMs) }
+                    runCatching { speakTripAdvice(checkNotNull(storedStartMs)) }
                         .onFailure { AppLogger.w(TAG, "trip advice failed: ${it.message}") }
                     AppLogger.i(
                         TAG,

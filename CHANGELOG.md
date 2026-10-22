@@ -19,6 +19,55 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   three parts. The roads the plan offered, one bar each, whose length is the travel time. The
   drift line stays on the dashboard only.
 
+### Changed (design)
+
+- **One "Details" screen per trip.** The energy-breakdown and speed-comparison screens are
+  merged and drawn: bars for consumed, regenerated and net energy, the gauge drop placed on the
+  0–100 % track, one bar per speed band (all your trips) with a mark for this trip, and the
+  modelled motorway speeds as bands either side of a centre line. Every group still names its
+  claim — derived, measured, estimated — and every row says it to TalkBack. The modelled
+  comparison stays parked-only. In the ledger, "Export trip" and "Delete trip" are icons; the
+  attribution line moved into Details.
+- **Battery page as four cards.** State of health with its "use this figure" action under it;
+  the last charge as a span of the gauge; calibration; exposure. Charge and advice histories
+  are page actions in the top bar, like Trips and Settings.
+- **Charges screen.** Each charge is its own card, and the analysis draws the energy every
+  charge put back as columns — solid where measured, light where estimated.
+- **Settings fit the panel.** Save joined Import and Export in the top bar, the vehicle figures
+  became a 2 × 3 grid, and the coach and language took a third column. Language is one button
+  opening the list, as in EVTasker.
+- **Split screen: consumption card (CP-094).** The last 15 km against your reference line and
+  their average, the trip screen's own trace, after Tesla's energy graph.
+
+- **Trips resume after a short stop.** The save at P now joins the previous trip when the stop
+  lasted ten minutes or less with no charge in between. In the ledger, a join icon does the same
+  for any stop, parked only and confirmed first: a join cannot be split again.
+- **Energy, more graphic.** The time and, while the car guides a route, the arrival time in the
+  top bar; the charge as a fill of 0–100 % (amber under 20 %); on a route, now → on arrival as
+  one bar; the last 15 km of consumption drawn under the instant figure.
+- **Split screen (CP-094), after Tesla's cluster.** The map takes three quarters, the companion a
+  quarter, always in the night palette. Consumption is an arc filled to the 15 km average with
+  a tick at the reference and the trace inside it; the arrival time is on the destination line;
+  the time is in the corner; "Full-screen map" is an icon. Everything fits without scrolling:
+  the arc shrinks first on a shorter panel. `mise run split-preview` shows it on the emulator.
+- **Charging stop in two columns.** The plan's sentence over a strip of the trip — departure
+  charge, each stop with its uncertainty bracketed under it, arrival charge — and the charger;
+  the road choices and speed what-if on the right. `mise run charge-stop-preview` plans a real
+  route on the emulator with a charge handed in (debug builds only).
+- **Diagnostics has no tab.** Three quick taps on the app name open it.
+
+- **The charge model fits this car (EVHardware 394ce73).** The 2026-10-22 bundle refused it:
+  143 segments, `fit=refused(aero)`. The model now carries the speed-independent load, so the eco
+  verdict, the trip eco review, the motorway comparison, the charge-based energy breakdown and
+  "Slowing down" can come back once the car refits it. "Slowing down" no longer blames the
+  firmware when there is no model. The unstable bundle now carries the fit's own segments
+  (`socSegments`), so a refusal can be replayed off the car.
+
+### Added (languages)
+
+- **Deutsch, Español, Italiano, Português**, alongside English and Français: EVTasker's five.
+  `locales_config.xml` lists them for the head unit's per-app language setting.
+
 ### Fixed (navigation)
 
 - **The map pane never got a surface (CP-094).** On the 2026-10-22 drive the pane gave up after

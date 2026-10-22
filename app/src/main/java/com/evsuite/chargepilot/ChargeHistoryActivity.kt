@@ -65,6 +65,7 @@ class ChargeHistoryActivity : AppCompatActivity() {
             return
         }
         renderAnalysis(charges)
+        renderColumns(charges)
         renderCurve(report)
         charges.asReversed().take(MAX_ROWS).forEach(::addRow)
         val notes = ArrayList<String>()
@@ -109,6 +110,28 @@ class ChargeHistoryActivity : AppCompatActivity() {
             )
         }
         binding.analysisFacts.text = lines.joinToString("\n")
+    }
+
+    /** Each charge's energy as a column, measured solid and estimated light; unknown is a gap. */
+    private fun renderColumns(charges: List<ChargeEnergy>) {
+        val shown = charges.takeLast(MAX_COLUMNS)
+        val estimates = shown.map { ChargeEnergyEstimate.of(it, pack) }
+        val tallest = estimates.maxOfOrNull { it?.kwh ?: 0.0 }?.takeIf { it > 0.0 }
+        if (tallest == null) {
+            binding.chargeColumns.show(emptyList())
+            binding.chargeColumnsLegend.text = ""
+            return
+        }
+        binding.chargeColumns.show(
+            estimates.map { estimate ->
+                ColumnChartView.Column(
+                    estimate?.let { (it.kwh / tallest).toFloat() },
+                    R.color.ev_accent,
+                    if (estimate?.measured == true) BarGaugeView.OPAQUE else BarGaugeView.LIGHT,
+                )
+            },
+        )
+        binding.chargeColumnsLegend.text = getString(R.string.charge_history_columns_legend, tallest)
     }
 
     private fun renderCurve(report: ChargeEnergyReport) {
@@ -177,5 +200,8 @@ class ChargeHistoryActivity : AppCompatActivity() {
     private companion object {
         /** The ledger is bounded already; a list longer than this is scrolled, not read. */
         const val MAX_ROWS = 50
+
+        /** About as many columns as stay wider than a finger on the left pane. */
+        const val MAX_COLUMNS = 30
     }
 }

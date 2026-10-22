@@ -220,6 +220,28 @@ SEED_PKG="com.evsuite.chargepilot" mise run seed-trips
 SEED_PKG="com.evsuite.chargepilot" mise run seed-settings
 '''
 
+[tasks.split-preview]
+description = "Show the CP-094 split screen on the emulator (debug build, no map, simulated guidance)"
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+# The screen is not exported: only root's shell may start it. Emulator images are userdebug.
+"$ADB" root >/dev/null
+"$ADB" wait-for-device
+"$ADB" shell am start -S --user 10 -n com.evsuite.chargepilot/.NavSplitActivity --ez split.preview true
+'''
+
+[tasks.charge-stop-preview]
+description = "Show a real charging-stop plan on the emulator (debug build; the emulator publishes no charge, so one is handed in)"
+run = '''
+set -e
+ADB="$ANDROID_HOME/platform-tools/adb"
+"$ADB" root >/dev/null
+"$ADB" wait-for-device
+"$ADB" shell am start -S --user 10 -n com.evsuite.chargepilot/.ChargeStopActivity \
+  --es label "Paris" --ed longitude 2.3522 --ed latitude 48.8566 --ed preview.soc 62 --ed preview.range 260
+'''
+
 [tasks.run-unstable]
 description = "Install and launch the unstable channel — probes, evidence capture, CP-055"
 depends = ["build-unstable"]

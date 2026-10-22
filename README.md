@@ -148,6 +148,11 @@ temporary file on USB. No archive copy accumulates on AAOS.
   and what the last charge cost — points gained, duration, and approximate energy and mean power
   where this app watched the whole session. Read-only, like every other screen: no charge limit,
   no schedule, no preheat.
+- Trip details for each recorded trip, drawn as bars: where the energy went (consumed,
+  regenerated, net, and the gauge drop priced at the declared pack), what each speed band cost
+  against your other trips, and — parked only — the modelled motorway comparison.
+- Five languages besides the system's, the same as EVTasker: Deutsch, English, Español,
+  Français, Italiano, Português.
 
 Every signal remains best-effort: unsupported or unreadable properties are displayed as `—`,
 never zero. Charger data and energy-source attribution remain outside this initial milestone.

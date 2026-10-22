@@ -29,7 +29,7 @@ class TripHistoryArtifactTest {
 
         val json = JsonParser.parseString(artifact.toJson()).asJsonObject
 
-        assertEquals(3, json["schemaVersion"].asInt)
+        assertEquals(4, json["schemaVersion"].asInt)
         assertEquals(
             "used=3/13 segments=7/12 span=18/20 km/h",
             json["socModelFit"].asString,

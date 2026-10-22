@@ -29,6 +29,11 @@ internal data class TripHistoryArtifact(
     val speedScaleCheck: SpeedScaleCheck.Result,
     /** Same model gate production screens use, evaluated without opening one. */
     val socModelFit: String,
+    /**
+     * The fit's own training points, `[km/h, °C, %/100 km, km]`, so a refusal can be replayed
+     * off the car. The 2026-10-22 `fit=refused(aero)` could not be: only trip totals left it.
+     */
+    val socSegments: List<List<Double>> = emptyList(),
     val notes: List<String> = NOTES,
     val summaries: List<EnergyTripSummary>,
     /** CP-090: [DrivingStress] for each exported trip that kept a sample track. */
@@ -44,7 +49,7 @@ internal data class TripHistoryArtifact(
     fun toJson(): String = GSON.toJson(this)
 
     companion object {
-        const val SCHEMA_VERSION = 3
+        const val SCHEMA_VERSION = 4
         const val PROBE = "trip-history"
         const val KIND = "trips"
 
@@ -52,6 +57,11 @@ internal data class TripHistoryArtifact(
 
         /** Enough to cover a validation session without turning the bundle into a database. */
         private const val MAX_SUMMARIES = 20
+
+        /** Four numbers each: a thousand segments is a few tens of kilobytes. */
+        private const val MAX_SEGMENTS = 1_000
+
+        private fun round(value: Double, scale: Double) = kotlin.math.round(value * scale) / scale
 
         private val GSON = Gson()
 
@@ -89,6 +99,14 @@ internal data class TripHistoryArtifact(
                 trips = summaries.size,
                 speedScaleCheck = SpeedScaleCheck.of(odometerSpanKm, integratedKm),
                 socModelFit = SocConsumptionFitter().describe(history),
+                socSegments = SocConsumptionFitter().segments(history).take(MAX_SEGMENTS).map {
+                    listOf(
+                        round(it.meanSpeedKmh, 10.0),
+                        round(it.meanOutsideTempCelsius, 10.0),
+                        round(it.percentPer100Km, 100.0),
+                        round(it.distanceKm, 100.0),
+                    )
+                },
                 summaries = summaries.take(MAX_SUMMARIES),
                 drivingStress = history.take(MAX_SUMMARIES)
                     .filter { !it.samples.isNullOrEmpty() }

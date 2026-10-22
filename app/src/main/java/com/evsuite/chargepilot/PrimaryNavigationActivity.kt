@@ -2,7 +2,9 @@ package com.evsuite.chargepilot
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.View
 import android.view.accessibility.AccessibilityManager
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -17,6 +19,7 @@ abstract class PrimaryNavigationActivity : AppCompatActivity() {
     private var downY = 0f
     private var trackingSwipe = false
     private var navigationStarted = false
+    private val diagnosticsTaps = DiagnosticsTaps()
 
     private val touchExplorationEnabled: Boolean
         get() = (getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager)
@@ -29,6 +32,9 @@ abstract class PrimaryNavigationActivity : AppCompatActivity() {
             tabs.addOnButtonCheckedListener { _, checkedId, isChecked ->
                 if (isChecked) pageForButton(checkedId)?.let(::navigateTo)
             }
+        }
+        findViewById<View>(R.id.appTitle)?.setOnClickListener {
+            if (diagnosticsTaps.onTap(SystemClock.elapsedRealtime())) navigateTo(PrimaryPage.DIAGNOSTICS)
         }
     }
 

@@ -18,14 +18,9 @@ import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
 import com.evsuite.hardware.telemetry.StoredTrip
+import com.evsuite.hardware.telemetry.TripJoin
 import com.evsuite.hardware.telemetry.UnavailableReason
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
-import com.evsuite.hardware.telemetry.model.AttributedEnergyEstimate
-import com.evsuite.hardware.telemetry.model.EnergyAttribution
-import com.evsuite.hardware.telemetry.model.EnergyAttributionResult
-import com.evsuite.hardware.telemetry.model.ResidualAttribution
-import com.evsuite.hardware.telemetry.model.ResidualContext
-import com.evsuite.hardware.telemetry.model.ResidualFinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
@@ -51,7 +46,6 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     }
     private val adapter = TripAdapter()
     private var selectedStartedAtMs: Long? = null
-    private var attributions: Map<Long, EnergyAttributionResult> = emptyMap()
     private var reviews: Map<Long, EcoTripReview> = emptyMap()
     private val reasons by lazy { ProvenanceText(this) }
     private var recorder: TripRecordingService? = null
@@ -72,14 +66,14 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             value.setListener(this@TripHistoryActivity) { snapshot ->
                 speedKmh = snapshot.speedKmh
                 speedObservedAtMs = snapshot.timestampMs
-                renderSpeedWhatIfGate()
+                renderParkedGate()
                 if (showOverview && snapshot.timestampMs - lastOverviewMs >= OVERVIEW_REFRESH_MS) {
                     loadOverview()
                 }
             }
             speedKmh = value.latest?.speedKmh
             speedObservedAtMs = value.latest?.timestampMs
-            renderSpeedWhatIfGate()
+            renderParkedGate()
             // The range needs the pack's charge, which only the service has.
             loadOverview()
         }
@@ -88,7 +82,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             recorder = null
             speedKmh = null
             speedObservedAtMs = null
-            renderSpeedWhatIfGate()
+            renderParkedGate()
         }
     }
 
@@ -159,13 +153,13 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 startActivity(TripPlotActivity.forTrip(this, startedAt))
             }
         }
-        binding.speedWhatIfAction.setOnClickListener { openSpeedWhatIfIfParked() }
-        binding.energyBreakdownAction.setOnClickListener {
+        binding.joinTripAction.setOnClickListener { confirmJoinIfParked() }
+        binding.tripDetailsAction.setOnClickListener {
             selectedStartedAtMs?.let { startedAt ->
-                startActivity(EnergyBreakdownActivity.forTrip(this, startedAt))
+                startActivity(TripDetailsActivity.forTrip(this, startedAt))
             }
         }
-        renderSpeedWhatIfGate()
+        renderParkedGate()
     }
 
     override fun onStart() {
@@ -175,7 +169,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             connection,
             Context.BIND_AUTO_CREATE,
         )
-        if (!bound) renderSpeedWhatIfGate()
+        if (!bound) renderParkedGate()
     }
 
     override fun onResume() {
@@ -192,7 +186,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     override fun onStop() {
         recorder?.clearListener(this)
         recorder = null
-        binding.speedWhatIfAction.removeCallbacks(gateExpiry)
+        binding.root.removeCallbacks(gateExpiry)
         if (bound) unbindService(connection)
         bound = false
         speedKmh = null
@@ -213,7 +207,6 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             val rows = trips.map { trip -> buildRow(trip, dateFormatter) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                attributions = reviewed.attributions
                 reviews = reviewed.reviews
                 adapter.submit(trips, rows)
                 if (trips.none { it.summary.startedAtMs == selectedStartedAtMs }) {
@@ -226,9 +219,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 loadOverview()
                 binding.deleteAllAction.isEnabled = !empty
                 binding.exportAllAction.isEnabled = !empty
-                binding.energyBreakdownAction.isEnabled = !empty
+                binding.tripDetailsAction.isEnabled = !empty
                 renderSelected()
-                renderSpeedWhatIfGate()
+                renderParkedGate()
             }
         }
     }
@@ -414,7 +407,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private fun resetTripAIfParked() {
         val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
         if (gate != ParkedDeletionGate.PARKED) {
-            renderSpeedWhatIfGate()
+            renderParkedGate()
             Snackbar.make(binding.root, R.string.trip_a_reset_moving, Snackbar.LENGTH_LONG).show()
             return
         }
@@ -429,43 +422,63 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             .show()
     }
 
-    private fun renderSpeedWhatIfGate() {
-        binding.speedWhatIfAction.removeCallbacks(gateExpiry)
+    /** The trip recorded just before [trip], which the list holds right after it. */
+    private fun previousOf(trip: StoredTrip): StoredTrip? =
+        adapter.items.getOrNull(adapter.items.indexOf(trip) + 1)
+
+    /**
+     * Joins the selected trip onto the one before it, for a stop the save at P could not tell
+     * from the end of a drive. Parked only and confirmed first: a join cannot be split again.
+     */
+    private fun confirmJoinIfParked() {
+        val trip = adapter.items.firstOrNull { it.summary.startedAtMs == selectedStartedAtMs } ?: return
+        val previous = previousOf(trip) ?: return
+        val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
+        if (gate != ParkedDeletionGate.PARKED) {
+            renderParkedGate()
+            Snackbar.make(binding.root, R.string.trip_join_moving, Snackbar.LENGTH_LONG).show()
+            return
+        }
+        val stopMinutes = ((trip.summary.startedAtMs - previous.summary.endedAtMs) / 60_000L)
+            .coerceAtLeast(0L).toInt()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.trip_join_title)
+            .setMessage(
+                getString(R.string.trip_join_message, formatDate(previous.summary.startedAtMs), stopMinutes),
+            )
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.action_join_trip) { _, _ -> join(trip.summary.startedAtMs) }
+            .show()
+    }
+
+    private fun join(startedAtMs: Long) {
+        disk.execute {
+            val joined = store.joinWithPrevious(startedAtMs)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (joined == null) {
+                    Snackbar.make(binding.root, R.string.trip_join_refused, Snackbar.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+                selectedStartedAtMs = joined
+                Snackbar.make(binding.root, R.string.trip_join_done, Snackbar.LENGTH_LONG).show()
+                loadTrips()
+            }
+        }
+    }
+
+    private fun renderParkedGate() {
+        binding.root.removeCallbacks(gateExpiry)
         val nowMs = System.currentTimeMillis()
         val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, nowMs)
         binding.resetTripAAction.isEnabled = gate == ParkedDeletionGate.PARKED
-        binding.speedWhatIfAction.isEnabled = selectedStartedAtMs != null &&
-            gate == ParkedDeletionGate.PARKED
         if (gate == ParkedDeletionGate.PARKED) {
             val ageMs = nowMs - checkNotNull(speedObservedAtMs)
-            binding.speedWhatIfAction.postDelayed(
+            binding.root.postDelayed(
                 gateExpiry,
                 ParkedDeletionPolicy.MAX_READING_AGE_MS - ageMs + 1L,
             )
         }
-    }
-
-    private fun openSpeedWhatIfIfParked() {
-        val gate = ParkedDeletionPolicy.gate(
-            speedKmh,
-            speedObservedAtMs,
-            System.currentTimeMillis(),
-        )
-        val startedAtMs = selectedStartedAtMs
-        if (gate != ParkedDeletionGate.PARKED || startedAtMs == null) {
-            renderSpeedWhatIfGate()
-            Snackbar.make(
-                binding.root,
-                if (gate == ParkedDeletionGate.MOVING) {
-                    R.string.speed_what_if_moving
-                } else {
-                    R.string.speed_what_if_speed_unavailable
-                },
-                Snackbar.LENGTH_LONG,
-            ).show()
-            return
-        }
-        startActivity(SpeedWhatIfActivity.forTrip(this, startedAtMs))
     }
 
     private fun renderSelected() {
@@ -473,6 +486,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             it.summary.startedAtMs == selectedStartedAtMs
         } ?: return
         val summary = trip.summary
+        binding.joinTripAction.isEnabled = previousOf(trip)
+            ?.let { TripJoin.canJoin(it.summary, summary) } == true
         binding.detailDate.text = formatDate(summary.startedAtMs)
         bindValue(binding.detailDuration, R.string.label_duration, duration(summary.durationMs))
         bindValue(
@@ -506,7 +521,6 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             summary.regeneratedKwh?.let(::energy),
             R.string.trip_power_not_recorded,
         )
-        renderAttribution(attributions[summary.startedAtMs])
         renderEcoReview(reviews[summary.startedAtMs])
 
         val samples = trip.samples
@@ -601,82 +615,6 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             },
         ).joinToString(" ")
     }
-
-    private fun renderAttribution(result: EnergyAttributionResult?) {
-        binding.detailAttribution.text = when (result) {
-            is EnergyAttributionResult.Ready -> attributionText(result.attribution)
-            is EnergyAttributionResult.Unavailable -> getString(
-                R.string.trip_attribution_unavailable,
-                getString(
-                    when {
-                        batteryPowerNeverPublished() -> R.string.reason_power_never_published
-                        result.reason == UnavailableReason.MODEL_NOT_TRAINED ->
-                            R.string.reason_model_not_trained
-                        else -> R.string.reason_insufficient_samples
-                    },
-                ),
-            )
-            null -> getString(
-                R.string.trip_attribution_unavailable,
-                getString(
-                    if (batteryPowerNeverPublished()) {
-                        R.string.reason_power_never_published
-                    } else {
-                        R.string.reason_model_not_trained
-                    }
-                ),
-            )
-        }
-        binding.detailAttribution.contentDescription = binding.detailAttribution.text
-    }
-
-    private fun attributionText(value: EnergyAttribution): String = buildString {
-        appendLine(getString(R.string.trip_attribution_intro))
-        appendLine(
-            getString(
-                R.string.trip_attribution_traction,
-                band(value.modelledTraction),
-            ),
-        )
-        value.residuals.forEach { appendLine(residualText(it)) }
-        append(
-            getString(
-                R.string.trip_attribution_reconciliation,
-                checkNotNull(value.measuredRegenerationKwh.value),
-                checkNotNull(value.unmodelledDiscrepancyKwh.value),
-                value.reconciliationErrorKwh,
-            ),
-        )
-    }
-
-    private fun residualText(value: ResidualAttribution): String {
-        val context = getString(
-            when (value.context) {
-                ResidualContext.CLIMATE_ACTIVE -> R.string.trip_attribution_climate_active
-                ResidualContext.CLIMATE_INACTIVE -> R.string.trip_attribution_climate_inactive
-                ResidualContext.CLIMATE_UNKNOWN -> R.string.trip_attribution_climate_unknown
-                ResidualContext.WINDOWS_OPEN -> R.string.trip_attribution_windows_open
-            },
-        )
-        return getString(
-            when (value.finding) {
-                ResidualFinding.DISTINGUISHABLE -> R.string.trip_attribution_residual
-                ResidualFinding.NOT_DISTINGUISHABLE_FROM_ZERO ->
-                    R.string.trip_attribution_residual_indistinguishable
-                ResidualFinding.NEGATIVE_MODEL_ERROR ->
-                    R.string.trip_attribution_residual_negative
-            },
-            context,
-            band(value.estimate),
-        )
-    }
-
-    private fun band(value: AttributedEnergyEstimate): String = String.format(
-        Locale.getDefault(),
-        "%.2f–%.2f kWh",
-        value.bandLowKwh,
-        value.bandHighKwh,
-    )
 
     /** Missing values explain themselves both to TalkBack and to a tap on the em dash. */
     private fun bindValue(
@@ -869,5 +807,5 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         const val DASH = "—"
     }
 
-    private val gateExpiry = Runnable { renderSpeedWhatIfGate() }
+    private val gateExpiry = Runnable { renderParkedGate() }
 }

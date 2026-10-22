@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="evidence_title">Evidência de sinais</string>
+    <string name="evidence_start">Iniciar captura</string>
+    <string name="evidence_stop">Parar e guardar</string>
+    <string name="evidence_ready">Pronto. Inicie a captura antes de conduzir o protocolo.</string>
+    <string name="evidence_speed_unavailable">Os controlos de captura ficam desativados até a velocidade ser legível.</string>
+    <string name="evidence_recording">A capturar. Os primeiros 60 segundos usam amostragem em rajadas de 200 ms.</string>
+    <string name="evidence_park_to_change">A captura continua. Estacione para a alterar.</string>
+    <string name="evidence_idle">Nenhuma captura em curso</string>
+    <string name="evidence_no_data">Ainda sem amostras.</string>
+    <string name="evidence_capturing">%1$d instantâneos · %2$d s</string>
+    <string name="evidence_saved">Captura guardada. Exporte o diagnóstico para USB para a tirar do carro.</string>
+    <string name="evidence_write_failed">Captura parada, mas o seu ficheiro não pôde ser guardado.</string>
+    <string name="evidence_refused">Estacione e aguarde uma velocidade legível antes de alterar a captura.</string>
+    <string name="nav_probe_title">Sonda de orientação da navegação</string>
+    <string name="nav_probe_start">Ativar o ouvinte</string>
+    <string name="nav_probe_stop">Parar o ouvinte</string>
+    <string name="nav_probe_save">Guardar para exportar</string>
+    <string name="nav_probe_idle">Ouvinte não ativado</string>
+    <string name="nav_probe_unavailable">Serviço adaptador indisponível</string>
+    <string name="nav_probe_silent">Ativado · nada recebido ainda</string>
+    <string name="nav_probe_receiving">Ativado · %1$d chamadas</string>
+    <string name="nav_probe_no_data">Ainda nenhuma chamada recebida.</string>
+    <string name="nav_probe_hint_ready">Estacione, ative o ouvinte, depois inicie a orientação na navegação do próprio carro e conduza.</string>
+    <string name="nav_probe_hint_running">A ouvir. Silêncio aqui significa que a navegação não reporta nada, e isso já é a resposta.</string>
+    <string name="nav_probe_hint_unavailable">O serviço adaptador da unidade não se ligou. Nenhuma fonte de rota neste firmware.</string>
+    <string name="nav_probe_refused">Estacione e aguarde uma velocidade legível antes de ativar o ouvinte.</string>
+    <string name="nav_probe_saved">Traçado guardado. Exporte o diagnóstico para USB para o tirar do carro.</string>
+    <string name="nav_probe_save_failed">Não foi possível guardar o traçado.</string>
+    <string name="nav_probe_open">Sonda de orientação</string>
+    <string name="nav_probe_undecoded">Ativado · tráfego visto, nada descodificado</string>
+    <string name="validation_arm">Ativar a viagem de validação</string>
+    <string name="validation_disarm">Desativar a viagem de validação</string>
+    <string name="validation_on">Modo de validação ligado. Cada pergunta em aberto regista-se sozinha; exporte para USB ao voltar.</string>
+    <string name="validation_ready_channel">Viagem de validação</string>
+    <string name="validation_ready_title">Resultados de validação completos</string>
+    <string name="validation_ready_text">Cada pergunta da sonda registou a sua resposta. Exporte agora o diagnóstico para USB para não perder esta viagem.</string>
+    <string name="validation_off">Modo de validação desligado. Nada é registado até ser ativado.</string>
+    <string name="update_title">Versão instável disponível</string>
+    <string name="update_ready">%1$s foi transferido para:\n%2$s\n\nO EVChargePilot não o pode instalar. Abra-o no gestor de ficheiros da unidade com o carro estacionado.</string>
+    <string name="update_close">OK</string>
+</resources>

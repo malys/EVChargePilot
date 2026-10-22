@@ -30,6 +30,27 @@
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
+        <!-- The time and, while the car guides a route, when it gets there. The MG4 draws no status
+             bar: without this nothing on the panel says the time. Title size, not display: the
+             charge stays the one large figure on the page. -->
+        <TextView
+            android:id="@+id/etaValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:fontFeatureSettings="tnum"
+            android:maxLines="1"
+            android:textAppearance="@style/Text.EV.Title"
+            android:textColor="@color/ev_accent"
+            android:visibility="gone" />
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/Text.EV.Title" />
+
         <!-- Full-height target despite secondary typography. Wide as its own text: the
              version it shows grows with the build number, and 140dp wrapped it onto two
              lines inside a 72dp bar. -->
@@ -77,6 +98,13 @@
             <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1" android:padding="@dimen/spacing_md">
                 <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_battery" />
                 <TextView android:id="@+id/socValue" style="@style/Text.EVChargePilot.Hero" android:text="@string/value_soc_unavailable" />
+                <!-- The charge as a fill of the 0–100 % track: the figure says it, the bar shows it. -->
+                <com.evsuite.chargepilot.BarGaugeView
+                    android:id="@+id/socBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    android:importantForAccessibility="no" />
                 <!-- One line with one job: where this number comes from, or in red that it
                      comes from nowhere. -->
                 <TextView
@@ -93,6 +121,14 @@
             <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1" android:padding="@dimen/spacing_md">
                 <TextView android:id="@+id/reachLabel" style="@style/Text.EV.ReadoutLabel" android:text="@string/label_adaptive_range" />
                 <TextView android:id="@+id/reachValue" style="@style/Text.EVChargePilot.Hero" />
+                <!-- On a route: the charge on arrival solid, what the drive spends light, on 0–100 %. -->
+                <com.evsuite.chargepilot.BarGaugeView
+                    android:id="@+id/reachBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    android:importantForAccessibility="no"
+                    android:visibility="invisible" />
                 <TextView
                     android:id="@+id/reachDetail"
                     android:layout_width="wrap_content"
@@ -104,6 +140,19 @@
             <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1" android:padding="@dimen/spacing_md">
                 <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_instant_consumption" />
                 <TextView android:id="@+id/instantConsumptionValue" style="@style/Text.EVChargePilot.Hero" />
+                <!-- After Tesla's energy graph: the last kilometres against the reference line. -->
+                <com.evsuite.chargepilot.ConsumptionTraceView
+                    android:id="@+id/recentTrace"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:importantForAccessibility="no" />
+                <TextView
+                    android:id="@+id/recentLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:maxLines="1"
+                    android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
         </LinearLayout>
 

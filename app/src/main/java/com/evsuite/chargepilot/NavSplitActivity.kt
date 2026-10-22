@@ -4,15 +4,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
+import android.text.format.DateFormat
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Lifecycle
 import com.evsuite.chargepilot.databinding.ActivityNavSplitBinding
 import com.evsuite.hardware.AppLogger
@@ -21,6 +24,7 @@ import com.evsuite.hardware.saic.SaicNavGuidance
 import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTripSession
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 
@@ -66,6 +70,15 @@ class NavSplitActivity : AppCompatActivity() {
     )
 
     private lateinit var binding: ActivityNavSplitBinding
+
+    /**
+     * Debug builds only: the companion without the car's map, so the emulator — which has no
+     * MG4 Navigator and cannot host the pane — can show the layout (`mise run split-preview`).
+     */
+    private val preview by lazy {
+        (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&
+            intent.getBooleanExtra(EXTRA_PREVIEW, false)
+    }
     private lateinit var pane: MapPane
 
     private val worker = Executors.newSingleThreadExecutor { runnable ->
@@ -82,6 +95,8 @@ class NavSplitActivity : AppCompatActivity() {
     private var remainingKm: Double? = null
     private var toStopKm: Double? = null
     private var drivenBaselineKm: Double? = null
+    private var traceReadAtMs = 0L
+    private val consumption by lazy { RecentConsumption(this) }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -97,13 +112,25 @@ class NavSplitActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Always the night palette, day or not: the companion sits beside the car's own map,
+        // dark in both modes, and a white quarter beside it is the brightest thing on the panel.
+        // An exception to DESIGN.md's DayNight rule, agreed by the owner on 2026-10-22; the night
+        // palette carries the same 7:1 floor as the day one.
+        delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
         super.onCreate(savedInstanceState)
         binding = ActivityNavSplitBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.splitFullMap.setOnClickListener { handBack() }
         // Back hands the map back, as the button does.
         onBackPressedDispatcher.addCallback(this) { handBack() }
-        renderRoads(roads(intent), intent.getIntExtra(EXTRA_CHOSEN, 0))
+        renderRoads(
+            roads(intent).ifEmpty { if (preview) PREVIEW_ROADS else emptyList() },
+            intent.getIntExtra(EXTRA_CHOSEN, 0),
+        )
+        if (preview) {
+            binding.mapWaiting.setText(R.string.nav_split_preview_map)
+            return
+        }
 
         pane = MapPane(this)
         val map = MapApps.comeForward(this).also { this.map = it }
@@ -193,14 +220,15 @@ class NavSplitActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         // A finish nobody asked for, the system's or a crash path's, still gives the map back.
-        if (!handedBack) MapApps.toForeground(this)
-        pane.release()
+        if (!handedBack && !preview) MapApps.toForeground(this)
+        if (::pane.isInitialized) pane.release()
         worker.shutdownNow()
         super.onDestroy()
     }
 
     /** The map back on the main display, full screen, and this screen gone. */
     private fun handBack() {
+        if (preview) return finish()
         if (handedBack) return
         handedBack = true
         MapApps.toForeground(this)
@@ -235,12 +263,15 @@ class NavSplitActivity : AppCompatActivity() {
             value.rangeKm?.let { String.format(Locale.getDefault(), "%.0f km", it) } ?: unavailable
         renderReach(value.rangeKm?.toDouble())
         renderEco(value)
+        renderConsumption(value)
         // Several binder reads per refresh: every few seconds is enough for a remaining distance.
         if (value.timestampMs - guidanceReadAtMs < GUIDANCE_REFRESH_MS) return
         guidanceReadAtMs = value.timestampMs
         worker.execute {
-            val guidance = runCatching { SaicNavGuidance.readNow() }.getOrNull()
-            val km = guidance?.remainingDistanceKm(FirmwareInfo.getGeneration())
+            val guidance = if (preview) null else runCatching { SaicNavGuidance.readNow() }.getOrNull()
+            val km = if (preview) PREVIEW_KM else guidance?.remainingDistanceKm(FirmwareInfo.getGeneration())
+            val minutes = if (preview) PREVIEW_MINUTES else guidance?.remainingMinutes
+            val road = if (preview) PREVIEW_ROAD else guidance?.road
             runOnUiThread {
                 if (isDestroyed) return@runOnUiThread
                 val toStop = intent.getBooleanExtra(EXTRA_TO_STOP, false)
@@ -255,17 +286,27 @@ class NavSplitActivity : AppCompatActivity() {
                         String.format(Locale.getDefault(), "%.0f", left),
                         toStopKm?.let { String.format(Locale.getDefault(), "%.1f", it) } ?: unavailable,
                     )
+                    minutes != null -> getString(
+                        R.string.nav_split_route_eta,
+                        String.format(Locale.getDefault(), "%.1f", left),
+                        minutes.toString(),
+                        arrivalClock(minutes),
+                    )
                     else -> getString(
                         R.string.nav_split_route,
                         String.format(Locale.getDefault(), "%.1f", left),
-                        guidance?.remainingMinutes?.toString() ?: unavailable,
+                        unavailable,
                     )
                 }
-                binding.splitRoad.text = guidance?.road.orEmpty()
+                binding.splitRoad.text = road.orEmpty()
                 renderReach(recorder?.latest?.rangeKm?.toDouble())
             }
         }
     }
+
+    /** The clock time the car's minutes left come to, in the head unit's own 12/24 h format. */
+    private fun arrivalClock(minutes: Int): String =
+        DateFormat.getTimeFormat(this).format(Date(System.currentTimeMillis() + minutes * 60_000L))
 
     /**
      * Distance driven since this screen opened, which is the tap.
@@ -285,6 +326,7 @@ class NavSplitActivity : AppCompatActivity() {
         if (km == null || rangeKm == null || rangeKm <= 0.0) {
             binding.splitReach.show(emptyList())
             binding.splitMargin.text = ""
+            binding.splitMargin.visibility = View.GONE
             return
         }
         val short = km > rangeKm
@@ -293,10 +335,51 @@ class NavSplitActivity : AppCompatActivity() {
                 BarGaugeView.Span(0f, (km / rangeKm).toFloat(), if (short) R.color.ev_error else R.color.ev_accent),
             ),
         )
+        binding.splitMargin.visibility = View.VISIBLE
         binding.splitMargin.text = if (short) getString(R.string.nav_split_margin_short) else getString(
             R.string.nav_split_margin,
             String.format(Locale.getDefault(), "%.0f", rangeKm - km),
         )
+    }
+
+    /**
+     * The last kilometres as the trip screen draws them: the line is the glance, the average the
+     * figure. [RecentConsumption] is shared with the energy dashboard.
+     */
+    private fun renderConsumption(value: EnergySnapshot) {
+        if (value.timestampMs - traceReadAtMs < TRACE_REFRESH_MS) return
+        traceReadAtMs = value.timestampMs
+        worker.execute {
+            val recent = consumption.read(value.timestampMs)
+            runOnUiThread {
+                if (isDestroyed) return@runOnUiThread
+                val average = recent.consumptionKwhPer100Km
+                val reference = recent.referenceKwhPer100Km
+                binding.splitTrace.setTrace(recent.trace, reference, recent.coveredKm)
+                binding.splitArc.show(
+                    average,
+                    reference,
+                    arcScale(average, reference),
+                    if (average != null && average > reference) R.color.ev_warn else R.color.ev_accent,
+                )
+                binding.splitConsumption.text = average
+                    ?.let { String.format(Locale.getDefault(), "%.1f", it) }
+                    ?: getString(R.string.value_unavailable)
+                binding.splitArc.contentDescription = average
+                    ?.let { getString(R.string.nav_split_consumption_value, it) }
+                binding.splitConsumptionSpan.text = if (recent.consumptionKwhPer100Km == null) {
+                    ""
+                } else {
+                    getString(R.string.nav_split_consumption_span, recent.coveredKm)
+                }
+            }
+        }
+    }
+
+    /** Twice the reference, or more when the average runs past it: the tick sits mid-arc. */
+    private fun arcScale(average: Double?, reference: Double): Double {
+        val top = maxOf(reference * 2.0, (average ?: 0.0) * 1.2)
+        return kotlin.math.ceil(top / ARC_STEP) * ARC_STEP
     }
 
     /** CP-093's score, live: the drive so far against the verdict the recorder last published. */
@@ -379,10 +462,21 @@ class NavSplitActivity : AppCompatActivity() {
         private const val REFRONT_CHECK_MS = 1_000L
         private const val REFRONT_MIN_MS = 3_000L
         private const val PERCENT = 100f
+        private const val ARC_STEP = 5.0
         private const val ECO_WARN_BELOW = 50
         private const val SPACING_DP = 8f
         private const val ROAD_BAR_DP = 8f
         private const val DASH = "—"
+        private const val TRACE_REFRESH_MS = 10_000L
+
+        private const val EXTRA_PREVIEW = "split.preview"
+        private const val PREVIEW_KM = 42.3
+        private const val PREVIEW_MINUTES = 37
+        private const val PREVIEW_ROAD = "A64"
+        private val PREVIEW_ROADS = listOf(
+            SplitRoad("A64", 42.3, 37.0, null, null),
+            SplitRoad("D817", 39.8, 52.0, -2.0, -0.5),
+        )
 
         private const val EXTRA_NAMES = "split.road.names"
         private const val EXTRA_KM = "split.road.km"

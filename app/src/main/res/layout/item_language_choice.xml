@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One language in the picker, pulled up to the suite's 72dp target and body size: Material's
+     single-choice row is 48dp and 16sp, the smallest thing on the screen at arm's length. -->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:checkMark="?android:attr/listChoiceIndicatorSingle"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_target"
+    android:paddingStart="@dimen/spacing_lg"
+    android:paddingEnd="@dimen/spacing_lg"
+    android:textAppearance="@style/Text.EV.Body"
+    android:textColor="@color/ev_text_primary" />

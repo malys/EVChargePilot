@@ -6,11 +6,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.view.View
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.evsuite.chargepilot.databinding.ActivitySettingsBinding
 import com.evsuite.chargepilot.route.RoutingConfig
 import com.evsuite.chargepilot.route.RoutingCredentials
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
@@ -133,6 +136,7 @@ class SettingsActivity : PrimaryNavigationActivity() {
      * silent refusal reads exactly like a voice that is merely waiting for advice.
      */
     private fun testVoice() {
+        binding.ecoVoiceStatus.visibility = View.VISIBLE
         binding.ecoVoiceStatus.text = getString(R.string.eco_voice_testing)
         EcoVoice.say(
             this, getString(R.string.eco_voice_test), EcoVoice.Origin.TEST, interrupt = true,
@@ -153,21 +157,32 @@ class SettingsActivity : PrimaryNavigationActivity() {
      * settings file the driver copies to another car does not carry it — the language belongs to
      * the person reading the screen, not to the vehicle.
      *
-     * The listener is attached after the initial check so that reading the current choice does
-     * not look like making one, and it compares buttons rather than tags: a system picker that
-     * sets `fr-FR` where we would have set `fr` is the same button and must not trigger a
-     * recreation loop.
+     * One button naming the language in use, opening the list — EVTasker's control, so the two
+     * apps are set the same way. Choosing the language already applied does nothing, compared by
+     * position rather than tag: a system picker that sets `fr-FR` where we would have set `fr`
+     * is the same entry and must not trigger a recreation.
      */
     private fun fillLanguage() {
-        val current = languageButton(AppCompatDelegate.getApplicationLocales().toLanguageTags())
-        binding.languageChoice.check(current)
-        binding.languageChoice.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            val applied = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-            if (languageButton(applied) == checkedId) return@addOnButtonCheckedListener
-            AppCompatDelegate.setApplicationLocales(
-                LocaleListCompat.forLanguageTags(languageTag(checkedId))
-            )
+        val names = resources.getStringArray(R.array.language_names)
+        val current = languageIndex(AppCompatDelegate.getApplicationLocales().toLanguageTags())
+        binding.languageAction.text = names[current]
+        binding.languageAction.contentDescription =
+            getString(R.string.language_settings_current, names[current])
+        binding.languageAction.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.language_settings_title)
+                .setSingleChoiceItems(
+                    ArrayAdapter(this, R.layout.item_language_choice, names),
+                    current,
+                ) { dialog, which ->
+                    dialog.dismiss()
+                    if (which == current) return@setSingleChoiceItems
+                    AppCompatDelegate.setApplicationLocales(
+                        LocaleListCompat.forLanguageTags(LANGUAGE_TAGS[which])
+                    )
+                }
+                .setNegativeButton(R.string.action_cancel, null)
+                .show()
         }
     }
 
@@ -505,16 +520,12 @@ class SettingsActivity : PrimaryNavigationActivity() {
         }
 }
 
-/** The button that stands for a stored language tag list. Empty, or anything else, is the system. */
-internal fun languageButton(tags: String): Int = when (tags.take(2).lowercase(Locale.ROOT)) {
-    "fr" -> R.id.languageFrench
-    "en" -> R.id.languageEnglish
-    else -> R.id.languageSystem
-}
+/**
+ * The languages this app has strings for, in the order Settings lists them: the system first,
+ * then EVTasker's five. The empty tag is the system choice, which is what clears a stored one.
+ */
+internal val LANGUAGE_TAGS = listOf("", "de", "en", "es", "fr", "it", "pt")
 
-/** The tag to store for a button. The system choice is the empty list, which is what clears it. */
-internal fun languageTag(buttonId: Int): String = when (buttonId) {
-    R.id.languageFrench -> "fr"
-    R.id.languageEnglish -> "en"
-    else -> ""
-}
+/** The entry that stands for a stored language tag list. Empty, or anything else, is the system. */
+internal fun languageIndex(tags: String): Int =
+    LANGUAGE_TAGS.indexOf(tags.take(2).lowercase(Locale.ROOT)).coerceAtLeast(0)

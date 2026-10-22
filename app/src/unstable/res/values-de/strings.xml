@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="evidence_title">Signalnachweis</string>
+    <string name="evidence_start">Erfassung starten</string>
+    <string name="evidence_stop">Beenden und speichern</string>
+    <string name="evidence_ready">Bereit. Erfassung vor dem Fahren des Protokolls starten.</string>
+    <string name="evidence_speed_unavailable">Erfassungssteuerung bleibt deaktiviert, bis die Geschwindigkeit lesbar ist.</string>
+    <string name="evidence_recording">Erfassung läuft. Die ersten 60 Sekunden messen im 200-ms-Takt.</string>
+    <string name="evidence_park_to_change">Die Erfassung läuft weiter. Zum Ändern parken.</string>
+    <string name="evidence_idle">Keine Erfassung aktiv</string>
+    <string name="evidence_no_data">Noch keine Messwerte.</string>
+    <string name="evidence_capturing">%1$d Momentaufnahmen · %2$d s</string>
+    <string name="evidence_saved">Erfassung gespeichert. Diagnose auf USB exportieren, um sie aus dem Auto zu holen.</string>
+    <string name="evidence_write_failed">Erfassung beendet, aber ihre Datei konnte nicht gespeichert werden.</string>
+    <string name="evidence_refused">Parken und auf lesbare Geschwindigkeit warten, bevor die Erfassung geändert wird.</string>
+    <string name="nav_probe_title">Sonde der Zielführung</string>
+    <string name="nav_probe_start">Listener aktivieren</string>
+    <string name="nav_probe_stop">Listener stoppen</string>
+    <string name="nav_probe_save">Für Export speichern</string>
+    <string name="nav_probe_idle">Listener nicht aktiv</string>
+    <string name="nav_probe_unavailable">Adapterdienst nicht verfügbar</string>
+    <string name="nav_probe_silent">Aktiv · noch nichts gemeldet</string>
+    <string name="nav_probe_receiving">Aktiv · %1$d Rückmeldungen</string>
+    <string name="nav_probe_no_data">Noch keine Rückmeldung erhalten.</string>
+    <string name="nav_probe_hint_ready">Parken, Listener aktivieren, dann die Zielführung in der Navigation des Autos starten und fahren.</string>
+    <string name="nav_probe_hint_running">Hört zu. Stille hier heißt, dass die Navigation nichts meldet — das ist selbst die Antwort.</string>
+    <string name="nav_probe_hint_unavailable">Der Adapterdienst des Infotainments hat sich nicht verbunden. Keine Routenquelle auf dieser Firmware.</string>
+    <string name="nav_probe_refused">Parken und auf lesbare Geschwindigkeit warten, bevor der Listener aktiviert wird.</string>
+    <string name="nav_probe_saved">Verlauf gespeichert. Diagnose auf USB exportieren, um ihn aus dem Auto zu holen.</string>
+    <string name="nav_probe_save_failed">Der Verlauf konnte nicht gespeichert werden.</string>
+    <string name="nav_probe_open">Zielführungs-Sonde</string>
+    <string name="nav_probe_undecoded">Aktiv · Verkehr gesehen, nichts dekodiert</string>
+    <string name="validation_arm">Validierungsfahrt aktivieren</string>
+    <string name="validation_disarm">Validierungsfahrt deaktivieren</string>
+    <string name="validation_on">Validierungsmodus an. Jede offene Frage zeichnet sich selbst auf; nach der Rückkehr auf USB exportieren.</string>
+    <string name="validation_ready_channel">Validierungsfahrt</string>
+    <string name="validation_ready_title">Validierungsergebnisse vollständig</string>
+    <string name="validation_ready_text">Jede Sondenfrage hat ihre Antwort aufgezeichnet. Exportiere die Diagnose jetzt auf USB, damit diese Fahrt nicht verloren geht.</string>
+    <string name="validation_off">Validierungsmodus aus. Nichts wird aufgezeichnet, bis er aktiviert ist.</string>
+    <string name="update_title">Instabile Version verfügbar</string>
+    <string name="update_ready">%1$s wurde heruntergeladen nach:\n%2$s\n\nEVChargePilot kann sie nicht installieren. Öffne sie im Dateimanager des Infotainments, wenn das Auto geparkt ist.</string>
+    <string name="update_close">OK</string>
+</resources>

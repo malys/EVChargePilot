@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="evidence_title">Prove dei segnali</string>
+    <string name="evidence_start">Avvia acquisizione</string>
+    <string name="evidence_stop">Ferma e salva</string>
+    <string name="evidence_ready">Pronto. Avvia l\'acquisizione prima di guidare il protocollo.</string>
+    <string name="evidence_speed_unavailable">I comandi di acquisizione restano disattivati finché la velocità non è leggibile.</string>
+    <string name="evidence_recording">Acquisizione in corso. I primi 60 secondi campionano a raffiche di 200 ms.</string>
+    <string name="evidence_park_to_change">L\'acquisizione continua. Parcheggia per modificarla.</string>
+    <string name="evidence_idle">Nessuna acquisizione in corso</string>
+    <string name="evidence_no_data">Ancora nessun campione.</string>
+    <string name="evidence_capturing">%1$d istantanee · %2$d s</string>
+    <string name="evidence_saved">Acquisizione salvata. Esporta la diagnostica su USB per portarla fuori dall\'auto.</string>
+    <string name="evidence_write_failed">Acquisizione fermata, ma il suo file non è stato salvato.</string>
+    <string name="evidence_refused">Parcheggia e attendi una velocità leggibile prima di modificare l\'acquisizione.</string>
+    <string name="nav_probe_title">Sonda della guida di navigazione</string>
+    <string name="nav_probe_start">Attiva l\'ascolto</string>
+    <string name="nav_probe_stop">Ferma l\'ascolto</string>
+    <string name="nav_probe_save">Salva per l\'esportazione</string>
+    <string name="nav_probe_idle">Ascolto non attivo</string>
+    <string name="nav_probe_unavailable">Servizio adattatore non disponibile</string>
+    <string name="nav_probe_silent">Attivo · ancora nulla ricevuto</string>
+    <string name="nav_probe_receiving">Attivo · %1$d chiamate</string>
+    <string name="nav_probe_no_data">Ancora nessuna chiamata ricevuta.</string>
+    <string name="nav_probe_hint_ready">Parcheggia, attiva l\'ascolto, poi avvia la guida nella navigazione dell\'auto e guida.</string>
+    <string name="nav_probe_hint_running">In ascolto. Il silenzio qui significa che la navigazione non segnala nulla, e questa è già la risposta.</string>
+    <string name="nav_probe_hint_unavailable">Il servizio adattatore dell\'unità non si è collegato. Nessuna fonte di percorso su questo firmware.</string>
+    <string name="nav_probe_refused">Parcheggia e attendi una velocità leggibile prima di attivare l\'ascolto.</string>
+    <string name="nav_probe_saved">Traccia salvata. Esporta la diagnostica su USB per portarla fuori dall\'auto.</string>
+    <string name="nav_probe_save_failed">Impossibile salvare la traccia.</string>
+    <string name="nav_probe_open">Sonda della guida</string>
+    <string name="nav_probe_undecoded">Attivo · traffico visto, nulla decodificato</string>
+    <string name="validation_arm">Attiva il viaggio di convalida</string>
+    <string name="validation_disarm">Disattiva il viaggio di convalida</string>
+    <string name="validation_on">Modalità convalida attiva. Ogni domanda aperta si registra da sola; esporta su USB al rientro.</string>
+    <string name="validation_ready_channel">Viaggio di convalida</string>
+    <string name="validation_ready_title">Risultati della convalida completi</string>
+    <string name="validation_ready_text">Ogni domanda della sonda ha registrato la sua risposta. Esporta ora la diagnostica su USB per non perdere questo viaggio.</string>
+    <string name="validation_off">Modalità convalida disattivata. Nulla viene registrato finché non è attiva.</string>
+    <string name="update_title">Versione instabile disponibile</string>
+    <string name="update_ready">%1$s è stato scaricato in:\n%2$s\n\nEVChargePilot non può installarlo. Aprilo dal file manager dell\'unità quando l\'auto è parcheggiata.</string>
+    <string name="update_close">OK</string>
+</resources>

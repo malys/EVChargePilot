@@ -4,8 +4,12 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.ServiceConnection
 import android.os.Bundle
+import android.text.style.AbsoluteSizeSpan
+import android.text.Spanned
+import android.text.SpannableString
 import android.os.IBinder
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
@@ -346,13 +350,13 @@ class ChargeStopActivity : AppCompatActivity() {
         credentials: RoutingCredentials.Values,
         origin: LocationSource.Fix,
     ) {
-        val socPercent = snapshot?.socPercent?.toDouble()
+        val socPercent = currentSoc()
         // The driver's own figures (CP-054), read on the main thread because they are four
         // numbers in a preferences file and the worker below must not race the settings screen.
         val settings = VehicleSettings.read(this)
         val effective = rate ?: SocRateEstimator.fromVehicleRange(
             socPercent,
-            snapshot?.rangeKm?.toDouble(),
+            currentRange(),
         )
         announce(getString(R.string.charge_stop_routing))
         worker.execute {
@@ -462,11 +466,11 @@ class ChargeStopActivity : AppCompatActivity() {
         ValidationProbe.record(ValidationQuestion.ROUTE_ALTERNATIVES) {
             "driver chose road ${index + 1} of ${found.list.size}: ${found.list[index].kind}"
         }
-        val socPercent = snapshot?.socPercent?.toDouble()
+        val socPercent = currentSoc()
         val settings = VehicleSettings.read(this)
         val effective = rate ?: SocRateEstimator.fromVehicleRange(
             socPercent,
-            snapshot?.rangeKm?.toDouble(),
+            currentRange(),
         )
         announce(getString(R.string.charge_stop_routing))
         worker.execute { planOn(found, index, socPercent, effective, settings) }
@@ -700,8 +704,7 @@ class ChargeStopActivity : AppCompatActivity() {
         val plan = chain?.legs?.firstOrNull()?.plan
         val charger = chargers.firstOrNull()
         if (route == null || chain == null || plan == null) {
-            binding.chargeStopPlan.visibility = View.GONE
-            binding.chargeStopDetail.visibility = View.GONE
+            binding.planCard.visibility = View.GONE
             binding.chargeStopAttribution.visibility = View.GONE
             binding.chargerPlace.visibility = View.GONE
             binding.chargerSource.visibility = View.GONE
@@ -711,10 +714,10 @@ class ChargeStopActivity : AppCompatActivity() {
             renderUnplannedHandoff(place)
             return
         }
-        binding.chargeStopPlan.visibility = View.VISIBLE
-        binding.chargeStopPlan.text = planText(chain, chargers, departurePercent)
+        binding.planCard.visibility = View.VISIBLE
+        binding.chargeStopPlan.text = headlined(planText(chain, chargers, departurePercent))
+        renderStrip(route, chain)
 
-        binding.chargeStopDetail.visibility = View.VISIBLE
         val detail = getString(
             R.string.charge_stop_detail,
             place.label,
@@ -759,6 +762,50 @@ class ChargeStopActivity : AppCompatActivity() {
     }
 
     /**
+     * The charge the plan starts from. Debug builds only may be handed one by
+     * `mise run charge-stop-preview`: the emulator publishes no charge, so without it no plan
+     * could ever be seen there.
+     */
+    private fun currentSoc(): Double? = snapshot?.socPercent?.toDouble() ?: preview(EXTRA_PREVIEW_SOC)
+
+    /** The car's range, or in a debug preview the one handed in with the charge. */
+    private fun currentRange(): Double? = snapshot?.rangeKm?.toDouble() ?: preview(EXTRA_PREVIEW_RANGE)
+
+    private fun preview(extra: String): Double? = intent.getDoubleExtra(extra, Double.NaN)
+        .takeIf { !it.isNaN() && (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 }
+
+    /** A card's first line at title size: what the card answers, then its details. */
+    private fun headlined(text: String): CharSequence {
+        val end = text.indexOf('\n').takeIf { it > 0 } ?: text.length
+        return SpannableString(text).apply {
+            setSpan(
+                AbsoluteSizeSpan(resources.getDimensionPixelSize(R.dimen.text_title)),
+                0, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+        }
+    }
+
+    /**
+     * The same plan, drawn: each leg the plan answered as a filled stretch of the road, each stop
+     * with its band, the charge now at the start and on arrival at the end. A refused leg is left
+     * as empty track, which is what "not planned past here" looks like.
+     */
+    private fun renderStrip(route: OrsDirections.Route, chain: ChargeStopPlan.Chain) {
+        binding.planStrip.show(
+            route.distanceKm,
+            chain.legs.filter { it.plan !is ChargeStopPlan.Plan.Refused }.map { leg ->
+                TripStripView.Leg(
+                    leg.startKm,
+                    leg.endKm,
+                    (leg.plan as? ChargeStopPlan.Plan.Stop)?.bandKm,
+                )
+            },
+            chain.legs.firstOrNull()?.takeIf { it.plan !is ChargeStopPlan.Plan.Refused }?.startPercent,
+            chain.arrival?.arrivalPercent,
+        )
+    }
+
+    /**
      * The plan in words: one line where one charge covers the road, a line per leg where it does
      * not.
      *
@@ -788,7 +835,9 @@ class ChargeStopActivity : AppCompatActivity() {
             )
             // This leg's charger or none at all: a name borrowed from another leg would sit
             // hundreds of kilometres from the stop it is written under (CP-062 rule 6).
-            val named = chargers.getOrNull(index)?.let { chargerLine(it) }
+            // The first stop's charger has its own card under the plan; repeating it here put
+            // the same long line on screen twice.
+            val named = chargers.getOrNull(index)?.takeIf { index > 0 }?.let { chargerLine(it) }
             lines += listOfNotNull(line, named?.let { "  $it" }).joinToString("\n")
         }
         val tail = chain.arrival?.let {
@@ -956,7 +1005,7 @@ class ChargeStopActivity : AppCompatActivity() {
             lines += getString(R.string.charge_stop_chain_searches, chargerSearches)
         }
         binding.routeChoices.visibility = View.VISIBLE
-        binding.routeChoices.text = lines.joinToString("\n")
+        binding.routeChoices.text = headlined(lines.joinToString("\n"))
         renderRoadActions(found, index)
     }
 
@@ -1148,7 +1197,7 @@ class ChargeStopActivity : AppCompatActivity() {
         rate: SocRate?,
         grade: RouteGrade.Cost?,
     ): FollowedPlan.Values? {
-        val soc = snapshot?.socPercent?.toDouble() ?: return null
+        val soc = currentSoc() ?: return null
         val base = rate ?: return null
         val legKm = when (plan) {
             is ChargeStopPlan.Plan.NoStop -> route.distanceKm
@@ -1540,6 +1589,8 @@ class ChargeStopActivity : AppCompatActivity() {
     )
 
     private companion object {
+        private const val EXTRA_PREVIEW_SOC = "preview.soc"
+        private const val EXTRA_PREVIEW_RANGE = "preview.range"
         const val HISTORY_FILE = "trips.json"
 
         /**

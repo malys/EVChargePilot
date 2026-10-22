@@ -92,4 +92,42 @@
     <style name="Text.EVChargePilot.HeroSecondary" parent="Text.EVChargePilot.Hero">
         <item name="autoSizeMaxTextSize">@dimen/chargepilot_text_hero_secondary</item>
     </style>
+
+    <!-- An action named by its icon, square at the touch target. The name is still there for
+         anyone who asks: contentDescription for TalkBack, tooltipText for a long press. Used
+         only for actions whose glyph is unambiguous in context — export, delete, history. -->
+    <style name="Widget.EVChargePilot.IconButton" parent="Widget.EV.Button.Outlined">
+        <item name="android:minWidth">@dimen/touch_target</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconSize">28dp</item>
+        <item name="iconTint">@color/ev_accent</item>
+    </style>
+
+    <!-- The page's primary action as an icon: filled, so it still reads as the one to press. -->
+    <style name="Widget.EVChargePilot.IconButton.Filled" parent="Widget.EVChargePilot.Button">
+        <item name="android:minWidth">@dimen/touch_target</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconSize">28dp</item>
+        <item name="iconTint">@color/ev_button_text</item>
+    </style>
+
+    <!-- An outlined action that also carries its icon: the one the eye should find first. -->
+    <style name="Widget.EVChargePilot.Button.OutlinedIcon" parent="Widget.EV.Button.Outlined">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/spacing_sm</item>
+        <item name="iconSize">24dp</item>
+        <item name="iconTint">@color/ev_accent</item>
+    </style>
 </resources>

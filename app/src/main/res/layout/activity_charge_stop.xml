@@ -60,135 +60,177 @@
             android:text="@string/action_back" />
     </LinearLayout>
 
-    <ScrollView
+    <!-- Two columns, after the rest of the app: the plan on the left — its sentence, the trip
+         drawn as a strip, the charger — and on the right what driving differently would change.
+         Each column scrolls on its own, and only when a long chain outgrows the panel. -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/chargepilot_bar_gap"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_md">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/spacing_lg"
-            android:paddingTop="@dimen/chargepilot_bar_gap"
-            android:paddingEnd="@dimen/spacing_lg"
-            android:paddingBottom="@dimen/spacing_lg">
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:fillViewport="true"
+            android:scrollbars="none">
 
-            <TextView
-                android:id="@+id/chargeStopStatus"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:accessibilityLiveRegion="polite"
-                android:gravity="center"
-                android:textAppearance="@style/Text.EV.Body" />
-
-            <!-- CP-044. Choosing where you are going is its own screen: it needs a keyboard,
-                 two lists and the whole panel, and it used to be a strip below this line. The
-                 button carries the chosen place, so the plan below always says what it is about. -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/chooseDestinationAction"
-                style="@style/Widget.EVChargePilot.Button"
-                android:layout_width="1400dp"
-                android:layout_height="@dimen/touch_target"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:text="@string/charge_stop_action_destination" />
-
-            <TextView
-                android:id="@+id/navigateNote"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/chargeStopPlan"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:background="@drawable/bg_card"
-                android:gravity="center"
-                android:padding="@dimen/spacing_lg"
-                android:textAppearance="@style/Text.EV.Title"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/chargeStopDetail"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:lineSpacingExtra="6dp"
-                android:padding="@dimen/spacing_lg"
-                android:textAppearance="@style/Text.EV.Body"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/chargerPlace"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:lineSpacingExtra="6dp"
-                android:padding="@dimen/spacing_lg"
-                android:textAppearance="@style/Text.EV.Body"
-                android:visibility="gone" />
-
-            <!-- Never merged into the line above: a record's age is what stops it reading as a
-                 promise, and a promise is what sends someone to a charger that is not there. -->
-            <TextView
-                android:id="@+id/chargerSource"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:visibility="gone" />
-
-            <!-- CP-049. Its own card, under the plan rather than inside it: what the driver
-                 would gain by driving differently is not what the plan says will happen. -->
-            <TextView
-                android:id="@+id/routeWhatIf"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:lineSpacingExtra="6dp"
-                android:padding="@dimen/spacing_lg"
-                android:textAppearance="@style/Text.EV.Body"
-                android:visibility="gone" />
-
-            <!-- CP-057. The comparison the driver was doing in their head across the cards
-                 above: same destination, three ways to reach it, one of which they pick. -->
-            <TextView
-                android:id="@+id/routeChoices"
-                android:layout_width="1400dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:lineSpacingExtra="6dp"
-                android:padding="@dimen/spacing_lg"
-                android:textAppearance="@style/Text.EV.Body"
-                android:visibility="gone" />
-
-            <!-- One button per road, filled in code. Choosing one re-plans the trip on it, and
-                 "Go" then hands that road to the car (CP-057 rule 6). -->
             <LinearLayout
-                android:id="@+id/roadChoiceActions"
-                android:layout_width="1400dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:orientation="horizontal"
-                android:visibility="gone" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/chargeStopAttribution"
-                android:layout_width="1400dp"
+                <!-- CP-044. Choosing where you are going is its own screen. The button carries the
+                     chosen place, so the plan below always says what it is about. -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/chooseDestinationAction"
+                    style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/touch_target"
+                    android:text="@string/charge_stop_action_destination"
+                    app:icon="@drawable/ic_action_destination" />
+
+                <TextView
+                    android:id="@+id/chargeStopStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:accessibilityLiveRegion="polite"
+                    android:textAppearance="@style/Text.EV.Secondary" />
+
+                <!-- The plan: one sentence a driver acts on, the trip drawn under it, then the
+                     route's own figures. -->
+                <LinearLayout
+                    android:id="@+id/planCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Text.EV.ReadoutLabel"
+                        android:text="@string/charge_stop_title" />
+
+                    <TextView
+                        android:id="@+id/chargeStopPlan"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:lineSpacingExtra="4dp"
+                        android:textAppearance="@style/Text.EV.Body" />
+
+                    <com.evsuite.chargepilot.TripStripView
+                        android:id="@+id/planStrip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/chargeStopDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:lineSpacingExtra="4dp"
+                        android:textAppearance="@style/Text.EV.Secondary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/chargerPlace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_card"
+                    android:lineSpacingExtra="4dp"
+                    android:padding="@dimen/spacing_md"
+                    android:textAppearance="@style/Text.EV.Body"
+                    android:visibility="gone" />
+
+                <!-- Never merged into the line above: a record's age is what stops it reading as a
+                     promise, and a promise is what sends someone to a charger that is not there. -->
+                <TextView
+                    android:id="@+id/chargerSource"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAppearance="@style/Text.EV.Secondary"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:visibility="gone" />
-        </LinearLayout>
-    </ScrollView>
+                android:orientation="vertical">
+
+                <!-- CP-057. Same destination, the ways to reach it, one of which the driver picks. -->
+                <TextView
+                    android:id="@+id/routeChoices"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card"
+                    android:lineSpacingExtra="4dp"
+                    android:padding="@dimen/spacing_md"
+                    android:textAppearance="@style/Text.EV.Body"
+                    android:visibility="gone" />
+
+                <!-- One button per road, filled in code. Choosing one re-plans the trip on it. -->
+                <LinearLayout
+                    android:id="@+id/roadChoiceActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+
+                <!-- CP-049. Its own card: what driving differently would change is not what the plan
+                     says will happen. -->
+                <TextView
+                    android:id="@+id/routeWhatIf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_card"
+                    android:lineSpacingExtra="4dp"
+                    android:padding="@dimen/spacing_md"
+                    android:textAppearance="@style/Text.EV.Body"
+                    android:visibility="gone" />
+
+                <!-- CP-056. The Navigate action's caveat, never its label. -->
+                <TextView
+                    android:id="@+id/navigateNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:textAppearance="@style/Text.EV.Secondary"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/chargeStopAttribution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:textAppearance="@style/Text.EV.Secondary"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>
