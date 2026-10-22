@@ -21,6 +21,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed (navigation)
 
+- **The map pane is black, and only the full-screen map moves (CP-094).** After "Aller à" on
+  the 2026-10-21 drive, the left two thirds stayed black until the driver chose the full-screen
+  map. Waiting for guidance did not fix it, so timing was not the cause. Android 9 lets only one
+  activity be resumed on the whole head unit. The map on the pane was therefore paused while the
+  split screen had the focus, and a paused map does not draw. Now, each time the split screen
+  takes the focus back, the map is brought to the front of the pane again. If the pane still
+  shows no map frame 8 s after the start, the map goes back to full screen by itself. The log
+  records the pause, each re-front and the first map frame. Not yet tried on the car.
 - **The map pane waits for the car to be guiding (CP-094).** On the 2026-10-19 drive, "Aller à"
   turned the screen black and then left a frozen *MG4 Navigator* while guidance carried on. The
   likely cause is that the pane moved the map while the car was still routing. The pane now

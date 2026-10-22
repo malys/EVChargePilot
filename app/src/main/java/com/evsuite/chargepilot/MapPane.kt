@@ -4,8 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.view.PixelCopy
+import android.view.SurfaceView
 import android.view.ViewGroup
 import com.evsuite.hardware.AppLogger
 import java.lang.reflect.InvocationTargetException
@@ -45,7 +49,7 @@ internal class MapPane(private val context: Context) {
      * ponytail: polling every 100 ms for 5 s; a compile-only ActivityView stub with the real
      * StateCallback would remove it.
      */
-    fun start(intent: Intent, onFailed: (String) -> Unit) {
+    fun start(intent: Intent, onStarted: () -> Unit = {}, onFailed: (String) -> Unit) {
         val pane = view ?: return onFailed("no ActivityView")
         val startActivity = runCatching {
             pane.javaClass.getMethod("startActivity", Intent::class.java)
@@ -57,6 +61,7 @@ internal class MapPane(private val context: Context) {
                 val error = try {
                     startActivity.invoke(pane, intent)
                     AppLogger.i(TAG, "map pane: started after $attempts retries")
+                    onStarted()
                     return
                 } catch (e: InvocationTargetException) {
                     e.targetException
@@ -72,6 +77,46 @@ internal class MapPane(private val context: Context) {
             }
         }
         main.post(attempt)
+    }
+
+    /**
+     * Calls [onBlack] once the pane has shown nothing but black for [limitMs], with the reason.
+     *
+     * The 2026-10-21 drive: the pane stayed black until the driver asked for the full-screen map.
+     * Whatever the cause, a black two thirds of the screen at departure is worse than the old
+     * full-screen handoff, so this hands the map back on its own. It reads a small copy of the
+     * pane's own surface, the one the map draws into, so it sees what the driver sees.
+     */
+    fun watchBlack(limitMs: Long, onBlack: (String) -> Unit) {
+        val surface = (view as? ViewGroup)?.getChildAt(0) as? SurfaceView ?: return
+        val startedAt = SystemClock.elapsedRealtime()
+        val probe = object : Runnable {
+            override fun run() {
+                if (released) return
+                val bitmap = Bitmap.createBitmap(SAMPLE_W, SAMPLE_H, Bitmap.Config.ARGB_8888)
+                val sample = this
+                runCatching {
+                    PixelCopy.request(surface, bitmap, { result ->
+                        if (released) return@request
+                        val pixels = IntArray(SAMPLE_W * SAMPLE_H)
+                        bitmap.getPixels(pixels, 0, SAMPLE_W, 0, 0, SAMPLE_W, SAMPLE_H)
+                        val black = when (result) {
+                            PixelCopy.SUCCESS -> isBlack(pixels)
+                            PixelCopy.ERROR_SOURCE_NO_DATA -> true
+                            else -> null
+                        }
+                        val ms = SystemClock.elapsedRealtime() - startedAt
+                        when {
+                            black == false -> AppLogger.i(TAG, "map pane: first map frame after $ms ms")
+                            black == null -> AppLogger.w(TAG, "map pane: pixel copy refused ($result), not watched")
+                            ms >= limitMs -> onBlack(if (result == PixelCopy.SUCCESS) "black" else "no frame")
+                            else -> main.postDelayed(sample, BLACK_POLL_MS)
+                        }
+                    }, main)
+                }.onFailure { AppLogger.w(TAG, "map pane: pixel copy failed: ${it.javaClass.simpleName}") }
+            }
+        }
+        main.postDelayed(probe, BLACK_POLL_MS)
     }
 
     /** Removes the virtual display. Android 9 destroys whatever is still on it. */
@@ -90,6 +135,17 @@ internal class MapPane(private val context: Context) {
         const val SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW"
         private const val READY_POLL_MS = 100L
         private const val READY_ATTEMPTS = 50
+        private const val BLACK_POLL_MS = 1_000L
+        private const val SAMPLE_W = 48
+        private const val SAMPLE_H = 18
+
+        /** Darker than this on every channel is black; a night map still has lit roads and labels. */
+        private const val BLACK_CHANNEL = 16
+
+        /** Every sampled pixel black, read from the packed ARGB ints without android.graphics. */
+        internal fun isBlack(pixels: IntArray): Boolean = pixels.all {
+            (it shr 16 and 0xFF) < BLACK_CHANNEL && (it shr 8 and 0xFF) < BLACK_CHANNEL && (it and 0xFF) < BLACK_CHANNEL
+        }
 
         /** Whether this head unit can host the map at all. Cheap: no binder, no view. */
         fun possible(context: Context): Boolean {

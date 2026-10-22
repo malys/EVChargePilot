@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import com.evsuite.chargepilot.databinding.ActivityNavSplitBinding
 import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.FirmwareInfo
@@ -41,6 +42,14 @@ import java.util.concurrent.Executors
  * while the guidance carried on. So the pane waits for the car to say it is guiding, then a
  * moment more, and shows a line meanwhile.
  *
+ * **The map must be the resumed activity.** Android 9 resumes one activity on the whole head
+ * unit, the top of the focused display; the multi-resume that keeps an embedded app live arrived
+ * in Android 10. When this screen holds the focus, the map on the pane is paused and stops
+ * drawing: one frozen frame (2026-10-19), or black when the move came first (2026-10-21). So
+ * whenever this screen is resumed while the pane is up, the map is sent to the front of the
+ * pane's display again. This screen still draws while paused and its button still takes touches.
+ * If the pane still shows nothing, [MapPane.watchBlack] hands the map back full screen.
+ *
  * The guidance is read through the synchronous getters, like the arrival screen reads it. This
  * screen never registers with the adapter's listener.
  */
@@ -65,6 +74,9 @@ class NavSplitActivity : AppCompatActivity() {
 
     private var recorder: TripRecordingService? = null
     private var handedBack = false
+    private var map: Intent? = null
+    private var paneStartedAt = 0L
+    private var refrontedAt = 0L
     private var guidanceReadAtMs = 0L
     private var remainingKm: Double? = null
     private var toStopKm: Double? = null
@@ -93,7 +105,7 @@ class NavSplitActivity : AppCompatActivity() {
         renderRoads(roads(intent), intent.getIntExtra(EXTRA_CHOSEN, 0))
 
         pane = MapPane(this)
-        val map = MapApps.comeForward(this)
+        val map = MapApps.comeForward(this).also { this.map = it }
         val view = pane.view
         if (map == null || view == null) {
             handBack()
@@ -109,9 +121,49 @@ class NavSplitActivity : AppCompatActivity() {
                     view,
                     ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
                 )
-                pane.start(map) { handBack() }
+                pane.start(map, onStarted = ::paneStarted) { handBack() }
             }
         }
+    }
+
+    private fun paneStarted() {
+        paneStartedAt = SystemClock.elapsedRealtime()
+        pane.watchBlack(BLACK_LIMIT_MS) { reason ->
+            AppLogger.w(TAG, "map pane: $reason after ${BLACK_LIMIT_MS} ms, map back full screen")
+            handBack()
+        }
+        // Launching on the pane should move the focus there and pause this screen. If it did not,
+        // onResume will not come again, so check once.
+        binding.root.postDelayed(
+            { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) refront("still resumed") },
+            REFRONT_CHECK_MS,
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (paneStartedAt != 0L) refront("resumed")
+    }
+
+    override fun onPause() {
+        if (paneStartedAt != 0L) {
+            AppLogger.i(TAG, "map pane: host paused ${SystemClock.elapsedRealtime() - paneStartedAt} ms after start")
+        }
+        super.onPause()
+    }
+
+    /**
+     * This screen has the focus, so the map on the pane is paused: send it to the front again.
+     * MAIN/HOME to the running task is the vendor launcher's "come forward", never a second copy.
+     * At most once per [REFRONT_MIN_MS], so two displays trading the focus cannot spin.
+     */
+    private fun refront(why: String) {
+        val intent = map ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (handedBack || now - refrontedAt < REFRONT_MIN_MS) return
+        refrontedAt = now
+        AppLogger.i(TAG, "map pane: host $why ${now - paneStartedAt} ms after start, map to front")
+        pane.start(intent) { handBack() }
     }
 
     override fun onStart() {
@@ -310,6 +362,9 @@ class NavSplitActivity : AppCompatActivity() {
         private const val GUIDANCE_POLLS = 20
         private const val GUIDANCE_POLL_MS = 500L
         private const val GUIDANCE_SETTLE_MS = 2_000L
+        private const val BLACK_LIMIT_MS = 8_000L
+        private const val REFRONT_CHECK_MS = 1_000L
+        private const val REFRONT_MIN_MS = 3_000L
         private const val PERCENT = 100f
         private const val ECO_WARN_BELOW = 50
         private const val SPACING_DP = 8f
