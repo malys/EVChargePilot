@@ -76,6 +76,7 @@ class NavSplitActivity : AppCompatActivity() {
     private var handedBack = false
     private var map: Intent? = null
     private var paneStartedAt = 0L
+    private var paneDue = false
     private var refrontedAt = 0L
     private var guidanceReadAtMs = 0L
     private var remainingKm: Double? = null
@@ -117,13 +118,24 @@ class NavSplitActivity : AppCompatActivity() {
             runOnUiThread {
                 if (handedBack || isDestroyed) return@runOnUiThread
                 AppLogger.i(TAG, "map pane: starting after ${waitedMs} ms of routing")
-                binding.mapPane.addView(
-                    view,
-                    ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
-                )
-                pane.start(map, onStarted = ::paneStarted) { handBack() }
+                // A stopped screen never gets the surface the pane's display is built on: on
+                // 2026-10-22 the map had come forward full screen 0.2 s before, and five seconds
+                // of retries ended in "before ActivityView is ready". So it waits for onStart.
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) startPane()
+                else paneDue = true.also { AppLogger.i(TAG, "map pane: host stopped, waits for it") }
             }
         }
+    }
+
+    private fun startPane() {
+        val intent = map ?: return
+        val view = pane.view ?: return
+        paneDue = false
+        binding.mapPane.addView(
+            view,
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
+        )
+        pane.start(intent, onStarted = ::paneStarted) { handBack() }
     }
 
     private fun paneStarted() {
@@ -169,6 +181,7 @@ class NavSplitActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         bindService(Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE)
+        if (paneDue && !handedBack) startPane()
     }
 
     override fun onStop() {

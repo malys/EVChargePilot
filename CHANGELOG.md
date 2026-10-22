@@ -21,6 +21,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed (navigation)
 
+- **The map pane never got a surface (CP-094).** On the 2026-10-22 drive the pane gave up after
+  5 s with `Trying to start activity before ActivityView is ready`. The car was already guiding,
+  so `goTo` went out after the route the map had just taken. That sent the destination a second
+  time, and the map most likely came forward full screen over the split screen. A covered
+  screen never gets the surface the pane is built on. Now `goTo` is never sent once the route
+  is taken by a car that was already guiding. A pane due while the screen is covered waits for
+  it to come back, and `release()` is skipped for a pane that never started. Not yet tried on
+  the car.
+- **A trip saved while one is deleted no longer undoes the other.** The service saves a trip
+  while the history screen can delete one, each through its own copy of `trips.json`. The last
+  write won: a drive lost, or a deleted trip back. EVHardware now holds one lock for both.
 - **The map pane is black, and only the full-screen map moves (CP-094).** After "Aller à" on
   the 2026-10-21 drive, the left two thirds stayed black until the driver chose the full-screen
   map. Waiting for guidance did not fix it, so timing was not the cause. Android 9 lets only one

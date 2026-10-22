@@ -121,6 +121,18 @@ internal object ChargeStopHandoff {
     }
 
     /**
+     * Whether `goTo` goes out after the route handoff, the rung for a head unit whose map takes
+     * the route and does nothing with it.
+     *
+     * Never when the route started the guidance, and never when the car was already guiding and
+     * took the route: it cannot say what came of it, and a second destination on top of the one
+     * it just took is the 2026-10-22 drive, where the map came forward over the split screen
+     * before its pane had a surface.
+     */
+    fun sendsGoTo(routeTaken: Boolean, wasGuiding: Boolean, routeGuided: Boolean): Boolean =
+        !routeTaken || (!wasGuiding && !routeGuided)
+
+    /**
      * Would this much charge, freed by slowing down, remove the stop.
      *
      * The planner answers it rather than the what-if: the reserve, the band and the refusal

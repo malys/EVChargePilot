@@ -142,6 +142,15 @@ class ChargeStopHandoffTest {
     }
 
     @Test
+    fun `goTo is the fallback for a route taken and ignored, never a second destination`() {
+        // 2026-10-22: already guiding, route taken, and goTo went out on top of it.
+        assertFalse(ChargeStopHandoff.sendsGoTo(routeTaken = true, wasGuiding = true, routeGuided = false))
+        assertFalse(ChargeStopHandoff.sendsGoTo(routeTaken = true, wasGuiding = false, routeGuided = true))
+        assertTrue(ChargeStopHandoff.sendsGoTo(routeTaken = true, wasGuiding = false, routeGuided = false))
+        assertTrue(ChargeStopHandoff.sendsGoTo(routeTaken = false, wasGuiding = true, routeGuided = false))
+    }
+
+    @Test
     fun `slowing down removes the stop only when the freed charge actually covers the road`() {
         val rate = rate()
 

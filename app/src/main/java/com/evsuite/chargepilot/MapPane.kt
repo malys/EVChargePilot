@@ -40,6 +40,9 @@ internal class MapPane(private val context: Context) {
     private val main = Handler(Looper.getMainLooper())
     private var released = false
 
+    /** Android 9 throws from `release()` on a pane whose display was never built. */
+    private var started = false
+
     /**
      * Starts [intent] on the pane's display.
      *
@@ -60,6 +63,7 @@ internal class MapPane(private val context: Context) {
                 if (released) return
                 val error = try {
                     startActivity.invoke(pane, intent)
+                    started = true
                     AppLogger.i(TAG, "map pane: started after $attempts retries")
                     onStarted()
                     return
@@ -125,6 +129,7 @@ internal class MapPane(private val context: Context) {
         released = true
         main.removeCallbacksAndMessages(null)
         val pane = view ?: return
+        if (!started) return
         runCatching { pane.javaClass.getMethod("release").invoke(pane) }
             .onFailure { AppLogger.w(TAG, "map pane: release failed: ${it.javaClass.simpleName}") }
     }

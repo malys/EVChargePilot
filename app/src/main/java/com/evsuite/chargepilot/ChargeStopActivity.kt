@@ -1240,8 +1240,8 @@ class ChargeStopActivity : AppCompatActivity() {
             // The route handoff first, since the drive of 2026-09-09 16:34 settled which channel
             // drives: `route taken=true guiding=true`, against `goTo taken=true guiding=false` on
             // the same tap and on the tap before it. Telenav takes transaction 23 and does nothing
-            // with it. `goTo` stays below as the rung for a head unit that behaves otherwise —
-            // it costs nothing on a tap that already worked, because it is not reached.
+            // with it. `goTo` stays below as the rung for a head unit that behaves otherwise,
+            // and [ChargeStopHandoff.sendsGoTo] says when it is reached.
             val route = target.destination?.let {
                 runCatching { SaicNavGuidance.startNavFromEvRoute(it, target.pathway) }
                     .getOrDefault(false)
@@ -1252,7 +1252,8 @@ class ChargeStopActivity : AppCompatActivity() {
             // below only settles what the message will say.
             if (route) showMap(split)
             val routeGuided = route && !wasGuiding && carStartedGuiding()
-            val goTo = if (routeGuided) false else target.point?.let {
+            val sendsGoTo = ChargeStopHandoff.sendsGoTo(route, wasGuiding, routeGuided)
+            val goTo = if (!sendsGoTo) false else target.point?.let {
                 runCatching { SaicNavGuidance.goTo(it) }.getOrDefault(false)
             } ?: false
             if (goTo && !route) showMap(split)
