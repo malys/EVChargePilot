@@ -255,6 +255,14 @@ class NavSplitActivity : AppCompatActivity() {
     }
 
     private fun render(value: EnergySnapshot) {
+        // The 2026-10-22 22:39 drive: the map on the pane was the resumed activity and its first
+        // frame was seen, yet the driver saw black from D until P, where the map came back. The
+        // pane only shows the map while parked on this car, so out of P, or with the gear
+        // unread, the map goes back full screen: a black map while moving is worse than no split.
+        if (!preview && (paneDue || paneStartedAt != 0L) && value.parked != true) {
+            AppLogger.w(TAG, "map pane: car not parked (parked=${value.parked}), map back full screen")
+            return handBack()
+        }
         val unavailable = getString(R.string.value_unavailable)
         val soc = value.socPercent?.let { String.format(Locale.getDefault(), "%.0f %%", it) } ?: unavailable
         binding.splitSocRing.show(value.socPercent?.div(PERCENT), soc)
