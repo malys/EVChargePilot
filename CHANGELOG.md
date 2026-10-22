@@ -46,10 +46,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   top bar; the charge as a fill of 0–100 % (amber under 20 %); on a route, now → on arrival as
   one bar; the last 15 km of consumption drawn under the instant figure.
 - **Split screen (CP-094), after Tesla's cluster.** The map takes three quarters, the companion a
-  quarter, always in the night palette. Consumption is an arc filled to the 15 km average with
-  a tick at the reference and the trace inside it; the arrival time is on the destination line;
-  the time is in the corner; "Full-screen map" is an icon. Everything fits without scrolling:
-  the arc shrinks first on a shorter panel. `mise run split-preview` shows it on the emulator.
+  quarter, always in the night palette. Consumption is a small arc filled to the 15 km average
+  with a tick at the reference and the figure inside, and the trace beside it on the rest of the
+  card (the 2026-10-22 drive: the arc filled the card, the trace was a thumbnail); the arrival
+  time is on the destination line; the time is in the corner; "Full-screen map" is an icon.
+  Everything fits without scrolling: the trace shrinks first on a shorter panel.
+  `mise run split-preview` shows it on the emulator.
 - **Charging stop in two columns.** The plan's sentence over a strip of the trip — departure
   charge, each stop with its uncertainty bracketed under it, arrival charge — and the charger;
   the road choices and speed what-if on the right. `mise run charge-stop-preview` plans a real

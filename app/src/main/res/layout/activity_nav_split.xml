@@ -135,7 +135,7 @@
         </LinearLayout>
 
         <!-- After Tesla's energy arc: filled to the average of the last kilometres, a tick at the
-             reference, the trace and the figure inside. Takes the height that is left. -->
+             reference, the figure inside, the trace beside it. Takes the height that is left. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -166,46 +166,58 @@
                     android:textAppearance="@style/Text.EV.Secondary" />
             </LinearLayout>
 
-            <FrameLayout
+            <!-- A small arc holding the figure, the trace beside it on the rest of the card: the
+                 2026-10-22 drive had the arc fill the card and the trace a thumbnail inside it. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:minHeight="120dp">
+                android:gravity="center_vertical"
+                android:minHeight="96dp"
+                android:orientation="horizontal">
 
-                <com.evsuite.chargepilot.ArcGaugeView
-                    android:id="@+id/splitArc"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:importantForAccessibility="no" />
+                <FrameLayout
+                    android:layout_width="128dp"
+                    android:layout_height="128dp">
 
-                <LinearLayout
-                    android:layout_width="136dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.evsuite.chargepilot.ConsumptionTraceView
-                        android:id="@+id/splitTrace"
+                    <com.evsuite.chargepilot.ArcGaugeView
+                        android:id="@+id/splitArc"
                         android:layout_width="match_parent"
-                        android:layout_height="32dp"
+                        android:layout_height="match_parent"
                         android:importantForAccessibility="no" />
 
-                    <TextView
-                        android:id="@+id/splitConsumption"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:text="@string/value_unavailable"
-                        android:textAppearance="@style/Text.EV.Title" />
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="36dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/trace_axis_consumption"
-                        android:textAppearance="@style/Text.EV.Secondary" />
-                </LinearLayout>
-            </FrameLayout>
+                        <TextView
+                            android:id="@+id/splitConsumption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFeatureSettings="tnum"
+                            android:text="@string/value_unavailable"
+                            android:textAppearance="@style/Text.EV.Title" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/trace_axis_consumption"
+                            android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <com.evsuite.chargepilot.ConsumptionTraceView
+                    android:id="@+id/splitTrace"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- This drive's eco score, out of 100, with the part to work on. -->
