@@ -30,13 +30,21 @@
 
     </FrameLayout>
 
-    <!-- Everything at once, no scroll: a glance that needs a scroll is not a glance. Every block
-         is as tall as its content except the consumption card, which takes what is left — on a
-         shorter panel the arc shrinks, nothing slides out of sight. -->
-    <LinearLayout
+    <!-- Every block is as tall as its content except the consumption card, which takes what is
+         left; on a shorter panel the trace shrinks first. -->
+    <!-- The car gives an app w1778dp h640dp, not 720: when the roads list makes the column
+         taller than that, it scrolls instead of cutting the bottom off. fillViewport keeps the
+         consumption card taking what is left whenever everything fits. -->
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="@dimen/spacing_md">
 
@@ -277,4 +285,5 @@
                 android:text="@string/nav_split_roads" />
         </LinearLayout>
     </LinearLayout>
+    </ScrollView>
 </LinearLayout>

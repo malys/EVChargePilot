@@ -13,19 +13,21 @@ _.path = [
 # profiles therefore validate different axes and neither replaces an on-vehicle pass:
 #   emulator-car     API 33 Automotive, with CarPropertyManager but the wrong OS version.
 #   emulator-screen  API 28 tablet, with the target OS and panel geometry but no car service.
-# The car's panel is 1920x720 at 160dpi and carries no system bars, so a layout gets all 720
-# of them. An emulator does have bars, which take EMU_SYSTEM_UI off the panel before the
-# activity sees it, so the panel is that much taller and the configuration then reports
-# h720dp — the car's box. The old 1080 panel reported h908dp and hid every overflow.
+# The car's app box is w1778dp h640dp at 160dpi, measured by the diagnostic bundle's [panel]
+# section (2026-10-23: screen_width_dp=1778 screen_height_dp=640, display_px=1778x720). The
+# vendor's own top strip and left dock take the rest of the 1920x720 panel. An emulator has
+# bars of its own, which take EMU_SYSTEM_UI off the panel before the activity sees it, so the
+# panel is that much taller and the configuration then reports h640dp — the car's box. The
+# earlier h720dp target was 80dp too tall and hid every overflow at the bottom of the screen.
 EMU_CAR_AVD = "evchargepilot-car"
 EMU_CAR_IMAGE = "system-images;android-33;android-automotive;x86_64"
 EMU_SCREEN_AVD = "evchargepilot-screen"
 EMU_SCREEN_IMAGE = "system-images;android-28;google_apis;x86_64"
-EMU_WIDTH = "1920"
-EMU_APP_HEIGHT = "720"
+EMU_WIDTH = "1778"
+EMU_APP_HEIGHT = "640"
 # Measured on the API 33 Automotive image: a 76dp status bar and a 96dp control bar.
 EMU_SYSTEM_UI = "172"
-EMU_HEIGHT = "892"
+EMU_HEIGHT = "812"
 EMU_DENSITY = "160"
 COMPILE_SDK = "36"
 BUILD_TOOLS = "36.0.0"
@@ -174,7 +176,7 @@ echo "Screen emulator ready."
 '''
 
 [tasks.emulator-viewport]
-description = "Size the running emulator so the app window matches the car's 1920x720 viewport"
+description = "Size the running emulator so the app window matches the car's 1778x640 app box"
 run = '''
 set -e
 ADB="$ANDROID_HOME/platform-tools/adb"

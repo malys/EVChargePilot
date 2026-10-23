@@ -52,10 +52,17 @@
             app:icon="@drawable/ic_action_advice" />
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Scrolls only when the cards outgrow the car's w1778dp h640dp box; otherwise
+         fillViewport keeps the weighted cards filling the page as before. -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:baselineAligned="false"
         android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_lg"
@@ -305,4 +312,5 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+    </ScrollView>
 </LinearLayout>

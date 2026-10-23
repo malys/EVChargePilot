@@ -52,6 +52,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   time is on the destination line; the time is in the corner; "Full-screen map" is an icon.
   Everything fits without scrolling: the trace shrinks first on a shorter panel.
   `mise run split-preview` shows it on the emulator.
+- **Layouts checked in the car's real box.** The 2026-10-23 bundle's `[panel]` says an app gets
+  w1778dp h640dp on the car, not 1920×720: the vendor's top strip and left dock keep the rest.
+  The emulator profile was sized for h720dp and hid every overflow in the bottom 80dp, so the
+  screens reworked on 2026-10-22 cut their last lines on the car. `mise run emulator-screen` now
+  sizes the app box to 1778×640. The battery page and the split screen's companion column scroll
+  when their content outgrows that box, and fill it as before when it fits.
 - **Split screen kept while driving, watched (CP-094).** The 2026-10-22 22:39 drive: the map
   was live on the pane and its first frame was seen, but the driver saw black from D until P.
   The pane now stays up in D and keeps sampling its own picture every 5 s, logging each change
