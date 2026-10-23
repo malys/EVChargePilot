@@ -90,7 +90,8 @@ finally:
         adb("shell", "settings", "delete" if value == "null" else "put", "global", key,
             *([] if value == "null" else [value]))
     if font_scale == "null":
-        adb("shell", "settings", "--user", user, "delete", "system", "font_scale")
+        # API 28's settings refuses --user on delete; it deletes for the current user.
+        adb("shell", "settings", "delete", "system", "font_scale")
     else:
         adb("shell", "settings", "--user", user, "put", "system", "font_scale", font_scale)
 assert not failed, f"Clipped windows: {failed}; reports/screenshots: {output}"
