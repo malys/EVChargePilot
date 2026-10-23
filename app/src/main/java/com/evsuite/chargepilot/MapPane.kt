@@ -40,9 +40,6 @@ internal class MapPane(private val context: Context) {
     private val main = Handler(Looper.getMainLooper())
     private var released = false
 
-    /** Android 9 throws from `release()` on a pane whose display was never built. */
-    private var started = false
-
     /**
      * Starts [intent] on the pane's display.
      *
@@ -63,7 +60,6 @@ internal class MapPane(private val context: Context) {
                 if (released) return
                 val error = try {
                     startActivity.invoke(pane, intent)
-                    started = true
                     AppLogger.i(TAG, "map pane: started after $attempts retries")
                     onStarted()
                     return
@@ -84,26 +80,25 @@ internal class MapPane(private val context: Context) {
     }
 
     /**
-     * Watches the pane for as long as it is up, and calls [onBlack] once it has shown nothing but
-     * black for [limitMs] in a row, with the reason.
+     * Watches continuously; calls [onBlack] after [limitMs] of consecutive black/missing frames.
      *
      * The 2026-10-21 drive: the pane stayed black until the driver asked for the full-screen map.
-     * Whatever the cause, a black two thirds of the screen is worse than the old full-screen
-     * handoff, so this hands the map back on its own. It reads a small copy of the pane's own
-     * surface, the one the map draws into, so it sees what the driver sees.
-     *
-     * **Not only at the start.** The 2026-10-22 22:39 drive saw a first frame, then the driver saw
-     * black from D until P. So after the first frame it keeps sampling every [WATCH_POLL_MS] and
-     * logs each change between map, black and frozen (the same picture [FROZEN_SAMPLES] times
-     * running), which is what the next drive has to answer.
+     * A black pane is worse than the full-screen handoff, including after its first lit frame.
+     * This samples the embedded surface only: a blocking window over the host display is not
+     * visible in the sample. A lit sample is therefore not proof of a visible map on the car.
      */
     fun watchBlack(limitMs: Long, onBlack: (String) -> Unit) {
-        val surface = (view as? ViewGroup)?.getChildAt(0) as? SurfaceView ?: return
+        val surface = (view as? ViewGroup)?.getChildAt(0) as? SurfaceView ?: return onBlack("no surface")
         val startedAt = SystemClock.elapsedRealtime()
-        var blackSince = startedAt
-        var seen: String? = null
-        var lastPicture = 0
-        var same = 0
+        val watch = MapFrameWatch(limitMs, startedAt)
+        fun observe(pixels: IntArray?, retry: Runnable) {
+            if (released) return
+            val now = SystemClock.elapsedRealtime()
+            val sample = watch.sample(pixels, now)
+            if (sample.changed) AppLogger.i(TAG, "map pane: ${sample.state} after ${now - startedAt} ms")
+            if (sample.expired) onBlack(sample.state)
+            else main.postDelayed(retry, BLACK_POLL_MS)
+        }
         val probe = object : Runnable {
             override fun run() {
                 if (released) return
@@ -111,36 +106,21 @@ internal class MapPane(private val context: Context) {
                 val sample = this
                 runCatching {
                     PixelCopy.request(surface, bitmap, { result ->
-                        if (released) return@request
-                        val pixels = IntArray(SAMPLE_W * SAMPLE_H)
-                        bitmap.getPixels(pixels, 0, SAMPLE_W, 0, 0, SAMPLE_W, SAMPLE_H)
-                        val black = when (result) {
-                            PixelCopy.SUCCESS -> isBlack(pixels)
-                            PixelCopy.ERROR_SOURCE_NO_DATA -> true
-                            else -> null
+                        try {
+                            if (result != PixelCopy.SUCCESS) AppLogger.w(TAG, "map pane: pixel copy refused ($result)")
+                            val pixels = if (result == PixelCopy.SUCCESS) IntArray(SAMPLE_W * SAMPLE_H).also {
+                                bitmap.getPixels(it, 0, SAMPLE_W, 0, 0, SAMPLE_W, SAMPLE_H)
+                            } else null
+                            observe(pixels, sample)
+                        } finally {
+                            bitmap.recycle()
                         }
-                        val now = SystemClock.elapsedRealtime()
-                        if (black == null) {
-                            AppLogger.w(TAG, "map pane: pixel copy refused ($result), not watched")
-                            return@request
-                        }
-                        val picture = pixels.contentHashCode()
-                        same = if (picture == lastPicture) same + 1 else 0
-                        lastPicture = picture
-                        if (!black) blackSince = now
-                        val state = when {
-                            black -> if (result == PixelCopy.SUCCESS) "black" else "no frame"
-                            same >= FROZEN_SAMPLES -> "frozen"
-                            else -> "map"
-                        }
-                        if (state != seen) {
-                            AppLogger.i(TAG, "map pane: $state after ${now - startedAt} ms")
-                            seen = state
-                        }
-                        if (black && now - blackSince >= limitMs) return@request onBlack(state)
-                        main.postDelayed(sample, if (black) BLACK_POLL_MS else WATCH_POLL_MS)
                     }, main)
-                }.onFailure { AppLogger.w(TAG, "map pane: pixel copy failed: ${it.javaClass.simpleName}") }
+                }.onFailure {
+                    bitmap.recycle()
+                    AppLogger.w(TAG, "map pane: pixel copy failed: ${it.javaClass.simpleName}")
+                    observe(null, sample)
+                }
             }
         }
         main.postDelayed(probe, BLACK_POLL_MS)
@@ -152,7 +132,8 @@ internal class MapPane(private val context: Context) {
         released = true
         main.removeCallbacksAndMessages(null)
         val pane = view ?: return
-        if (!started) return
+        // A display can exist even when launching its activity failed. Always attempt release;
+        // an uninitialised API 28 pane may throw, which is caught just like other release errors.
         runCatching { pane.javaClass.getMethod("release").invoke(pane) }
             .onFailure { AppLogger.w(TAG, "map pane: release failed: ${it.javaClass.simpleName}") }
     }
@@ -164,8 +145,6 @@ internal class MapPane(private val context: Context) {
         private const val READY_POLL_MS = 100L
         private const val READY_ATTEMPTS = 50
         private const val BLACK_POLL_MS = 1_000L
-        private const val WATCH_POLL_MS = 5_000L
-        private const val FROZEN_SAMPLES = 3
         private const val SAMPLE_W = 48
         private const val SAMPLE_H = 18
 

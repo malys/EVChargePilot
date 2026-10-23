@@ -62,19 +62,20 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="72dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_sm"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
-                    android:maxLines="1"
                     android:text="@string/label_range" />
 
                 <TextView
                     android:id="@+id/splitRange"
                     style="@style/Text.EVChargePilot.Hero"
+                    android:layout_height="72dp"
+                    android:layout_weight="0"
                     tools:text="355 km" />
             </LinearLayout>
 
@@ -186,7 +187,8 @@
 
                 <FrameLayout
                     android:layout_width="128dp"
-                    android:layout_height="128dp">
+                    android:layout_height="wrap_content"
+                    android:minHeight="128dp">
 
                     <com.evsuite.chargepilot.ArcGaugeView
                         android:id="@+id/splitArc"

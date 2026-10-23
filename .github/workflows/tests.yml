@@ -12,6 +12,9 @@ permissions:
   contents: read
 
 jobs:
+  window-bounds:
+    uses: ./.github/workflows/window-bounds.yml
+
   unit-tests:
     name: Unit tests (JVM)
     runs-on: ubuntu-latest

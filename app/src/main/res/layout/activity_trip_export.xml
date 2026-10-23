@@ -52,20 +52,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg"
+            android:baselineAligned="false"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/exportCsvAction"
                 style="@style/Widget.EV.Button.Outlined"
                 android:layout_width="240dp"
-                android:layout_height="@dimen/touch_target"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target"
                 android:text="@string/action_export_csv" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/exportJsonAction"
                 style="@style/Widget.EV.Button.Outlined"
                 android:layout_width="240dp"
-                android:layout_height="@dimen/touch_target"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target"
                 android:layout_marginStart="@dimen/spacing_md"
                 android:text="@string/action_export_json" />
 
@@ -73,7 +76,8 @@
                 android:id="@+id/shareAction"
                 style="@style/Widget.EV.Button.Outlined"
                 android:layout_width="240dp"
-                android:layout_height="@dimen/touch_target"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target"
                 android:layout_marginStart="@dimen/spacing_md"
                 android:text="@string/action_share_export" />
         </LinearLayout>

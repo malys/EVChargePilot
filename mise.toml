@@ -13,20 +13,16 @@ _.path = [
 # profiles therefore validate different axes and neither replaces an on-vehicle pass:
 #   emulator-car     API 33 Automotive, with CarPropertyManager but the wrong OS version.
 #   emulator-screen  API 28 tablet, with the target OS and panel geometry but no car service.
-# The car's app box is w1778dp h640dp at 160dpi, measured by the diagnostic bundle's [panel]
-# section (2026-10-23: screen_width_dp=1778 screen_height_dp=640, display_px=1778x720). The
-# vendor's own top strip and left dock take the rest of the 1920x720 panel. An emulator has
-# bars of its own, which take EMU_SYSTEM_UI off the panel before the activity sees it, so the
-# panel is that much taller and the configuration then reports h640dp — the car's box. The
-# earlier h720dp target was 80dp too tall and hid every overflow at the bottom of the screen.
+# The car gives an app w1778dp h640dp at 160dpi, measured by the diagnostic bundle's
+# [panel] section on 2026-10-23. The vendor strip and dock keep the rest of the 1920x720
+# panel. The emulator needs a taller panel to leave the same app box after its own bars.
 EMU_CAR_AVD = "evchargepilot-car"
 EMU_CAR_IMAGE = "system-images;android-33;android-automotive;x86_64"
 EMU_SCREEN_AVD = "evchargepilot-screen"
 EMU_SCREEN_IMAGE = "system-images;android-28;google_apis;x86_64"
 EMU_WIDTH = "1778"
 EMU_APP_HEIGHT = "640"
-# Measured on the API 33 Automotive image: a 76dp status bar and a 96dp control bar.
-EMU_SYSTEM_UI = "172"
+# API 33 starts with 172dp of bars; emulator-viewport measures and adjusts for each image.
 EMU_HEIGHT = "812"
 EMU_DENSITY = "160"
 COMPILE_SDK = "36"
@@ -63,6 +59,10 @@ run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME assembleUnstableDebug'
 [tasks.test]
 description = "Run application and EVHardware JVM tests"
 run = './gradlew -Dorg.gradle.java.home=$JAVA_HOME testStableDebugUnitTest testUnstableDebugUnitTest :evhardware:testDebugUnitTest'
+
+[tasks.check-windows]
+description = "Check every window at 1778x640 on a connected emulator (6 languages, day/night, 100%/130%)"
+run = "python3 scripts/check-window-bounds.py"
 
 [tasks.lint]
 description = "Run Android lint"
@@ -182,15 +182,28 @@ set -e
 ADB="$ANDROID_HOME/platform-tools/adb"
 "$ADB" shell wm size "${EMU_WIDTH}x${EMU_HEIGHT}"
 "$ADB" shell wm density "$EMU_DENSITY"
-# The panel is the viewport plus the bars; if this emulator's bars are not EMU_SYSTEM_UI tall
-# the app window is not the car's and every layout check made on it is measuring the wrong box.
-# The configuration's own w/h, which is the box a layout is measured in — and display 0 only,
-# because an Automotive image also publishes a cluster display and lists it first.
-box=$("$ADB" shell dumpsys window displays \
-  | awk '/mDisplayId=0/{f=1} f && /overrideConfig/{match($0, /w[0-9]+dp h[0-9]+dp/); print substr($0, RSTART, RLENGTH); exit}')
+# am get-config reports display 0 on both API 28 and 33. API 28's window dump has no
+# overrideConfig, and Automotive's window dump lists the cluster display first.
+layout_box() {
+  "$ADB" shell am get-config \
+    | sed -n 's/^config:.*-\(w[0-9]*dp\)-\(h[0-9]*dp\)-.*/\1 \2/p'
+}
+box=$(layout_box)
 want="w${EMU_WIDTH}dp h${EMU_APP_HEIGHT}dp"
+if [ -z "$box" ]; then
+  echo "Cannot read the emulator's layout box." >&2
+  exit 1
+fi
+# API 28's bars take 72dp, API 33 Automotive's take 172dp. Measure rather than assume.
 if [ "$box" != "$want" ]; then
-  echo "Layouts would be measured in $box, not the car's $want: this emulator's system UI is not $EMU_SYSTEM_UI tall." >&2
+  app_height=${box##* h}
+  app_height=${app_height%dp}
+  panel_height=$((EMU_HEIGHT + EMU_APP_HEIGHT - app_height))
+  "$ADB" shell wm size "${EMU_WIDTH}x${panel_height}"
+  box=$(layout_box)
+fi
+if [ "$box" != "$want" ]; then
+  echo "Layouts would be measured in $box, not the car's $want." >&2
   exit 1
 fi
 echo "Layout box $box at ${EMU_DENSITY}dpi — the car's viewport."

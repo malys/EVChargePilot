@@ -20,7 +20,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="128dp"
         android:layout_weight="1">
 
         <com.evsuite.chargepilot.ConsumptionTraceView
@@ -47,8 +47,7 @@
             android:id="@+id/cardEnergy"
             style="@style/Text.EV.TripValue"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:maxLines="2" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/cardDistance"

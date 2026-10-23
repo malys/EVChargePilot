@@ -175,11 +175,16 @@
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="@dimen/chargepilot_rail_width"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/spacing_md"
             android:background="@drawable/bg_card"
+            android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="@dimen/spacing_md">
 
@@ -271,5 +276,6 @@
                 android:layout_marginTop="@dimen/spacing_sm"
                 android:text="@string/action_start_trip" />
         </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 </LinearLayout>

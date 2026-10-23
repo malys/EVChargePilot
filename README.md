@@ -322,7 +322,8 @@ profiles. Neither replaces testing on every supported vehicle firmware:
 ```bash
 mise run emulator-setup   # one-time image download and AVD creation
 mise run emulator-car     # API 33 Automotive: car-service lifecycle
-mise run emulator-screen  # API 28, panel sized so the app box is the car's 1778x640
+mise run emulator-screen  # API 28: measured 1778x640 app viewport, system bars accounted for
+mise run check-windows    # all 15 screens + About, 6 languages, day/night, 100%/130% fonts
 mise run run              # build, install and launch on the connected device
 mise run logs             # focused application and EVHardware logs
 mise run emulator-stop
@@ -330,6 +331,15 @@ mise run emulator-stop
 
 The emulators do not expose the MG4 vendor services or signals. Seeing `—` for unavailable
 telemetry is the expected fail-safe behaviour, not simulated vehicle data.
+
+`check-windows` uses the stable debug APK on an emulator, seeds the reference trips and battery ledger, and verifies
+the measured 1778×640 app window. It checks child bounds and text baselines/widths; content
+inside a working scroll container remains reachable and is allowed. The detector also checks
+itself against deliberately cropped content. Reports and failure screenshots are written to
+`app/build/reports/window-bounds/`. CI runs this on API 28 and blocks both publication workflows
+on failure. These checks cover local, populated screens and the debug navigation preview;
+they do not prove the OEM map renders or that every network-dependent route state fits.
+The trip ledger and populated plot-cursor readouts are checked alongside the default screens.
 
 Release signing reads `EV_KEYSTORE`, `EV_KEYSTORE_PASSWORD`, `EV_KEY_ALIAS` and
 `EV_KEY_PASSWORD`, or their local `gradle.properties` equivalents. Never commit credentials.

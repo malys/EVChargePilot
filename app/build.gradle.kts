@@ -19,6 +19,7 @@ android {
         targetSdk = 34
         versionCode = 2
         versionName = "0.2.0"
+        testInstrumentationRunner = "com.evsuite.chargepilot.WindowBoundsTest"
     }
 
     val keystorePath = System.getenv("EV_KEYSTORE")

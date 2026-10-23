@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_md"
-                    android:lineSpacingMultiplier="1.25"
+                    android:minHeight="28sp"
                     android:text="@string/about_attribution"
                     android:textAppearance="@style/Text.EV.Body" />
             </LinearLayout>

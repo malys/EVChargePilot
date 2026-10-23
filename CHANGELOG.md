@@ -4,6 +4,19 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed (regression guards)
+
+- Lock emulator validation to the measured 1778×640 app window, adjusting for API 28 and
+  Automotive system bars. Reject a local app checkout older than the workspace gitlink.
+- Render every manifest activity and About in six languages, both palettes and 100%/130%
+  fonts. Fail CI on cropped children or text and retain failure screenshots; stable and
+  unstable publication now wait for this gate.
+- Let charge-row energy details and the companion's range label wrap; let the small arc
+  grow vertically for larger text, keeping its narrow width and the full-size trace.
+- Keep the embedded-map watch active through unreadable surfaces; hand back full screen
+  after eight seconds without a readable frame and attempt display release after failed
+  launches. Monotonic-time tests cover recovery, later black frames and a static map.
+
 ### Added (navigation)
 
 - **The map beside the companion (CP-094).** When "Aller à" hands a route to the car, the car's

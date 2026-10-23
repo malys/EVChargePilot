@@ -23,8 +23,12 @@ permissions:
   contents: write
 
 jobs:
+  window-bounds:
+    uses: ./.github/workflows/window-bounds.yml
+
   build:
     name: Build and publish unstable APK
+    needs: window-bounds
     runs-on: ubuntu-latest
     env:
       EV_KEYSTORE_BASE64: ${{ secrets.EV_KEYSTORE_BASE64 }}

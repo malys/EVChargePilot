@@ -78,8 +78,8 @@ workspace MIT default. EVHardware remains separately licensed.
 
 Run `mise run test`, `mise run lint`, or `mise run build`. `mise run emulator-setup` creates
 the complementary `emulator-car` (Automotive API 33) and `emulator-screen` (API 28,
-panel sized so the app box is the car's w1778dp h640dp) profiles; `mise run run` installs and
-launches the debug APK. JDK 17 and Android
+1778×640 app viewport, with panel height adjusted for system bars) profiles;
+`mise run run` installs and launches the debug APK. JDK 17 and Android
 SDK 36 are used for compilation; the deployed minimum remains API 28. Emulator checks do
 not replace a vehicle pass on each supported firmware generation.
 
@@ -103,6 +103,8 @@ not replace a vehicle pass on each supported firmware generation.
   `../EVHardware` repository, is tested and pushed there, then reaches this app through a
   submodule pointer update. Never develop library changes inside the nested checkout.
 - Before handing off a change, run `mise run check` and `mise run build`. For UI/lifecycle
-  work, also run the API 28 screen emulator sized to the car's
-  w1778dp h640dp app box (the bundle's `[panel]` section; not the 1920×720 panel); for vehicle interfaces, record the
+  work, also run `mise run check-windows` on the API 28 screen emulator. It checks every
+  manifest activity and About at 1778×640, in all six languages, both palettes and
+  100%/130% font scales. A screenshot from a larger app window is not verification.
+  Stable and unstable publication depend on this gate. For vehicle interfaces, record the
   remaining on-vehicle validation requirement rather than claiming emulator coverage.

@@ -29,7 +29,7 @@ import java.util.Locale
 import java.util.concurrent.Executors
 
 /**
- * CP-094: the car's navigation on two thirds of the screen, the companion on the last third.
+ * CP-094: the car's navigation on three quarters of the screen, the companion on the last quarter.
  *
  * Opened by the "Aller à" handoff in place of the full-screen map, and only where [MapPane.possible]
  * holds. If the pane cannot start the map, this screen hands the map back full screen and
@@ -208,11 +208,13 @@ class NavSplitActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        if (!preview) AppLogger.i(TAG, "map pane: host started, pane due=$paneDue")
         bindService(Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE)
         if (paneDue && !handedBack) startPane()
     }
 
     override fun onStop() {
+        if (!preview) AppLogger.i(TAG, "map pane: host stopped, pane started=${paneStartedAt != 0L}")
         recorder?.clearListener(this)
         recorder = null
         unbindService(connection)
