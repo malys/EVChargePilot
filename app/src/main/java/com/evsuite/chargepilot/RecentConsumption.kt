@@ -30,7 +30,8 @@ class RecentConsumption(private val context: Context, private val windowKm: Doub
     fun read(nowMs: Long): Reading {
         val kept = stored ?: EnergyTripHistoryStore(File(context.filesDir, HISTORY_FILE)).read()
             .also { stored = it }
-        val current = EnergyTripSession.current(nowMs)?.let { StoredTrip(it) }
+        // With its samples: a summary alone spreads the whole drive's average over the window.
+        val current = EnergyTripSession.currentTrip(nowMs)
         val window = TripOverview.window(listOfNotNull(current) + kept, windowKm)
         return Reading(
             trace = TripOverview.trace(window),

@@ -789,7 +789,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val energy: TextView,
     )
 
-    private companion object {
+    internal companion object {
         const val HISTORY_FILE = "trips.json"
         const val STATE_SELECTED = "selected_started_at"
         const val STATE_OVERVIEW = "show_overview"

@@ -290,8 +290,11 @@ class TripRecordingService : Service() {
             sampler.execute {
                 // A stop of a few minutes with no charge in it rejoins the drive it paused:
                 // the head unit is off ten seconds after P, so the trip had to be saved there.
+                // Never across a Trip A reset, or the drive leaves the count it began in.
+                val tripAFromMs = getSharedPreferences(TripHistoryActivity.OVERVIEW_FILE, MODE_PRIVATE)
+                    .getLong(TripHistoryActivity.KEY_TRIP_A, 0L)
                 val storedStartMs = runCatching {
-                    tripStore.appendOrJoin(recorded.summary, recorded.samples)
+                    tripStore.appendOrJoin(recorded.summary, recorded.samples, tripAFromMs)
                 }.onFailure {
                     AppLogger.w(TAG, "trip history write failed: ${it.message}")
                 }.getOrNull()

@@ -92,6 +92,7 @@ class NavSplitActivity : AppCompatActivity() {
     private var paneDue = false
     private var parkedSeen: Boolean? = null
     private var refrontedAt = 0L
+    private var refrontQueued = false
     private var guidanceReadAtMs = 0L
     private var remainingKm: Double? = null
     private var toStopKm: Double? = null
@@ -195,12 +196,25 @@ class NavSplitActivity : AppCompatActivity() {
     /**
      * This screen has the focus, so the map on the pane is paused: send it to the front again.
      * MAIN/HOME to the running task is the vendor launcher's "come forward", never a second copy.
-     * At most once per [REFRONT_MIN_MS], so two displays trading the focus cannot spin.
+     * At most once per [REFRONT_MIN_MS], so two displays trading the focus cannot spin; a request
+     * inside that window is kept for its end, not dropped.
      */
     private fun refront(why: String) {
         val intent = map ?: return
         val now = SystemClock.elapsedRealtime()
-        if (handedBack || now - refrontedAt < REFRONT_MIN_MS) return
+        if (handedBack) return
+        val wait = REFRONT_MIN_MS - (now - refrontedAt)
+        if (wait > 0) {
+            // Dropping it would leave the map paused behind a resumed host: try once when allowed.
+            if (!refrontQueued) {
+                refrontQueued = true
+                binding.root.postDelayed({
+                    refrontQueued = false
+                    if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) refront(why)
+                }, wait)
+            }
+            return
+        }
         refrontedAt = now
         AppLogger.i(TAG, "map pane: host $why ${now - paneStartedAt} ms after start, map to front")
         pane.start(intent) { handBack() }

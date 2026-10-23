@@ -16,6 +16,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Keep the embedded-map watch active through unreadable surfaces; hand back full screen
   after eight seconds without a readable frame and attempt display release after failed
   launches. Monotonic-time tests cover recovery, later black frames and a static map.
+- A host resumed inside the three-second re-front window now sends the map to the front once
+  the window ends, instead of leaving it paused behind the companion.
+- Joined trips keep power/speed provenance only when both halves had it, so legacy samples no
+  longer enter model training (EVHardware `096d85d`).
+- The save at P no longer joins a drive across a Trip A reset, which dropped its km from Trip A.
+- The 15 km consumption curve reads the live drive's samples, not its overall average spread flat.
 
 ### Added (navigation)
 
