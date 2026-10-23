@@ -84,16 +84,26 @@ internal class MapPane(private val context: Context) {
     }
 
     /**
-     * Calls [onBlack] once the pane has shown nothing but black for [limitMs], with the reason.
+     * Watches the pane for as long as it is up, and calls [onBlack] once it has shown nothing but
+     * black for [limitMs] in a row, with the reason.
      *
      * The 2026-10-21 drive: the pane stayed black until the driver asked for the full-screen map.
-     * Whatever the cause, a black two thirds of the screen at departure is worse than the old
-     * full-screen handoff, so this hands the map back on its own. It reads a small copy of the
-     * pane's own surface, the one the map draws into, so it sees what the driver sees.
+     * Whatever the cause, a black two thirds of the screen is worse than the old full-screen
+     * handoff, so this hands the map back on its own. It reads a small copy of the pane's own
+     * surface, the one the map draws into, so it sees what the driver sees.
+     *
+     * **Not only at the start.** The 2026-10-22 22:39 drive saw a first frame, then the driver saw
+     * black from D until P. So after the first frame it keeps sampling every [WATCH_POLL_MS] and
+     * logs each change between map, black and frozen (the same picture [FROZEN_SAMPLES] times
+     * running), which is what the next drive has to answer.
      */
     fun watchBlack(limitMs: Long, onBlack: (String) -> Unit) {
         val surface = (view as? ViewGroup)?.getChildAt(0) as? SurfaceView ?: return
         val startedAt = SystemClock.elapsedRealtime()
+        var blackSince = startedAt
+        var seen: String? = null
+        var lastPicture = 0
+        var same = 0
         val probe = object : Runnable {
             override fun run() {
                 if (released) return
@@ -109,13 +119,26 @@ internal class MapPane(private val context: Context) {
                             PixelCopy.ERROR_SOURCE_NO_DATA -> true
                             else -> null
                         }
-                        val ms = SystemClock.elapsedRealtime() - startedAt
-                        when {
-                            black == false -> AppLogger.i(TAG, "map pane: first map frame after $ms ms")
-                            black == null -> AppLogger.w(TAG, "map pane: pixel copy refused ($result), not watched")
-                            ms >= limitMs -> onBlack(if (result == PixelCopy.SUCCESS) "black" else "no frame")
-                            else -> main.postDelayed(sample, BLACK_POLL_MS)
+                        val now = SystemClock.elapsedRealtime()
+                        if (black == null) {
+                            AppLogger.w(TAG, "map pane: pixel copy refused ($result), not watched")
+                            return@request
                         }
+                        val picture = pixels.contentHashCode()
+                        same = if (picture == lastPicture) same + 1 else 0
+                        lastPicture = picture
+                        if (!black) blackSince = now
+                        val state = when {
+                            black -> if (result == PixelCopy.SUCCESS) "black" else "no frame"
+                            same >= FROZEN_SAMPLES -> "frozen"
+                            else -> "map"
+                        }
+                        if (state != seen) {
+                            AppLogger.i(TAG, "map pane: $state after ${now - startedAt} ms")
+                            seen = state
+                        }
+                        if (black && now - blackSince >= limitMs) return@request onBlack(state)
+                        main.postDelayed(sample, if (black) BLACK_POLL_MS else WATCH_POLL_MS)
                     }, main)
                 }.onFailure { AppLogger.w(TAG, "map pane: pixel copy failed: ${it.javaClass.simpleName}") }
             }
@@ -141,6 +164,8 @@ internal class MapPane(private val context: Context) {
         private const val READY_POLL_MS = 100L
         private const val READY_ATTEMPTS = 50
         private const val BLACK_POLL_MS = 1_000L
+        private const val WATCH_POLL_MS = 5_000L
+        private const val FROZEN_SAMPLES = 3
         private const val SAMPLE_W = 48
         private const val SAMPLE_H = 18
 

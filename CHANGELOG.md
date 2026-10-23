@@ -52,9 +52,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   time is on the destination line; the time is in the corner; "Full-screen map" is an icon.
   Everything fits without scrolling: the trace shrinks first on a shorter panel.
   `mise run split-preview` shows it on the emulator.
-- **Split screen only while parked (CP-094).** The 2026-10-22 22:39 drive: the map was live on
-  the pane and its first frame was seen, but the driver saw black from D until P, where the map
-  came back. Out of P, or with the gear unread, the map now goes back full screen.
+- **Split screen kept while driving, watched (CP-094).** The 2026-10-22 22:39 drive: the map
+  was live on the pane and its first frame was seen, but the driver saw black from D until P.
+  The pane now stays up in D and keeps sampling its own picture every 5 s, logging each change
+  between map, black and frozen, and each change of gear. Black for 8 s in a row, at any time,
+  gives the map back full screen. Replaces the parked-only rule of the same day.
 - **Charging stop in two columns.** The plan's sentence over a strip of the trip — departure
   charge, each stop with its uncertainty bracketed under it, arrival charge — and the charger;
   the road choices and speed what-if on the right. `mise run charge-stop-preview` plans a real
