@@ -188,20 +188,29 @@ layout_box() {
   "$ADB" shell am get-config \
     | sed -n 's/^config:.*-\(w[0-9]*dp\)-\(h[0-9]*dp\)-.*/\1 \2/p'
 }
-box=$(layout_box)
+# wm size returns before the configuration follows: read until two reads agree on the new width.
+settled_box() {
+  last=""
+  for _ in $(seq 1 40); do
+    box=$(layout_box)
+    case "$box" in "w${EMU_WIDTH}dp "*) [ "$box" = "$last" ] && return 0 ;; esac
+    last=$box
+    sleep 0.5
+  done
+  return 1
+}
 want="w${EMU_WIDTH}dp h${EMU_APP_HEIGHT}dp"
-if [ -z "$box" ]; then
-  echo "Cannot read the emulator's layout box." >&2
-  exit 1
-fi
+panel_height=$EMU_HEIGHT
 # API 28's bars take 72dp, API 33 Automotive's take 172dp. Measure rather than assume.
-if [ "$box" != "$want" ]; then
+for round in 1 2 3; do
+  settled_box || { echo "Cannot read the emulator's layout box (last: ${box:-none})." >&2; exit 1; }
+  echo "Panel ${EMU_WIDTH}x${panel_height}: layout box $box"
+  [ "$box" = "$want" ] && break
   app_height=${box##* h}
   app_height=${app_height%dp}
-  panel_height=$((EMU_HEIGHT + EMU_APP_HEIGHT - app_height))
+  panel_height=$((panel_height + EMU_APP_HEIGHT - app_height))
   "$ADB" shell wm size "${EMU_WIDTH}x${panel_height}"
-  box=$(layout_box)
-fi
+done
 if [ "$box" != "$want" ]; then
   echo "Layouts would be measured in $box, not the car's $want." >&2
   exit 1
