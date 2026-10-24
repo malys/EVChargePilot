@@ -150,8 +150,14 @@ class NavSplitActivity : AppCompatActivity() {
                 // A stopped screen never gets the surface the pane's display is built on: on
                 // 2026-10-22 the map had come forward full screen 0.2 s before, and five seconds
                 // of retries ended in "before ActivityView is ready". So it waits for onStart.
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) startPane()
-                else paneDue = true.also { AppLogger.i(TAG, "map pane: host stopped, waits for it") }
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return@runOnUiThread startPane()
+                // The 2026-10-24 drive: the route did not guide, so the handoff sent `goTo` ten
+                // seconds after the tap, and `goTo` raises the map full screen over this screen.
+                // Waiting for onStart then waited for the end of the drive. So this screen comes
+                // back over the map, and onStart moves the map onto the pane.
+                paneDue = true
+                AppLogger.i(TAG, "map pane: host stopped, brought back over the map")
+                startActivity(Intent(this, NavSplitActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             }
         }
     }
