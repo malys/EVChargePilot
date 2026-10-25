@@ -71,11 +71,14 @@
                     style="@style/Text.EV.ReadoutLabel"
                     android:text="@string/label_range" />
 
+                <!-- Its own floor: a 12-hour clock ("11:58 AM") at 130 % leaves this column about
+                     128 dp, where "355 km" at the hero floor wraps, depending on the time. -->
                 <TextView
                     android:id="@+id/splitRange"
                     style="@style/Text.EVChargePilot.Hero"
                     android:layout_height="72dp"
                     android:layout_weight="0"
+                    app:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
                     tools:text="355 km" />
             </LinearLayout>
 

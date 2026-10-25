@@ -18,6 +18,8 @@
     <dimen name="chargepilot_text_hero">96sp</dimen>
     <dimen name="chargepilot_text_hero_secondary">56sp</dimen>
     <dimen name="chargepilot_text_hero_floor">26sp</dimen>
+    <!-- The split screen's range beside the clock: see activity_nav_split.xml. -->
+    <dimen name="chargepilot_text_split_range_floor">16sp</dimen>
     <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
     <dimen name="chargepilot_swipe_threshold">96dp</dimen>
     <!-- Fixed across primary screens so destination tabs never shift under the driver's hand. -->
