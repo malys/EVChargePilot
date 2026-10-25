@@ -4,6 +4,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Changed
+
+- **Split screen (CP-094): the companion is drawn over the map, the map is no longer embedded.**
+  The 2026-10-25 drive heard two guidance voices and found a frozen map behind Back: handing the
+  embedded map back started a second MG4 Navigator. Android 9 resumes one activity, so a map on
+  the companion's virtual display froze whenever the companion had the focus. Navigator now stays
+  full screen, alone and live; the companion is a non-focusable window over its right quarter,
+  in place only while Navigator is the top task and guiding, and gone under the reverse camera.
+  Its button closes it. The `ActivityView` pane and its frame watch are removed.
+  Validation question Q12 records where the window landed, every show and hide with the top
+  task, and how many Navigator tasks and activities exist, so a second copy shows as 2.
+
 ### Fixed (regression guards)
 
 - Embedded map: a covered companion (the reverse camera, 2026-10-24) no longer hands the map

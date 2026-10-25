@@ -7,18 +7,17 @@ declares the car permissions needed to read speed, energy, exterior environment,
 vendor-extension data, plus network and location for route planning (CP-043). It has no
 overlay, no installer, no boot receiver and no vehicle-setting write path.
 
-### The map pane (CP-094)
+### The map companion (CP-094)
 
 The manifest declares `INTERNAL_SYSTEM_WINDOW`. The permission is signature-level, so only the
-platform-signed build receives it. It would allow system windows, and the app adds none. The
-app uses it for one thing: `NavSplitActivity` starts the car's own map on the virtual display of
-an `ActivityView` it owns. Android 9 refuses that launch otherwise, because no map activity on
-the MG4 allows embedding. The pane shows the map and reads nothing from it.
+platform-signed build receives it. The app uses it for one window: `MapCompanionOverlay` draws the
+companion over the right quarter of the car's map, while the map is guiding. The window takes no
+focus, reads nothing from the map and starts nothing.
 
 It also declares `REAL_GET_TASKS`, signature-level as well and read-only: the names of the top
-activities of the four most recent tasks. The split screen uses them to come back over the car's
-map when the map has raised itself full screen, and never over anything else, such as the reverse
-camera. The same names go into the diagnostic log. It moves no task.
+activities of the four most recent tasks. The companion window is in place only while the car's
+map is the top task, so it is removed when anything else comes up, such as the reverse camera.
+The same names go into the diagnostic log. It moves no task.
 
 Trip history, evidence captures and crash reports stay in app-private storage. Telemetry never
 leaves the device. What leaves it for a route is origin, destination and road profile, and — only

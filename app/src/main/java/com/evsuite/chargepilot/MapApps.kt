@@ -83,7 +83,7 @@ object MapApps {
         return runCatching { context.startActivity(intent) }.isSuccess
     }
 
-    /** The intent [toForeground] sends, for CP-094's map pane to send to its own display. */
+    /** The intent [toForeground] sends, and CP-094's map companion reads its package from. */
     fun comeForward(context: Context): Intent? {
         val component = installedComponent(context) ?: return null
         return Intent(Intent.ACTION_MAIN)

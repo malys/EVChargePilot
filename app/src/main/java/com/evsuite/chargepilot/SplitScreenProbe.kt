@@ -147,11 +147,12 @@ object SplitScreenProbe {
         lines += "platform_signed=$platformSigned"
         lines += "secondary_display_activities=$secondaryDisplays"
         lines += "process_uid=$uid"
-        // CP-094 declares it for the map pane; granted only where the build is platform-signed.
+        // CP-094 declares it for the companion overlay; granted only where the build is platform-signed.
         lines += "embedding_permission_granted=" + (
-            pm.checkPermission(MapPane.SYSTEM_WINDOW, context.packageName) == PackageManager.PERMISSION_GRANTED
+            pm.checkPermission("android.permission.INTERNAL_SYSTEM_WINDOW", context.packageName) ==
+                PackageManager.PERMISSION_GRANTED
         )
-        lines += "map_pane_possible=${MapPane.possible(context)}"
+        lines += "map_companion_possible=${MapCompanionOverlay.possible(context)}"
         // CP-094: what covered the split screen. Unreadable means REAL_GET_TASKS was not granted.
         lines += "tasks_now=${MapApps.recentTasks(context)?.joinToString(" < ") ?: "unreadable"}"
         lines += "multi_window_config=" + listOf(

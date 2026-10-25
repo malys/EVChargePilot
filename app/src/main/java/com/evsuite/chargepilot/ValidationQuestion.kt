@@ -92,4 +92,11 @@ enum class ValidationQuestion(
             "ends, the battery ledger writes, or a dashboard or battery page reloads; kept " +
             "across processes in monitor-journal.json",
     ),
+    MAP_COMPANION(
+        "Q12",
+        "CP-094",
+        "Does the companion window draw on the right quarter of the car's map, beside a single " +
+            "MG4 Navigator, and leave whenever anything else comes up, the reverse camera above all?",
+        "\"Aller à\" arms the companion, its window is placed, refused or removed, and it ends",
+    ),
 }

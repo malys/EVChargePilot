@@ -1337,16 +1337,12 @@ class ChargeStopActivity : AppCompatActivity() {
     }
 
     /**
-     * CP-094: the map beside the companion where this head unit can host it, full screen where
-     * it cannot. [NavSplitActivity] falls back to full screen on its own if the pane fails.
+     * CP-094: the map full screen, and the companion over its right quarter where this head unit
+     * lets [MapCompanionOverlay] draw. If it cannot, the map simply stays full screen.
      */
     private fun showMap(split: Intent) {
-        if (MapPane.possible(this)) {
-            runCatching { startActivity(split) }
-                .onFailure { MapApps.toForeground(this) }
-        } else {
-            MapApps.toForeground(this)
-        }
+        MapApps.toForeground(this)
+        if (MapCompanionOverlay.possible(this)) MapCompanionOverlay.show(this, split)
     }
 
     /**
@@ -1357,7 +1353,7 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun splitRoads(toStop: Boolean): Intent {
         val found = roads
         val list = found?.list.orEmpty().map { road ->
-            NavSplitActivity.SplitRoad(
+            SplitCompanion.SplitRoad(
                 roadName(road),
                 road.route.distanceKm,
                 road.route.durationMinutes,
@@ -1366,7 +1362,7 @@ class ChargeStopActivity : AppCompatActivity() {
             )
         }
         val routeKm = found?.list?.getOrNull(chosen)?.route?.distanceKm
-        return NavSplitActivity.intent(this, list, chosen, toStop, routeKm)
+        return SplitCompanion.intent(list, chosen, toStop, routeKm)
     }
 
     /**

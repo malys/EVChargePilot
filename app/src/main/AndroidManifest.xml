@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Read-only vehicle data. EVChargePilot declares no install capability, adds no overlay
-         window (INTERNAL_SYSTEM_WINDOW is held for CP-094's map pane only, see below) and
+    <!-- Read-only vehicle data. EVChargePilot declares no install capability, adds one overlay
+         window only (INTERNAL_SYSTEM_WINDOW, CP-094's map companion, see below) and
          writes no vehicle property. Network and location it now declares; see the CP-043
          block below for what they may and may not be used for.
 
@@ -68,16 +68,16 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!--
-      CP-094. Lets the companion host the car's map on a display it owns: no map activity on
-      the MG4 allows embedding, and Android 9 skips that check only for this permission.
-      Signature-level, so only the platform-signed build is granted it.
+      CP-094. Lets the companion draw its one window over the car's map without the user's
+      overlay setting (MapCompanionOverlay). Signature-level, so only the platform-signed build
+      is granted it.
     -->
     <uses-permission
         android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
         tools:ignore="ProtectedPermissions" />
 
     <!--
-        CP-094. Reads the top activity of the recent tasks, so the split screen comes back only
+        CP-094. Reads the top activity of the recent tasks, so the companion window stays only
         over the car's map and never over the reverse camera. Read-only: it moves no task.
         Signature-level, granted to the platform-signed build only.
     -->
