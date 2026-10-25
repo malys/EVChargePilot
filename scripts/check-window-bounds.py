@@ -83,6 +83,10 @@ try:
                 print(result, flush=True)
                 if "window_bounds_failures=0" in result:
                     break
+                # Annotations are readable without a token; job logs are not.
+                for line in result.splitlines():
+                    if line.startswith("FAIL"):
+                        print(f"::error title=window-bounds {label} #{attempt}::{line[:900]}", flush=True)
                 print(f"RETRY {label}: attempt {attempt} failed", flush=True)
             archive = subprocess.check_output([adb_path, "-s", serial, "exec-out", "run-as", package,
                 "--user", user, "tar", "-C", data, "-cf", "-", "window-bounds"], timeout=30)
