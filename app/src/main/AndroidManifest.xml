@@ -76,6 +76,15 @@
         android:name="android.permission.INTERNAL_SYSTEM_WINDOW"
         tools:ignore="ProtectedPermissions" />
 
+    <!--
+        CP-094. Reads the top activity of the recent tasks, so the split screen comes back only
+        over the car's map and never over the reverse camera. Read-only: it moves no task.
+        Signature-level, granted to the platform-signed build only.
+    -->
+    <uses-permission
+        android:name="android.permission.REAL_GET_TASKS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:name=".ChargePilotApp"
         android:allowBackup="false"

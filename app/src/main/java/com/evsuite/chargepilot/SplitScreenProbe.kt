@@ -152,6 +152,8 @@ object SplitScreenProbe {
             pm.checkPermission(MapPane.SYSTEM_WINDOW, context.packageName) == PackageManager.PERMISSION_GRANTED
         )
         lines += "map_pane_possible=${MapPane.possible(context)}"
+        // CP-094: what covered the split screen. Unreadable means REAL_GET_TASKS was not granted.
+        lines += "tasks_now=${MapApps.recentTasks(context)?.joinToString(" < ") ?: "unreadable"}"
         lines += "multi_window_config=" + listOf(
             "config_supportsMultiWindow",
             "config_supportsSplitScreenMultiWindow",

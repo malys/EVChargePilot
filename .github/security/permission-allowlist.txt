@@ -46,3 +46,7 @@ android.permission.WRITE_EXTERNAL_STORAGE
 # one thing: starting the car's own map on the virtual display of an ActivityView inside
 # NavSplitActivity. No overlay window is added, and nothing else is launched on that display.
 android.permission.INTERNAL_SYSTEM_WINDOW
+# CP-094: read-only list of the recent tasks' top activities. Signature-level, granted only to
+# the platform-signed build. Gates NavSplitActivity coming back over the map (never over the
+# reverse camera) and names what covered it in the diagnostic log. Moves no task.
+android.permission.REAL_GET_TASKS

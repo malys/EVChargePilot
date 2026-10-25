@@ -155,7 +155,13 @@ class NavSplitActivity : AppCompatActivity() {
                 // seconds after the tap, and `goTo` raises the map full screen over this screen.
                 // Waiting for onStart then waited for the end of the drive. So this screen comes
                 // back over the map, and onStart moves the map onto the pane.
+                // Only over the map: anything else on top, the reverse camera above all, keeps it.
                 paneDue = true
+                val tasks = MapApps.recentTasks(this)
+                if (!MapApps.mapOnTop(tasks, map?.component?.packageName)) {
+                    AppLogger.i(TAG, "map pane: host stopped, waits for it; tasks=${tasks ?: "unreadable"}")
+                    return@runOnUiThread
+                }
                 AppLogger.i(TAG, "map pane: host stopped, brought back over the map")
                 startActivity(Intent(this, NavSplitActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             }
@@ -175,16 +181,21 @@ class NavSplitActivity : AppCompatActivity() {
 
     private fun paneStarted() {
         paneStartedAt = SystemClock.elapsedRealtime()
-        pane.watchBlack(BLACK_LIMIT_MS) { reason ->
-            AppLogger.w(TAG, "map pane: $reason after ${BLACK_LIMIT_MS} ms, map back full screen")
-            handBack()
-        }
+        watchPane()
         // Launching on the pane should move the focus there and pause this screen. If it did not,
         // onResume will not come again, so check once.
         binding.root.postDelayed(
             { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) refront("still resumed") },
             REFRONT_CHECK_MS,
         )
+    }
+
+    /** Only while this screen is started: a stopped host has no surface to sample. */
+    private fun watchPane() {
+        pane.watchBlack(BLACK_LIMIT_MS) { reason ->
+            AppLogger.w(TAG, "map pane: $reason after ${BLACK_LIMIT_MS} ms, map back full screen")
+            handBack()
+        }
     }
 
     override fun onResume() {
@@ -228,13 +239,17 @@ class NavSplitActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (!preview) AppLogger.i(TAG, "map pane: host started, pane due=$paneDue")
+        if (!preview) AppLogger.i(TAG, "map pane: host started, pane due=$paneDue, tasks=${tasksLine()}")
+        if (paneStartedAt != 0L && !handedBack) watchPane()
         bindService(Intent(this, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE)
         if (paneDue && !handedBack) startPane()
     }
 
     override fun onStop() {
-        if (!preview) AppLogger.i(TAG, "map pane: host stopped, pane started=${paneStartedAt != 0L}")
+        if (!preview) AppLogger.i(TAG, "map pane: host stopped, pane started=${paneStartedAt != 0L}, tasks=${tasksLine()}")
+        // Covered, by the reverse camera on 2026-10-24: the map stays on the pane and onStart
+        // watches it again. Handing it back from here raised it over whatever covered this screen.
+        if (::pane.isInitialized) pane.stopWatch()
         recorder?.clearListener(this)
         recorder = null
         unbindService(connection)
@@ -248,6 +263,9 @@ class NavSplitActivity : AppCompatActivity() {
         worker.shutdownNow()
         super.onDestroy()
     }
+
+    /** What is on top of the head unit, for the `map pane:` lines. Probe only. */
+    private fun tasksLine(): String = MapApps.recentTasks(this)?.joinToString(" < ") ?: "unreadable"
 
     /** The map back on the main display, full screen, and this screen gone. */
     private fun handBack() {
@@ -282,7 +300,7 @@ class NavSplitActivity : AppCompatActivity() {
         // to [MapPane.watchBlack]'s map/black/frozen lines, which hand the map back when black.
         if (!preview && paneStartedAt != 0L && value.parked != parkedSeen) {
             val ms = SystemClock.elapsedRealtime() - paneStartedAt
-            AppLogger.i(TAG, "map pane: parked=${value.parked} $ms ms after start")
+            AppLogger.i(TAG, "map pane: parked=${value.parked} $ms ms after start, tasks=${tasksLine()}")
             parkedSeen = value.parked
         }
         val unavailable = getString(R.string.value_unavailable)

@@ -1,5 +1,6 @@
 package com.evsuite.chargepilot
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -115,6 +116,29 @@ object MapApps {
             .map { it.name.removePrefix(pkg) }
             .take(MAX_ENTRY_POINTS)
     }
+
+    /**
+     * CP-094: the top activity of each recent task, the focused one first, or null when the
+     * platform would answer only this app's own tasks.
+     *
+     * `REAL_GET_TASKS` is signature|privileged, granted to this platform-signed build, and
+     * read-only: names, never a way to move a task. Without it `getRunningTasks` answers this
+     * app and the launcher, which looks like an answer and is not one, so that case is null.
+     */
+    @Suppress("DEPRECATION")
+    fun recentTasks(context: Context): List<String>? {
+        if (context.checkSelfPermission(REAL_GET_TASKS) != PackageManager.PERMISSION_GRANTED) return null
+        val manager = context.getSystemService(ActivityManager::class.java) ?: return null
+        return runCatching { manager.getRunningTasks(MAX_TASKS) }.getOrNull()
+            ?.mapNotNull { it.topActivity?.flattenToShortString() }
+    }
+
+    /** Whether the focused task is the map's, from [recentTasks]. Unreadable is never yes. */
+    internal fun mapOnTop(tasks: List<String>?, mapPackage: String?): Boolean =
+        mapPackage != null && tasks?.firstOrNull()?.substringBefore('/') == mapPackage
+
+    private const val REAL_GET_TASKS = "android.permission.REAL_GET_TASKS"
+    private const val MAX_TASKS = 4
 
     /** A probe line is read on a laptop, not scrolled: enough to spot a lead, not a manifest dump. */
     private const val MAX_ENTRY_POINTS = 24

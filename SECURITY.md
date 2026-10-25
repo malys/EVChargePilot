@@ -15,6 +15,11 @@ app uses it for one thing: `NavSplitActivity` starts the car's own map on the vi
 an `ActivityView` it owns. Android 9 refuses that launch otherwise, because no map activity on
 the MG4 allows embedding. The pane shows the map and reads nothing from it.
 
+It also declares `REAL_GET_TASKS`, signature-level as well and read-only: the names of the top
+activities of the four most recent tasks. The split screen uses them to come back over the car's
+map when the map has raised itself full screen, and never over anything else, such as the reverse
+camera. The same names go into the diagnostic log. It moves no task.
+
 Trip history, evidence captures and crash reports stay in app-private storage. Telemetry never
 leaves the device. What leaves it for a route is origin, destination and road profile, and — only
 when a charging stop is needed — a window of road around that stop. Never a trip, a charge level,

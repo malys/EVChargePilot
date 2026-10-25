@@ -40,6 +40,9 @@ internal class MapPane(private val context: Context) {
     private val main = Handler(Looper.getMainLooper())
     private var released = false
 
+    /** Bumped by [stopWatch] and by each [watchBlack]: a sample from an older watch is dropped. */
+    private var watchGeneration = 0
+
     /**
      * Starts [intent] on the pane's display.
      *
@@ -86,13 +89,16 @@ internal class MapPane(private val context: Context) {
      * A black pane is worse than the full-screen handoff, including after its first lit frame.
      * This samples the embedded surface only: a blocking window over the host display is not
      * visible in the sample. A lit sample is therefore not proof of a visible map on the car.
+     *
+     * Calling it again replaces the previous watch, and [stopWatch] ends it.
      */
     fun watchBlack(limitMs: Long, onBlack: (String) -> Unit) {
         val surface = (view as? ViewGroup)?.getChildAt(0) as? SurfaceView ?: return onBlack("no surface")
+        val generation = ++watchGeneration
         val startedAt = SystemClock.elapsedRealtime()
         val watch = MapFrameWatch(limitMs, startedAt)
         fun observe(pixels: IntArray?, retry: Runnable) {
-            if (released) return
+            if (released || generation != watchGeneration) return
             val now = SystemClock.elapsedRealtime()
             val sample = watch.sample(pixels, now)
             if (sample.changed) AppLogger.i(TAG, "map pane: ${sample.state} after ${now - startedAt} ms")
@@ -101,7 +107,7 @@ internal class MapPane(private val context: Context) {
         }
         val probe = object : Runnable {
             override fun run() {
-                if (released) return
+                if (released || generation != watchGeneration) return
                 val bitmap = Bitmap.createBitmap(SAMPLE_W, SAMPLE_H, Bitmap.Config.ARGB_8888)
                 val sample = this
                 runCatching {
@@ -124,6 +130,15 @@ internal class MapPane(private val context: Context) {
             }
         }
         main.postDelayed(probe, BLACK_POLL_MS)
+    }
+
+    /**
+     * Ends the current [watchBlack]. For a stopped host: its surface is gone, so every sample
+     * reads "no frame" whatever the map is doing, and the 2026-10-24 drive handed the map back
+     * full screen eight seconds into a reverse manoeuvre for that reason alone.
+     */
+    fun stopWatch() {
+        watchGeneration++
     }
 
     /** Removes the virtual display. Android 9 destroys whatever is still on it. */

@@ -6,6 +6,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed (regression guards)
 
+- Embedded map: a covered companion (the reverse camera, 2026-10-24) no longer hands the map
+  back full screen after eight seconds; the frame watch pauses while it is stopped and resumes
+  on return. After a route sent by `goTo` it comes back over the map only when the map is the
+  focused task (`REAL_GET_TASKS`, read-only), and the `map pane:` lines name the top tasks.
 - Lock emulator validation to the measured 1778×640 app window, adjusting for API 28 and
   Automotive system bars. Reject a local app checkout older than the workspace gitlink.
 - Render every manifest activity and About in six languages, both palettes and 100%/130%

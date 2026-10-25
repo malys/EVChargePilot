@@ -55,4 +55,13 @@ class MapPaneTest {
         pixels[2] = 0xFF305070.toInt()
         assertFalse(MapPane.isBlack(pixels))
     }
+
+    @Test fun `the split screen comes back only over the map, never when the top is unknown`() {
+        val map = "com.telenav.app.arp"
+        assertTrue(MapApps.mapOnTop(listOf("$map/com.telenav.arp.module.map.MainActivity", "x/.Y"), map))
+        assertFalse(MapApps.mapOnTop(listOf("com.saicmotor.camera/.RearViewActivity", "$map/.Main"), map))
+        assertFalse(MapApps.mapOnTop(null, map))
+        assertFalse(MapApps.mapOnTop(emptyList(), map))
+        assertFalse(MapApps.mapOnTop(listOf("$map/.Main"), null))
+    }
 }
