@@ -169,9 +169,11 @@ object ValidationProbe {
     /**
      * Every question has at least one line: the bundle is worth exporting now. Q11 reads the
      * persistent journal, which this process's own `process start` line has already filled.
+     * Q12 answers only on a drive that uses "Aller à": it must not hold the prompt back on others.
      */
     fun allAnswered(): Boolean = allAnswered(
-        synchronized(rings) { rings.keys.toSet() } + ValidationQuestion.MONITOR_JOURNAL
+        synchronized(rings) { rings.keys.toSet() } +
+            ValidationQuestion.MONITOR_JOURNAL + ValidationQuestion.MAP_COMPANION
     )
 
     internal fun allAnswered(answered: Set<ValidationQuestion>): Boolean =

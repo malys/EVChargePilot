@@ -131,10 +131,13 @@ internal object MapCompanionOverlay {
             if (guidanceOver(now, shownAt, lastGuidingAt)) return end("guidance over")
             if (now - guidanceReadAt >= GUIDANCE_POLL_MS) {
                 guidanceReadAt = now
+                // A read still in flight when this arming ends must not land on the next one.
+                val session = shownAt
                 worker.execute {
                     if (runCatching { SaicNavGuidance.isMapNavigating() }.getOrNull() == true) {
                         val at = SystemClock.elapsedRealtime()
                         main.post {
+                            if (this@MapCompanionOverlay.app == null || shownAt != session) return@post
                             lastGuidingAt = at
                             if (!guidingHeard) note("car guiding ${at - shownAt} ms after the tap")
                             guidingHeard = true

@@ -208,6 +208,9 @@ object SplitScreenProbe {
         )
         options.forEach { (option, answer) -> lines += "option.${option.name.lowercase()}=$answer" }
         lines += "split_screen_verdict=" + verdict(options).name
+        // The verdict and options are the 2026-10-18 discovery. What ships since 2026-10-25 is
+        // neither pane nor docked map: the companion window over the full-screen map, see Q12.
+        lines += "split_screen_shipped=overlay"
         lines
     }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
