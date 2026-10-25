@@ -72,11 +72,18 @@ try:
         adb("shell", "settings", "--user", user, "put", "system", "font_scale", scale)
         for night in ["no", "yes"]:
             label = f"api-{adb('shell', 'getprop', 'ro.build.version.sdk').strip()}-font-{scale}-night-{night}"
-            result = adb("shell", "am", "instrument", "--user", user, "-w", "-r", "-e", "night", night,
-                         "-e", "font_scale", scale,
-                         f"{package}.test/com.evsuite.chargepilot.WindowBoundsTest")
-            (output / f"{label}.txt").write_text(result)
-            print(result, flush=True)
+            # One retry: the API 28 emulator's swiftshader drops frames ("bad color buffer handle")
+            # and one configuration failed that way on 2026-10-25 while two runs of the same commit
+            # passed. Layout is deterministic, so a real clipping fails both attempts.
+            for attempt in (1, 2):
+                result = adb("shell", "am", "instrument", "--user", user, "-w", "-r", "-e", "night", night,
+                             "-e", "font_scale", scale,
+                             f"{package}.test/com.evsuite.chargepilot.WindowBoundsTest")
+                (output / f"{label}-attempt-{attempt}.txt").write_text(result)
+                print(result, flush=True)
+                if "window_bounds_failures=0" in result:
+                    break
+                print(f"RETRY {label}: attempt {attempt} failed", flush=True)
             archive = subprocess.check_output([adb_path, "-s", serial, "exec-out", "run-as", package,
                 "--user", user, "tar", "-C", data, "-cf", "-", "window-bounds"], timeout=30)
             if (output / label).exists():
