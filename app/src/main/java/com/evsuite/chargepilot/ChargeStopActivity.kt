@@ -77,6 +77,9 @@ class ChargeStopActivity : AppCompatActivity() {
 
     private var recorder: TripRecordingService? = null
     private var bound = false
+
+    /** The car confirmed guidance: [returnToDashboard] waits for the driver to come back. */
+    private var finishOnReturn = false
     private var speedKmh: Float? = null
     private var speedObservedAtMs: Long? = null
 
@@ -241,6 +244,11 @@ class ChargeStopActivity : AppCompatActivity() {
             Context.BIND_AUTO_CREATE,
         )
         render()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        if (finishOnReturn) finish()
     }
 
     override fun onStop() {
@@ -1368,16 +1376,20 @@ class ChargeStopActivity : AppCompatActivity() {
     /**
      * The plan is being driven, so this screen is over: back to the dashboard.
      *
-     * **Finishing, never starting.** The map is in front by now and it is what the driver is
-     * about to follow; starting the dashboard here would pull this app over it. Finishing a
-     * screen nobody is looking at leaves the map alone and puts the dashboard — with the drift
-     * companion on it — under the driver's next return to this app.
+     * **On the driver's return, never now.** The map is in front by now and it is what the driver
+     * is about to follow; starting the dashboard here would pull this app over it, and so does
+     * finishing: on 2026-10-25 (build 157) a `finish()` a second after the map came up put
+     * ArrivalForecastActivity back over it, untouched, and took the companion with it. So the
+     * screen only goes in [onRestart], when the driver has brought this app back themselves,
+     * and the dashboard — with the drift companion on it — is what they land on.
      *
      * Only on the one outcome the car confirmed. A handoff that was merely accepted, or refused,
      * leaves the screen where it is, because the sentence saying so is the only place the driver
      * can read what happened.
      */
-    private fun returnToDashboard() = finish()
+    private fun returnToDashboard() {
+        finishOnReturn = true
+    }
 
     /**
      * Waits for the navigation app to say it is guiding, and gives up saying nothing happened.

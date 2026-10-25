@@ -39,6 +39,18 @@ class ChargeStopNavigateActionTest {
         )
     }
 
+    /** 2026-10-25: a `finish()` right after the handoff put this app back over the map. */
+    @Test fun `a confirmed handoff never finishes the screen under the map`() {
+        val source = module("src/main/java/com/evsuite/chargepilot/ChargeStopActivity.kt").readText()
+        val body = Regex("private fun returnToDashboard\\(\\)[^\\n]*\\{([^}]*)\\}").find(source)
+        assertTrue("returnToDashboard has no block body", body != null)
+        assertFalse("returnToDashboard finishes at once", "finish()" in body!!.groupValues[1])
+        assertTrue(
+            "nothing finishes the screen on the driver's return",
+            Regex("onRestart\\(\\)[\\s\\S]{0,80}if \\(finishOnReturn\\) finish\\(\\)").containsMatchIn(source),
+        )
+    }
+
     private fun children(element: Element): List<Element> =
         (0 until element.childNodes.length)
             .mapNotNull { element.childNodes.item(it) as? Element }
