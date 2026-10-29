@@ -371,7 +371,8 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                 estimate.powerKw,
             )
         } else if (estimate != null) {
-            // MG4Control's method for every charge, here only for one the app slept through.
+            // MG4Control's method for every charge, here only for one the app slept through
+            // or one the pack pair did not integrate.
             getString(
                 R.string.battery_health_last_charge_estimated,
                 last.session.gainedPercent,

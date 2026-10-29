@@ -90,7 +90,8 @@ class ChargeHistoryActivity : AppCompatActivity() {
             median.meanPercentPerHour,
             charges.maxOf { it.session.peakPercentPerHour },
         )
-        val watched = charges.filter { it.watched && it.packDeltaKwh != null }
+        // A watched charge the pack pair never integrated (SWI68 DC) has no energy to add.
+        val watched = charges.filter { it.meanPowerKw != null }
         if (watched.isNotEmpty()) {
             val energy = watched.sumOf { abs(it.packDeltaKwh!!) }
             val hours = watched.sumOf { it.session.durationHours }

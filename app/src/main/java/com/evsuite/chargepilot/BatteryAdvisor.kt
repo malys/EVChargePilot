@@ -34,7 +34,8 @@ import java.util.TimeZone
  * and says nothing again.
  *
  * **Parked only.** Advice goes to the [AdviceJournal] at once; the notification waits for a car
- * that reads stopped, fails closed on an unreadable speed, and posts at most one per kind a day.
+ * that reads stopped and in P, fails closed on an unreadable speed or gear, and posts at most one
+ * per kind a day.
  * A moving car gets nothing here: driving advice stays with the voice (CP-083).
  *
  * Runs on the sampler thread, which owns the ledger it reads.
@@ -70,7 +71,9 @@ internal class BatteryAdvisor(
         }
         if (!pending) return
         val gate = ParkedDeletionPolicy.gate(value.speedKmh, value.timestampMs, System.currentTimeMillis())
-        if (gate != ParkedDeletionGate.PARKED) return
+        // Stopped is not parked: on 2026-10-29 a charge line posted 12 s into a trip, at 0 km/h in
+        // D. The gear has to read P too, and an unread gear holds the notification back.
+        if (gate != ParkedDeletionGate.PARKED || value.parked != true) return
         runCatching { flush(value.timestampMs) }
             .onFailure { AppLogger.w(TAG, "advice notification failed: ${it.message}") }
     }

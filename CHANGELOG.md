@@ -16,6 +16,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   Validation question Q12 records where the window landed, every show and hide with the top
   task, and how many Navigator tasks and activities exist, so a second copy shows as 2.
 
+### Fixed
+
+- **Charge history and Battery page: a DC charge is no longer a measured 0 kWh.** The pack pair
+  stays flat through SWI68 fast charges (2026-10-26 and 10-29, +49,8 and +30,9 points), so both
+  rows read "0,0 kWh at 0,0 kW", their columns were empty and four SOC bands showed 0 kW. Such a
+  charge is now estimated from its points, like one the app slept through, and leaves the curve
+  and the measured-energy line alone (EVHardware `ChargeEnergy`).
+- **Battery notifications wait for P.** A charge line posted 12 s into a trip on 2026-10-29: the
+  gate read 0 km/h, the car was stopped in D. The gear must now read P; an unread gear holds the
+  notification back and the line stays in the history.
+
 ### Fixed (regression guards)
 
 - Embedded map: a covered companion (the reverse camera, 2026-10-24) no longer hands the map
