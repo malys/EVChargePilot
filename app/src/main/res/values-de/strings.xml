@@ -629,8 +629,9 @@
     <string name="charge_live_via_eighty">Laden: 80 %% um %1$s, %2$d %% um %3$s (zwischen %4$s und %5$s nach deinen früheren Ladungen).</string>
     <string name="charge_live_until">Laden: %1$d %% um %2$s (zwischen %3$s und %4$s nach deinen früheren Ladungen).</string>
     <string name="charge_live_at_target">Laden: am Limit von %1$d %%.</string>
-    <string name="charge_live_no_history">Laden: keine Endzeit — noch keine beobachtete Ladung, um sie zu messen.</string>
-    <string name="charge_live_missing_band">Laden: keine Endzeit — noch keine beobachtete Ladung hat %1$d–%2$d %% durchlaufen.</string>
+    <string name="charge_live_no_history">Laden: noch keine Endzeit — die App misst eine Ladung nur bei eingeschaltetem Bildschirm und hat noch keine gemessen. Nachtladungen laufen mit schlafendem Infotainment.</string>
+    <string name="charge_live_missing_band">Laden: keine Endzeit — die App hat noch keine Ladung zwischen %1$d und %2$d %% bei eingeschaltetem Bildschirm gemessen. Nachtladungen erreichen diesen Bereich mit schlafendem Infotainment, ihre Dauer ist daher unbekannt.</string>
+    <string name="charge_live_partial">Laden: %1$d %% um %2$s (zwischen %3$s und %4$s nach deinen früheren Ladungen). Über %1$d %%: noch keine Endzeit — dort wurde noch keine Ladung bei eingeschaltetem Bildschirm gemessen.</string>
     <string name="advice_charge_last_stretch">Der letzte Abschnitt bis %1$d %% dauert %2$.1f h, so lange wie die %3$.1f h davor.</string>
     <string name="advice_charge_slower">Laden von %1$d–%2$d %% dauerte %3$.1f min pro Punkt, langsamer als deine üblichen %4$.1f–%5$.1f min auf diesem Niveau (%6$d frühere Ladungen).</string>
     <string name="advice_charge_end">Ladung: +%1$.0f Punkte in %2$.1f h. %3$s</string>

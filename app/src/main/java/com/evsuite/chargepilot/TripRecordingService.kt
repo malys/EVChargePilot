@@ -23,6 +23,7 @@ import com.evsuite.hardware.AppLogger
 import com.evsuite.hardware.EVHardware
 import com.evsuite.hardware.telemetry.BatteryLedgerRecorder
 import com.evsuite.hardware.telemetry.BatteryLedgerStore
+import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EnergySnapshot
 import com.evsuite.hardware.telemetry.EnergyTelemetryReader
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
@@ -315,8 +316,14 @@ class TripRecordingService : Service() {
                         AppLogger.w(TAG, "local energy model refresh failed: ${it.message}")
                     }
                     historyRevisionCounter.incrementAndGet()
-                    runCatching { speakTripAdvice(checkNotNull(storedStartMs)) }
-                        .onFailure { AppLogger.w(TAG, "trip advice failed: ${it.message}") }
+                    // A join re-closes a drive that was already advised. A creep across the car
+                    // park (19 m on 2026-10-29, 9 min after the drive) said the same line twice.
+                    val joined = storedStartMs != recorded.summary.startedAtMs
+                    val leg = recorded.summary.recordedDistanceKm ?: 0.0
+                    if (!joined || leg >= EcoScore.MIN_DISTANCE_KM) {
+                        runCatching { speakTripAdvice(checkNotNull(storedStartMs)) }
+                            .onFailure { AppLogger.w(TAG, "trip advice failed: ${it.message}") }
+                    }
                     AppLogger.i(
                         TAG,
                         "trip recording saved; started_epoch_ms=${recorded.summary.startedAtMs}; " +

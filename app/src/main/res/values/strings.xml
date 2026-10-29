@@ -680,8 +680,9 @@ Spending %6$s %% per km</string>
     <string name="charge_live_via_eighty">Charging: 80 %% at %1$s, %2$d %% at %3$s (between %4$s and %5$s by your past charges).</string>
     <string name="charge_live_until">Charging: %1$d %% at %2$s (between %3$s and %4$s by your past charges).</string>
     <string name="charge_live_at_target">Charging: at the %1$d %% limit.</string>
-    <string name="charge_live_no_history">Charging: no end time — no watched charge to measure it from yet.</string>
-    <string name="charge_live_missing_band">Charging: no end time — no watched charge has crossed %1$d–%2$d %% yet.</string>
+    <string name="charge_live_no_history">Charging: no end time yet — the app times a charge only while the screen is on, and has not timed one yet. Overnight charges run with the head unit asleep.</string>
+    <string name="charge_live_missing_band">Charging: no end time — the app has not yet timed a charge through %1$d–%2$d %% with the screen on. Overnight charges reach it with the head unit asleep, so their time is not known.</string>
+    <string name="charge_live_partial">Charging: %1$d %% at %2$s (between %3$s and %4$s by your past charges). Above %1$d %%: no end time yet — no charge timed there with the screen on.</string>
     <string name="advice_charge_last_stretch">The last stretch to %1$d %% takes %2$.1f h, as long as the %3$.1f h before it.</string>
     <string name="advice_charge_slower">Charging %1$d–%2$d %% took %3$.1f min a point, slower than your usual %4$.1f–%5$.1f min at this level (%6$d past charges).</string>
     <string name="advice_charge_end">Charge: +%1$.0f points in %2$.1f h. %3$s</string>

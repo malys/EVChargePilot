@@ -629,8 +629,9 @@
     <string name="charge_live_via_eighty">A carregar: 80 %% às %1$s, %2$d %% às %3$s (entre %4$s e %5$s pelos seus carregamentos anteriores).</string>
     <string name="charge_live_until">A carregar: %1$d %% às %2$s (entre %3$s e %4$s pelos seus carregamentos anteriores).</string>
     <string name="charge_live_at_target">A carregar: no limite de %1$d %%.</string>
-    <string name="charge_live_no_history">A carregar: sem hora de fim — ainda nenhum carregamento acompanhado para a medir.</string>
-    <string name="charge_live_missing_band">A carregar: sem hora de fim — nenhum carregamento acompanhado atravessou ainda %1$d–%2$d %%.</string>
+    <string name="charge_live_no_history">A carregar: ainda sem hora de fim — a app só cronometra um carregamento com o ecrã ligado e ainda não cronometrou nenhum. Os carregamentos noturnos fazem-se com a unidade em repouso.</string>
+    <string name="charge_live_missing_band">A carregar: sem hora de fim — a app ainda não cronometrou nenhum carregamento entre %1$d e %2$d %% com o ecrã ligado. Os carregamentos noturnos chegam lá com a unidade em repouso, por isso a sua duração não é conhecida.</string>
+    <string name="charge_live_partial">A carregar: %1$d %% às %2$s (entre %3$s e %4$s pelos seus carregamentos anteriores). Acima de %1$d %%: ainda sem hora de fim — nenhum carregamento cronometrado aí com o ecrã ligado.</string>
     <string name="advice_charge_last_stretch">O último troço até %1$d %% demora %2$.1f h, tanto como as %3$.1f h anteriores.</string>
     <string name="advice_charge_slower">Carregar %1$d–%2$d %% demorou %3$.1f min por ponto, mais lento do que os seus habituais %4$.1f–%5$.1f min a este nível (%6$d carregamentos anteriores).</string>
     <string name="advice_charge_end">Carregamento: +%1$.0f pontos em %2$.1f h. %3$s</string>

@@ -629,8 +629,9 @@
     <string name="charge_live_via_eighty">In ricarica: 80 %% alle %1$s, %2$d %% alle %3$s (tra %4$s e %5$s secondo le tue ricariche precedenti).</string>
     <string name="charge_live_until">In ricarica: %1$d %% alle %2$s (tra %3$s e %4$s secondo le tue ricariche precedenti).</string>
     <string name="charge_live_at_target">In ricarica: al limite del %1$d %%.</string>
-    <string name="charge_live_no_history">In ricarica: nessun orario di fine — ancora nessuna ricarica seguita con cui misurarlo.</string>
-    <string name="charge_live_missing_band">In ricarica: nessun orario di fine — nessuna ricarica seguita ha ancora attraversato %1$d–%2$d %%.</string>
+    <string name="charge_live_no_history">In ricarica: ancora nessun orario di fine — l\'app cronometra una ricarica solo a schermo acceso e non ne ha ancora cronometrata nessuna. Le ricariche notturne avvengono con l\'unità in standby.</string>
+    <string name="charge_live_missing_band">In ricarica: nessun orario di fine — l\'app non ha ancora cronometrato una ricarica tra %1$d e %2$d %% a schermo acceso. Le ricariche notturne ci arrivano con l\'unità in standby, quindi la loro durata non è nota.</string>
+    <string name="charge_live_partial">In ricarica: %1$d %% alle %2$s (tra %3$s e %4$s secondo le tue ricariche precedenti). Oltre %1$d %%: ancora nessun orario di fine — nessuna ricarica cronometrata lì a schermo acceso.</string>
     <string name="advice_charge_last_stretch">L\'ultimo tratto fino al %1$d %% richiede %2$.1f h, quanto le %3$.1f h precedenti.</string>
     <string name="advice_charge_slower">La ricarica %1$d–%2$d %% ha richiesto %3$.1f min per punto, più lenta dei tuoi soliti %4$.1f–%5$.1f min a questo livello (%6$d ricariche precedenti).</string>
     <string name="advice_charge_end">Ricarica: +%1$.0f punti in %2$.1f h. %3$s</string>

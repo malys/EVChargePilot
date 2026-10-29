@@ -18,6 +18,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Battery page, charging line: no more "no charge has crossed 80–90 %" over the whole answer.**
+  The car had charged to 99,9 %, overnight with the head unit asleep, so the app never timed it.
+  The line now gives the time to the last band it did time ("80 % at 18:10") and says the rest is
+  unknown because no charge was timed there with the screen on. Six languages.
+- **One trip-end line per drive.** A 19 m creep across the car park, joined onto the drive nine
+  minutes later, said the same score again (2026-10-29, and 10-27). A joined leg under 2 km is
+  saved and not re-advised.
 - **Charge history and Battery page: a DC charge is no longer a measured 0 kWh.** The pack pair
   stays flat through SWI68 fast charges (2026-10-26 and 10-29, +49,8 and +30,9 points), so both
   rows read "0,0 kWh at 0,0 kW", their columns were empty and four SOC bands showed 0 kW. Such a

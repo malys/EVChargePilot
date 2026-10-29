@@ -175,7 +175,16 @@ internal class ChargeCompanionText(private val res: Context, private val zone: T
             ChargeDurationRefusal.NO_WATCHED_CHARGE -> res.getString(R.string.charge_live_no_history)
             ChargeDurationRefusal.MISSING_BAND -> {
                 val from = result.bandFromPercent ?: 0
-                res.getString(R.string.charge_live_missing_band, from, from + ChargeDuration.BAND_PERCENT)
+                val partial = result.partial
+                if (partial != null) {
+                    val at = { minutes: Double -> clock(live.computedAtMs + (minutes * MINUTE_MS).toLong()) }
+                    res.getString(
+                        R.string.charge_live_partial,
+                        partial.targetPercent, at(partial.minutes), at(partial.lowMinutes), at(partial.highMinutes),
+                    )
+                } else {
+                    res.getString(R.string.charge_live_missing_band, from, from + ChargeDuration.BAND_PERCENT)
+                }
             }
         }
     }
