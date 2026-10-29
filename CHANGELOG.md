@@ -18,6 +18,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Eco score measures smoothness again, and ignores crawls.** Smoothness read 97–100 on every
+  recorded drive (scale ending at 25 % of moving time hard, measured 0–0,85 %); it ends at 1 %
+  now. Trips under 2 km get no score, so a 600 m move no longer says "Note 100" or feeds the
+  average, record and run (EVHardware `EcoScore`).
 - **Battery page, charging line: no more "no charge has crossed 80–90 %" over the whole answer.**
   The car had charged to 99,9 %, overnight with the head unit asleep, so the app never timed it.
   The line now gives the time to the last band it did time ("80 % at 18:10") and says the rest is
