@@ -479,7 +479,7 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_calibration_cycles">%1$.1f cycles complets équivalents depuis.</string>
     <string name="battery_health_calibration_unavailable">Rien à dire pour l’instant : il faut quelques jours d’historique.</string>
     <string name="battery_health_last_charge">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh à %4$.1f kW, d’après la tension × le courant du pack intégrés ici.</string>
-    <string name="battery_health_last_charge_estimated">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh, estimés d’après les points gagnés et la capacité déclarée (%4$.1f kWh) : l’application ne tournait pas pendant une partie de la charge.</string>
+    <string name="battery_health_last_charge_estimated">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh, estimés d’après les points gagnés et la capacité déclarée (%4$.1f kWh) : l’application ne tournait pas pendant une partie de la charge, ou la mesure de la batterie ne l’a pas suivie (charge rapide).</string>
     <string name="battery_health_last_charge_unwatched">Dernière charge : +%1$.0f points en %2$.1f h. Pas de valeur d’énergie : l’application n’échantillonnait pas pendant une partie de la charge.</string>
     <string name="battery_health_last_charge_none">Aucune charge enregistrée pour l’instant. Une charge apparaît ici dès que l’application a vu la jauge monter entre deux de ses relevés, voiture à l’arrêt ou branchée.</string>
     <!-- CP-082. Historique des charges : mesuré uniquement, sans coût. -->
@@ -499,7 +499,7 @@ Consommation %6$s %% par km</string>
     <string name="charge_history_median_label">Charge médiane, points</string>
     <string name="charge_history_partial">Partielle</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · extérieur %3$.0f à %4$.0f °C</string>
-    <string name="charge_history_estimated_note">Estimée (≈) : l’écran était en veille pendant une partie de la charge. L’énergie vient alors des points gagnés × la capacité utile déclarée (%1$.1f kWh, ±5 %%), et la puissance de cette énergie ÷ la durée entre deux relevés.</string>
+    <string name="charge_history_estimated_note">Estimée (≈) : l’écran était en veille pendant une partie de la charge, ou la mesure de la batterie ne l’a pas suivie (charge rapide). L’énergie vient alors des points gagnés × la capacité utile déclarée (%1$.1f kWh, ±5 %%), et la puissance de cette énergie ÷ la durée entre deux relevés.</string>
     <string name="charge_history_energy_estimated">Charges en veille (%1$d) : ≈ %2$.1f kWh estimés d’après la capacité déclarée.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimés · %2$.1f kW déduits</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimés</string>

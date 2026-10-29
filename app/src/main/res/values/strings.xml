@@ -489,7 +489,7 @@ Spending %6$s %% per km</string>
     <string name="battery_health_calibration_cycles">%1$.1f equivalent full cycles since then.</string>
     <string name="battery_health_calibration_unavailable">Nothing to say yet: this needs a few days of history.</string>
     <string name="battery_health_last_charge">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh at %4$.1f kW, from pack voltage × current integrated here.</string>
-    <string name="battery_health_last_charge_estimated">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh, estimated from the points gained and the declared capacity (%4$.1f kWh): the app was not running for part of it.</string>
+    <string name="battery_health_last_charge_estimated">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh, estimated from the points gained and the declared capacity (%4$.1f kWh): the app was not running for part of it, or the battery reading did not follow the charge (fast charging).</string>
     <string name="battery_health_last_charge_unwatched">Last charge: +%1$.0f points in %2$.1f h. No energy figure for it: this app was not sampling for part of it.</string>
     <string name="battery_health_last_charge_none">No charge recorded yet. A charge appears here once the app has seen the charge gauge rise between two of its readings, the car standing or plugged.</string>
     <!-- CP-082. Charge history: every charge in the ledger, measured only, no cost. -->
@@ -508,7 +508,7 @@ Spending %6$s %% per km</string>
     <string name="charge_history_added_label">Points put back</string>
     <string name="charge_history_median_label">Median charge, points</string>
     <string name="charge_history_partial">Partial</string>
-    <string name="charge_history_estimated_note">Estimated (≈): the screen slept for part of this charge. Its energy is then the points gained × the declared usable capacity (%1$.1f kWh, ±5 %%), and its power that energy ÷ the time between two readings.</string>
+    <string name="charge_history_estimated_note">Estimated (≈): the screen slept for part of this charge, or the battery reading did not follow it (fast charging). Its energy is then the points gained × the declared usable capacity (%1$.1f kWh, ±5 %%), and its power that energy ÷ the time between two readings.</string>
     <string name="charge_history_energy_estimated">Charges slept through (%1$d): ≈ %2$.1f kWh estimated from the declared capacity.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimated · %2$.1f kW derived</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimated</string>

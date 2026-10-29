@@ -457,7 +457,7 @@
     <string name="battery_health_calibration_cycles">%1$.1f äquivalente Vollzyklen seitdem.</string>
     <string name="battery_health_calibration_unavailable">Noch nichts zu sagen: dafür braucht es ein paar Tage Verlauf.</string>
     <string name="battery_health_last_charge">Letzte Ladung: +%1$.0f Punkte in %2$.1f h — etwa %3$.1f kWh bei %4$.1f kW, hier aus Batteriespannung × Strom integriert.</string>
-    <string name="battery_health_last_charge_estimated">Letzte Ladung: +%1$.0f Punkte in %2$.1f h — etwa %3$.1f kWh, geschätzt aus den gewonnenen Punkten und der angegebenen Kapazität (%4$.1f kWh): die App lief nicht durchgehend.</string>
+    <string name="battery_health_last_charge_estimated">Letzte Ladung: +%1$.0f Punkte in %2$.1f h — etwa %3$.1f kWh, geschätzt aus den gewonnenen Punkten und der angegebenen Kapazität (%4$.1f kWh): die App lief nicht durchgehend, oder die Batteriemessung folgte der Ladung nicht (Schnellladung).</string>
     <string name="battery_health_last_charge_unwatched">Letzte Ladung: +%1$.0f Punkte in %2$.1f h. Kein Energiewert dazu: die App hat nicht durchgehend gemessen.</string>
     <string name="battery_health_last_charge_none">Noch keine Ladung aufgezeichnet. Eine Ladung erscheint hier, sobald die App die Ladeanzeige zwischen zwei Messungen steigen sah, mit stehendem oder angestecktem Auto.</string>
     <string name="charge_history_title">Ladungen</string>
@@ -475,7 +475,7 @@
     <string name="charge_history_added_label">Zurückgebrachte Punkte</string>
     <string name="charge_history_median_label">Median-Ladung, Punkte</string>
     <string name="charge_history_partial">Teilweise</string>
-    <string name="charge_history_estimated_note">Geschätzt (≈): der Bildschirm schlief während eines Teils dieser Ladung. Ihre Energie ist dann die gewonnenen Punkte × die angegebene nutzbare Kapazität (%1$.1f kWh, ±5 %%), ihre Leistung diese Energie ÷ die Zeit zwischen zwei Messungen.</string>
+    <string name="charge_history_estimated_note">Geschätzt (≈): der Bildschirm schlief während eines Teils dieser Ladung, oder die Batteriemessung folgte ihr nicht (Schnellladung). Ihre Energie ist dann die gewonnenen Punkte × die angegebene nutzbare Kapazität (%1$.1f kWh, ±5 %%), ihre Leistung diese Energie ÷ die Zeit zwischen zwei Messungen.</string>
     <string name="charge_history_energy_estimated">Verschlafene Ladungen (%1$d): ≈ %2$.1f kWh, geschätzt aus der angegebenen Kapazität.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh geschätzt · %2$.1f kW abgeleitet</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh geschätzt</string>

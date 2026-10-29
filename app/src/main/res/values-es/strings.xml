@@ -457,7 +457,7 @@
     <string name="battery_health_calibration_cycles">%1$.1f ciclos completos equivalentes desde entonces.</string>
     <string name="battery_health_calibration_unavailable">Nada que decir aún: hacen falta unos días de historial.</string>
     <string name="battery_health_last_charge">Última carga: +%1$.0f puntos en %2$.1f h — unos %3$.1f kWh a %4$.1f kW, integrados aquí a partir de tensión × corriente de la batería.</string>
-    <string name="battery_health_last_charge_estimated">Última carga: +%1$.0f puntos en %2$.1f h — unos %3$.1f kWh, estimados a partir de los puntos ganados y la capacidad declarada (%4$.1f kWh): la app no estuvo activa todo el tiempo.</string>
+    <string name="battery_health_last_charge_estimated">Última carga: +%1$.0f puntos en %2$.1f h — unos %3$.1f kWh, estimados a partir de los puntos ganados y la capacidad declarada (%4$.1f kWh): la app no estuvo activa todo el tiempo, o la lectura de la batería no siguió la carga (carga rápida).</string>
     <string name="battery_health_last_charge_unwatched">Última carga: +%1$.0f puntos en %2$.1f h. Sin cifra de energía: esta app no estuvo midiendo todo el tiempo.</string>
     <string name="battery_health_last_charge_none">Aún no hay cargas registradas. Una carga aparece aquí cuando la app ha visto subir el indicador entre dos de sus lecturas, con el coche parado o enchufado.</string>
     <string name="charge_history_title">Cargas</string>
@@ -475,7 +475,7 @@
     <string name="charge_history_added_label">Puntos recuperados</string>
     <string name="charge_history_median_label">Carga mediana, puntos</string>
     <string name="charge_history_partial">Parcial</string>
-    <string name="charge_history_estimated_note">Estimado (≈): la pantalla durmió durante parte de esta carga. Su energía es entonces los puntos ganados × la capacidad útil declarada (%1$.1f kWh, ±5 %%), y su potencia esa energía ÷ el tiempo entre dos lecturas.</string>
+    <string name="charge_history_estimated_note">Estimado (≈): la pantalla durmió durante parte de esta carga, o la lectura de la batería no la siguió (carga rápida). Su energía es entonces los puntos ganados × la capacidad útil declarada (%1$.1f kWh, ±5 %%), y su potencia esa energía ÷ el tiempo entre dos lecturas.</string>
     <string name="charge_history_energy_estimated">Cargas no seguidas (%1$d): ≈ %2$.1f kWh estimados a partir de la capacidad declarada.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimados · %2$.1f kW derivados</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimados</string>

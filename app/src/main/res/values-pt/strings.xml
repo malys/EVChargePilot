@@ -457,7 +457,7 @@
     <string name="battery_health_calibration_cycles">%1$.1f ciclos completos equivalentes desde então.</string>
     <string name="battery_health_calibration_unavailable">Ainda nada a dizer: são precisos alguns dias de histórico.</string>
     <string name="battery_health_last_charge">Último carregamento: +%1$.0f pontos em %2$.1f h — cerca de %3$.1f kWh a %4$.1f kW, integrados aqui a partir de tensão × corrente da bateria.</string>
-    <string name="battery_health_last_charge_estimated">Último carregamento: +%1$.0f pontos em %2$.1f h — cerca de %3$.1f kWh, estimados a partir dos pontos ganhos e da capacidade declarada (%4$.1f kWh): a app não esteve ativa parte do tempo.</string>
+    <string name="battery_health_last_charge_estimated">Último carregamento: +%1$.0f pontos em %2$.1f h — cerca de %3$.1f kWh, estimados a partir dos pontos ganhos e da capacidade declarada (%4$.1f kWh): a app não esteve ativa parte do tempo, ou a leitura da bateria não acompanhou o carregamento (carregamento rápido).</string>
     <string name="battery_health_last_charge_unwatched">Último carregamento: +%1$.0f pontos em %2$.1f h. Sem valor de energia: esta app não esteve a medir parte do tempo.</string>
     <string name="battery_health_last_charge_none">Ainda nenhum carregamento registado. Um carregamento aparece aqui quando a app vê o indicador subir entre duas leituras, com o carro parado ou ligado.</string>
     <string name="charge_history_title">Carregamentos</string>
@@ -475,7 +475,7 @@
     <string name="charge_history_added_label">Pontos recuperados</string>
     <string name="charge_history_median_label">Carregamento mediano, pontos</string>
     <string name="charge_history_partial">Parcial</string>
-    <string name="charge_history_estimated_note">Estimado (≈): o ecrã dormiu durante parte deste carregamento. A sua energia é então os pontos ganhos × a capacidade útil declarada (%1$.1f kWh, ±5 %%), e a sua potência essa energia ÷ o tempo entre duas leituras.</string>
+    <string name="charge_history_estimated_note">Estimado (≈): o ecrã dormiu durante parte deste carregamento, ou a leitura da bateria não o acompanhou (carregamento rápido). A sua energia é então os pontos ganhos × a capacidade útil declarada (%1$.1f kWh, ±5 %%), e a sua potência essa energia ÷ o tempo entre duas leituras.</string>
     <string name="charge_history_energy_estimated">Carregamentos não acompanhados (%1$d): ≈ %2$.1f kWh estimados a partir da capacidade declarada.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimados · %2$.1f kW derivados</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimados</string>

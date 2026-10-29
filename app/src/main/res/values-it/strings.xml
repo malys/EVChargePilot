@@ -457,7 +457,7 @@
     <string name="battery_health_calibration_cycles">%1$.1f cicli completi equivalenti da allora.</string>
     <string name="battery_health_calibration_unavailable">Ancora nulla da dire: servono alcuni giorni di storico.</string>
     <string name="battery_health_last_charge">Ultima ricarica: +%1$.0f punti in %2$.1f h — circa %3$.1f kWh a %4$.1f kW, integrati qui da tensione × corrente della batteria.</string>
-    <string name="battery_health_last_charge_estimated">Ultima ricarica: +%1$.0f punti in %2$.1f h — circa %3$.1f kWh, stimati dai punti guadagnati e dalla capacità dichiarata (%4$.1f kWh): l\'app non era attiva per parte del tempo.</string>
+    <string name="battery_health_last_charge_estimated">Ultima ricarica: +%1$.0f punti in %2$.1f h — circa %3$.1f kWh, stimati dai punti guadagnati e dalla capacità dichiarata (%4$.1f kWh): l\'app non era attiva per parte del tempo, o la misura della batteria non ha seguito la ricarica (ricarica rapida).</string>
     <string name="battery_health_last_charge_unwatched">Ultima ricarica: +%1$.0f punti in %2$.1f h. Nessun valore di energia: questa app non stava misurando per parte del tempo.</string>
     <string name="battery_health_last_charge_none">Ancora nessuna ricarica registrata. Una ricarica appare qui quando l\'app ha visto salire l\'indicatore tra due sue letture, con l\'auto ferma o collegata.</string>
     <string name="charge_history_title">Ricariche</string>
@@ -475,7 +475,7 @@
     <string name="charge_history_added_label">Punti recuperati</string>
     <string name="charge_history_median_label">Ricarica mediana, punti</string>
     <string name="charge_history_partial">Parziale</string>
-    <string name="charge_history_estimated_note">Stimato (≈): lo schermo ha dormito per parte di questa ricarica. La sua energia è allora i punti guadagnati × la capacità utile dichiarata (%1$.1f kWh, ±5 %%), e la sua potenza quell\'energia ÷ il tempo tra due letture.</string>
+    <string name="charge_history_estimated_note">Stimato (≈): lo schermo ha dormito per parte di questa ricarica, o la misura della batteria non l\'ha seguita (ricarica rapida). La sua energia è allora i punti guadagnati × la capacità utile dichiarata (%1$.1f kWh, ±5 %%), e la sua potenza quell\'energia ÷ il tempo tra due letture.</string>
     <string name="charge_history_energy_estimated">Ricariche non seguite (%1$d): ≈ %2$.1f kWh stimati dalla capacità dichiarata.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh stimati · %2$.1f kW ricavati</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh stimati</string>
