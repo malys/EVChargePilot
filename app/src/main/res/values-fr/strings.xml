@@ -668,7 +668,8 @@ Consommation %6$s %% par km</string>
     <string name="advice_charge_curve_usual">La courbe était celle d’habitude.</string>
     <string name="advice_charge_curve_slower">Une partie de la courbe était plus lente que d’habitude.</string>
     <string name="advice_charge_curve_unchecked">Courbe non vérifiée : moins de trois charges passées ont traversé une tranche entière.</string>
-    <string name="nav_split_full_map">Carte plein écran</string>
+    <string name="nav_split_full_map">EVChargePilot plein écran</string>
+    <string name="action_split">Écran partagé</string>
     <string name="nav_split_map_waiting">La voiture calcule l\u2019itinéraire…</string>
     <string name="nav_split_destination">DESTINATION</string>
     <string name="nav_split_route">%1$s km · %2$s min</string>

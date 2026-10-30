@@ -691,7 +691,8 @@ Spending %6$s %% per km</string>
     <string name="advice_charge_curve_usual">The curve was your usual one.</string>
     <string name="advice_charge_curve_slower">Part of the curve was slower than usual.</string>
     <string name="advice_charge_curve_unchecked">The curve was not checked: fewer than three past charges crossed a whole band.</string>
-    <string name="nav_split_full_map">Full-screen map</string>
+    <string name="nav_split_full_map">EVChargePilot full screen</string>
+    <string name="action_split">Split screen</string>
     <string name="nav_split_map_waiting">The car is calculating the route…</string>
     <!-- Debug builds only, on the emulator: no translation needed. -->
     <string name="nav_split_preview_map" translatable="false">Emulator preview — the car\'s map draws here on the head unit.</string>

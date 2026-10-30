@@ -640,7 +640,8 @@
     <string name="advice_charge_curve_usual">A curva foi a habitual.</string>
     <string name="advice_charge_curve_slower">Parte da curva foi mais lenta do que o habitual.</string>
     <string name="advice_charge_curve_unchecked">A curva não foi verificada: menos de três carregamentos anteriores atravessaram uma faixa inteira.</string>
-    <string name="nav_split_full_map">Mapa em ecrã inteiro</string>
+    <string name="nav_split_full_map">EVChargePilot em ecrã inteiro</string>
+    <string name="action_split">Ecrã dividido</string>
     <string name="nav_split_map_waiting">O carro está a calcular a rota…</string>
     <string name="nav_split_destination">DESTINO</string>
     <string name="nav_split_route">%1$s km · %2$s min</string>

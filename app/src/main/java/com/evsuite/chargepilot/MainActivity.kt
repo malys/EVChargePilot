@@ -142,6 +142,17 @@ class MainActivity : PrimaryNavigationActivity() {
             versionGestures.onTouchEvent(event)
             true
         }
+        if (MapCompanionOverlay.possible(this)) {
+            binding.splitAction.visibility = View.VISIBLE
+            binding.splitAction.setOnClickListener { showSplit() }
+            // Owner decision 2026-10-30: launched from the car's launcher, the app opens as the
+            // map with the companion. Tabs and the companion's own button start it otherwise.
+            if (savedInstanceState == null && intent.action == Intent.ACTION_MAIN &&
+                intent.hasCategory(Intent.CATEGORY_LAUNCHER)
+            ) {
+                showSplit()
+            }
+        }
         renderUnavailable()
         requestVehiclePermissions()
         if (TripRecordingService.isAutomaticDetectionEnabled(this)) {
@@ -516,6 +527,12 @@ class MainActivity : PrimaryNavigationActivity() {
         val rendered = provenance.render(value, pattern, unavailable)
         view.text = smallUnits(rendered)
         view.contentDescription = provenance.describe(getString(label), value, rendered)
+    }
+
+    /** The map in front, the companion over its right quarter, with or without a route. */
+    private fun showSplit() {
+        if (!MapApps.toForeground(this)) return
+        MapCompanionOverlay.show(this, SplitCompanion.intent(emptyList(), 0, false, null), untilClosed = true)
     }
 
     /**

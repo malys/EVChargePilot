@@ -42,8 +42,11 @@ import java.util.concurrent.Executors
  * hidden `TaskStackListener` would remove it on the change itself, at the cost of compiling
  * against a framework stub.
  *
- * **Only while guiding.** It ends when the car stops guiding, cancelled or arrived, and on its
- * button, so Navigator's own menus and keyboard get their quarter back.
+ * **Only while guiding** — when the charge-stop handoff opened it. It ends when the car stops
+ * guiding, cancelled or arrived, and on its button, so Navigator's own menus and keyboard get
+ * their quarter back. Owner decision 2026-10-30: launching the app opens the same split with no
+ * route, and that one stays [untilClosed]. Its button opens the app full screen, the app's own
+ * split icon comes back here.
  */
 @SuppressLint("StaticFieldLeak") // Holds the application context only.
 internal object MapCompanionOverlay {
@@ -74,6 +77,7 @@ internal object MapCompanionOverlay {
     private var renderedAt = 0L
     private var shows = 0
     private var guidingHeard = false
+    private var untilClosed = false
     private var recorder: TripRecordingService? = null
     private val worker = Executors.newSingleThreadExecutor { Thread(it, "chargepilot-overlay") }
 
@@ -93,15 +97,26 @@ internal object MapCompanionOverlay {
             PackageManager.PERMISSION_GRANTED && MapApps.comeForward(context) != null
 
     /** Arms the companion for the drive [extras] describes, replacing any earlier one. */
-    fun show(context: Context, extras: Intent) {
+    fun show(context: Context, extras: Intent, untilClosed: Boolean = false) {
         main.post {
             end("replaced")
+            this.untilClosed = untilClosed
             val app = context.applicationContext.also { this.app = it }
             val themed = ContextThemeWrapper(companionContext(app), R.style.Theme_EVChargePilot)
             val binding = ActivityNavSplitBinding.inflate(LayoutInflater.from(themed)).also { this.binding = it }
             binding.mapPane.visibility = View.GONE
             binding.root.setBackgroundResource(R.color.ev_background)
-            binding.splitFullMap.setOnClickListener { end("button") }
+            binding.splitFullMap.setOnClickListener {
+                end("button")
+                // The full app, not the full map: the split is the default, so its one way out
+                // goes to what the quarter cannot show.
+                runCatching {
+                    app.startActivity(
+                        Intent(app, MainActivity::class.java)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                    )
+                }
+            }
             split = SplitCompanion(themed, binding, extras, preview = false) { recorder }
             params = WindowManager.LayoutParams(
                 app.resources.displayMetrics.widthPixels / 4,
@@ -119,7 +134,7 @@ internal object MapCompanionOverlay {
             shows = 0
             guidingHeard = false
             app.bindService(Intent(app, TripRecordingService::class.java), connection, Context.BIND_AUTO_CREATE)
-            note("armed, map=$mapPackage, navigator ${navigatorCopies(app)}")
+            note("armed, map=$mapPackage, untilClosed=$untilClosed, navigator ${navigatorCopies(app)}")
             main.post(tick)
         }
     }
@@ -128,7 +143,7 @@ internal object MapCompanionOverlay {
         override fun run() {
             val app = app ?: return
             val now = SystemClock.elapsedRealtime()
-            if (guidanceOver(now, shownAt, lastGuidingAt)) return end("guidance over")
+            if (!untilClosed && guidanceOver(now, shownAt, lastGuidingAt)) return end("guidance over")
             if (now - guidanceReadAt >= GUIDANCE_POLL_MS) {
                 guidanceReadAt = now
                 // A read still in flight when this arming ends must not land on the next one.

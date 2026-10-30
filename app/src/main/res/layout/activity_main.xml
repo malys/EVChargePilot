@@ -51,6 +51,19 @@
             android:fontFeatureSettings="tnum"
             android:textAppearance="@style/Text.EV.Title" />
 
+        <!-- Back to the map with the companion over its right quarter. Shown only where this
+             head unit lets the companion draw. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/splitAction"
+            style="@style/Widget.EVChargePilot.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:contentDescription="@string/action_split"
+            android:tooltipText="@string/action_split"
+            android:visibility="gone"
+            app:icon="@drawable/ic_action_split" />
+
         <!-- Full-height target despite secondary typography. Wide as its own text: the
              version it shows grows with the build number, and 140dp wrapped it onto two
              lines inside a 72dp bar. -->
