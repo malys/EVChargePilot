@@ -605,8 +605,6 @@
     <string name="eco_history_windows">Finestrini aperti: in media il %1$d %% dell\'energia dei viaggi in cui hanno contato.</string>
     <string name="advice_history_title">Consigli</string>
     <string name="advice_history_open">Storico consigli</string>
-    <string name="advice_history_list">Consigli, dal più recente, così come sono stati dati</string>
-    <string name="advice_history_empty">Ancora nessun consiglio dato. Qui si conservano la riga di fine viaggio e ciò che cambia da un giorno all\'altro nelle analisi della batteria.</string>
     <string name="advice_settings_notify">Notifica i consigli batteria a veicolo fermo</string>
     <string name="advice_notification_title">Compagno della batteria</string>
     <string name="advice_channel">Consigli batteria</string>
@@ -669,4 +667,11 @@
     <string name="battery_health_windows_label">scariche di almeno %1$.0f punti misurate</string>
     <string name="battery_health_sessions_label">ricariche</string>
     <string name="battery_health_stress_label" formatted="false">alta potenza, freddo o sotto 20 %, questo mese</string>
+    <string name="advice_scores_title">Voto eco per viaggio</string>
+    <string name="advice_scores_legend">ultimi %1$d viaggi · media %2$d / 100 · sotto la media in arancione</string>
+    <string name="advice_braking_title">Frenate brusche ogni 10 km</string>
+    <string name="advice_braking_legend">media %1$.1f · massimo %2$.1f</string>
+    <string name="advice_driving_title">Guida</string>
+    <string name="advice_charge_title">Ricarica e batteria</string>
+    <string name="advice_none">Ancora nessun consiglio.</string>
 </resources>

@@ -633,8 +633,6 @@ Consommation %6$s %% par km</string>
     <!-- CP-087 : historique des conseils et notifications du compagnon batterie. -->
     <string name="advice_history_title">Conseils</string>
     <string name="advice_history_open">Historique des conseils</string>
-    <string name="advice_history_list">Conseils, du plus récent au plus ancien, tels que donnés</string>
-    <string name="advice_history_empty">Aucun conseil pour l’instant. La phrase de fin de trajet et ce qui change d’un jour à l’autre dans les analyses de la batterie sont gardés ici.</string>
     <string name="advice_settings_notify">Notifier les conseils batterie à l’arrêt</string>
     <string name="advice_notification_title">Compagnon batterie</string>
     <string name="advice_channel">Conseils batterie</string>
@@ -693,4 +691,11 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_windows_label">décharges d’au moins %1$.0f points mesurées</string>
     <string name="battery_health_sessions_label">charges</string>
     <string name="battery_health_stress_label" formatted="false">forte puissance, froid ou sous 20 %, ce mois</string>
+    <string name="advice_scores_title">Note éco par trajet</string>
+    <string name="advice_scores_legend">%1$d derniers trajets · moyenne %2$d / 100 · sous la moyenne en orange</string>
+    <string name="advice_braking_title">Freinages brusques aux 10 km</string>
+    <string name="advice_braking_legend">moyenne %1$.1f · le plus haut %2$.1f</string>
+    <string name="advice_driving_title">Conduite</string>
+    <string name="advice_charge_title">Charge et batterie</string>
+    <string name="advice_none">Pas encore de conseil.</string>
 </resources>

@@ -605,8 +605,6 @@
     <string name="eco_history_windows">Ventanillas abiertas: de media el %1$d %% de la energía de los trayectos en que contaron.</string>
     <string name="advice_history_title">Consejos</string>
     <string name="advice_history_open">Historial de consejos</string>
-    <string name="advice_history_list">Consejos, el más reciente primero, tal como se dieron</string>
-    <string name="advice_history_empty">Aún no se ha dado ningún consejo. Aquí se guardan la línea de fin de trayecto y lo que cambia de un día a otro en los análisis de batería.</string>
     <string name="advice_settings_notify">Avisar de los consejos de batería con el coche aparcado</string>
     <string name="advice_notification_title">Compañero de batería</string>
     <string name="advice_channel">Consejos de batería</string>
@@ -669,4 +667,11 @@
     <string name="battery_health_windows_label">descargas de al menos %1$.0f puntos medidas</string>
     <string name="battery_health_sessions_label">cargas</string>
     <string name="battery_health_stress_label" formatted="false">potencia alta, frío o bajo 20 %, este mes</string>
+    <string name="advice_scores_title">Nota eco por trayecto</string>
+    <string name="advice_scores_legend">últimos %1$d trayectos · media %2$d / 100 · bajo la media en naranja</string>
+    <string name="advice_braking_title">Frenazos por cada 10 km</string>
+    <string name="advice_braking_legend">media %1$.1f · máximo %2$.1f</string>
+    <string name="advice_driving_title">Conducción</string>
+    <string name="advice_charge_title">Carga y batería</string>
+    <string name="advice_none">Aún no hay consejos.</string>
 </resources>

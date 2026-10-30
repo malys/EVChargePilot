@@ -605,8 +605,6 @@
     <string name="eco_history_windows">Offene Fenster: im Schnitt %1$d %% der Energie der Fahrten, bei denen sie zählten.</string>
     <string name="advice_history_title">Tipps</string>
     <string name="advice_history_open">Tipp-Verlauf</string>
-    <string name="advice_history_list">Tipps, neueste zuerst, wie sie gegeben wurden</string>
-    <string name="advice_history_empty">Noch keine Tipps gegeben. Die Zeile am Fahrtende und was sich in den Batterieanalysen von einem Tag zum nächsten ändert, werden hier aufbewahrt.</string>
     <string name="advice_settings_notify">Batterietipps im Stand melden</string>
     <string name="advice_notification_title">Batterie-Begleiter</string>
     <string name="advice_channel">Batterietipps</string>
@@ -668,4 +666,11 @@
     <string name="battery_health_windows_label">Entladungen ab %1$.0f Punkten gemessen</string>
     <string name="battery_health_sessions_label">Ladevorgänge</string>
     <string name="battery_health_stress_label" formatted="false">hohe Leistung, Kälte oder unter 20 %, diesen Monat</string>
+    <string name="advice_scores_title">Öko-Note pro Fahrt</string>
+    <string name="advice_scores_legend">letzte %1$d Fahrten · Schnitt %2$d / 100 · unter dem Schnitt in Orange</string>
+    <string name="advice_braking_title">Harte Bremsungen pro 10 km</string>
+    <string name="advice_braking_legend">Schnitt %1$.1f · höchster %2$.1f</string>
+    <string name="advice_driving_title">Fahren</string>
+    <string name="advice_charge_title">Laden und Batterie</string>
+    <string name="advice_none">Noch kein Tipp.</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CP-087. Every advice the app gave, newest first, as it was said. One pane: the text is the
-     content, and a line of advice reads better wide than squeezed beside a second column. -->
+<!-- CP-087, redrawn 2026-10-30: the list of every sentence said was "not very useful". The trips'
+     scores and hard braking as columns first, then the one current tip of each kind. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,39 +32,155 @@
             android:text="@string/action_back" />
     </LinearLayout>
 
-    <ScrollView
-        style="@style/Widget.EV.Readout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginStart="@dimen/spacing_lg"
-        android:layout_marginTop="@dimen/chargepilot_bar_gap"
-        android:layout_marginEnd="@dimen/spacing_lg"
-        android:layout_marginBottom="@dimen/spacing_lg"
-        android:padding="@dimen/spacing_md">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/chargepilot_bar_gap"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_sm">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:layout_weight="1.6"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
 
             <TextView
                 style="@style/Text.EV.ReadoutLabel"
-                android:text="@string/advice_history_list" />
+                android:text="@string/advice_scores_title" />
 
-            <LinearLayout
-                android:id="@+id/adviceRows"
+            <com.evsuite.chargepilot.ColumnChartView
+                android:id="@+id/scoreColumns"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:importantForAccessibility="no" />
 
             <TextView
-                android:id="@+id/adviceEmpty"
+                android:id="@+id/scoreLegend"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/advice_history_empty"
-                android:textAppearance="@style/Text.EV.Secondary"
-                android:visibility="gone" />
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:ellipsize="end"
+                android:fontFeatureSettings="tnum"
+                android:maxLines="1"
+                android:textAppearance="@style/Text.EV.Secondary" />
         </LinearLayout>
-    </ScrollView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <TextView
+                style="@style/Text.EV.ReadoutLabel"
+                android:text="@string/advice_braking_title" />
+
+            <com.evsuite.chargepilot.ColumnChartView
+                android:id="@+id/brakingColumns"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/brakingLegend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:ellipsize="end"
+                android:fontFeatureSettings="tnum"
+                android:maxLines="1"
+                android:textAppearance="@style/Text.EV.Secondary" />
+        </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <TextView
+                style="@style/Text.EV.ReadoutLabel"
+                android:text="@string/advice_driving_title" />
+
+            <TextView
+                android:id="@+id/drivingDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
+            <TextView
+                android:id="@+id/drivingTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:text="@string/advice_none"
+                android:textAppearance="@style/Text.EV.Body" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <TextView
+                style="@style/Text.EV.ReadoutLabel"
+                android:text="@string/advice_charge_title" />
+
+            <TextView
+                android:id="@+id/chargeDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:textAppearance="@style/Text.EV.Secondary" />
+
+            <TextView
+                android:id="@+id/chargeTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:text="@string/advice_none"
+                android:textAppearance="@style/Text.EV.Body" />
+        </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

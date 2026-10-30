@@ -605,8 +605,6 @@
     <string name="eco_history_windows">Janelas abertas: em média %1$d %% da energia das viagens em que contaram.</string>
     <string name="advice_history_title">Conselhos</string>
     <string name="advice_history_open">Histórico de conselhos</string>
-    <string name="advice_history_list">Conselhos, do mais recente, tal como foram dados</string>
-    <string name="advice_history_empty">Ainda nenhum conselho dado. Aqui ficam a linha de fim de viagem e o que muda de um dia para o outro nas análises da bateria.</string>
     <string name="advice_settings_notify">Notificar os conselhos da bateria com o carro estacionado</string>
     <string name="advice_notification_title">Companheiro da bateria</string>
     <string name="advice_channel">Conselhos da bateria</string>
@@ -669,4 +667,11 @@
     <string name="battery_health_windows_label">descargas de pelo menos %1$.0f pontos medidas</string>
     <string name="battery_health_sessions_label">carregamentos</string>
     <string name="battery_health_stress_label" formatted="false">potência alta, frio ou abaixo de 20 %, este mês</string>
+    <string name="advice_scores_title">Nota eco por viagem</string>
+    <string name="advice_scores_legend">últimas %1$d viagens · média %2$d / 100 · abaixo da média a laranja</string>
+    <string name="advice_braking_title">Travagens bruscas por 10 km</string>
+    <string name="advice_braking_legend">média %1$.1f · máximo %2$.1f</string>
+    <string name="advice_driving_title">Condução</string>
+    <string name="advice_charge_title">Carga e bateria</string>
+    <string name="advice_none">Ainda sem conselhos.</string>
 </resources>
