@@ -187,6 +187,7 @@
                                 android:singleLine="true"
                                 android:textSize="@dimen/text_body" />
                         </com.google.android.material.textfield.TextInputLayout>
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -277,51 +278,91 @@
                         android:layout_marginTop="@dimen/spacing_xs"
                         android:textAppearance="@style/Text.EV.Secondary" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/routingKeyLayout"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    <!-- Beside the eye: the stored key is never shown, so removing it is its own action. -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_sm"
-                        android:hint="@string/routing_hint_key"
-                        app:endIconContentDescription="@string/routing_desc_toggle_key"
-                        app:endIconMinSize="@dimen/touch_target"
-                        app:endIconMode="password_toggle"
-                        app:helperText="@string/routing_helper_key"
-                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/routingKeyInput"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/routingKeyLayout"
+                            android:layout_weight="1"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:inputType="textPassword"
-                            android:saveEnabled="false"
-                            android:singleLine="true"
-                            android:textSize="@dimen/text_body" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:hint="@string/routing_hint_key"
+                            app:endIconContentDescription="@string/routing_desc_toggle_key"
+                            app:endIconMinSize="@dimen/touch_target"
+                            app:endIconMode="password_toggle"
+                            app:helperText="@string/routing_helper_key"
+                            app:helperTextTextAppearance="@style/Text.EV.Secondary">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/chargerKeyLayout"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/routingKeyInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:saveEnabled="false"
+                                android:singleLine="true"
+                                android:textSize="@dimen/text_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/routingClearAction"
+                            style="@style/Widget.EVChargePilot.IconButton"
+                            android:layout_width="@dimen/touch_target"
+                            android:layout_height="@dimen/touch_target"
+                            android:layout_marginStart="@dimen/spacing_xs"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:contentDescription="@string/routing_action_clear_routing"
+                            android:tooltipText="@string/routing_action_clear_routing"
+                            app:icon="@drawable/ic_action_delete"
+                            app:iconTint="@color/ev_error" />
+                    </LinearLayout>
+
+                    <!-- Beside the eye: the stored key is never shown, so removing it is its own action. -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_sm"
-                        android:hint="@string/routing_hint_charger_key"
-                        app:endIconContentDescription="@string/routing_desc_toggle_key"
-                        app:endIconMinSize="@dimen/touch_target"
-                        app:endIconMode="password_toggle"
-                        app:helperText="@string/routing_helper_charger_key"
-                        app:helperTextTextAppearance="@style/Text.EV.Secondary">
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/chargerKeyInput"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/chargerKeyLayout"
+                            android:layout_weight="1"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:inputType="textPassword"
-                            android:saveEnabled="false"
-                            android:singleLine="true"
-                            android:textSize="@dimen/text_body" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:hint="@string/routing_hint_charger_key"
+                            app:endIconContentDescription="@string/routing_desc_toggle_key"
+                            app:endIconMinSize="@dimen/touch_target"
+                            app:endIconMode="password_toggle"
+                            app:helperText="@string/routing_helper_charger_key"
+                            app:helperTextTextAppearance="@style/Text.EV.Secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/chargerKeyInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:saveEnabled="false"
+                                android:singleLine="true"
+                                android:textSize="@dimen/text_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/chargerClearAction"
+                            style="@style/Widget.EVChargePilot.IconButton"
+                            android:layout_width="@dimen/touch_target"
+                            android:layout_height="@dimen/touch_target"
+                            android:layout_marginStart="@dimen/spacing_xs"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:contentDescription="@string/routing_action_clear_charger"
+                            android:tooltipText="@string/routing_action_clear_charger"
+                            app:icon="@drawable/ic_action_delete"
+                            app:iconTint="@color/ev_error" />
+                    </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/routingBaseUrlLayout"
@@ -342,25 +383,6 @@
                             android:textSize="@dimen/text_body" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
-
-                    <!-- The page's one destructive action, and the only one that cannot be an
-                         empty field: a stored key is never shown, so clearing the box cannot
-                         mean "remove the key I cannot see". -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/routingClearAction"
-                        style="@style/Widget.EVChargePilot.IconButton"
-                        android:layout_width="@dimen/touch_target"
-                        android:layout_height="@dimen/touch_target"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="@dimen/spacing_sm"
-                        android:contentDescription="@string/routing_action_clear"
-                        android:tooltipText="@string/routing_action_clear"
-                        app:icon="@drawable/ic_action_delete"
-                        app:iconTint="@color/ev_error" />
                 </LinearLayout>
 
                 <!-- CP-074. The app's own preferences. Switches and language apply on the tap,
@@ -419,34 +441,33 @@
                         android:text="@string/eco_settings_note"
                         android:textAppearance="@style/Text.EV.Secondary" />
 
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
 
                     <!-- The same control as EVTasker's: one button naming the language in use,
-                         opening the list of the five the suite speaks. -->
-                    <TextView
+                         opening the list of the five the suite speaks. Title and button share a
+                         row and the "this app only" note is the button's tooltip, so the column
+                         keeps inside the panel's height. -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_md"
-                        android:text="@string/language_settings_title"
-                        android:textAppearance="@style/Text.EV.Title" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_xs"
-                        android:text="@string/language_settings_note"
-                        android:textAppearance="@style/Text.EV.Secondary" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/language_settings_title"
+                            android:textAppearance="@style/Text.EV.Title" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/languageAction"
-                        style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/touch_target"
-                        android:layout_marginTop="@dimen/spacing_sm"
-                        app:icon="@drawable/ic_action_language" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/languageAction"
+                            style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/touch_target"
+                            android:tooltipText="@string/language_settings_note"
+                            app:icon="@drawable/ic_action_language" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

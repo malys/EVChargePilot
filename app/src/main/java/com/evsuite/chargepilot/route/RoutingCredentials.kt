@@ -126,12 +126,16 @@ object RoutingCredentials {
         }.apply()
     }
 
-    fun clear(context: Context) {
-        preferences(context).edit()
-            .remove(KEY_API_KEY)
-            .remove(KEY_BASE_URL)
-            .remove(KEY_CHARGER_API_KEY)
-            .remove(KEY_CHARGER_BASE_URL)
-            .apply()
+    /** One service's key and its address: the other service keeps working. */
+    fun clear(context: Context, charger: Boolean) {
+        preferences(context).edit().apply {
+            if (charger) {
+                remove(KEY_CHARGER_API_KEY)
+                remove(KEY_CHARGER_BASE_URL)
+            } else {
+                remove(KEY_API_KEY)
+                remove(KEY_BASE_URL)
+            }
+        }.apply()
     }
 }

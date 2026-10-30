@@ -94,7 +94,8 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.settingsSaveAction.setOnClickListener { save() }
-        binding.routingClearAction.setOnClickListener { clearKeys() }
+        binding.routingClearAction.setOnClickListener { clearKey(charger = false) }
+        binding.chargerClearAction.setOnClickListener { clearKey(charger = true) }
         binding.settingsImportAction.setOnClickListener { import() }
         binding.settingsExportAction.setOnClickListener { export() }
         fill(VehicleSettings.read(this))
@@ -307,11 +308,14 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.chargerKeyInput.setText(stored.chargerApiKey.orEmpty())
     }
 
-    private fun clearKeys() {
-        RoutingCredentials.clear(this)
-        binding.routingKeyInput.text?.clear()
-        binding.chargerKeyInput.text?.clear()
-        binding.routingBaseUrlInput.setText(RoutingConfig.DEFAULT_BASE_URL)
+    private fun clearKey(charger: Boolean) {
+        RoutingCredentials.clear(this, charger)
+        if (charger) {
+            binding.chargerKeyInput.text?.clear()
+        } else {
+            binding.routingKeyInput.text?.clear()
+            binding.routingBaseUrlInput.setText(RoutingConfig.DEFAULT_BASE_URL)
+        }
         announce(getString(R.string.routing_cleared))
     }
 
@@ -484,6 +488,8 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.referenceLayout.isEnabled = parked
         binding.routingKeyLayout.isEnabled = parked
         binding.chargerKeyLayout.isEnabled = parked
+        binding.routingClearAction.isEnabled = parked
+        binding.chargerClearAction.isEnabled = parked
         binding.routingBaseUrlLayout.isEnabled = parked
         binding.settingsSaveAction.isEnabled = parked
         binding.settingsImportAction.isEnabled = parked

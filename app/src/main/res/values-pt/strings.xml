@@ -14,6 +14,7 @@
     <string name="power_state_unavailable">Sinal indisponível em %1$s</string>
     <string name="power_state_waiting">A aguardar a deteção do firmware</string>
     <string name="label_range">AUTONOMIA DO VEÍCULO</string>
+    <string name="nav_split_range_label">AUTONOMIA</string>
     <string name="label_adaptive_range">ESTIMATIVA ADAPTATIVA</string>
     <string name="label_arrival">À CHEGADA</string>
     <string name="label_speed">VELOCIDADE</string>
@@ -323,7 +324,8 @@
     <string name="routing_hint_base_url">Serviço de rotas (https)</string>
     <string name="routing_helper_base_url">Deixe assim para a HeiGIT ou aponte para a sua própria instância.</string>
     <string name="routing_action_save">Guardar</string>
-    <string name="routing_action_clear">Remover as chaves</string>
+    <string name="routing_action_clear_routing">Remover a chave OpenRouteService</string>
+    <string name="routing_action_clear_charger">Remover a chave Open Charge Map</string>
     <string name="routing_configured">Configurada · %1$s</string>
     <string name="routing_absent">Sem chave de rotas.</string>
     <string name="routing_moving">A configuração é recusada com o veículo em movimento.</string>

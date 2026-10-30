@@ -17,6 +17,7 @@
     <string name="power_state_unavailable">Signal unavailable on %1$s</string>
     <string name="power_state_waiting">Waiting for firmware detection</string>
     <string name="label_range">VEHICLE RANGE</string>
+    <string name="nav_split_range_label">RANGE</string>
     <string name="label_adaptive_range">ADAPTIVE ESTIMATE</string>
     <string name="label_arrival">ON ARRIVAL</string>
     <string name="reach_route_detail" translatable="false">%1$s km · %2$s min</string>
@@ -342,7 +343,8 @@ Spending %6$s %% per km</string>
     <string name="routing_hint_base_url">Routing service (https)</string>
     <string name="routing_helper_base_url">Leave as it is for HeiGIT, or point it at your own instance.</string>
     <string name="routing_action_save">Save</string>
-    <string name="routing_action_clear">Remove the keys</string>
+    <string name="routing_action_clear_routing">Remove the OpenRouteService key</string>
+    <string name="routing_action_clear_charger">Remove the Open Charge Map key</string>
     <string name="routing_configured">Configured · %1$s</string>
     <string name="routing_absent">No routing key.</string>
     <string name="routing_moving">Configuration is refused while the vehicle is moving.</string>
