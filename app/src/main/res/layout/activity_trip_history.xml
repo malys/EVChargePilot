@@ -243,7 +243,8 @@
                      consults its own minimum, so the 84dp here did nothing: on the car's box at a
                      larger per-app density the share fell below what a label over a 26sp value
                      needs and sheared the numbers off. Content-sized now, the same shape the plot
-                     screen's cursor row already uses; the track below keeps whatever is left. -->
+                     screen's cursor row already uses; the track below keeps whatever is left.
+                     One row of six, units drawn small, so the track gets the second row's height. -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -263,14 +264,6 @@
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
                         <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.ReadoutValue" />
                     </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:minHeight="@dimen/chargepilot_readout_height"
-                    android:orientation="horizontal">
 
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc_change" />
@@ -287,15 +280,16 @@
                 </LinearLayout>
 
                 <!-- CP-075. The answer to the question the readouts above never answer: was this
-                     drive an efficient one. Four lines at most — a verdict and up to three
-                     findings — and no new screen, because a review behind a tap is a review
+                     drive an efficient one. Two lines — the score and the verdict first, findings
+                     after them while room lasts — and no new screen, because a review behind a tap is a review
                      nobody reads. The track below keeps whatever height is left. -->
                 <TextView
                     android:id="@+id/detailEcoReview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/spacing_sm"
-                    android:maxLines="4"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:textAppearance="@style/Text.EV.Secondary" />
 
                 <LinearLayout
@@ -308,6 +302,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:text="@string/trip_track_legend"
                         android:textAppearance="@style/Text.EV.Secondary" />
 
