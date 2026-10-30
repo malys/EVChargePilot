@@ -1,9 +1,11 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.DrivingStress
 import com.evsuite.hardware.telemetry.EnergyTripHistoryStore
 import com.evsuite.hardware.telemetry.EnergyTripSummary
+import com.evsuite.hardware.telemetry.model.EnergyModelTrainer
 import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import com.google.gson.Gson
 import java.io.File
@@ -29,6 +31,8 @@ internal data class TripHistoryArtifact(
     val speedScaleCheck: SpeedScaleCheck.Result,
     /** Same model gate production screens use, evaluated without opening one. */
     val socModelFit: String,
+    /** The kWh model's gates, as [socModelFit]: the Details page only says "no model". */
+    val powerModelFit: String = "",
     /**
      * The fit's own training points, `[km/h, °C, %/100 km, km]`, so a refusal can be replayed
      * off the car. The 2026-10-22 `fit=refused(aero)` could not be: only trip totals left it.
@@ -99,6 +103,7 @@ internal data class TripHistoryArtifact(
                 trips = summaries.size,
                 speedScaleCheck = SpeedScaleCheck.of(odometerSpanKm, integratedKm),
                 socModelFit = SocConsumptionFitter().describe(history),
+                powerModelFit = EnergyModelTrainer().describe(history, FirmwareInfo.getGeneration()),
                 socSegments = SocConsumptionFitter().segments(history).take(MAX_SEGMENTS).map {
                     listOf(
                         round(it.meanSpeedKmh, 10.0),
