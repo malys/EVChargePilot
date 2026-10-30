@@ -352,13 +352,15 @@
                          mean "remove the key I cannot see". -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/routingClearAction"
-                        style="@style/Widget.EVChargePilot.Button.Danger"
-                        android:layout_width="match_parent"
+                        style="@style/Widget.EVChargePilot.IconButton"
+                        android:layout_width="@dimen/touch_target"
                         android:layout_height="@dimen/touch_target"
+                        android:layout_gravity="end"
                         android:layout_marginTop="@dimen/spacing_sm"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:text="@string/routing_action_clear" />
+                        android:contentDescription="@string/routing_action_clear"
+                        android:tooltipText="@string/routing_action_clear"
+                        app:icon="@drawable/ic_action_delete"
+                        app:iconTint="@color/ev_error" />
                 </LinearLayout>
 
                 <!-- CP-074. The app's own preferences. Switches and language apply on the tap,
