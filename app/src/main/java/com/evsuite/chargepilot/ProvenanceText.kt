@@ -24,6 +24,13 @@ internal const val PATTERN_CONSUMPTION = "%.1f kWh/100 km"
 internal const val PATTERN_SOC_WHOLE = "%.0f %%"
 internal const val PATTERN_DISTANCE_WHOLE = "%.0f km"
 
+// A unit starts after a space with a letter, % or °, and runs to the end or to an estimate's
+// ± band, so "kWh/100 km" stays one unit and "≈ 12 km ± 3 km" holds two.
+private val UNIT = Regex("""(?<= )[%°\p{L}][^±]*?(?= ±|$)""")
+
+/** Where the units sit in a rendered value, so a hero can draw them smaller than the figure. */
+internal fun unitRanges(rendered: String): List<IntRange> = UNIT.findAll(rendered).map { it.range }.toList()
+
 /**
  * Draws a [Provenanced] value so its kind is visible without a legend.
  *

@@ -8,7 +8,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.format.DateFormat
+import android.text.style.RelativeSizeSpan
 import android.os.IBinder
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -514,7 +517,12 @@ class MainActivity : PrimaryNavigationActivity() {
         unavailable: String = DASH,
     ) {
         val rendered = provenance.render(value, pattern, unavailable)
-        view.text = rendered
+        // The unit never changes; drawn small, it leaves the autosized width to the figure.
+        view.text = SpannableString(rendered).apply {
+            unitRanges(rendered).forEach {
+                setSpan(RelativeSizeSpan(UNIT_SCALE), it.first, it.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
         view.contentDescription = provenance.describe(getString(label), value, rendered)
     }
 
@@ -608,6 +616,7 @@ class MainActivity : PrimaryNavigationActivity() {
         const val SOC_UNAVAILABLE = "— %"
         const val POWER_UNAVAILABLE = "— kW"
         const val DISTANCE_UNAVAILABLE = "— km"
+        const val UNIT_SCALE = 0.45f
         const val ARRIVAL_REFRESH_MS = 5_000L
         const val RECENT_REFRESH_MS = 10_000L
         const val LOW_SOC_PERCENT = 20f
