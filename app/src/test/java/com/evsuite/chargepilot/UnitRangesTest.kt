@@ -22,6 +22,13 @@ class UnitRangesTest {
     }
 
     @Test
+    fun `a route line shrinks its units, not its words or clock`() {
+        assertEquals(listOf("km", "min"), units("120,5 km · 45 min · arrivée 19:30"))
+        assertEquals(listOf("km"), units("≈ 35 km d’autonomie restante à l’arrivée"))
+        assertEquals(listOf("km/h"), units("130 km/h"))
+    }
+
+    @Test
     fun `a bare dash has no unit`() {
         assertEquals(emptyList<String>(), units("—"))
     }

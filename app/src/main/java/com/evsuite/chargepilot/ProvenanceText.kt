@@ -1,6 +1,9 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
 import com.evsuite.hardware.CarPropertyEvidence
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.telemetry.Provenance
@@ -24,12 +27,22 @@ internal const val PATTERN_CONSUMPTION = "%.1f kWh/100 km"
 internal const val PATTERN_SOC_WHOLE = "%.0f %%"
 internal const val PATTERN_DISTANCE_WHOLE = "%.0f km"
 
-// A unit starts after a space with a letter, % or °, and runs to the end or to an estimate's
-// ± band, so "kWh/100 km" stays one unit and "≈ 12 km ± 3 km" holds two.
-private val UNIT = Regex("""(?<= )[%°\p{L}][^±]*?(?= ±|$)""")
+// A unit is one of the app's own, right after a figure or the unavailable dash, so "kWh/100 km"
+// stays one unit, "≈ 12 km ± 3 km" holds two, and "120 km · 45 min · arrival 19:30" leaves the
+// words and the clock alone. Longest first: "kWh/100 km" before "kWh", "km/h" before "km".
+private val UNIT = Regex("""(?<=[\d—] )(kWh/100 km|km/h|kWh|kW|km|min|°C|%)(?![\p{L}/])""")
 
 /** Where the units sit in a rendered value, so a hero can draw them smaller than the figure. */
 internal fun unitRanges(rendered: String): List<IntRange> = UNIT.findAll(rendered).map { it.range }.toList()
+
+private const val UNIT_SCALE = 0.45f
+
+/** The text with its units drawn small: a unit never changes, so it gives its width to the figure. */
+internal fun smallUnits(text: String): CharSequence = SpannableString(text).apply {
+    unitRanges(text).forEach {
+        setSpan(RelativeSizeSpan(UNIT_SCALE), it.first, it.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+}
 
 /**
  * Draws a [Provenanced] value so its kind is visible without a legend.

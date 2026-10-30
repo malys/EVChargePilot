@@ -101,7 +101,7 @@ internal class SplitCompanion(
                 remainingKm = destinationKm(toStop, km, routeKm, drivenKm(value))
                 toStopKm = km.takeIf { toStop }
                 val left = remainingKm
-                binding.splitRoute.text = when {
+                binding.splitRoute.text = smallUnits(when {
                     left == null -> context.getString(R.string.nav_split_no_guidance)
                     toStop -> context.getString(
                         R.string.nav_split_route_stop,
@@ -119,7 +119,7 @@ internal class SplitCompanion(
                         String.format(Locale.getDefault(), "%.1f", left),
                         unavailable,
                     )
-                }
+                })
                 binding.splitRoad.text = road.orEmpty()
                 renderReach(recorder()?.latest?.rangeKm?.toDouble())
             }
@@ -158,10 +158,10 @@ internal class SplitCompanion(
             ),
         )
         binding.splitMargin.visibility = View.VISIBLE
-        binding.splitMargin.text = if (short) context.getString(R.string.nav_split_margin_short) else context.getString(
+        binding.splitMargin.text = smallUnits(if (short) context.getString(R.string.nav_split_margin_short) else context.getString(
             R.string.nav_split_margin,
             String.format(Locale.getDefault(), "%.0f", rangeKm - km),
-        )
+        ))
     }
 
     /**
