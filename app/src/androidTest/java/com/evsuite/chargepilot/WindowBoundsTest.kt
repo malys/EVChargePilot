@@ -26,6 +26,8 @@ import java.io.File
 class WindowBoundsTest : Instrumentation() {
     private lateinit var options: Bundle
 
+    private val overflows = mutableListOf<String>()
+
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
         options = arguments ?: Bundle()
@@ -103,7 +105,7 @@ class WindowBoundsTest : Instrumentation() {
                             .putExtra("started_at", startedAt)
                             .putExtra("split.preview", true))
                         onMain {
-                            activity.findViewById<TextView>(R.id.splitRange)?.text = "355 km"
+                            activity.findViewById<TextView>(R.id.splitRange)?.text = smallUnits("355 km")
                         }
                         waitForIdleSync()
                         // Wait for data and layout, not a fixed delay that can miss slow renders.
@@ -111,6 +113,7 @@ class WindowBoundsTest : Instrumentation() {
                         waitForIdleSync()
                         onMain { inspect(activity, language) }
                         report += "PASS $label"
+                        if (overflows.any { it.startsWith("SCROLL $label ") }) capture(File(output, "scroll-$label.png"))
                         if (name.endsWith(".TripHistoryActivity")) {
                             onMain { activity.findViewById<View>(R.id.viewLedger).performClick() }
                             waitForIdleSync()
@@ -174,6 +177,7 @@ class WindowBoundsTest : Instrumentation() {
                 AppCompatDelegate.setDefaultNightMode(originalNight)
             }
         }
+        report += overflows.distinct()
         File(output, "report-${options.getString("night")}.txt").writeText(report.joinToString("\n"))
         finish(if (failures == 0) Activity.RESULT_OK else Activity.RESULT_CANCELED, Bundle().apply {
             putString("stream", report.joinToString("\n") + "\nwindow_bounds_failures=$failures\n")
@@ -218,8 +222,33 @@ class WindowBoundsTest : Instrumentation() {
         check(root.width == (1778 * density).toInt() && root.height == (640 * density).toInt()) {
             "Wrong app box: ${root.width}x${root.height}px @ $density"
         }
+        overflows += hidden(root, density).map { "SCROLL $language-${activity.javaClass.simpleName} $it" }
         val errors = clipped(root)
         check(errors.isEmpty()) { errors.joinToString("\n") }
+    }
+
+    /**
+     * Content a scroller holds below its fold. Not a failure — the scroller reaches it — but on
+     * the car a driver reads a cut card as a missing one, so the report names each and by how much.
+     */
+    private fun hidden(root: View, density: Float): List<String> {
+        val found = mutableListOf<String>()
+        fun visit(view: View) {
+            if (view.visibility != View.VISIBLE) return
+            if ((view is ScrollView || view is androidx.core.widget.NestedScrollView) &&
+                view is ViewGroup && view.childCount > 0
+            ) {
+                val over = view.getChildAt(0).height - view.height
+                if (over > density) {
+                    val id = if (view.id == View.NO_ID) view.javaClass.simpleName else
+                        runCatching { view.resources.getResourceEntryName(view.id) }.getOrDefault("?")
+                    found += "$id hides ${(over / density).toInt()}dp"
+                }
+            }
+            if (view is ViewGroup) for (index in 0 until view.childCount) visit(view.getChildAt(index))
+        }
+        visit(root)
+        return found
     }
 
     /** Assertions must fail the test thread, never crash the application's main thread. */

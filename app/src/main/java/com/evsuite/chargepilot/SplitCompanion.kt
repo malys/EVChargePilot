@@ -82,8 +82,9 @@ internal class SplitCompanion(
         val soc = value.socPercent?.let { String.format(Locale.getDefault(), "%.0f %%", it) } ?: unavailable
         binding.splitSocRing.show(value.socPercent?.div(PERCENT), soc)
         binding.splitSocRing.contentDescription = context.getString(R.string.nav_split_battery, soc)
-        binding.splitRange.text =
-            value.rangeKm?.let { String.format(Locale.getDefault(), "%.0f km", it) } ?: unavailable
+        binding.splitRange.text = smallUnits(
+            value.rangeKm?.let { String.format(Locale.getDefault(), PATTERN_DISTANCE_WHOLE, it) } ?: unavailable,
+        )
         renderReach(value.rangeKm?.toDouble())
         renderEco(value)
         renderConsumption(value)

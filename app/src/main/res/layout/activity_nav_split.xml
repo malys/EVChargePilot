@@ -67,9 +67,12 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
+                <!-- One line: the long "vehicle range" took a second one the routes below needed. -->
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
-                    android:text="@string/label_range" />
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/nav_split_range_label" />
 
                 <!-- Its own floor: a 12-hour clock ("11:58 AM") at 130 % leaves this column about
                      128 dp, where "355 km" at the hero floor wraps, depending on the time. -->
