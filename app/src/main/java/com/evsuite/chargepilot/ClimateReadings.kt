@@ -56,7 +56,9 @@ data class ClimateReadings(
             }
             val fanLevel = climate.fanLevel
             val fanMaximum = climate.fanLevelMax
-            val fan = if (fanLevel != null && fanMaximum != null) {
+            // SWI68 answers 15 against a maximum of 11 (2026-10-22 and 10-29 captures): a code,
+            // not a level, so "15 / 11" is never drawn. Its meaning is not known yet.
+            val fan = if (fanLevel != null && fanMaximum != null && fanLevel <= fanMaximum) {
                 Provenanced.measured(FanReading(fanLevel, fanMaximum))
             } else {
                 Provenanced.unavailable<FanReading>(absent)

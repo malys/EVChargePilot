@@ -18,6 +18,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Climate: no more "Fan 15 / 11".** SWI68 answers 15 against a maximum of 11 (10-22 and 10-29
+  captures); that is a code, not a level, and the tile now shows it as unavailable.
+- **Diagnostic bundle: the head unit serial is no longer exported** (EVHardware probe); the
+  report already promised it was excluded.
 - **Eco score measures smoothness again, and ignores crawls.** Smoothness read 97–100 on every
   recorded drive (scale ending at 25 % of moving time hard, measured 0–0,85 %); it ends at 1 %
   now. Trips under 2 km get no score, so a 600 m move no longer says "Note 100" or feeds the

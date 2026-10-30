@@ -57,6 +57,12 @@ class ClimateReadingsTest {
         assertEquals(UnavailableReason.SIGNAL_ABSENT, unknownMaximum.fan.reason)
     }
 
+    @Test fun `a fan code above the maximum is not drawn as a level`() {
+        // SWI68, 2026-10-29: 15 against a maximum of 11.
+        val code = ClimateReadings.of(snapshot().copy(climate = climate(fanLevel = 15, fanLevelMax = 11)))
+        assertEquals(Provenance.UNAVAILABLE, code.fan.provenance)
+    }
+
     @Test fun `raw battery temperature stays hidden until exact firmware is validated`() {
         val readings = ClimateReadings.of(snapshot().copy(batteryTempCelsius = 27f))
 
