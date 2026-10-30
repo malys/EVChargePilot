@@ -177,7 +177,8 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

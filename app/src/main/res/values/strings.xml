@@ -475,9 +475,8 @@ Spending %6$s %% per km</string>
     <string name="battery_health_evidence_cold">%1$s · %2$d discharges measured · %3$d excluded as too cold · %4$.0f days · capacity %5$s</string>
     <string name="battery_health_source_counters">Measured from the car’s own energy counters</string>
     <string name="battery_health_source_pack_pair">Derived from pack voltage × current, integrated by this app</string>
-    <string name="battery_health_unavailable">No health figure yet. It is the energy that left the pack over the charge it cost, so it needs complete discharges of at least %1$.0f points, and at least %2$d of them. Your history holds %3$d.</string>
     <string name="battery_health_unavailable_no_source">No health figure yet. This car published no usable energy for any discharge in the ledger — neither its own counters nor a pack reading this app could integrate.</string>
-    <string name="battery_health_apply">Use this figure in my vehicle settings</string>
+    <string name="battery_health_apply">Use in my settings</string>
     <string name="battery_action_charges">Charges</string>
     <string name="battery_action_advice">Advice</string>
     <string name="battery_last_charge_title">Last charge</string>
@@ -490,9 +489,6 @@ Spending %6$s %% per km</string>
     <string name="battery_health_calibration_steps">%1$d charge step(s) nothing explains, the largest %2$.0f points while parked. That is the gauge re-estimating, not the pack losing charge.</string>
     <string name="battery_health_calibration_cycles">%1$.1f equivalent full cycles since then.</string>
     <string name="battery_health_calibration_unavailable">Nothing to say yet: this needs a few days of history.</string>
-    <string name="battery_health_last_charge">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh at %4$.1f kW, from pack voltage × current integrated here.</string>
-    <string name="battery_health_last_charge_estimated">Last charge: +%1$.0f points in %2$.1f h — about %3$.1f kWh, estimated from the points gained and the declared capacity (%4$.1f kWh): the app was not running for part of it, or the battery reading did not follow the charge (fast charging).</string>
-    <string name="battery_health_last_charge_unwatched">Last charge: +%1$.0f points in %2$.1f h. No energy figure for it: this app was not sampling for part of it.</string>
     <string name="battery_health_last_charge_none">No charge recorded yet. A charge appears here once the app has seen the charge gauge rise between two of its readings, the car standing or plugged.</string>
     <!-- CP-082. Charge history: every charge in the ledger, measured only, no cost. -->
     <string name="charge_history_title">Charges</string>
@@ -520,10 +516,6 @@ Spending %6$s %% per km</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · outside %3$.0f to %4$.0f °C</string>
     <string name="charge_history_row_gain" translatable="false">+%1$.0f pts · %2$.1f h</string>
     <string name="charge_history_row_energy" translatable="false">≈ %1$.1f kWh · %2$.1f kW</string>
-    <string name="battery_health_exposure_sessions">%1$d charge sessions, fastest %2$.0f points an hour.</string>
-    <string name="battery_health_stress">Hard power at a low charge (under 20 %%) or below 0 °C this month: %1$.0f min (trips measured: %2$d).</string>
-    <string name="battery_health_stress_cold_regen">%1$.2f kWh regenerated below 0 °C.</string>
-    <string name="battery_health_stress_unknown">Hard power at a low charge or in the cold this month: — no trip could measure it yet.</string>
     <string name="battery_health_exposure_unavailable">Nothing recorded yet. This fills in as the app samples the car.</string>
     <string name="battery_health_read_only">This app changes nothing on the car: no charge limit, no schedule, no preheat. It measures and it says what it sees.</string>
     <string name="battery_health_calibration_state_settled">Settled</string>
@@ -721,4 +713,9 @@ Spending %6$s %% per km</string>
     <string name="nav_split_eco_waiting">Score after 2 km of driving</string>
     <string name="nav_split_roads">ROUTES</string>
     <string name="nav_split_road_charge">%1$s to %2$s %% charge vs routed</string>
+    <string name="battery_curve_title">Charge curve</string>
+    <string name="battery_curve_legend">MG4 %1$s · dashed: DC (EVKX) and AC %2$.1f kW · columns: measured, AC green, DC cyan</string>
+    <string name="battery_health_windows_label">discharges of %1$.0f points or more measured</string>
+    <string name="battery_health_sessions_label">charges</string>
+    <string name="battery_health_stress_label" formatted="false">hard power, cold or under 20 %, this month</string>
 </resources>

@@ -443,9 +443,8 @@
     <string name="battery_health_evidence_cold">%1$s · %2$d descargas medidas · %3$d excluídas por frio · %4$.0f dias · capacidade %5$s</string>
     <string name="battery_health_source_counters">Medido pelos próprios contadores de energia do carro</string>
     <string name="battery_health_source_pack_pair">Derivado de tensão × corrente da bateria, integrado por esta app</string>
-    <string name="battery_health_unavailable">Ainda sem valor de saúde. É a energia que saiu da bateria face à carga que custou, por isso precisa de descargas completas de pelo menos %1$.0f pontos, e pelo menos %2$d delas. O seu histórico tem %3$d.</string>
     <string name="battery_health_unavailable_no_source">Ainda sem valor de saúde. Este carro não publicou energia útil para nenhuma descarga do registo, nem com os seus próprios contadores nem com uma leitura da bateria que esta app pudesse integrar.</string>
-    <string name="battery_health_apply">Usar este valor nas definições do veículo</string>
+    <string name="battery_health_apply">Usar nas definições</string>
     <string name="battery_action_charges">Carregamentos</string>
     <string name="battery_action_advice">Conselhos</string>
     <string name="battery_last_charge_title">Último carregamento</string>
@@ -458,9 +457,6 @@
     <string name="battery_health_calibration_steps">%1$d salto(s) de carga sem explicação, o maior de %2$.0f pontos com o carro parado. É o indicador a reestimar, não a bateria a perder carga.</string>
     <string name="battery_health_calibration_cycles">%1$.1f ciclos completos equivalentes desde então.</string>
     <string name="battery_health_calibration_unavailable">Ainda nada a dizer: são precisos alguns dias de histórico.</string>
-    <string name="battery_health_last_charge">Último carregamento: +%1$.0f pontos em %2$.1f h — cerca de %3$.1f kWh a %4$.1f kW, integrados aqui a partir de tensão × corrente da bateria.</string>
-    <string name="battery_health_last_charge_estimated">Último carregamento: +%1$.0f pontos em %2$.1f h — cerca de %3$.1f kWh, estimados a partir dos pontos ganhos e da capacidade declarada (%4$.1f kWh): a app não esteve ativa parte do tempo, ou a leitura da bateria não acompanhou o carregamento (carregamento rápido).</string>
-    <string name="battery_health_last_charge_unwatched">Último carregamento: +%1$.0f pontos em %2$.1f h. Sem valor de energia: esta app não esteve a medir parte do tempo.</string>
     <string name="battery_health_last_charge_none">Ainda nenhum carregamento registado. Um carregamento aparece aqui quando a app vê o indicador subir entre duas leituras, com o carro parado ou ligado.</string>
     <string name="charge_history_title">Carregamentos</string>
     <string name="charge_history_open">Histórico de carregamentos</string>
@@ -482,10 +478,6 @@
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimados · %2$.1f kW derivados</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimados</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · exterior de %3$.0f a %4$.0f °C</string>
-    <string name="battery_health_exposure_sessions">%1$d sessões de carregamento, a mais rápida %2$.0f pontos por hora.</string>
-    <string name="battery_health_stress">Potência elevada com carga baixa (abaixo de 20 %%) ou abaixo de 0 °C este mês: %1$.0f min (viagens medidas: %2$d).</string>
-    <string name="battery_health_stress_cold_regen">%1$.2f kWh regenerados abaixo de 0 °C.</string>
-    <string name="battery_health_stress_unknown">Potência elevada com carga baixa ou com frio este mês: — nenhuma viagem conseguiu medi-la ainda.</string>
     <string name="battery_health_exposure_unavailable">Ainda nada registado. Preenche-se à medida que a app mede o carro.</string>
     <string name="battery_health_read_only">Esta app não altera nada no carro: nem limite de carga, nem programação, nem pré-climatização. Mede e diz o que vê.</string>
     <string name="battery_health_calibration_state_settled">Estável</string>
@@ -672,4 +664,9 @@
         <item quantity="other">%1$d viagens exportadas. O caminho privado da app é mostrado abaixo.</item>
         <item quantity="many">%1$d viagens exportadas. O caminho privado da app é mostrado abaixo.</item>
     </plurals>
+    <string name="battery_curve_title">Curva de carga</string>
+    <string name="battery_curve_legend">MG4 %1$s · tracejado: DC (EVKX) e AC %2$.1f kW · colunas: medido, AC verde, DC ciano</string>
+    <string name="battery_health_windows_label">descargas de pelo menos %1$.0f pontos medidas</string>
+    <string name="battery_health_sessions_label">carregamentos</string>
+    <string name="battery_health_stress_label" formatted="false">potência alta, frio ou abaixo de 20 %, este mês</string>
 </resources>

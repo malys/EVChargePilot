@@ -465,9 +465,8 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_evidence_cold">%1$s · %2$d décharges mesurées · %3$d écartées car trop froides · %4$.0f jours · capacité %5$s</string>
     <string name="battery_health_source_counters">Mesuré sur les compteurs d’énergie de la voiture</string>
     <string name="battery_health_source_pack_pair">Déduit de la tension × courant du pack, intégré par cette application</string>
-    <string name="battery_health_unavailable">Pas encore de valeur de santé. C’est l’énergie sortie du pack divisée par la charge qu’elle a coûtée : il faut des décharges complètes d’au moins %1$.0f points, et au moins %2$d. Votre historique en contient %3$d.</string>
     <string name="battery_health_unavailable_no_source">Pas encore de valeur de santé. Cette voiture n’a publié aucune énergie exploitable pour les décharges enregistrées — ni ses propres compteurs, ni une lecture du pack intégrable par cette application.</string>
-    <string name="battery_health_apply">Utiliser cette valeur dans mes réglages véhicule</string>
+    <string name="battery_health_apply">Utiliser dans mes réglages</string>
     <string name="battery_action_charges">Charges</string>
     <string name="battery_action_advice">Conseils</string>
     <string name="battery_last_charge_title">Dernière charge</string>
@@ -480,9 +479,6 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_calibration_steps">%1$d saut(s) de charge que rien n’explique, le plus grand de %2$.0f points à l’arrêt. C’est la jauge qui se réestime, pas le pack qui se vide.</string>
     <string name="battery_health_calibration_cycles">%1$.1f cycles complets équivalents depuis.</string>
     <string name="battery_health_calibration_unavailable">Rien à dire pour l’instant : il faut quelques jours d’historique.</string>
-    <string name="battery_health_last_charge">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh à %4$.1f kW, d’après la tension × le courant du pack intégrés ici.</string>
-    <string name="battery_health_last_charge_estimated">Dernière charge : +%1$.0f points en %2$.1f h — environ %3$.1f kWh, estimés d’après les points gagnés et la capacité déclarée (%4$.1f kWh) : l’application ne tournait pas pendant une partie de la charge, ou la mesure de la batterie ne l’a pas suivie (charge rapide).</string>
-    <string name="battery_health_last_charge_unwatched">Dernière charge : +%1$.0f points en %2$.1f h. Pas de valeur d’énergie : l’application n’échantillonnait pas pendant une partie de la charge.</string>
     <string name="battery_health_last_charge_none">Aucune charge enregistrée pour l’instant. Une charge apparaît ici dès que l’application a vu la jauge monter entre deux de ses relevés, voiture à l’arrêt ou branchée.</string>
     <!-- CP-082. Historique des charges : mesuré uniquement, sans coût. -->
     <string name="charge_history_title">Charges</string>
@@ -505,10 +501,6 @@ Consommation %6$s %% par km</string>
     <string name="charge_history_energy_estimated">Charges en veille (%1$d) : ≈ %2$.1f kWh estimés d’après la capacité déclarée.</string>
     <string name="charge_history_row_estimated">≈ %1$.1f kWh estimés · %2$.1f kW déduits</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh estimés</string>
-    <string name="battery_health_exposure_sessions">%1$d sessions de charge, la plus rapide à %2$.0f points par heure.</string>
-    <string name="battery_health_stress">Forte puissance à charge basse (sous 20 %%) ou sous 0 °C ce mois-ci : %1$.0f min (trajets mesurés : %2$d).</string>
-    <string name="battery_health_stress_cold_regen">%1$.2f kWh régénérés sous 0 °C.</string>
-    <string name="battery_health_stress_unknown">Forte puissance à charge basse ou dans le froid ce mois-ci : — aucun trajet n’a encore pu la mesurer.</string>
     <string name="battery_health_exposure_unavailable">Rien d’enregistré pour l’instant. Cela se remplit à mesure que l’application lit la voiture.</string>
     <string name="battery_health_read_only">Cette application ne change rien sur la voiture : ni limite de charge, ni programmation, ni préchauffage. Elle mesure et elle dit ce qu’elle voit.</string>
     <string name="battery_health_calibration_state_settled">Stable</string>
@@ -696,4 +688,9 @@ Consommation %6$s %% par km</string>
     <string name="nav_split_eco_waiting">Note après 2 km de conduite</string>
     <string name="nav_split_roads">ITINÉRAIRES</string>
     <string name="nav_split_road_charge">%1$s à %2$s %% de charge vs calculé</string>
+    <string name="battery_curve_title">Courbe de charge</string>
+    <string name="battery_curve_legend">MG4 %1$s · pointillés : DC (EVKX) et AC %2$.1f kW · colonnes : mesuré, AC vert, DC cyan</string>
+    <string name="battery_health_windows_label">décharges d’au moins %1$.0f points mesurées</string>
+    <string name="battery_health_sessions_label">charges</string>
+    <string name="battery_health_stress_label" formatted="false">forte puissance, froid ou sous 20 %, ce mois</string>
 </resources>

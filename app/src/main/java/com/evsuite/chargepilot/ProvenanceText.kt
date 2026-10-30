@@ -35,12 +35,14 @@ private val UNIT = Regex("""(?<=[\d—] )(kWh/100 km|km/h|kWh|kW|km|min|°C|%)(?
 /** Where the units sit in a rendered value, so a hero can draw them smaller than the figure. */
 internal fun unitRanges(rendered: String): List<IntRange> = UNIT.findAll(rendered).map { it.range }.toList()
 
-private const val UNIT_SCALE = 0.45f
+/** Units at under half a hero figure's size; a title-sized readout keeps them legible at [READOUT_UNIT_SCALE]. */
+private const val HERO_UNIT_SCALE = 0.45f
+internal const val READOUT_UNIT_SCALE = 0.6f
 
 /** The text with its units drawn small: a unit never changes, so it gives its width to the figure. */
-internal fun smallUnits(text: String): CharSequence = SpannableString(text).apply {
+internal fun smallUnits(text: String, scale: Float = HERO_UNIT_SCALE): CharSequence = SpannableString(text).apply {
     unitRanges(text).forEach {
-        setSpan(RelativeSizeSpan(UNIT_SCALE), it.first, it.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan(RelativeSizeSpan(scale), it.first, it.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
 

@@ -171,6 +171,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         renderHealth()
         renderCalibration()
         renderCharge()
+        renderCurve()
         renderExposure()
         renderApply()
     }
@@ -188,19 +189,24 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             }
             is StateOfHealthResult.Unavailable, null -> {
                 val seen = (current as? StateOfHealthResult.Unavailable)?.windowsSeen ?: 0
-                binding.healthBar.show(emptyList(), declaredMark())
-                binding.healthValue.text = getString(R.string.value_unavailable)
-                binding.healthTrend.text = getString(R.string.battery_health_read_only)
-                binding.healthEvidence.text = if (seen == 0 && current != null) {
-                    getString(R.string.battery_health_unavailable_no_source)
-                } else {
-                    getString(
-                        R.string.battery_health_unavailable,
-                        StateOfHealthEstimator.MIN_SOC_DROP_PERCENT,
-                        StateOfHealthEstimator.MIN_WINDOWS,
-                        seen,
-                    )
+                if (seen == 0 && current != null) {
+                    binding.healthBar.show(emptyList(), declaredMark())
+                    binding.healthValue.text = getString(R.string.value_unavailable)
+                    binding.healthTrend.text = ""
+                    binding.healthEvidence.text = getString(R.string.battery_health_unavailable_no_source)
+                    return
                 }
+                // The way to a figure, as a gauge: discharges measured out of those it needs.
+                val needed = StateOfHealthEstimator.MIN_WINDOWS
+                binding.healthBar.show(
+                    listOf(BarGaugeView.Span(0f, (seen.toFloat() / needed).coerceAtMost(1f), R.color.ev_accent)),
+                )
+                binding.healthValue.text = format("%d / %d", seen, needed)
+                binding.healthTrend.text = getString(
+                    R.string.battery_health_windows_label,
+                    StateOfHealthEstimator.MIN_SOC_DROP_PERCENT,
+                )
+                binding.healthEvidence.text = ""
             }
         }
     }
@@ -362,31 +368,36 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             ),
         )
         val estimate = ChargeEnergyEstimate.of(last, declared.pack)
-        binding.chargeFacts.text = if (estimate?.measured == true && estimate.powerKw != null) {
-            getString(
-                R.string.battery_health_last_charge,
-                last.session.gainedPercent,
-                last.session.durationHours,
-                estimate.kwh,
-                estimate.powerKw,
-            )
+        // Figures only: the range above says the points, and an estimate wears its "≈" — the
+        // app's one sign for it — where a sentence used to explain where the figure came from.
+        val parts = mutableListOf(format("%.1f h", last.session.durationHours))
+        if (estimate?.measured == true && estimate.powerKw != null) {
+            parts += format("%.1f kWh", estimate.kwh)
+            parts += format("%.1f kW", estimate.powerKw)
         } else if (estimate != null) {
-            // MG4Control's method for every charge, here only for one the app slept through
-            // or one the pack pair did not integrate.
-            getString(
-                R.string.battery_health_last_charge_estimated,
-                last.session.gainedPercent,
-                last.session.durationHours,
-                estimate.kwh,
-                declared.pack.usableCapacityKwhWhenNew,
-            )
-        } else {
-            getString(
-                R.string.battery_health_last_charge_unwatched,
-                last.session.gainedPercent,
-                last.session.durationHours,
-            )
+            parts += format("≈ %.1f kWh", estimate.kwh)
         }
+        binding.chargeFacts.text = parts.joinToString(" · ")
+    }
+
+    /**
+     * The version's curves and what this car drew. The version is the pack nearest the declared
+     * capacity, since the car publishes none; the on-board charger is the one the AC charges
+     * show, or the version's usual one before any was watched.
+     */
+    private fun renderCurve() {
+        val charges = charge?.pluggedCharges.orEmpty()
+        val variant = Mg4Variant.of(declared.usableCapacityKwhWhenNew, ChargeCurve.peakDcKw(charges))
+        val acKw = ChargeCurve.acKw(charges, variant)
+        binding.chargeCurve.show(
+            ChargeCurveView.Curves(
+                variant.dcKw,
+                acKw,
+                ChargeCurve.measured(charges, dc = false),
+                ChargeCurve.measured(charges, dc = true),
+            ),
+        )
+        binding.chargeCurveLegend.text = getString(R.string.battery_curve_legend, variant.label, acKw)
     }
 
     private fun renderExposure() {
@@ -420,27 +431,13 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         binding.kmPerCycleValue.text =
             report.kmPerEquivalentCycle?.let { format("%.0f", it) } ?: getString(R.string.value_unavailable)
         binding.meanSocValue.text = format("%.0f %%", report.meanSocPercent)
-        val lines = ArrayList<String>()
-        if (report.sessions.isNotEmpty()) {
-            lines += getString(
-                R.string.battery_health_exposure_sessions,
-                report.sessions.size,
-                report.sessions.maxOf { it.peakPercentPerHour },
-            )
-        }
-        lines += stressText()
-        lines += getString(R.string.battery_health_read_only)
-        binding.exposureFacts.text = lines.joinToString("\n")
+        binding.sessionsValue.text = format("%d", report.sessions.size)
+        binding.stressValue.text = stress.lastOrNull { it.month == YearMonth.now() }
+            ?.let { smallUnits(format("%.0f min", it.stressedMinutes), READOUT_UNIT_SCALE) }
+            ?: getString(R.string.value_unavailable)
+        binding.exposureFacts.text = getString(R.string.battery_health_read_only)
     }
 
-    /** CP-090. This month's hard power at a low charge or in the cold, beside the charge split. */
-    private fun stressText(): String {
-        val month = stress.lastOrNull { it.month == YearMonth.now() }
-            ?: return getString(R.string.battery_health_stress_unknown)
-        val minutes = getString(R.string.battery_health_stress, month.stressedMinutes, month.trips)
-        val regen = month.coldRegeneratedKwh ?: return minutes
-        return minutes + " " + getString(R.string.battery_health_stress_cold_regen, regen)
-    }
 
     private fun format(pattern: String, vararg args: Any) =
         String.format(Locale.getDefault(), pattern, *args)

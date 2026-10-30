@@ -254,28 +254,28 @@
 
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_duration" />
-                        <TextView android:id="@+id/detailDuration" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailDuration" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_distance" />
-                        <TextView android:id="@+id/detailDistance" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailDistance" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_consumption" />
-                        <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailConsumption" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
 
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_soc_change" />
-                        <TextView android:id="@+id/detailSoc" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailSoc" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_energy_used" />
-                        <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailConsumed" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
                     <LinearLayout style="@style/Widget.EV.Readout" android:layout_height="match_parent" android:layout_weight="1">
                         <TextView style="@style/Text.EV.ReadoutLabel" android:text="@string/label_regenerated" />
-                        <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.ReadoutValue" />
+                        <TextView android:id="@+id/detailRegenerated" style="@style/Text.EV.ReadoutValue" android:layout_width="match_parent" android:maxLines="1" app:autoSizeTextType="uniform" app:autoSizeMinTextSize="@dimen/text_body" app:autoSizeMaxTextSize="@dimen/text_title" />
                     </LinearLayout>
                 </LinearLayout>
 

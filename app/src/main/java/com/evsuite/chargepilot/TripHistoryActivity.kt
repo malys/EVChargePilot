@@ -649,7 +649,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
                 Snackbar.make(binding.root, reason, Snackbar.LENGTH_LONG).show()
             }
         } else {
-            view.text = smallUnits(rendered)
+            view.text = smallUnits(rendered, READOUT_UNIT_SCALE)
             view.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
             view.contentDescription = getString(R.string.trip_value_description, label, rendered)
         }

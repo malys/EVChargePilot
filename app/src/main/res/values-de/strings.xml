@@ -443,9 +443,8 @@
     <string name="battery_health_evidence_cold">%1$s · %2$d Entladungen gemessen · %3$d als zu kalt ausgeschlossen · %4$.0f Tage · Kapazität %5$s</string>
     <string name="battery_health_source_counters">Gemessen mit den eigenen Energiezählern des Autos</string>
     <string name="battery_health_source_pack_pair">Abgeleitet aus Batteriespannung × Strom, von dieser App integriert</string>
-    <string name="battery_health_unavailable">Noch kein Zustandswert. Er ist die Energie, die die Batterie verlassen hat, bezogen auf die dafür verbrauchte Ladung; er braucht vollständige Entladungen von mindestens %1$.0f Punkten, und mindestens %2$d davon. Dein Verlauf enthält %3$d.</string>
     <string name="battery_health_unavailable_no_source">Noch kein Zustandswert. Dieses Auto hat für keine Entladung im Protokoll brauchbare Energie veröffentlicht — weder eigene Zähler noch einen Batteriewert, den diese App integrieren konnte.</string>
-    <string name="battery_health_apply">Diesen Wert in meine Fahrzeugeinstellungen übernehmen</string>
+    <string name="battery_health_apply">In Einstellungen übernehmen</string>
     <string name="battery_action_charges">Ladungen</string>
     <string name="battery_action_advice">Tipps</string>
     <string name="battery_last_charge_title">Letzte Ladung</string>
@@ -458,9 +457,6 @@
     <string name="battery_health_calibration_steps">%1$d unerklärte Ladesprünge, der größte %2$.0f Punkte im Stand. Das ist die Anzeige, die neu schätzt, nicht die Batterie, die Ladung verliert.</string>
     <string name="battery_health_calibration_cycles">%1$.1f äquivalente Vollzyklen seitdem.</string>
     <string name="battery_health_calibration_unavailable">Noch nichts zu sagen: dafür braucht es ein paar Tage Verlauf.</string>
-    <string name="battery_health_last_charge">Letzte Ladung: +%1$.0f Punkte in %2$.1f h — etwa %3$.1f kWh bei %4$.1f kW, hier aus Batteriespannung × Strom integriert.</string>
-    <string name="battery_health_last_charge_estimated">Letzte Ladung: +%1$.0f Punkte in %2$.1f h — etwa %3$.1f kWh, geschätzt aus den gewonnenen Punkten und der angegebenen Kapazität (%4$.1f kWh): die App lief nicht durchgehend, oder die Batteriemessung folgte der Ladung nicht (Schnellladung).</string>
-    <string name="battery_health_last_charge_unwatched">Letzte Ladung: +%1$.0f Punkte in %2$.1f h. Kein Energiewert dazu: die App hat nicht durchgehend gemessen.</string>
     <string name="battery_health_last_charge_none">Noch keine Ladung aufgezeichnet. Eine Ladung erscheint hier, sobald die App die Ladeanzeige zwischen zwei Messungen steigen sah, mit stehendem oder angestecktem Auto.</string>
     <string name="charge_history_title">Ladungen</string>
     <string name="charge_history_open">Ladeverlauf</string>
@@ -482,10 +478,6 @@
     <string name="charge_history_row_estimated">≈ %1$.1f kWh geschätzt · %2$.1f kW abgeleitet</string>
     <string name="charge_history_row_estimated_energy">≈ %1$.1f kWh geschätzt</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · außen %3$.0f bis %4$.0f °C</string>
-    <string name="battery_health_exposure_sessions">%1$d Ladevorgänge, schnellster %2$.0f Punkte pro Stunde.</string>
-    <string name="battery_health_stress">Hohe Leistung bei niedrigem Ladestand (unter 20 %%) oder unter 0 °C diesen Monat: %1$.0f min (gemessene Fahrten: %2$d).</string>
-    <string name="battery_health_stress_cold_regen">%1$.2f kWh unter 0 °C rekuperiert.</string>
-    <string name="battery_health_stress_unknown">Hohe Leistung bei niedrigem Ladestand oder Kälte diesen Monat: — noch keine Fahrt konnte es messen.</string>
     <string name="battery_health_exposure_unavailable">Noch nichts aufgezeichnet. Dies füllt sich, während die App das Auto misst.</string>
     <string name="battery_health_read_only">Diese App ändert nichts am Auto: kein Ladelimit, kein Zeitplan, keine Vorklimatisierung. Sie misst und sagt, was sie sieht.</string>
     <string name="battery_health_calibration_state_settled">Stabil</string>
@@ -671,4 +663,9 @@
         <item quantity="one">%1$d Fahrt exportiert. Der private App-Pfad steht unten.</item>
         <item quantity="other">%1$d Fahrten exportiert. Der private App-Pfad steht unten.</item>
     </plurals>
+    <string name="battery_curve_title">Ladekurve</string>
+    <string name="battery_curve_legend">MG4 %1$s · gestrichelt: DC (EVKX) und AC %2$.1f kW · Säulen: gemessen, AC grün, DC cyan</string>
+    <string name="battery_health_windows_label">Entladungen ab %1$.0f Punkten gemessen</string>
+    <string name="battery_health_sessions_label">Ladevorgänge</string>
+    <string name="battery_health_stress_label" formatted="false">hohe Leistung, Kälte oder unter 20 %, diesen Monat</string>
 </resources>

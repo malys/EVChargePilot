@@ -68,7 +68,7 @@
         android:paddingStart="@dimen/spacing_lg"
         android:paddingTop="@dimen/chargepilot_bar_gap"
         android:paddingEnd="@dimen/spacing_lg"
-        android:paddingBottom="@dimen/spacing_lg">
+        android:paddingBottom="@dimen/spacing_sm">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -191,11 +191,45 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- What the charger gives at each charge level: this version's curves, dashed, and
+             what this car drew, in columns. A chart, because the text it replaces was a list
+             of points per hour nobody could picture. -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/spacing_md"
-            android:layout_weight="1"
+            android:layout_weight="0.85"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <TextView
+                style="@style/Text.EV.ReadoutLabel"
+                android:text="@string/battery_curve_title" />
+
+            <com.evsuite.chargepilot.ChargeCurveView
+                android:id="@+id/chargeCurve"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:minHeight="160dp" />
+
+            <TextView
+                android:id="@+id/chargeCurveLegend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textAppearance="@style/Text.EV.Secondary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_weight="1.15"
             android:orientation="vertical">
 
             <LinearLayout
@@ -299,9 +333,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_xs"
+                    android:ellipsize="end"
                     android:fontFeatureSettings="tnum"
                     android:maxLines="1"
                     android:textAppearance="@style/Text.EV.Secondary" />
+
+                <!-- The charges and this month's hard power as figures, not sentences. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:id="@+id/sessionsValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:maxLines="1" android:text="@string/value_unavailable" android:textAppearance="@style/Text.EV.Title" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:text="@string/battery_health_sessions_label" android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:orientation="vertical">
+                        <TextView android:id="@+id/stressValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:maxLines="1" android:text="@string/value_unavailable" android:textAppearance="@style/Text.EV.Title" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:text="@string/battery_health_stress_label" android:textAppearance="@style/Text.EV.Secondary" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/exposureFacts"
