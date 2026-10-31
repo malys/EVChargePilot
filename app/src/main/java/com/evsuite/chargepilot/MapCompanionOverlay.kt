@@ -117,6 +117,16 @@ internal object MapCompanionOverlay {
                     )
                 }
             }
+            binding.splitDestination.setOnClickListener {
+                end("destination")
+                runCatching {
+                    app.startActivity(
+                        Intent(app, ChargeStopActivity::class.java)
+                            .putExtra(ChargeStopActivity.EXTRA_CHOOSE_DESTINATION, true)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                }
+            }
             split = SplitCompanion(themed, binding, extras, preview = false) { recorder }
             params = WindowManager.LayoutParams(
                 app.resources.displayMetrics.widthPixels / 4,

@@ -21,8 +21,8 @@ import java.util.concurrent.Executors
 
 /**
  * CP-094: the companion quarter beside the car's map. Glance-only while moving: charge and range,
- * the destination against the range, the drive's eco score, the recent consumption and the roads
- * the plan offered.
+ * the destination against the range, the drive's eco score, the recent consumption and the other
+ * roads the plan offered.
  *
  * Drawn by [MapCompanionOverlay] over MG4 Navigator on the car, and by [NavSplitActivity] in the
  * emulator preview, from the extras [intent] builds.
@@ -82,10 +82,11 @@ internal class SplitCompanion(
         val soc = value.socPercent?.let { String.format(Locale.getDefault(), "%.0f %%", it) } ?: unavailable
         binding.splitSocRing.show(value.socPercent?.div(PERCENT), soc)
         binding.splitSocRing.contentDescription = context.getString(R.string.nav_split_battery, soc)
-        binding.splitRange.text = smallUnits(
-            value.rangeKm?.let { String.format(Locale.getDefault(), PATTERN_DISTANCE_WHOLE, it) } ?: unavailable,
-        )
-        renderReach(value.rangeKm?.toDouble())
+        val range = value.rangeKm?.let { String.format(Locale.getDefault(), PATTERN_DISTANCE_WHOLE, it) } ?: unavailable
+        binding.splitRange.text = smallUnits(range)
+        // The label is gone from the screen, not from a screen reader.
+        binding.splitRange.contentDescription = context.getString(R.string.nav_split_range_label) + " " + range
+        renderReach(value)
         renderEco(value)
         renderConsumption(value)
         // Several binder reads per refresh: every few seconds is enough for a remaining distance.
@@ -102,6 +103,8 @@ internal class SplitCompanion(
                 remainingKm = destinationKm(toStop, km, routeKm, drivenKm(value))
                 toStopKm = km.takeIf { toStop }
                 val left = remainingKm
+                binding.splitDestination.visibility = if (left == null) View.VISIBLE else View.GONE
+                binding.splitRoute.visibility = if (left == null) View.GONE else View.VISIBLE
                 binding.splitRoute.text = smallUnits(when {
                     left == null -> context.getString(R.string.nav_split_no_guidance)
                     toStop -> context.getString(
@@ -122,7 +125,7 @@ internal class SplitCompanion(
                     )
                 })
                 binding.splitRoad.text = road.orEmpty()
-                renderReach(recorder()?.latest?.rangeKm?.toDouble())
+                renderReach(recorder()?.latest)
             }
         }
     }
@@ -143,8 +146,9 @@ internal class SplitCompanion(
         return (trip - baseline).coerceAtLeast(0.0)
     }
 
-    /** The trip's share of the range on the bar, and what is left of the range on arriving. */
-    private fun renderReach(rangeKm: Double?) {
+    /** The trip's share of the range on the bar, and what is left of the range and charge on arriving. */
+    private fun renderReach(value: EnergySnapshot?) {
+        val rangeKm = value?.rangeKm?.toDouble()
         val km = remainingKm
         if (km == null || rangeKm == null || rangeKm <= 0.0) {
             binding.splitReach.show(emptyList())
@@ -162,6 +166,9 @@ internal class SplitCompanion(
         binding.splitMargin.text = smallUnits(if (short) context.getString(R.string.nav_split_margin_short) else context.getString(
             R.string.nav_split_margin,
             String.format(Locale.getDefault(), "%.0f", rangeKm - km),
+            value.socPercent
+                ?.let { String.format(Locale.getDefault(), "%.0f", arrivalSoc(it.toDouble(), rangeKm, km)) }
+                ?: context.getString(R.string.value_unavailable),
         ))
     }
 
@@ -177,7 +184,6 @@ internal class SplitCompanion(
             onUi {
                 val average = recent.consumptionKwhPer100Km
                 val reference = recent.referenceKwhPer100Km
-                binding.splitTrace.setTrace(recent.trace, reference, recent.coveredKm)
                 binding.splitArc.show(
                     average,
                     reference,
@@ -227,15 +233,19 @@ internal class SplitCompanion(
         )
     }
 
-    /** One line and one bar per road; the bar's length is the road's time against the longest. */
+    /**
+     * One line and one bar per road other than [chosen], which the destination block already
+     * shows; the bar's length is the road's time against the longest.
+     */
     private fun renderRoads(roads: List<SplitRoad>, chosen: Int) {
         if (roads.size < 2) return
         val fastest = roads.minOf { it.minutes }
         val longest = roads.maxOf { it.minutes }.takeIf { it > 0.0 } ?: return
         val density = context.resources.displayMetrics.density
         roads.forEachIndexed { at, road ->
+            if (at == chosen) return@forEachIndexed
             val delta = road.minutes - fastest
-            var line = context.getString(
+            val line = context.getString(
                 R.string.route_choices_road,
                 road.name,
                 String.format(Locale.getDefault(), "%.0f", road.km),
@@ -243,10 +253,9 @@ internal class SplitCompanion(
                 if (delta < 0.5) context.getString(R.string.route_choices_delta_fastest)
                 else context.getString(R.string.route_choices_delta_slower, String.format(Locale.getDefault(), "%.0f", delta)),
             )
-            if (at == chosen) line = context.getString(R.string.route_choices_chosen, line)
             binding.splitRoads.addView(
                 TextView(context).apply {
-                    setTextAppearance(if (at == chosen) R.style.Text_EV_Body else R.style.Text_EV_Secondary)
+                    setTextAppearance(R.style.Text_EV_Secondary)
                     text = if (road.chargeLow == null || road.chargeHigh == null) line else line + "\n" + context.getString(
                         R.string.nav_split_road_charge,
                         String.format(Locale.getDefault(), "%+.1f", road.chargeLow),
@@ -263,7 +272,7 @@ internal class SplitCompanion(
                                 0f,
                                 (road.minutes / longest).toFloat(),
                                 R.color.ev_accent,
-                                if (at == chosen) BarGaugeView.OPAQUE else BarGaugeView.LIGHT,
+                                BarGaugeView.LIGHT,
                             ),
                         ),
                     )
@@ -309,6 +318,16 @@ internal class SplitCompanion(
          */
         internal fun destinationKm(toStop: Boolean, carKm: Double?, routeKm: Double?, drivenKm: Double): Double? =
             if (!toStop) carKm else routeKm?.let { (it - drivenKm).coerceAtLeast(0.0) }
+
+        /**
+         * The charge left on arriving, on the car's own range: the range is what the charge
+         * drives, so the trip takes the same share of both.
+         *
+         * shortcut: linear in the car's estimate and zero at 0 %, so a buffer the car keeps below
+         * its range or a hilly road shows here as error; the plan's arrival model would cover both.
+         */
+        internal fun arrivalSoc(socPercent: Double, rangeKm: Double, km: Double): Double =
+            socPercent * (rangeKm - km) / rangeKm
 
         /** The companion's extras: the roads the plan offered and the one being driven. */
         fun intent(roads: List<SplitRoad>, chosen: Int, toStop: Boolean, routeKm: Double?): Intent =

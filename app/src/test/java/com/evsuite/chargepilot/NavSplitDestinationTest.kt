@@ -20,4 +20,11 @@ class NavSplitDestinationTest {
         assertEquals(0.0, SplitCompanion.destinationKm(true, 0.0, 7.0, 9.0)!!, 1e-9)
         assertNull(SplitCompanion.destinationKm(true, 0.9, null, 1.5))
     }
+
+    @Test
+    fun `the trip takes the same share of the charge as of the range`() {
+        // 80 % for 300 km: 120 km is two fifths of it, so 48 % is left.
+        assertEquals(48.0, SplitCompanion.arrivalSoc(80.0, 300.0, 120.0), 1e-9)
+        assertEquals(80.0, SplitCompanion.arrivalSoc(80.0, 300.0, 0.0), 1e-9)
+    }
 }

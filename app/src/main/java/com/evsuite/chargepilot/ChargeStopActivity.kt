@@ -234,6 +234,9 @@ class ChargeStopActivity : AppCompatActivity() {
             renderUnplannedHandoff(place, R.string.charge_stop_navigate_planning)
             route(place)
         }
+        if (savedInstanceState == null && intent.getBooleanExtra(EXTRA_CHOOSE_DESTINATION, false)) {
+            destination.launch(DestinationActivity.intent(this))
+        }
     }
 
     override fun onStart() {
@@ -1596,7 +1599,9 @@ class ChargeStopActivity : AppCompatActivity() {
         val secondNotOffered: Boolean,
     )
 
-    private companion object {
+    internal companion object {
+        /** The split screen's destination button: this screen opens on its chooser. */
+        const val EXTRA_CHOOSE_DESTINATION = "charge_stop.choose_destination"
         private const val EXTRA_PREVIEW_SOC = "preview.soc"
         private const val EXTRA_PREVIEW_RANGE = "preview.range"
         const val HISTORY_FILE = "trips.json"

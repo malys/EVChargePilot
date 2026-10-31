@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **Split companion: the arrival in one line, the clock larger.** The destination block reads
+  "≈ 354 km · 72 % on arrival" (charge on arrival linear in the car's own range), and offers a
+  *Destination* button when there is no guidance. The consumption card keeps its arc and drops
+  the trace; the range label goes (still read out). The road being driven leaves the roads list,
+  the destination block already shows it. Spare height sits between the blocks.
 - **Split screen (CP-094): the companion is drawn over the map, the map is no longer embedded.**
   The 2026-10-25 drive heard two guidance voices and found a frozen map behind Back: handing the
   embedded map back started a second MG4 Navigator. Android 9 resumes one activity, so a map on

@@ -30,11 +30,9 @@
 
     </FrameLayout>
 
-    <!-- Every block is as tall as its content except the consumption card, which takes what is
-         left; on a shorter panel the trace shrinks first. -->
+    <!-- Every block is as tall as its content; what the column has left goes between them. -->
     <!-- The car gives an app w1778dp h640dp, not 720: when the roads list makes the column
-         taller than that, it scrolls instead of cutting the bottom off. fillViewport keeps the
-         consumption card taking what is left whenever everything fits. -->
+         taller than that, it scrolls instead of cutting the bottom off. -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -60,30 +58,19 @@
                 android:layout_width="72dp"
                 android:layout_height="72dp" />
 
-            <LinearLayout
+            <!-- No label: kilometres beside the battery ring can only be the range, and the
+                 larger clock left the label "AUTONOM…" at 130 %. Its own floor: a 12-hour clock
+                 ("11:58 AM") at 130 % leaves this column narrow, where "355 km" at the hero floor
+                 wraps, depending on the time. -->
+            <TextView
+                android:id="@+id/splitRange"
+                style="@style/Text.EVChargePilot.Hero"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="72dp"
                 android:layout_marginStart="@dimen/spacing_sm"
                 android:layout_weight="1"
-                android:orientation="vertical">
-
-                <!-- One line: the long "vehicle range" took a second one the routes below needed. -->
-                <TextView
-                    style="@style/Text.EV.ReadoutLabel"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/nav_split_range_label" />
-
-                <!-- Its own floor: a 12-hour clock ("11:58 AM") at 130 % leaves this column about
-                     128 dp, where "355 km" at the hero floor wraps, depending on the time. -->
-                <TextView
-                    android:id="@+id/splitRange"
-                    style="@style/Text.EVChargePilot.Hero"
-                    android:layout_height="72dp"
-                    android:layout_weight="0"
-                    app:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
-                    tools:text="355 km" />
-            </LinearLayout>
+                app:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
+                tools:text="355 km" />
 
             <!-- The time: the MG4 draws no status bar, so nothing else on the panel says it. -->
             <TextClock
@@ -91,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_sm"
                 android:fontFeatureSettings="tnum"
-                android:textAppearance="@style/Text.EV.Title" />
+                android:textAppearance="@style/Text.EV.Display" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/splitFullMap"
@@ -103,6 +90,11 @@
                 android:tooltipText="@string/nav_split_full_map"
                 app:icon="@drawable/ic_action_fullscreen" />
         </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- The destination against the range: the bar is the trip, the track the reach. -->
         <LinearLayout
@@ -133,6 +125,15 @@
                 android:textAppearance="@style/Text.EV.Secondary"
                 tools:text="A64" />
 
+            <!-- Only with no guidance: there is no arrival to show, so the block offers one. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/splitDestination"
+                style="@style/Widget.EVChargePilot.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/charge_stop_action_destination"
+                android:visibility="gone" />
+
             <com.evsuite.chargepilot.BarGaugeView
                 android:id="@+id/splitReach"
                 android:layout_width="match_parent"
@@ -144,33 +145,59 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:textAppearance="@style/Text.EV.Secondary"
+                android:textAppearance="@style/Text.EV.Body"
                 android:visibility="gone"
-                tools:text="≈ 354 km of range left on arrival" />
+                tools:text="≈ 354 km · 72 % on arrival" />
         </LinearLayout>
 
-        <!-- After Tesla's energy arc: filled to the average of the last kilometres, a tick at the
-             reference, the figure inside, the trace beside it. Takes the height that is left. -->
-        <LinearLayout
+        <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- After Tesla's energy arc: filled to the average of the last kilometres, a tick at the
+             reference, the figure inside. The trace beside it went on 2026-10-31: it took the
+             column's spare height and the glance never used it. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_sm"
-            android:layout_weight="1"
             android:background="@drawable/bg_card"
-            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:padding="@dimen/spacing_sm">
 
+            <FrameLayout
+                android:layout_width="104dp"
+                android:layout_height="104dp">
+
+                <com.evsuite.chargepilot.ArcGaugeView
+                    android:id="@+id/splitArc"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/splitConsumption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="33dp"
+                    android:fontFeatureSettings="tnum"
+                    android:text="@string/value_unavailable"
+                    android:textAppearance="@style/Text.EV.Title" />
+            </FrameLayout>
+
+            <!-- The unit rides with the span, at the label's size, not under the figure. -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="@dimen/spacing_sm"
-                android:paddingEnd="@dimen/spacing_sm">
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
                     style="@style/Text.EV.ReadoutLabel"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:text="@string/nav_split_consumption" />
 
                 <TextView
@@ -178,63 +205,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFeatureSettings="tnum"
-                    android:textAppearance="@style/Text.EV.Secondary" />
-            </LinearLayout>
-
-            <!-- A small arc holding the figure, the trace beside it on the rest of the card: the
-                 2026-10-22 drive had the arc fill the card and the trace a thumbnail inside it. -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:minHeight="96dp"
-                android:orientation="horizontal">
-
-                <FrameLayout
-                    android:layout_width="128dp"
-                    android:layout_height="wrap_content"
-                    android:minHeight="128dp">
-
-                    <com.evsuite.chargepilot.ArcGaugeView
-                        android:id="@+id/splitArc"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:importantForAccessibility="no" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="36dp"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/splitConsumption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFeatureSettings="tnum"
-                            android:text="@string/value_unavailable"
-                            android:textAppearance="@style/Text.EV.Title" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/trace_axis_consumption"
-                            android:textAppearance="@style/Text.EV.Secondary" />
-                    </LinearLayout>
-                </FrameLayout>
-
-                <com.evsuite.chargepilot.ConsumptionTraceView
-                    android:id="@+id/splitTrace"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/spacing_sm"
-                    android:layout_weight="1"
-                    android:importantForAccessibility="no" />
+                    android:textAppearance="@style/Text.EV.Secondary"
+                    tools:text="kWh/100 km · last 10 km" />
             </LinearLayout>
         </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- This drive's eco score, out of 100, with the part to work on. -->
         <LinearLayout
@@ -279,7 +258,13 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- The roads the plan offered, one line and one bar each, length is time. -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- The other roads the plan offered, one line and one bar each, length is time. The
+             driven one is the destination block above. -->
         <LinearLayout
             android:id="@+id/splitRoads"
             android:layout_width="match_parent"
