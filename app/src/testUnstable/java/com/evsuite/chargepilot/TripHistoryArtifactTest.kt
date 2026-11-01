@@ -20,6 +20,7 @@ class TripHistoryArtifactTest {
                 note = "consistent",
             ),
             socModelFit = "used=3/13 segments=7/12 span=18/20 km/h",
+            powerWindows = listOf(listOf(42.0, 13.5, 18.25)),
             summaries = emptyList(),
             drivingStress = listOf(
                 TripHistoryArtifact.TripStress(1L, 2.5, null),
@@ -34,6 +35,7 @@ class TripHistoryArtifactTest {
             "used=3/13 segments=7/12 span=18/20 km/h",
             json["socModelFit"].asString,
         )
+        assertEquals(18.25, json["powerWindows"].asJsonArray[0].asJsonArray[2].asDouble, 0.0)
         val stress = json["drivingStress"].asJsonArray
         assertEquals(2.5, stress[0].asJsonObject["stressedMinutes"].asDouble, 0.0)
         // A trip the measurement could not judge carries no figure at all, never a zero.

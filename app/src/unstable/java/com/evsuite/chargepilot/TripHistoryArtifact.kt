@@ -38,6 +38,8 @@ internal data class TripHistoryArtifact(
      * off the car. The 2026-10-22 `fit=refused(aero)` could not be: only trip totals left it.
      */
     val socSegments: List<List<Double>> = emptyList(),
+    /** [powerModelFit]'s training kilometres, `[km/h, °C, kWh/100 km]`, as [socSegments]. */
+    val powerWindows: List<List<Double>> = emptyList(),
     val notes: List<String> = NOTES,
     val summaries: List<EnergyTripSummary>,
     /** CP-090: [DrivingStress] for each exported trip that kept a sample track. */
@@ -112,6 +114,9 @@ internal data class TripHistoryArtifact(
                         round(it.distanceKm, 100.0),
                     )
                 },
+                powerWindows = EnergyModelTrainer().windows(history, FirmwareInfo.getGeneration())
+                    .take(MAX_SEGMENTS)
+                    .map { (speed, temp, kwh) -> listOf(round(speed, 10.0), round(temp, 10.0), round(kwh, 100.0)) },
                 summaries = summaries.take(MAX_SUMMARIES),
                 drivingStress = history.take(MAX_SUMMARIES)
                     .filter { !it.samples.isNullOrEmpty() }
