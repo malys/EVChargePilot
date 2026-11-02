@@ -68,12 +68,13 @@
                 android:orientation="vertical">
 
                 <!-- The time: the MG4 draws no status bar, so nothing else on the panel says it.
-                     It shrinks to its share, so a 12-hour clock at 130 % fits the same box. -->
+                     Two thirds of the column: the driver asked for it larger (2026-11-02). It
+                     shrinks to its share, so a 12-hour clock at 130 % fits the same box. -->
                 <TextClock
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:autoSizeMaxTextSize="@dimen/chargepilot_text_hero_secondary"
+                    android:layout_weight="2"
+                    android:autoSizeMaxTextSize="@dimen/chargepilot_text_hero"
                     android:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
                     android:autoSizeTextType="uniform"
                     android:fontFeatureSettings="tnum"
