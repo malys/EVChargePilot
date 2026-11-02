@@ -20,6 +20,14 @@
     <dimen name="chargepilot_text_hero_floor">26sp</dimen>
     <!-- The split screen's range beside the clock: see activity_nav_split.xml. -->
     <dimen name="chargepilot_text_split_range_floor">16sp</dimen>
+    <!-- The split screen's gauges, sized to fill the 444x640 column when the plan offered no
+         other road (bundle of 2026-11-02). With roads to list, the arc and the eco ring fall
+         back to the compact sizes so the roads stay on screen; see SplitCompanion. -->
+    <dimen name="chargepilot_split_ring">112dp</dimen>
+    <dimen name="chargepilot_split_arc">168dp</dimen>
+    <dimen name="chargepilot_split_arc_compact">104dp</dimen>
+    <dimen name="chargepilot_split_eco">120dp</dimen>
+    <dimen name="chargepilot_split_eco_compact">64dp</dimen>
     <!-- Deliberate enough to avoid accidental page changes while tapping or scrolling. -->
     <dimen name="chargepilot_swipe_threshold">96dp</dimen>
     <!-- Fixed across primary screens so destination tabs never shift under the driver's hand. -->

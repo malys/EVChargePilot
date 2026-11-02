@@ -46,7 +46,9 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_md">
 
-        <!-- Charge in the ring, range beside it, the time, and the way back to the full map. -->
+        <!-- Charge in the ring; the time over the range beside it; the way back to the full map.
+             The column is 444dp wide on the car (bundle of 2026-11-02), so the ring and the
+             clock take its height rather than sitting in a 72dp row with room to spare. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,30 +57,37 @@
 
             <com.evsuite.chargepilot.RingGaugeView
                 android:id="@+id/splitSocRing"
-                android:layout_width="72dp"
-                android:layout_height="72dp" />
+                android:layout_width="@dimen/chargepilot_split_ring"
+                android:layout_height="@dimen/chargepilot_split_ring" />
 
-            <!-- No label: kilometres beside the battery ring can only be the range, and the
-                 larger clock left the label "AUTONOM…" at 130 %. Its own floor: a 12-hour clock
-                 ("11:58 AM") at 130 % leaves this column narrow, where "355 km" at the hero floor
-                 wraps, depending on the time. -->
-            <TextView
-                android:id="@+id/splitRange"
-                style="@style/Text.EVChargePilot.Hero"
+            <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="72dp"
+                android:layout_height="@dimen/chargepilot_split_ring"
                 android:layout_marginStart="@dimen/spacing_sm"
                 android:layout_weight="1"
-                app:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
-                tools:text="355 km" />
+                android:orientation="vertical">
 
-            <!-- The time: the MG4 draws no status bar, so nothing else on the panel says it. -->
-            <TextClock
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_sm"
-                android:fontFeatureSettings="tnum"
-                android:textAppearance="@style/Text.EV.Display" />
+                <!-- The time: the MG4 draws no status bar, so nothing else on the panel says it.
+                     It shrinks to its share, so a 12-hour clock at 130 % fits the same box. -->
+                <TextClock
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:autoSizeMaxTextSize="@dimen/chargepilot_text_hero_secondary"
+                    android:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
+                    android:autoSizeTextType="uniform"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:textAppearance="@style/Text.EV.Display" />
+
+                <!-- No label: kilometres beside the battery ring can only be the range. -->
+                <TextView
+                    android:id="@+id/splitRange"
+                    style="@style/Text.EVChargePilot.Hero"
+                    app:autoSizeMinTextSize="@dimen/chargepilot_text_split_range_floor"
+                    tools:text="355 km" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/splitFullMap"
@@ -168,8 +177,9 @@
             android:padding="@dimen/spacing_sm">
 
             <FrameLayout
-                android:layout_width="104dp"
-                android:layout_height="104dp">
+                android:id="@+id/splitArcFrame"
+                android:layout_width="@dimen/chargepilot_split_arc"
+                android:layout_height="@dimen/chargepilot_split_arc">
 
                 <com.evsuite.chargepilot.ArcGaugeView
                     android:id="@+id/splitArc"
@@ -181,11 +191,10 @@
                     android:id="@+id/splitConsumption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="33dp"
+                    android:layout_gravity="center"
                     android:fontFeatureSettings="tnum"
                     android:text="@string/value_unavailable"
-                    android:textAppearance="@style/Text.EV.Title" />
+                    android:textAppearance="@style/Text.EV.Display" />
             </FrameLayout>
 
             <!-- The unit rides with the span, at the label's size, not under the figure. -->
@@ -225,8 +234,8 @@
 
             <com.evsuite.chargepilot.RingGaugeView
                 android:id="@+id/splitEcoRing"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
+                android:layout_width="@dimen/chargepilot_split_eco"
+                android:layout_height="@dimen/chargepilot_split_eco" />
 
             <LinearLayout
                 android:layout_width="0dp"

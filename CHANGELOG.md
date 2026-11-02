@@ -6,6 +6,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **Split companion: the clock and the gauges fill the column.** The car's companion window is
+  444×640 (bundle of 2026-11-02) and the ring, clock and arcs used little of it. The charge ring
+  grows to 112dp with the clock over the range beside it, both sized to their box; the consumption
+  arc to 168dp with its figure centred; the eco ring to 120dp. When the plan offered other roads,
+  the arc and the eco ring keep their earlier sizes so the roads stay on screen.
 - **Split companion: the arrival in one line, the clock larger.** The destination block reads
   "≈ 354 km · 72 % on arrival" (charge on arrival linear in the car's own range), and offers a
   *Destination* button when there is no guidance. The consumption card keeps its arc and drops

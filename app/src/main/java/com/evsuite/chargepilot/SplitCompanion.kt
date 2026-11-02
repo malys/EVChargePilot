@@ -281,6 +281,12 @@ internal class SplitCompanion(
             )
         }
         binding.splitRoads.visibility = View.VISIBLE
+        // The gauges are sized to fill a column with no roads; the roads take that room back.
+        val arc = context.resources.getDimensionPixelSize(R.dimen.chargepilot_split_arc_compact)
+        binding.splitArcFrame.layoutParams = binding.splitArcFrame.layoutParams.apply { width = arc; height = arc }
+        binding.splitConsumption.setTextAppearance(R.style.Text_EV_Title)
+        val eco = context.resources.getDimensionPixelSize(R.dimen.chargepilot_split_eco_compact)
+        binding.splitEcoRing.layoutParams = binding.splitEcoRing.layoutParams.apply { width = eco; height = eco }
     }
 
     companion object {
