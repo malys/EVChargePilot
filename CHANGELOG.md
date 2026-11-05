@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-05
+
 ### Changed
 
 - **Split companion: the clock and the gauges fill the column.** The car's companion window is
