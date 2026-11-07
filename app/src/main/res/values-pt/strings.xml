@@ -578,10 +578,22 @@
     <string name="eco_challenge_met">Agora %1$.1f: cumprido.</string>
     <string name="eco_challenge_now">Agora %1$.1f.</string>
     <string name="eco_challenge_none_yet">Ainda não houve condução suficiente esta semana.</string>
-    <string name="eco_clause_anticipate">antecipando %1$d travagens bruscas</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">antecipando %1$d travagem brusca</item>
+        <item quantity="other">antecipando %1$d travagens bruscas</item>
+        <item quantity="many">antecipando %1$d travagens bruscas</item>
+    </plurals>
     <string name="eco_lever_anticipate">antecipar as travagens</string>
-    <string name="eco_tip_anticipate">%1$d travagens bruscas (%2$.1f por 10 km): levante o pé mais cedo.</string>
-    <string name="trip_eco_finding_brakings">%1$d travagens bruscas, %2$.1f por 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d travagem brusca (%2$.1f por 10 km): levante o pé mais cedo.</item>
+        <item quantity="other">%1$d travagens bruscas (%2$.1f por 10 km): levante o pé mais cedo.</item>
+        <item quantity="many">%1$d travagens bruscas (%2$.1f por 10 km): levante o pé mais cedo.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d travagem brusca, %2$.1f por 10 km.</item>
+        <item quantity="other">%1$d travagens bruscas, %2$.1f por 10 km.</item>
+        <item quantity="many">%1$d travagens bruscas, %2$.1f por 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Pontuação %1$d / 100 · antecipação %2$s · suavidade %3$s · eficiência %4$s</string>
     <string name="eco_lever_smoother">condução mais suave</string>
     <string name="eco_lever_eco_mode">modo Eco</string>

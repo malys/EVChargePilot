@@ -627,10 +627,19 @@ Spending %6$s %% per km</string>
     <string name="eco_challenge_met">Now %1$.1f: met.</string>
     <string name="eco_challenge_now">Now %1$.1f.</string>
     <string name="eco_challenge_none_yet">Not enough driving this week yet.</string>
-    <string name="eco_clause_anticipate">by anticipating %1$d hard stops</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">by anticipating %1$d hard stop</item>
+        <item quantity="other">by anticipating %1$d hard stops</item>
+    </plurals>
     <string name="eco_lever_anticipate">anticipate braking</string>
-    <string name="eco_tip_anticipate">%1$d hard stops (%2$.1f per 10 km): lift off earlier.</string>
-    <string name="trip_eco_finding_brakings">%1$d hard stops, %2$.1f per 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d hard stop (%2$.1f per 10 km): lift off earlier.</item>
+        <item quantity="other">%1$d hard stops (%2$.1f per 10 km): lift off earlier.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d hard stop, %2$.1f per 10 km.</item>
+        <item quantity="other">%1$d hard stops, %2$.1f per 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Score %1$d / 100 · anticipation %2$s · smoothness %3$s · efficiency %4$s</string>
     <string name="eco_lever_smoother">smoother driving</string>
     <string name="eco_lever_eco_mode">Eco mode</string>

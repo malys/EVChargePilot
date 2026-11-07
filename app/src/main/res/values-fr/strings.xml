@@ -604,10 +604,19 @@ Consommation %6$s %% par km</string>
     <string name="eco_challenge_met">En ce moment %1$.1f : réussi.</string>
     <string name="eco_challenge_now">En ce moment : %1$.1f.</string>
     <string name="eco_challenge_none_yet">Pas encore assez de route cette semaine.</string>
-    <string name="eco_clause_anticipate">en anticipant %1$d freinages brusques</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">en anticipant %1$d freinage brusque</item>
+        <item quantity="other">en anticipant %1$d freinages brusques</item>
+    </plurals>
     <string name="eco_lever_anticipate">anticiper les freinages</string>
-    <string name="eco_tip_anticipate">%1$d freinages brusques (%2$.1f aux 10 km) : levez le pied plus tôt.</string>
-    <string name="trip_eco_finding_brakings">%1$d freinages brusques, %2$.1f aux 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d freinage brusque (%2$.1f aux 10 km) : levez le pied plus tôt.</item>
+        <item quantity="other">%1$d freinages brusques (%2$.1f aux 10 km) : levez le pied plus tôt.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d freinage brusque, %2$.1f aux 10 km.</item>
+        <item quantity="other">%1$d freinages brusques, %2$.1f aux 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Note %1$d / 100 · anticipation %2$s · souplesse %3$s · efficacité %4$s</string>
     <string name="eco_lever_smoother">conduite plus souple</string>
     <string name="eco_lever_eco_mode">mode Éco</string>

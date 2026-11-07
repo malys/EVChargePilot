@@ -4,6 +4,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Eco advice: one hard stop is singular.** The trip-end tip, its "by anticipating…" clause
+  and the trip details read "1 freinages brusques" (bundle of 2026-11-07); the three strings
+  are plurals in every language now.
+
 ## [0.2.0] - 2026-11-05
 
 ### Changed

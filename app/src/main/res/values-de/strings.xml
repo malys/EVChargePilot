@@ -578,10 +578,19 @@
     <string name="eco_challenge_met">Jetzt %1$.1f: geschafft.</string>
     <string name="eco_challenge_now">Jetzt %1$.1f.</string>
     <string name="eco_challenge_none_yet">Diese Woche noch nicht genug gefahren.</string>
-    <string name="eco_clause_anticipate">indem du %1$d harte Stopps vorausahnst</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">indem du %1$d harten Stopp vorausahnst</item>
+        <item quantity="other">indem du %1$d harte Stopps vorausahnst</item>
+    </plurals>
     <string name="eco_lever_anticipate">vorausschauend bremsen</string>
-    <string name="eco_tip_anticipate">%1$d harte Stopps (%2$.1f pro 10 km): früher vom Pedal gehen.</string>
-    <string name="trip_eco_finding_brakings">%1$d harte Stopps, %2$.1f pro 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d harter Stopp (%2$.1f pro 10 km): früher vom Pedal gehen.</item>
+        <item quantity="other">%1$d harte Stopps (%2$.1f pro 10 km): früher vom Pedal gehen.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d harter Stopp, %2$.1f pro 10 km.</item>
+        <item quantity="other">%1$d harte Stopps, %2$.1f pro 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Punktzahl %1$d / 100 · Vorausschau %2$s · Gleichmäßigkeit %3$s · Effizienz %4$s</string>
     <string name="eco_lever_smoother">sanfteres Fahren</string>
     <string name="eco_lever_eco_mode">Eco-Modus</string>

@@ -438,7 +438,9 @@ class EcoAdviceText(context: Context) {
     /** The tips that finish "you could have saved … by …"; the others stand alone. */
     private fun clause(tip: EcoTip): String? = when (tip) {
         is EcoTip.Smoother -> app.getString(R.string.eco_clause_smoother, tip.harshMinutes)
-        is EcoTip.Anticipate -> app.getString(R.string.eco_clause_anticipate, tip.brakings)
+        is EcoTip.Anticipate -> app.resources.getQuantityString(
+            R.plurals.eco_clause_anticipate, tip.brakings, tip.brakings,
+        )
         is EcoTip.EcoMode -> app.getString(R.string.eco_clause_eco_mode)
         is EcoTip.SlowerMotorway ->
             app.getString(R.string.eco_clause_motorway, tip.finding.referenceSpeedKmh)
@@ -461,7 +463,9 @@ class EcoAdviceText(context: Context) {
         is EcoTip.Smoother ->
             app.getString(R.string.eco_tip_smoother, tip.harshMinutes, tip.sharePercent)
         is EcoTip.Anticipate ->
-            app.getString(R.string.eco_tip_anticipate, tip.brakings, tip.per10Km)
+            app.resources.getQuantityString(
+                R.plurals.eco_tip_anticipate, tip.brakings, tip.brakings, tip.per10Km,
+            )
         is EcoTip.EcoMode -> app.getString(
             if (tip.current == null) R.string.eco_tip_eco_mode_unknown else R.string.eco_tip_eco_mode,
             tip.current?.let { app.getString(it.labelRes) }.orEmpty(),

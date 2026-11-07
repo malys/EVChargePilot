@@ -578,10 +578,22 @@
     <string name="eco_challenge_met">Ora %1$.1f: riuscita.</string>
     <string name="eco_challenge_now">Ora %1$.1f.</string>
     <string name="eco_challenge_none_yet">Ancora troppa poca guida questa settimana.</string>
-    <string name="eco_clause_anticipate">anticipando %1$d frenate brusche</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">anticipando %1$d frenata brusca</item>
+        <item quantity="other">anticipando %1$d frenate brusche</item>
+        <item quantity="many">anticipando %1$d frenate brusche</item>
+    </plurals>
     <string name="eco_lever_anticipate">anticipare le frenate</string>
-    <string name="eco_tip_anticipate">%1$d frenate brusche (%2$.1f ogni 10 km): rilascia prima.</string>
-    <string name="trip_eco_finding_brakings">%1$d frenate brusche, %2$.1f ogni 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d frenata brusca (%2$.1f ogni 10 km): rilascia prima.</item>
+        <item quantity="other">%1$d frenate brusche (%2$.1f ogni 10 km): rilascia prima.</item>
+        <item quantity="many">%1$d frenate brusche (%2$.1f ogni 10 km): rilascia prima.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d frenata brusca, %2$.1f ogni 10 km.</item>
+        <item quantity="other">%1$d frenate brusche, %2$.1f ogni 10 km.</item>
+        <item quantity="many">%1$d frenate brusche, %2$.1f ogni 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Punteggio %1$d / 100 · anticipazione %2$s · fluidità %3$s · efficienza %4$s</string>
     <string name="eco_lever_smoother">guida più fluida</string>
     <string name="eco_lever_eco_mode">modalità Eco</string>

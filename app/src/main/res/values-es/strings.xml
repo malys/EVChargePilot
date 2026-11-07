@@ -578,10 +578,22 @@
     <string name="eco_challenge_met">Ahora %1$.1f: cumplido.</string>
     <string name="eco_challenge_now">Ahora %1$.1f.</string>
     <string name="eco_challenge_none_yet">Aún no se ha conducido lo suficiente esta semana.</string>
-    <string name="eco_clause_anticipate">anticipando %1$d frenadas fuertes</string>
+    <plurals name="eco_clause_anticipate">
+        <item quantity="one">anticipando %1$d frenada fuerte</item>
+        <item quantity="other">anticipando %1$d frenadas fuertes</item>
+        <item quantity="many">anticipando %1$d frenadas fuertes</item>
+    </plurals>
     <string name="eco_lever_anticipate">anticipar las frenadas</string>
-    <string name="eco_tip_anticipate">%1$d frenadas fuertes (%2$.1f cada 10 km): levanta el pie antes.</string>
-    <string name="trip_eco_finding_brakings">%1$d frenadas fuertes, %2$.1f cada 10 km.</string>
+    <plurals name="eco_tip_anticipate">
+        <item quantity="one">%1$d frenada fuerte (%2$.1f cada 10 km): levanta el pie antes.</item>
+        <item quantity="other">%1$d frenadas fuertes (%2$.1f cada 10 km): levanta el pie antes.</item>
+        <item quantity="many">%1$d frenadas fuertes (%2$.1f cada 10 km): levanta el pie antes.</item>
+    </plurals>
+    <plurals name="trip_eco_finding_brakings">
+        <item quantity="one">%1$d frenada fuerte, %2$.1f cada 10 km.</item>
+        <item quantity="other">%1$d frenadas fuertes, %2$.1f cada 10 km.</item>
+        <item quantity="many">%1$d frenadas fuertes, %2$.1f cada 10 km.</item>
+    </plurals>
     <string name="trip_eco_score">Puntuación %1$d / 100 · anticipación %2$s · suavidad %3$s · eficiencia %4$s</string>
     <string name="eco_lever_smoother">una conducción más suave</string>
     <string name="eco_lever_eco_mode">modo Eco</string>

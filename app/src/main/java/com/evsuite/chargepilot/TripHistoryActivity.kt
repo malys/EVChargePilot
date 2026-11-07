@@ -610,7 +610,9 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             getString(R.string.trip_eco_finding_steadiness, finding.harshSharePercent.roundToInt()),
             finding.hardBrakings?.let { count ->
                 finding.hardBrakingsPer10Km?.let {
-                    getString(R.string.trip_eco_finding_brakings, count, it)
+                    resources.getQuantityString(
+                        R.plurals.trip_eco_finding_brakings, count, count, it,
+                    )
                 }
             },
         ).joinToString(" ")
