@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-09
+
 ### Changed
 
 - **"Y aller" works while driving.** Handing the planned trip to the car's map is no longer
