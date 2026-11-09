@@ -1,7 +1,9 @@
 package com.evsuite.chargepilot
 
 import com.evsuite.chargepilot.route.OpenChargeMap
+import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
+import com.evsuite.chargepilot.route.RouteGeometry
 import com.evsuite.hardware.saic.NavigationHandoff
 import com.evsuite.hardware.telemetry.ChargeStopPlan
 import com.evsuite.hardware.telemetry.RouteGrade
@@ -37,14 +39,16 @@ internal data class Found(
  * URI can carry — the charging stop when there is one, since that is the leg the forecast is
  * about. [point] is that same leg target validated for the adapter's `goTo`, the command that
  * starts guidance. [destination] and [pathway] are the whole plan, for the route handoff,
- * which has a waypoint list and therefore needs no such choice — the charging stops and the
- * destination, nothing else.
+ * which has a waypoint list and therefore needs no such choice — the charging stops, and points
+ * along the road between them, so the car drives the route the screen costed rather than one of
+ * its own choosing.
  *
- * **No shape points.** CP-060 also sent eight points spaced along the road, to pin the car to
- * the route the screen costed. The drive of 2026-10-19 showed what Telenav does with them: it
- * guides to the next one ("900 m" on a 7 km trip), the adapter's remaining distance is the
- * distance to that point, and guidance dropped about 2 km in. The car now picks its own road
- * between the stops.
+ * **Shape points, spaced out.** CP-060 sent eight of them whatever the trip's length; on the
+ * 7 km drive of 2026-10-19 that was one every 900 m, Telenav guided to the next one ("900 m"),
+ * and guidance dropped about 2 km in. They were removed, then restored on the owner's request
+ * with [ChargeStopHandoff.MIN_SHAPE_SPACING_KM] between them: a short trip gets none, exactly as
+ * in the build that removed them. Telenav's remaining distance is still to the next waypoint, so
+ * [shapePoints] tells the companion to count from the planned road instead.
  */
 internal data class Handoff(
     val latitude: Double,
@@ -59,6 +63,10 @@ internal data class Handoff(
      * The leg the tap sends is in it: the chain counts from the leg already handed over.
      */
     val legs: List<NavigationHandoff.Poi>,
+    /** Points of the road's shape in [pathway]: places the car passes, never legs. */
+    val shapePoints: Int = 0,
+    /** How far along the planned road the first charging stop sits, when there is one. */
+    val firstStopKm: Double? = null,
 )
 
 internal object ChargeStopHandoff {
@@ -79,6 +87,7 @@ internal object ChargeStopHandoff {
     fun of(
         place: OrsGeocode.Place,
         stops: List<Found>,
+        route: OrsDirections.Route? = null,
     ): Handoff {
         val destination = NavigationHandoff.poi(place.latitude, place.longitude, place.label)
         val stopsOnTheWay = stops.mapNotNull { stop ->
@@ -87,9 +96,16 @@ internal object ChargeStopHandoff {
         }
         // Ordered by distance along the road, because a pathway is an itinerary and not a set: a
         // waypoint after the destination in the list is a route that doubles back.
-        val pathway = NavigationHandoff.pathway(stopsOnTheWay.sortedBy { it.first }.map { it.second })
+        // The stops are the points the plan is about and they keep their place in the list
+        // whatever the shape costs: the budget is what is left over, not the other way round.
+        val shape = shape(route, NavigationHandoff.MAX_PATHWAY_POINTS - stopsOnTheWay.size)
+        val pathway = NavigationHandoff.pathway(
+            (shape + stopsOnTheWay).sortedBy { it.first }.map { it.second }
+        )
         // The stops first and the destination after them: that is the order they are driven in,
-        // and the order the chain hands them over in once each leg's guidance ends.
+        // and the order the chain hands them over in once each leg's guidance ends. Shape points
+        // are deliberately not legs — they are places the car passes, and a chain that treated one
+        // as an arrival would re-send guidance in the middle of a motorway.
         val first = stops.firstOrNull()
         return if (first != null) {
             Handoff(
@@ -97,15 +113,65 @@ internal object ChargeStopHandoff {
                 point = stopsOnTheWay.firstOrNull()?.second, destination = destination,
                 pathway = pathway,
                 legs = stopsOnTheWay.map { it.second } + listOfNotNull(destination),
+                shapePoints = shape.size, firstStopKm = first.alongKm,
             )
         } else {
             Handoff(
                 place.latitude, place.longitude, place.label, toStop = false,
                 point = destination, destination = destination, pathway = pathway,
-                legs = listOfNotNull(destination),
+                legs = listOfNotNull(destination), shapePoints = shape.size,
             )
         }
     }
+
+    /**
+     * The road's shape, as the handful of points the adapter's pathway can carry.
+     *
+     * Why this exists: the handoff names where the driver is going, and the car plans its own way
+     * there. Every figure on the screen — the arrival charge, the stop, the drift the companion
+     * watches — is about *this* route, so a car that takes another road quietly makes all of them
+     * about a different trip. Points along the way are the only instruction available; they do
+     * not force the road, they constrain it.
+     *
+     * At most one per [MIN_SHAPE_SPACING_KM] of road, so a trip shorter than twice that gets none.
+     *
+     * Named by the road they sit on where the router said what it is. A coordinate is what falls
+     * out otherwise, and a map showing `43.612345,3.876543` as a waypoint label is honest about
+     * being a point on a line.
+     */
+    private fun shape(
+        route: OrsDirections.Route?,
+        budget: Int,
+    ): List<Pair<Double, NavigationHandoff.Poi>> {
+        if (route == null) return emptyList()
+        val count = minOf(budget, (route.distanceKm / MIN_SHAPE_SPACING_KM).toInt() - 1)
+        if (count < 1) return emptyList()
+        return RouteGeometry.evenlySpaced(route.points, count).mapNotNull { along ->
+            NavigationHandoff.poi(
+                along.point.latitude,
+                along.point.longitude,
+                roadAtKm(route.sections, along.alongKm),
+            )?.let { along.alongKm to it }
+        }
+    }
+
+    /** The road the router named for this distance along the route, when it named one. */
+    private fun roadAtKm(sections: List<OrsDirections.Section>, km: Double): String? {
+        var along = 0.0
+        for (section in sections) {
+            along += section.distanceKm
+            if (km <= along) return section.road?.takeIf { it.isNotBlank() }
+        }
+        return null
+    }
+
+    /**
+     * The least road between two shape points. Telenav guides to the next waypoint, and on
+     * 2026-10-19 eight of them on 7 km made the guidance a series of 900 m hops: spaced this far
+     * apart, a point is somewhere on a long road the car would otherwise re-plan, never the next
+     * turning.
+     */
+    internal const val MIN_SHAPE_SPACING_KM = 40.0
 
     /**
      * The handoff for a destination nothing has been planned to yet — no route, or a route still

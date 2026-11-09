@@ -431,13 +431,17 @@ class MainActivity : PrimaryNavigationActivity() {
                 SaicNavGuidance.connect(applicationContext)
                 val generation = FirmwareInfo.getGeneration()
                 val guidance = runCatching { SaicNavGuidance.readNow() }.getOrNull()
-                val remainingKm = guidance?.remainingDistanceKm(generation)
+                val carKm = guidance?.remainingDistanceKm(generation)
+                // A shaped handoff: the car's figures are to the next shape point, not the end.
+                val legLeft = FollowedPlan.legLeftKm(this, carKm)
+                val remainingKm = legLeft ?: carKm
+                val minutesLeft = guidance?.remainingMinutes?.takeIf { legLeft == null }
                 if (guidance == null || remainingKm == null) {
                     arrival = null
                     arrivalAt = null
                     return@execute
                 }
-                arrivalAt = guidance.remainingMinutes?.let { minutes ->
+                arrivalAt = minutesLeft?.let { minutes ->
                     DateFormat.getTimeFormat(this)
                         .format(Date(System.currentTimeMillis() + minutes * 60_000L))
                 }
@@ -447,7 +451,7 @@ class MainActivity : PrimaryNavigationActivity() {
                 arrivalRoute = getString(
                     R.string.reach_route_detail,
                     format("%.0f", remainingKm),
-                    guidance.remainingMinutes?.toString() ?: DASH,
+                    minutesLeft?.toString() ?: DASH,
                 )
                 arrival = ArrivalSocForecast.of(socPercent, remainingKm, rate)
             }

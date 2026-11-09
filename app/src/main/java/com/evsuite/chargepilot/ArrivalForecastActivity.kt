@@ -176,7 +176,10 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
         val latest = snapshot
         val generation = FirmwareInfo.getGeneration()
         val guidance = runCatching { SaicNavGuidance.readNow() }.getOrNull()
-        val remainingKm = guidance?.remainingDistanceKm(generation)
+        val carKm = guidance?.remainingDistanceKm(generation)
+        // A shaped handoff: the car's figures are to the next shape point, not the end.
+        val legLeft = FollowedPlan.legLeftKm(this, carKm)
+        val remainingKm = legLeft ?: carKm
         val socPercent = latest?.socPercent?.toDouble()
         val effective = rate ?: SocRateEstimator.fromVehicleRange(
             socPercent,
@@ -188,7 +191,7 @@ class ArrivalForecastActivity : PrimaryNavigationActivity() {
             arrival = arrival,
             reachKm = reach,
             remainingKm = remainingKm,
-            minutes = guidance?.remainingMinutes,
+            minutes = guidance?.remainingMinutes?.takeIf { legLeft == null },
             road = guidance?.road,
             rate = effective,
             routeKnown = remainingKm != null,

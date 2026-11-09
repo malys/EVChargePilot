@@ -1174,9 +1174,11 @@ class ChargeStopActivity : AppCompatActivity() {
         // way to it (CP-062 rule 8). Which of them the single-point channels get is
         // [ChargeStopHandoff]'s decision, tested there.
         val stops = if (plan is ChargeStopPlan.Plan.Stop) chargers.filterNotNull() else emptyList()
-        val target = ChargeStopHandoff.of(place, stops)
-        handoff = target
         followed = follow(plan, chargers.firstOrNull(), route, rate, grade)
+        // Shape points only for a plan the companions can follow: the car then counts to the next
+        // of them, and the leg's arithmetic on the followed plan is what stands in for its figure.
+        val target = ChargeStopHandoff.of(place, stops, route.takeIf { followed != null })
+        handoff = target
         binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(
             if (target.toStop) R.string.charge_stop_navigate_stop
@@ -1268,7 +1270,12 @@ class ChargeStopActivity : AppCompatActivity() {
         // Written down on the tap and not on the render: this is the one unambiguous "I am
         // driving this" the app ever gets, and a plan merely looked at is not one being driven.
         // Recorded whether or not anything accepted the intent — the driver still chose it.
-        followed?.let { FollowedPlan.write(this, it.copy(committedAtMs = System.currentTimeMillis())) }
+        followed?.let {
+            FollowedPlan.write(
+                this,
+                it.copy(committedAtMs = System.currentTimeMillis(), shaped = target.shapePoints > 0),
+            )
+        }
             ?: FollowedPlan.clear(this)
         // Q10 otherwise says nothing until fifteen kilometres have been driven, and a drive cut
         // short then leaves it blank — indistinguishable from a companion that never armed.
@@ -1283,7 +1290,7 @@ class ChargeStopActivity : AppCompatActivity() {
         // Whatever the previous tap left running stops being the plan the moment this one starts.
         NavLegs.disarm()
         // Read here, on the main thread: the worker below must not race a road being chosen.
-        val split = splitRoads(target.toStop)
+        val split = splitRoads(target)
         // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
@@ -1353,9 +1360,10 @@ class ChargeStopActivity : AppCompatActivity() {
     /**
      * The split screen, carrying the roads this plan offered so the driver still sees the trade
      * once the map is up. The charge band is against the routed road, so the routed road has none.
-     * With a stop, the car's remaining distance is to the stop, so the road's length goes too.
+     * With a stop or a shape point, the car's remaining distance is to that waypoint, so the
+     * road's length goes too, and where the stop sits along it.
      */
-    private fun splitRoads(toStop: Boolean): Intent {
+    private fun splitRoads(target: Handoff): Intent {
         val found = roads
         val list = found?.list.orEmpty().map { road ->
             SplitCompanion.SplitRoad(
@@ -1367,7 +1375,10 @@ class ChargeStopActivity : AppCompatActivity() {
             )
         }
         val routeKm = found?.list?.getOrNull(chosen)?.route?.distanceKm
-        return SplitCompanion.intent(list, chosen, toStop, routeKm)
+        return SplitCompanion.intent(
+            list, chosen, target.toStop, routeKm,
+            shaped = target.shapePoints > 0, stopKm = target.firstStopKm,
+        )
     }
 
     /**
@@ -1452,7 +1463,8 @@ class ChargeStopActivity : AppCompatActivity() {
         }
         announce(
             getString(
-                if (target.pathway.isEmpty()) R.string.charge_stop_navigate_route
+                // The pathway may hold shape points alone; the sentence names a stop only if there is one.
+                if (!target.toStop) R.string.charge_stop_navigate_route
                 else R.string.charge_stop_navigate_route_via
             )
         )

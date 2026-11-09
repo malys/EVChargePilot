@@ -33,6 +33,39 @@ object RouteGeometry {
         return out
     }
 
+    /** A point of the route with how far along it sits, which is what orders a pathway. */
+    data class Along(val alongKm: Double, val point: OrsDirections.Point)
+
+    /**
+     * [count] points spread evenly along the route, both ends excluded.
+     *
+     * CP-060's whole mechanism: the adapter's route handoff carries a pathway, and a pathway is
+     * the only thing that stops the car planning its own road between two ends. Even spacing by
+     * *distance along the road* rather than by vertex index is what makes them useful — a router
+     * puts hundreds of vertices in a roundabout and four in a motorway straight, so every other
+     * vertex would pin the roundabout and leave the two hundred kilometres after it free.
+     *
+     * Fewer than [count] come back when two targets land on the same vertex, which is a short
+     * route with few of them: a pathway that names the same place twice is a worse instruction
+     * than one that names it once.
+     */
+    fun evenlySpaced(points: List<OrsDirections.Point>, count: Int): List<Along> {
+        if (count < 1 || points.size < 2) return emptyList()
+        val cumulative = cumulativeKm(points)
+        val total = cumulative.last()
+        if (total <= 0.0) return emptyList()
+        val step = total / (count + 1)
+        val chosen = LinkedHashSet<Int>()
+        var index = 0
+        for (n in 1..count) {
+            val target = step * n
+            while (index < cumulative.lastIndex && cumulative[index] < target) index++
+            // The last vertex is the destination, which the handoff carries separately.
+            if (index < cumulative.lastIndex) chosen.add(index)
+        }
+        return chosen.map { Along(cumulative[it], points[it]) }
+    }
+
     /**
      * The stretch between two distances along the route.
      *

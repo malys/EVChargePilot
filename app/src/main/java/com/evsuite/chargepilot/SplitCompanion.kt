@@ -100,8 +100,11 @@ internal class SplitCompanion(
             onUi {
                 val toStop = extras.getBooleanExtra(EXTRA_TO_STOP, false)
                 val routeKm = extras.getDoubleExtra(EXTRA_ROUTE_KM, Double.NaN).takeUnless(Double::isNaN)
-                remainingKm = destinationKm(toStop, km, routeKm, drivenKm(value))
-                toStopKm = km.takeIf { toStop }
+                val shaped = extras.getBooleanExtra(EXTRA_SHAPED, false)
+                val stopKm = extras.getDoubleExtra(EXTRA_STOP_KM, Double.NaN).takeUnless(Double::isNaN)
+                val driven = drivenKm(value)
+                remainingKm = destinationKm(toStop || shaped, km, routeKm, driven)
+                toStopKm = if (toStop) stopKmLeft(shaped, km, stopKm, driven) else null
                 val left = remainingKm
                 binding.splitDestination.visibility = if (left == null) View.VISIBLE else View.GONE
                 binding.splitRoute.visibility = if (left == null) View.GONE else View.VISIBLE
@@ -112,7 +115,8 @@ internal class SplitCompanion(
                         String.format(Locale.getDefault(), "%.0f", left),
                         toStopKm?.let { String.format(Locale.getDefault(), "%.1f", it) } ?: unavailable,
                     )
-                    minutes != null -> context.getString(
+                    // With shape points the car's minutes are to the next one, not to the end.
+                    minutes != null && !shaped -> context.getString(
                         R.string.nav_split_route_eta,
                         String.format(Locale.getDefault(), "%.1f", left),
                         minutes.toString(),
@@ -315,15 +319,26 @@ internal class SplitCompanion(
         private const val EXTRA_CHOSEN = "split.road.chosen"
         private const val EXTRA_TO_STOP = "split.to_stop"
         private const val EXTRA_ROUTE_KM = "split.route_km"
+        private const val EXTRA_SHAPED = "split.shaped"
+        private const val EXTRA_STOP_KM = "split.stop_km"
 
         /**
          * Kilometres left to the destination.
          *
-         * Without a stop the car's figure is it. With one, the car counts to the stop (its next
-         * waypoint), so the destination is the planned road's length less what has been driven.
+         * Without a waypoint the car's figure is it. With one — a stop or a shape point — the car
+         * counts to that waypoint, so the destination is the planned road's length less what has
+         * been driven.
          */
-        internal fun destinationKm(toStop: Boolean, carKm: Double?, routeKm: Double?, drivenKm: Double): Double? =
-            if (!toStop) carKm else routeKm?.let { (it - drivenKm).coerceAtLeast(0.0) }
+        internal fun destinationKm(viaWaypoint: Boolean, carKm: Double?, routeKm: Double?, drivenKm: Double): Double? =
+            if (!viaWaypoint) carKm else routeKm?.let { (it - drivenKm).coerceAtLeast(0.0) }
+
+        /**
+         * Kilometres left to the charging stop. The car's figure when the stop is its next
+         * waypoint; with shape points the next one may be a point on the road before it, so the
+         * stop's place along the planned road less what has been driven.
+         */
+        internal fun stopKmLeft(shaped: Boolean, carKm: Double?, stopKm: Double?, drivenKm: Double): Double? =
+            if (!shaped) carKm else stopKm?.let { (it - drivenKm).coerceAtLeast(0.0) }
 
         /**
          * The charge left on arriving, on the car's own range: the range is what the charge
@@ -336,9 +351,18 @@ internal class SplitCompanion(
             socPercent * (rangeKm - km) / rangeKm
 
         /** The companion's extras: the roads the plan offered and the one being driven. */
-        fun intent(roads: List<SplitRoad>, chosen: Int, toStop: Boolean, routeKm: Double?): Intent =
+        fun intent(
+            roads: List<SplitRoad>,
+            chosen: Int,
+            toStop: Boolean,
+            routeKm: Double?,
+            shaped: Boolean = false,
+            stopKm: Double? = null,
+        ): Intent =
             Intent()
                 .putExtra(EXTRA_TO_STOP, toStop)
+                .putExtra(EXTRA_SHAPED, shaped)
+                .putExtra(EXTRA_STOP_KM, stopKm ?: Double.NaN)
                 .putExtra(EXTRA_ROUTE_KM, routeKm ?: Double.NaN)
                 .putExtra(EXTRA_NAMES, roads.map { it.name }.toTypedArray())
                 .putExtra(EXTRA_KM, roads.map { it.km }.toDoubleArray())

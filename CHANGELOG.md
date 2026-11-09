@@ -4,6 +4,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Changed
+
+- **Navigation: the route handed to the car carries points along the road again.** "Navigate to"
+  pins MG4 Navigator to the road the screen costed, with at most one point every 40 km, so a
+  trip under 80 km sends none, as in 0.2.0. Telenav counts to its next waypoint, so the split
+  companion, the dashboard, the arrival forecast and the drift line count the rest of the leg on
+  the planned road instead. Shape points go only with a plan the companions can follow.
+
 ## [0.2.1] - 2026-11-09
 
 ### Changed

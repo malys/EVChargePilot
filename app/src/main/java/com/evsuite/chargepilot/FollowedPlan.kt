@@ -2,6 +2,7 @@ package com.evsuite.chargepilot
 
 import android.content.Context
 import com.evsuite.chargepilot.route.OrsDirections
+import com.evsuite.hardware.saic.SaicNav
 import com.evsuite.hardware.telemetry.PlanDrift
 import java.util.Locale
 
@@ -52,6 +53,8 @@ object FollowedPlan {
      * @param sections the road ahead as it was at departure, for CP-049's what-if. Empty when the
      *   route had too many to keep.
      * @param toStop whether the leg ends at a charging stop rather than at the destination.
+     * @param shaped whether the handoff carried shape points, so the car's remaining distance is
+     *   to the next of them rather than to the end of the leg.
      */
     data class Values(
         val committedAtMs: Long,
@@ -59,6 +62,7 @@ object FollowedPlan {
         val drift: PlanDrift.Followed,
         val sections: List<OrsDirections.Section>,
         val toStop: Boolean,
+        val shaped: Boolean = false,
     )
 
     fun write(context: Context, values: Values) {
@@ -71,6 +75,7 @@ object FollowedPlan {
             .putFloat(KEY_RATE_BAND, values.drift.plannedUncertaintyPercentPerKm.toFloat())
             .putFloat(KEY_RESERVE, values.drift.reservePercent.toFloat())
             .putBoolean(KEY_TO_STOP, values.toStop)
+            .putBoolean(KEY_SHAPED, values.shaped)
             .putString(KEY_SECTIONS, encode(values.sections))
             .apply()
     }
@@ -104,10 +109,34 @@ object FollowedPlan {
             ),
             sections = decode(prefs.getString(KEY_SECTIONS, null)),
             toStop = prefs.getBoolean(KEY_TO_STOP, false),
+            shaped = prefs.getBoolean(KEY_SHAPED, false),
         )
     }
 
     fun clear(context: Context) = prefs(context).edit().clear().apply()
+
+    /**
+     * What is left of the leg, when the car's own figure is only to a shape point.
+     *
+     * Telenav counts to its next waypoint, and a shaped handoff puts points along the road before
+     * the leg's end. A car figure short of the leg's arithmetic is that point; one at or past it
+     * is the leg's end itself or a guidance to somewhere else, and both are the car's to give.
+     * Null means: use the car's figure.
+     */
+    internal fun legLeftKm(plan: Values?, carKm: Double?, odometerKm: Double?): Double? {
+        if (plan == null || !plan.shaped || carKm == null || odometerKm == null) return null
+        val left = (plan.drift.legKm - (odometerKm - plan.odometerAtDepartureKm)).coerceAtLeast(0.0)
+        return left.takeIf { carKm < it }
+    }
+
+    /** [legLeftKm] for the plan on file, on the adapter's odometer. Call off the main thread. */
+    fun legLeftKm(context: Context, carKm: Double?): Double? {
+        if (carKm == null) return null
+        val plan = read(context)?.takeIf { it.shaped } ?: return null
+        SaicNav.connect(context)
+        val odometer = runCatching { SaicNav.totalMileageKm() }.getOrNull()?.toDouble()
+        return legLeftKm(plan, carKm, odometer)
+    }
 
     /**
      * The road still in front of the car, after [drivenKm] of the stored route.
@@ -178,5 +207,6 @@ object FollowedPlan {
     private const val KEY_RATE_BAND = "rate_band_percent_per_km"
     private const val KEY_RESERVE = "reserve_percent"
     private const val KEY_TO_STOP = "to_stop"
+    private const val KEY_SHAPED = "shaped"
     private const val KEY_SECTIONS = "sections"
 }

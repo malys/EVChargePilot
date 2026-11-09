@@ -237,6 +237,10 @@ class DriftCompanion(context: Context) {
         val remaining = guidance.remainingDistanceKm(FirmwareInfo.getGeneration())
             ?: return null
         if (remaining <= 0.0) return null
+        // With shape points the car counts to the next one, not to the leg's end.
+        if (FollowedPlan.legLeftKm(followed, remaining, drivenKm?.let { it + followed.odometerAtDepartureKm }) != null) {
+            return null
+        }
         val expected = followed.drift.legKm - (drivenKm ?: 0.0)
         if (expected <= 0.0) return null
         return remaining.takeIf { it <= expected * MAX_GUIDANCE_RATIO }

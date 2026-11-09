@@ -22,6 +22,16 @@ class NavSplitDestinationTest {
     }
 
     @Test
+    fun `with shape points the stop is counted on the road, not on the car`() {
+        // The car says 40 km: a shape point before the stop at 180 km.
+        assertEquals(170.0, SplitCompanion.stopKmLeft(true, 40.0, 180.0, 10.0)!!, 1e-9)
+        assertEquals(0.0, SplitCompanion.stopKmLeft(true, 40.0, 180.0, 200.0)!!, 1e-9)
+        assertNull(SplitCompanion.stopKmLeft(true, 40.0, null, 10.0))
+        // Without them the stop is the car's next waypoint, and its figure is the right one.
+        assertEquals(40.0, SplitCompanion.stopKmLeft(false, 40.0, 180.0, 10.0)!!, 1e-9)
+    }
+
+    @Test
     fun `the trip takes the same share of the charge as of the range`() {
         // 80 % for 300 km: 120 km is two fifths of it, so 48 % is left.
         assertEquals(48.0, SplitCompanion.arrivalSoc(80.0, 300.0, 120.0), 1e-9)

@@ -1,7 +1,9 @@
 package com.evsuite.chargepilot
 
 import com.evsuite.chargepilot.route.OpenChargeMap
+import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
+import com.evsuite.hardware.saic.NavigationHandoff
 import com.evsuite.hardware.telemetry.SocRate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -39,6 +41,22 @@ class ChargeStopHandoffTest {
 
     private fun found(alongKm: Double = 180.0) = Found(charger(), alongKm, arrivalPercent = 22.0)
 
+    /**
+     * [degrees] of latitude, about 111 km each, on a road the router named the whole way. One
+     * vertex per 0.1 degree, so the vertices sit about 11 km apart.
+     */
+    private fun route(degrees: Double = 3.0): OrsDirections.Route {
+        val km = degrees * 111.0
+        val steps = (degrees * 10).toInt()
+        return OrsDirections.Route(
+            distanceKm = km,
+            durationMinutes = km * 0.6,
+            points = (0..steps).map { OrsDirections.Point(4.0, 43.0 + it * 0.1, null) },
+            attribution = null,
+            sections = listOf(OrsDirections.Section(km, km * 0.6, "A7")),
+        )
+    }
+
     /** The driver's own trips, with a band narrow enough that the planner does not refuse. */
     private fun rate() = SocRate(
         percentPerKm = 0.25,
@@ -64,13 +82,58 @@ class ChargeStopHandoffTest {
     }
 
     @Test
-    fun `the pathway is the stops alone, never points along the road`() {
-        // 2026-10-19: with shape points, Telenav guided to the next one and dropped guidance
-        // about 2 km in. Only places the driver stops at go in the pathway.
-        val handoff = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 180.0)))
+    fun `the pathway carries the road's shape, with the stop in its place along it`() {
+        val handoff = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 180.0)), route())
 
-        assertEquals(listOf("Aire de Montélimar"), handoff.pathway.map { it.name })
+        // Every point the adapter will take, and no more: the stop plus the shape fills the cap.
+        assertEquals(NavigationHandoff.MAX_PATHWAY_POINTS, handoff.pathway.size)
+        assertEquals(7, handoff.shapePoints)
+        // The shape points are named by the road the router said they sit on.
+        assertEquals(7, handoff.pathway.count { it.name == "A7" })
+        // The stop keeps its place in the itinerary — 180 km along a 333 km route falls between
+        // the fourth waypoint and the fifth, and a pathway is driven in the order it is written.
+        assertEquals("Aire de Montélimar", handoff.pathway[4].name)
+        assertEquals(180.0, handoff.firstStopKm!!, 1e-9)
+
+        // Shape points are places the car passes, never legs: a chain that read one as an arrival
+        // would hand the next destination over in the middle of a motorway.
         assertEquals(listOf("Aire de Montélimar", "Marseille"), handoff.legs.map { it.name })
+    }
+
+    @Test
+    fun `shape points are never closer together than the minimum spacing`() {
+        // 2026-10-19: eight points on 7 km, one every 900 m, and Telenav guided hop by hop.
+        val handoff = ChargeStopHandoff.of(marseille, stops = emptyList(), route = route(degrees = 1.5))
+        val along = handoff.pathway.map { (it.latitude - 43.0) * 111.0 }
+
+        // 166 km: four gaps of at least 40 km, so three points.
+        assertEquals(3, handoff.shapePoints)
+        along.zipWithNext().forEach { (a, b) ->
+            assertTrue(b - a >= ChargeStopHandoff.MIN_SHAPE_SPACING_KM - 11.1)
+        }
+        assertTrue(along.first() >= ChargeStopHandoff.MIN_SHAPE_SPACING_KM - 11.1)
+    }
+
+    @Test
+    fun `a short trip sends no shape point, as the build that removed them did`() {
+        // Under twice the spacing there is no room for a point with road on both sides of it.
+        val short = route(degrees = 0.7)
+        assertTrue(short.distanceKm < 2 * ChargeStopHandoff.MIN_SHAPE_SPACING_KM)
+
+        val alone = ChargeStopHandoff.of(marseille, stops = emptyList(), route = short)
+        assertTrue(alone.pathway.isEmpty())
+        assertEquals(0, alone.shapePoints)
+
+        val withStop = ChargeStopHandoff.of(marseille, listOf(found(alongKm = 40.0)), short)
+        assertEquals(listOf("Aire de Montélimar"), withStop.pathway.map { it.name })
+        assertEquals(0, withStop.shapePoints)
+    }
+
+    @Test
+    fun `no route, no shape`() {
+        val handoff = ChargeStopHandoff.of(marseille, listOf(found()))
+        assertEquals(listOf("Aire de Montélimar"), handoff.pathway.map { it.name })
+        assertEquals(0, handoff.shapePoints)
     }
 
     /** CP-062: Auzielle → Paris stops twice, and the car is told about both stops. */

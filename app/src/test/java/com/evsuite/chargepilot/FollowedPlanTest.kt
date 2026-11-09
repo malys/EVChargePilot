@@ -2,7 +2,9 @@ package com.evsuite.chargepilot
 
 import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.RouteWhatIf
+import com.evsuite.hardware.telemetry.PlanDrift
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Locale
@@ -87,5 +89,39 @@ class FollowedPlanTest {
             RouteWhatIf.Result.Unavailable(SpeedWhatIfUnavailable.MODEL_NOT_TRAINED),
             result,
         )
+    }
+
+    private fun plan(shaped: Boolean) = FollowedPlan.Values(
+        committedAtMs = 1L,
+        odometerAtDepartureKm = 1000.0,
+        drift = PlanDrift.Followed(
+            legKm = 300.0,
+            socAtDeparturePercent = 90.0,
+            plannedRatePercentPerKm = 0.2,
+            plannedUncertaintyPercentPerKm = 0.01,
+            reservePercent = 10.0,
+        ),
+        sections = emptyList(),
+        toStop = false,
+        shaped = shaped,
+    )
+
+    @Test
+    fun `a shaped plan answers for the leg when the car counts to a shape point`() {
+        // 50 km driven, the car says 30 km: the next shape point, not the 250 km left.
+        assertEquals(250.0, FollowedPlan.legLeftKm(plan(true), 30.0, 1050.0)!!, 1e-9)
+    }
+
+    @Test
+    fun `the car keeps its own figure everywhere else`() {
+        // No shape point in the handoff: the car's next waypoint is the leg's end.
+        assertNull(FollowedPlan.legLeftKm(plan(false), 30.0, 1050.0))
+        // Past the last shape point, or guiding somewhere else: the car knows the road taken.
+        assertNull(FollowedPlan.legLeftKm(plan(true), 250.0, 1050.0))
+        assertNull(FollowedPlan.legLeftKm(plan(true), 600.0, 1050.0))
+        // Not guiding, no odometer, no plan.
+        assertNull(FollowedPlan.legLeftKm(plan(true), null, 1050.0))
+        assertNull(FollowedPlan.legLeftKm(plan(true), 30.0, null))
+        assertNull(FollowedPlan.legLeftKm(null, 30.0, 1050.0))
     }
 }
