@@ -615,6 +615,7 @@
     <string name="advice_history_title">Tipps</string>
     <string name="advice_history_open">Tipp-Verlauf</string>
     <string name="advice_settings_notify">Batterietipps im Stand melden</string>
+    <string name="navigation_settings_shape_points">Zwischenpunkte der berechneten Route an die Navigation senden</string>
     <string name="advice_notification_title">Batterie-Begleiter</string>
     <string name="advice_channel">Batterietipps</string>
     <string name="advice_channel_description">Was sich in den Batterieanalysen geändert hat, nur bei stehendem Auto gesendet, höchstens einer je Art pro Tag.</string>

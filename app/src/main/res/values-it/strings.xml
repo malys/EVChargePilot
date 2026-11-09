@@ -618,6 +618,7 @@
     <string name="advice_history_title">Consigli</string>
     <string name="advice_history_open">Storico consigli</string>
     <string name="advice_settings_notify">Notifica i consigli batteria a veicolo fermo</string>
+    <string name="navigation_settings_shape_points">Invia punti intermedi del percorso calcolato alla navigazione</string>
     <string name="advice_notification_title">Compagno della batteria</string>
     <string name="advice_channel">Consigli batteria</string>
     <string name="advice_channel_description">Cosa è cambiato nelle analisi della batteria, inviato solo con l\'auto ferma, al massimo uno per tipo al giorno.</string>

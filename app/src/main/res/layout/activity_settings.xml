@@ -441,6 +441,15 @@
                         android:text="@string/eco_settings_note"
                         android:textAppearance="@style/Text.EV.Secondary" />
 
+                    <!-- Points along the planned road in the route handoff, so MG4 Navigator
+                         follows the road the plan costed. Read when a plan is drawn. -->
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/shapePointsSwitch"
+                        style="@style/Widget.EV.Switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/navigation_settings_shape_points" />
+
 
                     <!-- The same control as EVTasker's: one button naming the language in use,
                          opening the list of the five the suite speaks. Title and button share a

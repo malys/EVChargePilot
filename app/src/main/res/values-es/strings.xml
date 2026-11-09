@@ -618,6 +618,7 @@
     <string name="advice_history_title">Consejos</string>
     <string name="advice_history_open">Historial de consejos</string>
     <string name="advice_settings_notify">Avisar de los consejos de batería con el coche aparcado</string>
+    <string name="navigation_settings_shape_points">Enviar puntos intermedios de la ruta calculada a la navegación</string>
     <string name="advice_notification_title">Compañero de batería</string>
     <string name="advice_channel">Consejos de batería</string>
     <string name="advice_channel_description">Lo que cambió en los análisis de batería, enviado solo con el coche parado, como mucho uno de cada tipo al día.</string>

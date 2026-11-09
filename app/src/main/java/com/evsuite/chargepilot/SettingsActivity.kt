@@ -129,6 +129,10 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.adviceNotifySwitch.setOnCheckedChangeListener { _, checked ->
             BatteryAdvisor.storeNotificationsEnabled(this, checked)
         }
+        binding.shapePointsSwitch.isChecked = ChargeStopHandoff.shapePointsEnabled(this)
+        binding.shapePointsSwitch.setOnCheckedChangeListener { _, checked ->
+            ChargeStopHandoff.storeShapePointsEnabled(this, checked)
+        }
     }
 
     /**

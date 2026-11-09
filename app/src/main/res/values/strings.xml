@@ -666,6 +666,7 @@ Spending %6$s %% per km</string>
     <string name="advice_history_title">Advice</string>
     <string name="advice_history_open">Advice history</string>
     <string name="advice_settings_notify">Notify battery advice when parked</string>
+    <string name="navigation_settings_shape_points">Send points along the planned road to the navigation</string>
     <string name="advice_notification_title">Battery companion</string>
     <string name="advice_channel">Battery advice</string>
     <string name="advice_channel_description">What changed in the battery analyses, sent only with the car stopped, at most one of each kind a day.</string>

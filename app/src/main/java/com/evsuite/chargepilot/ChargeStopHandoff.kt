@@ -1,5 +1,6 @@
 package com.evsuite.chargepilot
 
+import android.content.Context
 import com.evsuite.chargepilot.route.OpenChargeMap
 import com.evsuite.chargepilot.route.OrsDirections
 import com.evsuite.chargepilot.route.OrsGeocode
@@ -48,7 +49,8 @@ internal data class Found(
  * and guidance dropped about 2 km in. They were removed, then restored on the owner's request
  * with [ChargeStopHandoff.MIN_SHAPE_SPACING_KM] between them: a short trip gets none, exactly as
  * in the build that removed them. Telenav's remaining distance is still to the next waypoint, so
- * [shapePoints] tells the companion to count from the planned road instead.
+ * [shapePoints] tells the companion to count from the planned road instead. A setting,
+ * [ChargeStopHandoff.shapePointsEnabled], turns them off; on by default.
  */
 internal data class Handoff(
     val latitude: Double,
@@ -172,6 +174,18 @@ internal object ChargeStopHandoff {
      * turning.
      */
     internal const val MIN_SHAPE_SPACING_KM = 40.0
+
+    /** Whether the route handoff carries shape points. The driver's setting; on by default. */
+    fun shapePointsEnabled(context: Context): Boolean = prefs(context).getBoolean(PREF_SHAPE, true)
+
+    fun storeShapePointsEnabled(context: Context, enabled: Boolean) =
+        prefs(context).edit().putBoolean(PREF_SHAPE, enabled).apply()
+
+    private fun prefs(context: Context) = context.applicationContext
+        .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+
+    private const val PREFERENCES = "navigation_handoff"
+    private const val PREF_SHAPE = "shape_points"
 
     /**
      * The handoff for a destination nothing has been planned to yet — no route, or a route still

@@ -11,6 +11,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   trip under 80 km sends none, as in 0.2.0. Telenav counts to its next waypoint, so the split
   companion, the dashboard, the arrival forecast and the drift line count the rest of the leg on
   the planned road instead. Shape points go only with a plan the companions can follow.
+- **Settings: the shape points can be switched off.** "Send points along the planned road to the
+  navigation", on by default, lets the car pick its own road between the stops again. It is read
+  when a plan is drawn, so a plan already on screen keeps what it was drawn with.
 
 ## [0.2.1] - 2026-11-09
 

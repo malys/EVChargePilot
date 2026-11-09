@@ -1177,7 +1177,9 @@ class ChargeStopActivity : AppCompatActivity() {
         followed = follow(plan, chargers.firstOrNull(), route, rate, grade)
         // Shape points only for a plan the companions can follow: the car then counts to the next
         // of them, and the leg's arithmetic on the followed plan is what stands in for its figure.
-        val target = ChargeStopHandoff.of(place, stops, route.takeIf { followed != null })
+        // And only when the driver has not switched them off in the settings.
+        val shapeAllowed = followed != null && ChargeStopHandoff.shapePointsEnabled(this)
+        val target = ChargeStopHandoff.of(place, stops, route.takeIf { shapeAllowed })
         handoff = target
         binding.navigateNote.visibility = View.VISIBLE
         binding.navigateNote.setText(
