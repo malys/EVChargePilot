@@ -4,6 +4,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Changed
+
+- **"Y aller" works while driving.** Handing the planned trip to the car's map is no longer
+  refused once the car moves. Choosing the destination and the road still needs the car parked.
+
 ### Fixed
 
 - **Eco advice: one hard stop is singular.** The trip-end tip, its "by anticipating…" clause

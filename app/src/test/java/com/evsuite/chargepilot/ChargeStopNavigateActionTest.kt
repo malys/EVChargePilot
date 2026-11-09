@@ -39,6 +39,17 @@ class ChargeStopNavigateActionTest {
         )
     }
 
+    /** Owner decision 2026-11-09: the handoff works while moving; only planning is parked. */
+    @Test fun `the handoff is not gated on being parked`() {
+        val source = module("src/main/java/com/evsuite/chargepilot/ChargeStopActivity.kt").readText()
+        val body = source.substringAfter("private fun navigate() {").substringBefore("\n    }\n")
+        assertFalse("navigate() refuses while moving", "ParkedDeletionPolicy.gate" in body)
+        assertFalse(
+            "the navigate button is disabled while moving",
+            Regex("navigateAction\\.isEnabled = usable").containsMatchIn(source),
+        )
+    }
+
     /** 2026-10-25: a `finish()` right after the handoff put this app back over the map. */
     @Test fun `a confirmed handoff never finishes the screen under the map`() {
         val source = module("src/main/java/com/evsuite/chargepilot/ChargeStopActivity.kt").readText()

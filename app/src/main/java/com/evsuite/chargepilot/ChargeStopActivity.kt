@@ -1240,18 +1240,12 @@ class ChargeStopActivity : AppCompatActivity() {
     /**
      * Sends it. The first thing this application asks a vehicle system to do rather than tell it.
      *
-     * Parked, on a tap, once. The gate is re-read here and not trusted from [render]: the button
-     * was enabled at some earlier moment and the car may have moved since, and a navigation
-     * screen changing under someone at 110 is the hazard this whole screen is arranged around.
+     * On a tap, once, moving or not (owner decision, 2026-11-09): handing a planned trip to the
+     * car's own map is not a vehicle write, and a driver who planned while parked must still be
+     * able to start it once rolling. Planning itself — destination, road choice — stays parked.
      */
     private fun navigate() {
         val target = handoff ?: return
-        if (ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
-            != ParkedDeletionGate.PARKED
-        ) {
-            announce(getString(R.string.charge_stop_moving))
-            return
-        }
         val uri = NavigationHandoff.geoUri(target.latitude, target.longitude, target.label)
             ?: run {
                 announce(getString(R.string.charge_stop_navigate_bad_place))
@@ -1552,7 +1546,8 @@ class ChargeStopActivity : AppCompatActivity() {
         // Disabled, never hidden: the action stays where the driver last saw it, and a button
         // that is on screen and grey says "not yet" where an absent one says "this screen has
         // no way out of it".
-        binding.navigateAction.isEnabled = usable && handoff != null
+        // Not behind the parked gate: see [navigate].
+        binding.navigateAction.isEnabled = handoff != null
         for (at in 0 until binding.roadChoiceActions.childCount) {
             binding.roadChoiceActions.getChildAt(at).isEnabled = usable
         }
