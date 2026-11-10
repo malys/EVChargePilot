@@ -16,6 +16,7 @@ import com.evsuite.hardware.telemetry.model.SocConsumptionFitter
 import com.evsuite.hardware.telemetry.model.SocConsumptionModel
 import java.io.File
 import java.util.Locale
+import kotlin.math.sqrt
 
 /** One thing about this drive that was measured, with the number that measured it. */
 sealed interface EcoFinding {
@@ -50,6 +51,17 @@ sealed interface EcoFinding {
         val uncertaintyKwh: Double,
         val sharePercent: Double,
         val openDistanceKm: Double,
+    ) : EcoFinding
+
+    /**
+     * The climate's cost read from the history, not from a fit: how much further above the charge
+     * model's expectation the drives run with it on went, against the drives run with it off.
+     * An association, cold days included, which is why it carries both counts.
+     */
+    data class Climate(
+        val extraPercent: Double,
+        val withTrips: Int,
+        val withoutTrips: Int,
     ) : EcoFinding
 
     /** The share of moving time spent accelerating hard, from the track's speed channel. */
@@ -167,6 +179,9 @@ object EcoTripReviewer {
             " uncertainty_kwh=${format(finding.uncertaintyKwh)}" +
             " share_percent=${format(finding.sharePercent)}" +
             " open_km_above_60=${format(finding.openDistanceKm)}"
+        is EcoFinding.Climate -> "finding=CLIMATE" +
+            " extra_percent=${format(finding.extraPercent)}" +
+            " with_trips=${finding.withTrips} without_trips=${finding.withoutTrips}"
         is EcoFinding.Steadiness ->
             "finding=STEADINESS harsh_share_percent=${format(finding.harshSharePercent)}" +
                 " hard_brakings=${finding.hardBrakings ?: "unavailable"}"
@@ -298,6 +313,45 @@ object EcoTripReviewer {
     }
 
     private fun format(value: Double): String = String.format(Locale.ROOT, "%.2f", value)
+
+    /** Half the climate-readable track with the climate on: the drive was run with it. */
+    const val CLIMATE_ON_SHARE = 0.5
+
+    /** Under a tenth: the drive was run without it. Between the two it was both, and not compared. */
+    const val CLIMATE_OFF_SHARE = 0.1
+
+    /** Fewer drives on either side and one odd drive is the whole comparison. */
+    const val MIN_CLIMATE_TRIPS = 3
+
+    /** On, off, or null when the track never read the climate or ran it for part of the drive. */
+    fun climateOn(trip: StoredTrip): Boolean? {
+        val states = trip.samples.orEmpty().mapNotNull(ChargeAttributionCalculator::climateActive)
+        if (states.isEmpty()) return null
+        val share = states.count { it }.toDouble() / states.size
+        return when {
+            share >= CLIMATE_ON_SHARE -> true
+            share < CLIMATE_OFF_SHARE -> false
+            else -> null
+        }
+    }
+
+    /**
+     * Each side's verdict deltas, in percent over the expectation. Answers only when the drives
+     * with the climate ran further over it by more than twice the standard error of the
+     * difference; a smaller gap, or a cheaper climate, is not something to advise on.
+     */
+    fun climate(withDeltas: List<Double>, withoutDeltas: List<Double>): EcoFinding.Climate? {
+        if (withDeltas.size < MIN_CLIMATE_TRIPS || withoutDeltas.size < MIN_CLIMATE_TRIPS) return null
+        fun mean(values: List<Double>) = values.average()
+        fun variance(values: List<Double>): Double {
+            val m = mean(values)
+            return values.sumOf { (it - m) * (it - m) } / (values.size - 1)
+        }
+        val extra = mean(withDeltas) - mean(withoutDeltas)
+        val error = sqrt(variance(withDeltas) / withDeltas.size + variance(withoutDeltas) / withoutDeltas.size)
+        if (!extra.isFinite() || extra <= 2.0 * error) return null
+        return EcoFinding.Climate(extra, withDeltas.size, withoutDeltas.size)
+    }
 }
 
 /** The attribution and the review of every trip, from the fits the whole history supports. */
@@ -328,7 +382,7 @@ fun reviewHistory(filesDir: File, trips: List<StoredTrip>): ReviewedHistory {
             SpeedWhatIfCalculator.calculate(trip, model, socModel),
         )
     }
-    return ReviewedHistory(attributions, reviews)
+    return ReviewedHistory(attributions, withClimate(trips, reviews))
 }
 
 /**
@@ -369,4 +423,29 @@ fun ecoProgress(tripsNewestFirst: List<StoredTrip>, nowMs: Long): EcoProgress {
             EcoTripReviewer.verdict(trip, socModelWithout(tripsNewestFirst, trip))
     }
     return EcoProgress.of(recent, verdicts, nowMs)
+}
+
+/**
+ * Adds the history's climate comparison to every drive run with the climate on.
+ *
+ * The cabin share needs the power model, which this car refuses; the comparison needs only the
+ * charge verdicts. A drive that already carries a fitted cabin share keeps that instead.
+ */
+private fun withClimate(
+    trips: List<StoredTrip>,
+    reviews: Map<Long, EcoTripReview>,
+): Map<Long, EcoTripReview> {
+    val on = trips.associate { it.summary.startedAtMs to EcoTripReviewer.climateOn(it) }
+    fun deltas(state: Boolean) = trips.mapNotNull { trip ->
+        if (on[trip.summary.startedAtMs] != state) return@mapNotNull null
+        (reviews[trip.summary.startedAtMs] as? EcoTripReview.Ready)?.verdict?.deltaPercent
+    }
+    val climate = EcoTripReviewer.climate(deltas(true), deltas(false)) ?: return reviews
+    return reviews.mapValues { (startedAtMs, review) ->
+        if (review !is EcoTripReview.Ready || on[startedAtMs] != true ||
+            review.findings.any { it is EcoFinding.Cabin }
+        ) return@mapValues review
+        val (style, rest) = review.findings.partition { it is EcoFinding.Steadiness }
+        review.copy(findings = (rest + climate + style).take(EcoTripReviewer.MAX_FINDINGS))
+    }
 }

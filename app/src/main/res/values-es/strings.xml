@@ -517,6 +517,7 @@
     <string name="trip_eco_finding_motorway_energy">A %1$d km/h en los %2$.0f km de vía rápida: entre %3$.1f y %4$.1f kWh menos.</string>
     <string name="trip_eco_finding_motorway_soc">A %1$d km/h en los %2$.0f km de vía rápida: entre %3$.1f y %4$.1f puntos de carga menos.</string>
     <string name="trip_eco_finding_cabin">Habitáculo: unos %1$.1f kWh, el %2$.0f %% de este trayecto.</string>
+    <string name="trip_eco_finding_climate">Climatización: sus trayectos con ella usaron un %1$.0f %% más de carga de lo previsto que los trayectos sin ella (%2$d trayectos frente a %3$d), días fríos incluidos. El asiento calefactado o una consigna más baja cuestan menos que el aire caliente.</string>
     <string name="trip_eco_finding_windows">Ventanillas abiertas: unos %1$.1f kWh, el %2$.0f %% de este trayecto, %3$.0f km por encima de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Aceleraciones o frenadas fuertes en el %1$d %% de este trayecto.</string>
     <string name="diagnostics_eco_trip_review">Último trayecto, revisado</string>

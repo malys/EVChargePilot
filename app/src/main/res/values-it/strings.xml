@@ -517,6 +517,7 @@
     <string name="trip_eco_finding_motorway_energy">A %1$d km/h sui %2$.0f km di strada veloce: circa %3$.1f-%4$.1f kWh in meno.</string>
     <string name="trip_eco_finding_motorway_soc">A %1$d km/h sui %2$.0f km di strada veloce: circa %3$.1f-%4$.1f punti di carica in meno.</string>
     <string name="trip_eco_finding_cabin">Abitacolo: circa %1$.1f kWh, il %2$.0f %% di questo viaggio.</string>
+    <string name="trip_eco_finding_climate">Clima: i suoi viaggi con il clima acceso hanno usato il %1$.0f %% di carica in più del previsto rispetto a quelli senza (%2$d viaggi contro %3$d), giorni freddi compresi. Il sedile riscaldato o un\u2019impostazione più bassa costano meno dell\u2019aria calda.</string>
     <string name="trip_eco_finding_windows">Finestrini aperti: circa %1$.1f kWh, il %2$.0f %% di questo viaggio, %3$.0f km sopra i 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Accelerazioni o frenate brusche sul %1$d %% di questa guida.</string>
     <string name="diagnostics_eco_trip_review">Ultimo viaggio, analizzato</string>

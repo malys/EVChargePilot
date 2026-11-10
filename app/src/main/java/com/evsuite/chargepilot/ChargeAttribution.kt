@@ -217,7 +217,7 @@ object ChargeAttributionCalculator {
         }
     }
 
-    private fun climateActive(sample: TripSample): Boolean? = when {
+    internal fun climateActive(sample: TripSample): Boolean? = when {
         sample.climatePowerOn == true || sample.climateAcOn == true ||
             sample.climateFanLevel?.let { it > 0 } == true -> true
         sample.climatePowerOn == false -> false

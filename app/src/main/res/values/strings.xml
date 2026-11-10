@@ -562,6 +562,7 @@ Spending %6$s %% per km</string>
     <string name="trip_eco_finding_motorway_energy">At %1$d km/h over the %2$.0f km of fast road: about %3$.1f to %4$.1f kWh less.</string>
     <string name="trip_eco_finding_motorway_soc">At %1$d km/h over the %2$.0f km of fast road: about %3$.1f to %4$.1f points of charge less.</string>
     <string name="trip_eco_finding_cabin">Cabin: about %1$.1f kWh, %2$.0f %% of this trip.</string>
+    <string name="trip_eco_finding_climate">Climate: with it on, your drives used %1$.0f %% more charge than without it, each against its expected use (%2$d drives against %3$d), cold days included. Seat heating or a lower setting costs less than warm air.</string>
     <string name="trip_eco_finding_windows">Open windows: about %1$.1f kWh, %2$.0f %% of this trip, %3$.0f km above 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Hard acceleration or braking on %1$d %% of this drive.</string>
     <string name="diagnostics_eco_trip_review">Latest trip, reviewed</string>

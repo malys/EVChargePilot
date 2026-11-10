@@ -517,6 +517,7 @@
     <string name="trip_eco_finding_motorway_energy">Mit %1$d km/h auf den %2$.0f km schneller Straße: etwa %3$.1f bis %4$.1f kWh weniger.</string>
     <string name="trip_eco_finding_motorway_soc">Mit %1$d km/h auf den %2$.0f km schneller Straße: etwa %3$.1f bis %4$.1f Ladepunkte weniger.</string>
     <string name="trip_eco_finding_cabin">Innenraum: etwa %1$.1f kWh, %2$.0f %% dieser Fahrt.</string>
+    <string name="trip_eco_finding_climate">Klima: Ihre Fahrten mit eingeschalteter Klima verbrauchten %1$.0f %% mehr Ladung als erwartet als die ohne (%2$d Fahrten gegen %3$d), kalte Tage inbegriffen. Sitzheizung oder eine niedrigere Einstellung kosten weniger als warme Luft.</string>
     <string name="trip_eco_finding_windows">Offene Fenster: etwa %1$.1f kWh, %2$.0f %% dieser Fahrt, %3$.0f km über 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Starkes Beschleunigen oder Bremsen auf %1$d %% dieser Fahrt.</string>
     <string name="diagnostics_eco_trip_review">Letzte Fahrt, ausgewertet</string>

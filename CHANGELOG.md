@@ -30,6 +30,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **Route choices: the road that uses least charge is named.** "least charge used" sits on
   the row whose worst case beats every other road's best case. When the bands overlap, or a
   road has no estimate, no row is named.
+- **Trip review: what the climate costs, from your own drives.** Drives run with the climate on
+  for half the track or more are compared with drives run with it off, each against the charge
+  model's expectation. Shown on the drives with it on when the gap is more than twice its
+  standard error, with both counts; cold days are included, and the line says so. The fitted
+  cabin share needed the power model, which this car refuses.
 
 ## [0.2.1] - 2026-11-09
 

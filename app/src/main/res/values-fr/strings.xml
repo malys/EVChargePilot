@@ -543,6 +543,7 @@ Consommation %6$s %% par km</string>
     <string name="trip_eco_finding_motorway_energy">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f kWh de moins.</string>
     <string name="trip_eco_finding_motorway_soc">À %1$d km/h sur les %2$.0f km de voie rapide : environ %3$.1f à %4$.1f points de charge de moins.</string>
     <string name="trip_eco_finding_cabin">Habitacle : environ %1$.1f kWh, soit %2$.0f %% de ce trajet.</string>
+    <string name="trip_eco_finding_climate">Climatisation : avec elle, vos trajets consomment %1$.0f %% de charge de plus que sans, chacun rapporté à sa consommation prévue (%2$d trajets contre %3$d), jours froids compris. Le siège chauffant ou une consigne plus basse coûtent moins que l\u2019air chaud.</string>
     <string name="trip_eco_finding_windows">Fenêtres ouvertes : environ %1$.1f kWh, soit %2$.0f %% de ce trajet, %3$.0f km au-delà de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Accélérations ou freinages francs sur %1$d %% de ce trajet.</string>
     <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>

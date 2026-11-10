@@ -606,6 +606,12 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             finding.sharePercent,
             finding.openDistanceKm,
         )
+        is EcoFinding.Climate -> getString(
+            R.string.trip_eco_finding_climate,
+            finding.extraPercent,
+            finding.withTrips,
+            finding.withoutTrips,
+        )
         is EcoFinding.Steadiness -> listOfNotNull(
             getString(R.string.trip_eco_finding_steadiness, finding.harshSharePercent.roundToInt()),
             finding.hardBrakings?.let { count ->

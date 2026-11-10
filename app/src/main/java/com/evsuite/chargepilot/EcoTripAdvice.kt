@@ -246,7 +246,7 @@ object EcoTripAdvice {
                     is EcoFinding.MotorwaySpeed -> motorway += finding
                     is EcoFinding.Cabin -> cabin += finding.sharePercent
                     is EcoFinding.Windows -> windows += finding.sharePercent
-                    is EcoFinding.Steadiness -> Unit
+                    is EcoFinding.Climate, is EcoFinding.Steadiness -> Unit
                 }
             }
         }
