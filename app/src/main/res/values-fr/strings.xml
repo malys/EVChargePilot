@@ -381,6 +381,7 @@ Consommation %6$s %% par km</string>
     <string name="route_choices_chosen">Choisie · %1$s</string>
     <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
     <string name="route_choices_delta_fastest">la plus rapide</string>
+    <string name="route_choices_thriftiest">%1$s · la moins gourmande</string>
     <string name="route_choices_versus">%1$s km par rapport à l\u2019itinéraire calculé, %2$s à %3$s %% de charge estimés</string>
     <string name="route_choices_second_not_offered">Au-delà de 100 km, le service d\u2019itinéraire ne propose pas de seconde route.</string>
     <string name="route_choices_estimated">Tous ces chiffres sont estimés à partir de vos trajets enregistrés, jamais mesurés.</string>

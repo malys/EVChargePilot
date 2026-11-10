@@ -21,6 +21,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   drive that spent less than 2 % of charge, which on the car was 19 drives out of 20. It is now
   refused only when the gauge's tenth-of-a-percent step could decide it alone (EVHardware
   6c16a8f).
+- **Tyre pressures on SWI68.** The dashboard and the diagnostic bundle read them from the
+  car's vendor TPMS properties, since SWI68 does not publish the standard one (EVHardware
+  b6340a3).
+
+### Added
+
+- **Route choices: the road that uses least charge is named.** "least charge used" sits on
+  the row whose worst case beats every other road's best case. When the bands overlap, or a
+  road has no estimate, no row is named.
 
 ## [0.2.1] - 2026-11-09
 

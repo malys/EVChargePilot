@@ -388,6 +388,7 @@ Spending %6$s %% per km</string>
     <string name="route_choices_chosen">Chosen · %1$s</string>
     <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
     <string name="route_choices_delta_fastest">fastest</string>
+    <string name="route_choices_thriftiest">%1$s · least charge used</string>
     <string name="route_choices_versus">%1$s km against the routed road, an estimated %2$s to %3$s %% of charge</string>
     <string name="route_choices_second_not_offered">Past 100 km the routing service offers no second road.</string>
     <string name="route_choices_estimated">Every figure here is estimated from your recorded trips, never measured.</string>

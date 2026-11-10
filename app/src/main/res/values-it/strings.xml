@@ -365,6 +365,7 @@
     <string name="route_choices_chosen">Scelto · %1$s</string>
     <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
     <string name="route_choices_delta_fastest">il più veloce</string>
+    <string name="route_choices_thriftiest">%1$s · la che consuma meno carica</string>
     <string name="route_choices_versus">%1$s km rispetto al percorso calcolato, tra %2$s e %3$s %% di carica stimati</string>
     <string name="route_choices_second_not_offered">Oltre 100 km il servizio di instradamento non offre una seconda strada.</string>
     <string name="route_choices_estimated">Ogni cifra qui è stimata dai tuoi viaggi registrati, mai misurata.</string>

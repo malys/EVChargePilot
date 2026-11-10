@@ -365,6 +365,7 @@
     <string name="route_choices_chosen">Elegida · %1$s</string>
     <string name="route_choices_road">%1$s · %2$s km · %3$s min · %4$s</string>
     <string name="route_choices_delta_fastest">la más rápida</string>
+    <string name="route_choices_thriftiest">%1$s · la que menos carga gasta</string>
     <string name="route_choices_versus">%1$s km frente a la ruta calculada, entre %2$s y %3$s %% de carga estimados</string>
     <string name="route_choices_second_not_offered">Más allá de 100 km el servicio de rutas no ofrece una segunda carretera.</string>
     <string name="route_choices_estimated">Cada cifra aquí se estima a partir de tus trayectos grabados, nunca se mide.</string>

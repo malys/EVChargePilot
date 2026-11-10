@@ -974,10 +974,18 @@ class ChargeStopActivity : AppCompatActivity() {
             return
         }
         val fastest = found.list.minOf { it.route.durationMinutes }
+        // A road with no estimate is unknown, not equal to the routed one, so nothing is labelled.
+        val saved = found.list.map { road ->
+            if (road.kind == Road.Kind.PLANNED) 0.0..0.0
+            else road.versus?.let { it.savedPercentLow..it.savedPercentHigh }
+        }
+        val thrifty = if (saved.any { it == null }) null else thriftiest(saved.filterNotNull())
         val lines = ArrayList<String>()
         lines += getString(R.string.route_choices_title)
         found.list.forEachIndexed { at, road ->
-            val head = roadHead(road, road.route.durationMinutes - fastest)
+            val head = roadHead(road, road.route.durationMinutes - fastest).let {
+                if (at == thrifty) getString(R.string.route_choices_thriftiest, it) else it
+            }
             // The chosen road carries the charger found for it; the others are distances only,
             // because no allowance is spent on a road the driver has not picked.
             val consequence = if (at == index && plan is ChargeStopPlan.Plan.Stop) {
@@ -1620,6 +1628,17 @@ class ChargeStopActivity : AppCompatActivity() {
          * driver's quota nothing until the driver picks it.
          */
         const val ALTERNATIVES = 2
+
+        /**
+         * The road that spends the least charge, or null when the bands overlap and the estimate
+         * cannot tell the roads apart. Each range is the charge a road saves against the routed
+         * one, low to high; the routed road's is zero. A road wins only if its worst case beats
+         * every other road's best case.
+         */
+        internal fun thriftiest(saved: List<ClosedFloatingPointRange<Double>>): Int? =
+            if (saved.size < 2) null else saved.indices.singleOrNull { at ->
+                saved.indices.all { other -> other == at || saved[at].start > saved[other].endInclusive }
+            }
 
         /** ORS refuses alternatives past this distance, and the whole request with them (2004). */
         const val ALTERNATIVES_MAX_KM = 100.0
