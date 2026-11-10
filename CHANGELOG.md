@@ -15,6 +15,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   navigation", on by default, lets the car pick its own road between the stops again. It is read
   when a plan is drawn, so a plan already on screen keeps what it was drawn with.
 
+### Fixed
+
+- **Eco: town drives get a verdict.** "Better / typical / worse than usual" was refused for any
+  drive that spent less than 2 % of charge, which on the car was 19 drives out of 20. It is now
+  refused only when the gauge's tenth-of-a-percent step could decide it alone (EVHardware
+  6c16a8f).
+
 ## [0.2.1] - 2026-11-09
 
 ### Changed
