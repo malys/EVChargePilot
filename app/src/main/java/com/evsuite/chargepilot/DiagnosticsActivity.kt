@@ -297,7 +297,7 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
     }
 
     private fun diagnosticsReport(): String {
-        val crash = CrashLogger.read(applicationContext)
+        val crash = CrashLogger.read(applicationContext, CRASH_MAX_AGE_MS)
         val logEntries = AppLogger.entries
         val recentLog = DiagnosticExporter.boundedTail(logEntries.joinToString("\n") {
             "[${it.time}] ${it.level}/${it.tag}: ${it.msg.take(MAX_LOG_MESSAGE_CHARS)}" +
@@ -529,6 +529,8 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
         const val MAX_LOG_MESSAGE_CHARS = 1_024
         const val MAX_LOG_SECTION_BYTES = 32 * 1_024
         const val MAX_INVENTORY_FILES = 64
+        /** A crash older than this was fixed by a later build; it no longer heads the report. */
+        private const val CRASH_MAX_AGE_MS = 7L * 24 * 60 * 60 * 1000
         private const val INBOX_PREFS = "diagnostic_inbox"
         private const val INBOX_URL = "url"
         const val HISTORY_FILE = "trips.json"

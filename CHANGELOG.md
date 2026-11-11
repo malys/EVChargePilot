@@ -4,6 +4,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The diagnostic report no longer repeats a crash older than a week.** `[previous_crash]` showed a
+  September crash, long fixed, in every bundle since.
+
 ### Changed
 
 - **Navigation: the route handed to the car carries points along the road again.** "Navigate to"
