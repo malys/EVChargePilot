@@ -515,7 +515,7 @@ Spending %6$s %% per km</string>
     <string name="charge_history_band_power" translatable="false">%1$.1f kW · %2$.1f h</string>
     <string name="charge_history_row_levels" translatable="false">%1$.0f → %2$.0f %%</string>
     <string name="charge_history_row_levels_temperature">%1$.0f → %2$.0f %% · outside %3$.0f to %4$.0f °C</string>
-    <string name="charge_history_row_gain" translatable="false">+%1$.0f pts · %2$.1f h</string>
+    <string name="charge_history_row_gain" translatable="false">+%1$.0f pts · %2$s%3$.1f h</string>
     <string name="charge_history_row_energy" translatable="false">≈ %1$.1f kWh · %2$.1f kW</string>
     <string name="battery_health_exposure_unavailable">Nothing recorded yet. This fills in as the app samples the car.</string>
     <string name="battery_health_read_only">This app changes nothing on the car: no charge limit, no schedule, no preheat. It measures and it says what it sees.</string>
@@ -724,7 +724,7 @@ Spending %6$s %% per km</string>
     <string name="nav_split_roads">OTHER ROUTES</string>
     <string name="nav_split_road_charge">%1$s to %2$s %% charge vs routed</string>
     <string name="battery_curve_title">Charge curve</string>
-    <string name="battery_curve_legend">MG4 %1$s · dashed: DC (EVKX) and AC %2$.1f kW · columns: measured, AC green, DC cyan</string>
+    <string name="battery_curve_legend">MG4 %1$s · dashed: DC (EVKX) and AC %2$.1f kW · columns: measured, AC green, DC blue</string>
     <string name="battery_health_windows_label">discharges of %1$.0f points or more measured</string>
     <string name="battery_health_sessions_label">charges</string>
     <string name="battery_health_stress_label" formatted="false">hard power, cold or under 20 %, this month</string>

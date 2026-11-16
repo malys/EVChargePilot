@@ -180,7 +180,7 @@ class ChargeHistoryActivity : AppCompatActivity() {
             ),
         )
         row.rowGain.text =
-            getString(R.string.charge_history_row_gain, session.gainedPercent, session.durationHours)
+            getString(R.string.charge_history_row_gain, session.gainedPercent, if (charge.watched) "" else "≤ ", session.durationHours)
         val estimate = ChargeEnergyEstimate.of(charge, pack)
         row.rowEnergy.text = when {
             estimate == null -> getString(R.string.charge_history_partial)

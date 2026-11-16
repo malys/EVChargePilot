@@ -678,7 +678,7 @@
         <item quantity="many">%1$d trayectos exportados. La ruta privada de la app se muestra abajo.</item>
     </plurals>
     <string name="battery_curve_title">Curva de carga</string>
-    <string name="battery_curve_legend">MG4 %1$s · discontinuo: DC (EVKX) y AC %2$.1f kW · columnas: medido, AC verde, DC cian</string>
+    <string name="battery_curve_legend">MG4 %1$s · discontinuo: DC (EVKX) y AC %2$.1f kW · columnas: medido, AC verde, DC azul</string>
     <string name="battery_health_windows_label">descargas de al menos %1$.0f puntos medidas</string>
     <string name="battery_health_sessions_label">cargas</string>
     <string name="battery_health_stress_label" formatted="false">potencia alta, frío o bajo 20 %, este mes</string>

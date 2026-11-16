@@ -370,7 +370,9 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
         val estimate = ChargeEnergyEstimate.of(last, declared.pack)
         // Figures only: the range above says the points, and an estimate wears its "≈" — the
         // app's one sign for it — where a sentence used to explain where the figure came from.
-        val parts = mutableListOf(format("%.1f h", last.session.durationHours))
+        // Unwatched (head unit asleep on the charger), the span is the gap between two ledger
+        // readings: the charge happened inside it, it is not the charge's own length.
+        val parts = mutableListOf((if (last.watched) "" else "≤ ") + format("%.1f h", last.session.durationHours))
         if (estimate?.measured == true && estimate.powerKw != null) {
             parts += format("%.1f kWh", estimate.kwh)
             parts += format("%.1f kW", estimate.powerKw)

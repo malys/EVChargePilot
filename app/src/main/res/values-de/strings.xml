@@ -674,7 +674,7 @@
         <item quantity="other">%1$d Fahrten exportiert. Der private App-Pfad steht unten.</item>
     </plurals>
     <string name="battery_curve_title">Ladekurve</string>
-    <string name="battery_curve_legend">MG4 %1$s · gestrichelt: DC (EVKX) und AC %2$.1f kW · Säulen: gemessen, AC grün, DC cyan</string>
+    <string name="battery_curve_legend">MG4 %1$s · gestrichelt: DC (EVKX) und AC %2$.1f kW · Säulen: gemessen, AC grün, DC blau</string>
     <string name="battery_health_windows_label">Entladungen ab %1$.0f Punkten gemessen</string>
     <string name="battery_health_sessions_label">Ladevorgänge</string>
     <string name="battery_health_stress_label" formatted="false">hohe Leistung, Kälte oder unter 20 %, diesen Monat</string>

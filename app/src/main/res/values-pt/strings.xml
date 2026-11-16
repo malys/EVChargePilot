@@ -678,7 +678,7 @@
         <item quantity="many">%1$d viagens exportadas. O caminho privado da app é mostrado abaixo.</item>
     </plurals>
     <string name="battery_curve_title">Curva de carga</string>
-    <string name="battery_curve_legend">MG4 %1$s · tracejado: DC (EVKX) e AC %2$.1f kW · colunas: medido, AC verde, DC ciano</string>
+    <string name="battery_curve_legend">MG4 %1$s · tracejado: DC (EVKX) e AC %2$.1f kW · colunas: medido, AC verde, DC azul</string>
     <string name="battery_health_windows_label">descargas de pelo menos %1$.0f pontos medidas</string>
     <string name="battery_health_sessions_label">carregamentos</string>
     <string name="battery_health_stress_label" formatted="false">potência alta, frio ou abaixo de 20 %, este mês</string>

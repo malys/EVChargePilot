@@ -699,7 +699,7 @@ Consommation %6$s %% par km</string>
     <string name="nav_split_roads">AUTRES ITINÉRAIRES</string>
     <string name="nav_split_road_charge">%1$s à %2$s %% de charge vs calculé</string>
     <string name="battery_curve_title">Courbe de charge</string>
-    <string name="battery_curve_legend">MG4 %1$s · pointillés : DC (EVKX) et AC %2$.1f kW · colonnes : mesuré, AC vert, DC cyan</string>
+    <string name="battery_curve_legend">MG4 %1$s · pointillés : DC (EVKX) et AC %2$.1f kW · colonnes : mesuré, AC vert, DC bleu</string>
     <string name="battery_health_windows_label">décharges d’au moins %1$.0f points mesurées</string>
     <string name="battery_health_sessions_label">charges</string>
     <string name="battery_health_stress_label" formatted="false">forte puissance, froid ou sous 20 %, ce mois</string>
