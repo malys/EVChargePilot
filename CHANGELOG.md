@@ -4,10 +4,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
-### Fixed
-
-- **The diagnostic report no longer repeats a crash older than a week.** `[previous_crash]` showed a
-  September crash, long fixed, in every bundle since.
+## [0.3.0] - 2026-11-19
 
 ### Changed
 
@@ -29,6 +26,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - **Tyre pressures on SWI68.** The dashboard and the diagnostic bundle read them from the
   car's vendor TPMS properties, since SWI68 does not publish the standard one (EVHardware
   b6340a3).
+- **The diagnostic report no longer repeats a crash older than a week.** `[previous_crash]` showed a
+  September crash, long fixed, in every bundle since.
+- **A charge taken while the head unit slept shows its time as an upper bound.** Only the
+  readings before and after are known, so the time between them is prefixed with "≤" on the
+  Battery page and in the charge history, instead of reading as the charge's own length. The
+  curve legend calls the DC columns blue, which they are by day as well as at night.
+- EVHardware 1.21.0.
 
 ### Added
 

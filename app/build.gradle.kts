@@ -17,8 +17,8 @@ android {
         applicationId = "com.evsuite.chargepilot"
         minSdk = 28
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.3.0"
         testInstrumentationRunner = "com.evsuite.chargepilot.WindowBoundsTest"
     }
 
