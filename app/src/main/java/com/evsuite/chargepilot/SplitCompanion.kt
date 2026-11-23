@@ -59,6 +59,7 @@ internal class SplitCompanion(
     private var drivenBaselineKm: Double? = null
     private var traceReadAtMs = 0L
     private val consumption by lazy { RecentConsumption(context) }
+    private val harsh = HarshPulse()
 
     init {
         renderRoads(
@@ -217,6 +218,8 @@ internal class SplitCompanion(
     /** CP-093's score, live: the drive so far against the verdict the recorder last published. */
     private fun renderEco(value: EnergySnapshot) {
         val verdict = DashboardFrame.eco
+        // CP-097: fed on every frame, so a hard second is caught even before the score exists.
+        val pulse = harsh.add(value.timestampMs, value.speedKmh)
         val score = EnergyTripSession.current(value.timestampMs)?.let { EcoScore.of(it, verdict) }
         binding.splitEcoBand.text = recorder()?.eco?.band(verdict) ?: context.getString(R.string.value_unavailable)
         if (score == null) {
@@ -227,7 +230,12 @@ internal class SplitCompanion(
         binding.splitEcoRing.show(
             score.total / PERCENT,
             score.total.toString(),
-            if (score.total < ECO_WARN_BELOW) R.color.ev_warn else R.color.ev_accent,
+            when {
+                // Red either way: a low score is already orange, and the cue must stand out from it.
+                pulse != null -> R.color.ev_error
+                score.total < ECO_WARN_BELOW -> R.color.ev_warn
+                else -> R.color.ev_accent
+            },
         )
         binding.splitEcoParts.text = context.getString(
             R.string.nav_split_eco_parts,
