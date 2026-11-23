@@ -4,6 +4,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- **Eco scores per driver (CP-098).** A trip is filed under the driver EVTasker published for
+  the ignition cycle (read-only, signature-protected). The trip page filters the eco progress by
+  driver, lists per-driver totals and average score, and lets a parked driver assign or forget a
+  name. Kept in `trip_drivers.tsv`, never exported. Needs EVTasker with *Set the driver*;
+  without it every trip is *Unknown driver* and nothing else changes.
+
 ## [0.3.0] - 2026-11-19
 
 ### Changed

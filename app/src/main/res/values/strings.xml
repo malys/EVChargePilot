@@ -735,4 +735,21 @@ Spending %6$s %% per km</string>
     <string name="advice_driving_title">Driving</string>
     <string name="advice_charge_title">Charging and battery</string>
     <string name="advice_none">No tip yet.</string>
+
+    <!-- CP-098: driver attribution -->
+    <string name="driver_unknown">Unknown driver</string>
+    <string name="driver_all">All drivers</string>
+    <string name="driver_filter_title">Whose trips?</string>
+    <string name="driver_assign_title">Who drove this trip?</string>
+    <string name="driver_new">New driver…</string>
+    <string name="driver_new_hint">Driver name</string>
+    <string name="driver_name_invalid">Use 1 to 24 characters.</string>
+    <string name="driver_forget">Forget %1$s</string>
+    <string name="driver_forget_message">Every trip filed under %1$s becomes Unknown driver. The trips themselves stay.</string>
+    <string name="driver_forget_confirm">Forget</string>
+    <string name="driver_assign_moving">Stop the car to change the driver.</string>
+    <string name="driver_not_saved">The driver could not be saved.</string>
+    <string name="driver_stats_title">By driver</string>
+    <string name="driver_stats_line">%1$s · %2$d trips · %3$s · %4$s · score %5$s</string>
+    <string name="driver_button_description">Driver: %1$s. Tap to change.</string>
 </resources>

@@ -689,4 +689,21 @@
     <string name="advice_driving_title">Guida</string>
     <string name="advice_charge_title">Ricarica e batteria</string>
     <string name="advice_none">Ancora nessun consiglio.</string>
+
+    <!-- CP-098: driver attribution -->
+    <string name="driver_unknown">Conducente sconosciuto</string>
+    <string name="driver_all">Tutti i conducenti</string>
+    <string name="driver_filter_title">Di chi sono i viaggi?</string>
+    <string name="driver_assign_title">Chi ha guidato questo viaggio?</string>
+    <string name="driver_new">Nuovo conducente…</string>
+    <string name="driver_new_hint">Nome del conducente</string>
+    <string name="driver_name_invalid">Da 1 a 24 caratteri.</string>
+    <string name="driver_forget">Dimentica %1$s</string>
+    <string name="driver_forget_message">Tutti i viaggi di %1$s diventano Conducente sconosciuto. I viaggi restano.</string>
+    <string name="driver_forget_confirm">Dimentica</string>
+    <string name="driver_assign_moving">Ferma l’auto per cambiare conducente.</string>
+    <string name="driver_not_saved">Impossibile salvare il conducente.</string>
+    <string name="driver_stats_title">Per conducente</string>
+    <string name="driver_stats_line">%1$s · %2$d viaggi · %3$s · %4$s · punteggio %5$s</string>
+    <string name="driver_button_description">Conducente: %1$s. Tocca per cambiare.</string>
 </resources>

@@ -32,6 +32,17 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <!-- CP-098: reads the driver EVTasker published, to file a trip under them. Signature-level,
+         and declared here as well as in EVTasker: on API 28 a permission defined by an app
+         installed after this one would not be granted to it until a reinstall. -->
+    <permission
+        android:name="com.evsuite.tasker.permission.READ_DRIVER"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.evsuite.tasker.permission.READ_DRIVER" />
+    <queries>
+        <provider android:authorities="com.evsuite.tasker.driver" />
+    </queries>
+
     <!-- CP-080; reviewed in .github/security/permission-allowlist.txt. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 

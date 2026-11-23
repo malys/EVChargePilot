@@ -710,4 +710,21 @@ Consommation %6$s %% par km</string>
     <string name="advice_driving_title">Conduite</string>
     <string name="advice_charge_title">Charge et batterie</string>
     <string name="advice_none">Pas encore de conseil.</string>
+
+    <!-- CP-098: driver attribution -->
+    <string name="driver_unknown">Conducteur inconnu</string>
+    <string name="driver_all">Tous les conducteurs</string>
+    <string name="driver_filter_title">Les trajets de qui ?</string>
+    <string name="driver_assign_title">Qui a conduit ce trajet ?</string>
+    <string name="driver_new">Nouveau conducteur…</string>
+    <string name="driver_new_hint">Nom du conducteur</string>
+    <string name="driver_name_invalid">Entre 1 et 24 caractères.</string>
+    <string name="driver_forget">Oublier %1$s</string>
+    <string name="driver_forget_message">Tous les trajets de %1$s passent en Conducteur inconnu. Les trajets restent.</string>
+    <string name="driver_forget_confirm">Oublier</string>
+    <string name="driver_assign_moving">Arrêtez la voiture pour changer de conducteur.</string>
+    <string name="driver_not_saved">Le conducteur n’a pas pu être enregistré.</string>
+    <string name="driver_stats_title">Par conducteur</string>
+    <string name="driver_stats_line">%1$s · %2$d trajets · %3$s · %4$s · score %5$s</string>
+    <string name="driver_button_description">Conducteur : %1$s. Touchez pour changer.</string>
 </resources>

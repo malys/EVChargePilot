@@ -50,3 +50,7 @@ android.permission.INTERNAL_SYSTEM_WINDOW
 # the platform-signed build. Keeps the companion window over the map only (never over the
 # reverse camera) and names what is on top in the diagnostic log. Moves no task.
 android.permission.REAL_GET_TASKS
+# CP-098, 2026-11-23, owner decision: EVTasker publishes the driver of the ignition cycle and this
+# app files trips under it. Signature-level, defined by EVTasker and declared here too (install
+# order on API 28). Reads one name and one time from a read-only provider; writes nothing.
+com.evsuite.tasker.permission.READ_DRIVER

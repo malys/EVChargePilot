@@ -685,4 +685,21 @@
     <string name="advice_driving_title">Fahren</string>
     <string name="advice_charge_title">Laden und Batterie</string>
     <string name="advice_none">Noch kein Tipp.</string>
+
+    <!-- CP-098: driver attribution -->
+    <string name="driver_unknown">Unbekannter Fahrer</string>
+    <string name="driver_all">Alle Fahrer</string>
+    <string name="driver_filter_title">Wessen Fahrten?</string>
+    <string name="driver_assign_title">Wer ist diese Fahrt gefahren?</string>
+    <string name="driver_new">Neuer Fahrer…</string>
+    <string name="driver_new_hint">Name des Fahrers</string>
+    <string name="driver_name_invalid">1 bis 24 Zeichen.</string>
+    <string name="driver_forget">%1$s vergessen</string>
+    <string name="driver_forget_message">Alle Fahrten von %1$s werden zu Unbekannter Fahrer. Die Fahrten bleiben.</string>
+    <string name="driver_forget_confirm">Vergessen</string>
+    <string name="driver_assign_moving">Halten Sie an, um den Fahrer zu ändern.</string>
+    <string name="driver_not_saved">Der Fahrer konnte nicht gespeichert werden.</string>
+    <string name="driver_stats_title">Nach Fahrer</string>
+    <string name="driver_stats_line">%1$s · %2$d Fahrten · %3$s · %4$s · Score %5$s</string>
+    <string name="driver_button_description">Fahrer: %1$s. Zum Ändern tippen.</string>
 </resources>

@@ -6,13 +6,16 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.evsuite.chargepilot.databinding.ActivityTripHistoryBinding
 import com.evsuite.chargepilot.databinding.ViewTripOverviewCardBinding
+import com.evsuite.hardware.DriverContract
 import com.evsuite.hardware.telemetry.EcoScore
 import com.evsuite.hardware.telemetry.EcoVerdict
 import com.evsuite.hardware.telemetry.EnergySnapshot
@@ -58,6 +61,11 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private var overviewExplanation = ""
     private var loaded = false
     private var lastOverviewMs = 0L
+    /** CP-098: who drove each trip, and whose trips the overview's eco lines are about. */
+    private lateinit var driverStore: TripDriverStore
+    private var drivers: Map<Long, String> = emptyMap()
+    /** Null for every trip, [DriverAttribution.UNKNOWN] for the unclaimed ones, else a name. */
+    private var driverFilter: String? = null
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -91,6 +99,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         binding = ActivityTripHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
         store = EnergyTripHistoryStore(File(filesDir, HISTORY_FILE))
+        driverStore = TripDriverStore(File(filesDir, TripDriverStore.FILE_NAME))
+        driverFilter = overviewPrefs.getString(KEY_DRIVER_FILTER, null)
         selectedStartedAtMs = savedInstanceState?.getLong(STATE_SELECTED)?.takeIf { it != 0L }
         showOverview = savedInstanceState?.getBoolean(STATE_OVERVIEW) ?: true
 
@@ -154,6 +164,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             }
         }
         binding.joinTripAction.setOnClickListener { confirmJoinIfParked() }
+        binding.assignDriverAction.setOnClickListener { assignDriverIfParked() }
+        binding.driverFilterAction.setOnClickListener { chooseDriverFilter() }
         binding.tripDetailsAction.setOnClickListener {
             selectedStartedAtMs?.let { startedAt ->
                 startActivity(TripDetailsActivity.forTrip(this, startedAt))
@@ -202,12 +214,14 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
     private fun loadTrips() {
         disk.execute {
             val trips = store.read()
+            val tripDrivers = driverStore.read()
             val reviewed = reviewHistory(filesDir, trips)
             val dateFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
             val rows = trips.map { trip -> buildRow(trip, dateFormatter) }
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 reviews = reviewed.reviews
+                drivers = tripDrivers
                 adapter.submit(trips, rows)
                 if (trips.none { it.summary.startedAtMs == selectedStartedAtMs }) {
                     selectedStartedAtMs = trips.firstOrNull()?.summary?.startedAtMs
@@ -253,8 +267,11 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val windowKm = selectedWindowKm()
         val tripAFromMs = overviewPrefs.getLong(KEY_TRIP_A, 0L)
         val reviewed = reviews
+        val tripDrivers = drivers
+        val filter = driverFilter?.takeIf { it == DriverAttribution.UNKNOWN || it in tripDrivers.values }
+        driverFilter = filter
         disk.execute {
-            val value = buildOverview(trips, reviewed, latest, windowKm, tripAFromMs)
+            val value = buildOverview(trips, reviewed, latest, windowKm, tripAFromMs, tripDrivers, filter)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 renderOverview(value)
@@ -269,7 +286,10 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         latest: EnergySnapshot?,
         windowKm: Double,
         tripAFromMs: Long,
+        tripDrivers: Map<Long, String>,
+        driverFilter: String?,
     ): Overview {
+        val verdicts = reviewed.mapValues { (it.value as? EcoTripReview.Ready)?.verdict }
         val settings = VehicleSettings.read(this)
         val current = EnergyTripSession.current(System.currentTimeMillis())
         val currentTrip = current?.let { StoredTrip(it) }
@@ -301,10 +321,12 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             history = card(all),
             ecoAdvice = EcoTripAdvice.history(stored, reviewed),
             ecoProgress = EcoProgress.of(
-                stored.take(EcoTripAdvice.HISTORY_TRIPS),
-                reviewed.mapValues { (it.value as? EcoTripReview.Ready)?.verdict },
+                stored.filter { DriverAttribution.matches(tripDrivers, it.summary.startedAtMs, driverFilter) }
+                    .take(EcoTripAdvice.HISTORY_TRIPS),
+                verdicts,
                 System.currentTimeMillis(),
             ),
+            driverStats = DriverStats.of(stored, tripDrivers, verdicts),
         )
     }
 
@@ -343,7 +365,11 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             getString(R.string.trip_overview_trace_description, distance(value.coveredKm))
         val ecoText = EcoAdviceText(this)
         binding.overviewEcoAdvice.text = (ecoText.progress(value.ecoProgress) +
+            listOfNotNull(driverTable(value.driverStats)) +
             ecoText.history(value.ecoAdvice)).joinToString("\n\n")
+        binding.driverFilterAction.visibility =
+            if (value.driverStats.isEmpty() && driverFilter == null) View.GONE else View.VISIBLE
+        binding.driverFilterAction.text = driverLabel(driverFilter)
 
         renderCard(
             binding.cardCurrent,
@@ -401,6 +427,128 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             totals?.distanceKm?.let(::distance) ?: DASH,
             totals?.let { duration(it.durationMs) } ?: DASH,
         ).joinToString("\n")
+    }
+
+    /** CP-098: one line per driver, Unknown last; null while no trip has a driver. */
+    private fun driverTable(stats: List<DriverStats>): String? {
+        if (stats.isEmpty()) return null
+        return (listOf(getString(R.string.driver_stats_title)) + stats.map {
+            getString(
+                R.string.driver_stats_line,
+                driverLabel(it.driver),
+                it.totals.trips,
+                it.totals.distanceKm?.let(::distance) ?: DASH,
+                it.totals.consumptionKwhPer100Km?.let(::consumption) ?: DASH,
+                it.averageScore?.toString() ?: DASH,
+            )
+        }).joinToString("\n")
+    }
+
+    private fun driverLabel(driver: String?): String = when (driver) {
+        null -> getString(R.string.driver_all)
+        DriverAttribution.UNKNOWN -> getString(R.string.driver_unknown)
+        else -> driver
+    }
+
+    private fun knownDrivers(): List<String> = drivers.values.distinct().sorted()
+
+    private fun chooseDriverFilter() {
+        val choices = listOf<String?>(null) + knownDrivers() + DriverAttribution.UNKNOWN
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.driver_filter_title)
+            .setSingleChoiceItems(
+                choices.map(::driverLabel).toTypedArray(),
+                choices.indexOf(driverFilter).coerceAtLeast(0),
+            ) { dialog, which ->
+                driverFilter = choices[which]
+                overviewPrefs.edit().putString(KEY_DRIVER_FILTER, driverFilter).apply()
+                dialog.dismiss()
+                loadOverview()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
+    private fun parkedOr(messageRes: Int): Boolean {
+        val gate = ParkedDeletionPolicy.gate(speedKmh, speedObservedAtMs, System.currentTimeMillis())
+        if (gate == ParkedDeletionGate.PARKED) return true
+        renderParkedGate()
+        Snackbar.make(binding.root, messageRes, Snackbar.LENGTH_LONG).show()
+        return false
+    }
+
+    /**
+     * Who drove the selected trip: a known name, Unknown, or a new name. Parked only, like the
+     * other trip edits. The name EVTasker filed is the phone on hands-free, which a passenger's
+     * phone can be — this is where that is put right.
+     */
+    private fun assignDriverIfParked() {
+        val startedAt = selectedStartedAtMs ?: return
+        if (!parkedOr(R.string.driver_assign_moving)) return
+        val current = drivers[startedAt]
+        val names = knownDrivers()
+        val labels = names + getString(R.string.driver_unknown) + getString(R.string.driver_new)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.driver_assign_title)
+            .setItems(labels.toTypedArray()) { _, which ->
+                when {
+                    which < names.size -> saveDriver { driverStore.assign(startedAt, names[which]) }
+                    which == names.size -> saveDriver { driverStore.assign(startedAt, null) }
+                    else -> askNewDriver(startedAt)
+                }
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+        if (current != null) {
+            dialog.setNeutralButton(getString(R.string.driver_forget, current)) { _, _ -> confirmForget(current) }
+        }
+        dialog.show()
+    }
+
+    private fun askNewDriver(startedAt: Long) {
+        val input = EditText(this).apply {
+            setSingleLine()
+            hint = getString(R.string.driver_new_hint)
+            filters = arrayOf<InputFilter>(InputFilter.LengthFilter(DriverContract.MAX_NAME_LENGTH))
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.driver_new)
+            .setView(input)
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val name = input.text.toString()
+                if (DriverContract.normalizeName(name) == null) {
+                    Snackbar.make(binding.root, R.string.driver_name_invalid, Snackbar.LENGTH_LONG).show()
+                } else {
+                    saveDriver { driverStore.assign(startedAt, name) }
+                }
+            }
+            .show()
+    }
+
+    private fun confirmForget(name: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.driver_forget, name))
+            .setMessage(getString(R.string.driver_forget_message, name))
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.driver_forget_confirm) { _, _ ->
+                if (parkedOr(R.string.driver_assign_moving)) saveDriver { driverStore.forget(name) }
+            }
+            .show()
+    }
+
+    /** Writes off the main thread, then redraws the driver button and the overview. */
+    private fun saveDriver(write: () -> Boolean) {
+        disk.execute {
+            val ok = write()
+            val read = driverStore.read()
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                drivers = read
+                if (!ok) Snackbar.make(binding.root, R.string.driver_not_saved, Snackbar.LENGTH_LONG).show()
+                renderSelected()
+                loadOverview()
+            }
+        }
     }
 
     /** Parked only, like every other control on this page; one Undo, because a lost start is lost. */
@@ -489,6 +637,10 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         binding.joinTripAction.isEnabled = previousOf(trip)
             ?.let { TripJoin.canJoin(it.summary, summary) } == true
         binding.detailDate.text = formatDate(summary.startedAtMs)
+        val driver = drivers[summary.startedAtMs]
+        binding.assignDriverAction.text = driver ?: getString(R.string.driver_unknown)
+        binding.assignDriverAction.contentDescription =
+            getString(R.string.driver_button_description, driverLabel(driver ?: DriverAttribution.UNKNOWN))
         bindValue(binding.detailDuration, R.string.label_duration, duration(summary.durationMs))
         bindValue(
             binding.detailDistance,
@@ -782,6 +934,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         val history: OverviewCard,
         val ecoAdvice: HistoryAdvice,
         val ecoProgress: EcoProgress,
+        val driverStats: List<DriverStats>,
     )
 
     private data class TripRow(
@@ -804,6 +957,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         const val OVERVIEW_FILE = "chargepilot_trip_overview"
         const val KEY_WINDOW = "window_km"
         const val KEY_TRIP_A = "trip_a_from_ms"
+        const val KEY_DRIVER_FILTER = "driver_filter"
         const val DEFAULT_WINDOW_KM = 150.0
         /** A live trip moves the overview; every ten seconds is often enough to see it move. */
         const val OVERVIEW_REFRESH_MS = 10_000L

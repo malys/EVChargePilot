@@ -69,6 +69,7 @@ class TripRecordingService : Service() {
     }
     private lateinit var reader: EnergyTelemetryReader
     private lateinit var tripStore: EnergyTripHistoryStore
+    private lateinit var tripDrivers: TripDriverStore
     private lateinit var batteryLedger: BatteryLedgerRecorder
     private lateinit var batteryAdvisor: BatteryAdvisor
 
@@ -111,6 +112,7 @@ class TripRecordingService : Service() {
         super.onCreate()
         reader = EnergyTelemetryReader(applicationContext)
         tripStore = EnergyTripHistoryStore(File(filesDir, "trips.json"))
+        tripDrivers = TripDriverStore(File(filesDir, TripDriverStore.FILE_NAME))
         batteryLedger = BatteryLedgerRecorder(
             BatteryLedgerStore(File(filesDir, BatteryLedgerStore.FILE_NAME))
         )
@@ -305,6 +307,19 @@ class TripRecordingService : Service() {
                 }
                 if (!saved) AppLogger.w(TAG, "trip history could not be saved")
                 if (saved) {
+                    // CP-098: before the advice, so its score compares this driver with themselves.
+                    runCatching {
+                        val driver = DriverSource.forTrip(
+                            this@TripRecordingService,
+                            recorded.summary.startedAtMs,
+                            recorded.summary.endedAtMs,
+                        )
+                        tripDrivers.attributeSaved(
+                            checkNotNull(storedStartMs),
+                            joined = storedStartMs != recorded.summary.startedAtMs,
+                            driver = driver,
+                        )
+                    }.onFailure { AppLogger.w(TAG, "trip driver not filed: ${it.message}") }
                     runCatching {
                         val trips = tripStore.read()
                         val evidence = trips.firstNotNullOfOrNull {
@@ -366,7 +381,14 @@ class TripRecordingService : Service() {
         val mode = runCatching { EVHardware.getDriveMode() }.getOrNull()
         val advice = EcoTripAdvice.advise(trip, reviewTrip(filesDir, trips, trip), mode)
         val text = EcoAdviceText(inAppLanguage())
-        val progress = runCatching { ecoProgress(trips, System.currentTimeMillis()) }.getOrNull()
+        // CP-098: a known driver is scored against their own trips; an unknown one against all.
+        val drivers = tripDrivers.read()
+        val driver = drivers[startedAtMs]
+        val progress = runCatching {
+            ecoProgress(trips, System.currentTimeMillis()) {
+                driver == null || DriverAttribution.matches(drivers, it.summary.startedAtMs, driver)
+            }
+        }.getOrNull()
         // CP-090: the same voice, gate and journal carry the pack-stress clause.
         val line = listOfNotNull(
             progress?.let(text::scoreLine),

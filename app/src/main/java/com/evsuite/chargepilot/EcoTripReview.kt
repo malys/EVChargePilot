@@ -416,8 +416,13 @@ private fun socModelWithout(trips: List<StoredTrip>, trip: StoredTrip): SocConsu
  * The score of the newest trip, with its record, run and weekly target, from the
  * [EcoTripAdvice.HISTORY_TRIPS] newest. Fits once per trip scored: call off the main thread.
  */
-fun ecoProgress(tripsNewestFirst: List<StoredTrip>, nowMs: Long): EcoProgress {
-    val recent = tripsNewestFirst.take(EcoTripAdvice.HISTORY_TRIPS)
+fun ecoProgress(
+    tripsNewestFirst: List<StoredTrip>,
+    nowMs: Long,
+    /** CP-098: which trips are scored — one driver's. The charge model still fits on them all. */
+    include: (StoredTrip) -> Boolean = { true },
+): EcoProgress {
+    val recent = tripsNewestFirst.filter(include).take(EcoTripAdvice.HISTORY_TRIPS)
     val verdicts = recent.associate { trip ->
         trip.summary.startedAtMs to
             EcoTripReviewer.verdict(trip, socModelWithout(tripsNewestFirst, trip))

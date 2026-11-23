@@ -151,6 +151,12 @@ temporary file on USB. No archive copy accumulates on AAOS.
 - Trip details for each recorded trip, drawn as bars: where the energy went (consumed,
   regenerated, net, and the gauge drop priced at the declared pack), what each speed band cost
   against your other trips, and — parked only — the modelled motorway comparison.
+- Eco scores per driver (CP-098). With EVTasker installed and a rule that sets the driver —
+  usually on the driver's phone joining hands-free — each trip is filed under that name when it
+  ends. The trip page then filters the score, record, run and weekly challenge by driver and
+  lists trips, distance, consumption and average score per driver. A trip nobody claimed is
+  *Unknown driver* and can be assigned, parked only. The name is the phone on hands-free, not a
+  proof of who drove; it stays on the head unit, out of exports and diagnostic bundles.
 - Five languages besides the system's, the same as EVTasker: Deutsch, English, Español,
   Français, Italiano, Português.
 
