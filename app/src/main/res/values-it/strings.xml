@@ -596,7 +596,7 @@
         <item quantity="other">%1$d frenate brusche, %2$.1f ogni 10 km.</item>
         <item quantity="many">%1$d frenate brusche, %2$.1f ogni 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Punteggio %1$d / 100 · anticipazione %2$s · fluidità %3$s · efficienza %4$s</string>
+    <string name="trip_eco_score">Punteggio %1$d / 100 · anticipazione %2$s · fluidità %3$s · efficienza %4$s · velocità %5$s · rigenerazione %6$s</string>
     <string name="eco_lever_smoother">guida più fluida</string>
     <string name="eco_lever_eco_mode">modalità Eco</string>
     <string name="eco_lever_motorway">%1$d km/h sulle strade veloci</string>
@@ -668,7 +668,7 @@
     <string name="nav_split_consumption_span">kWh/100 km · ultimi %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">GUIDA ECO</string>
-    <string name="nav_split_eco_parts">anticipazione %1$s · fluidità %2$s · efficienza %3$s</string>
+    <string name="nav_split_eco_parts">anticipazione %1$s · fluidità %2$s · efficienza %3$s · velocità %4$s · rigenerazione %5$s</string>
     <string name="nav_split_eco_waiting">Punteggio dopo 2 km di guida</string>
     <string name="nav_split_roads">ALTRI PERCORSI</string>
     <string name="nav_split_road_charge">%1$s-%2$s %% di carica rispetto al calcolato</string>

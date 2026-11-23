@@ -44,6 +44,9 @@ class EcoCoach(context: Context) {
     @Volatile
     private var model: SocConsumptionModel? = null
 
+    @Volatile
+    private var kwhPerSocPercent: Double? = null
+
     private var lastComputedAtMs = 0L
     private var verdict = EcoVerdict(Provenanced.unavailable(UnavailableReason.MODEL_NOT_TRAINED))
 
@@ -54,6 +57,7 @@ class EcoCoach(context: Context) {
     fun load(trips: List<StoredTrip>) {
         val fit = SocConsumptionFitter().fit(trips, FirmwareInfo.getGeneration())
         model = (fit as? SocConsumptionFitResult.Ready)?.model
+        kwhPerSocPercent = scaleOf(trips)
     }
 
     /**
@@ -72,6 +76,7 @@ class EcoCoach(context: Context) {
                 model,
                 EnergyTripSession.current(snapshot.timestampMs),
                 snapshot.outsideTempCelsius,
+                kwhPerSocPercent = kwhPerSocPercent,
             )
         }
         return verdict

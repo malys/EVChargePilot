@@ -642,7 +642,7 @@ Spending %6$s %% per km</string>
         <item quantity="one">%1$d hard stop, %2$.1f per 10 km.</item>
         <item quantity="other">%1$d hard stops, %2$.1f per 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Score %1$d / 100 · anticipation %2$s · smoothness %3$s · efficiency %4$s</string>
+    <string name="trip_eco_score">Score %1$d / 100 · anticipation %2$s · smoothness %3$s · efficiency %4$s · speed %5$s · regeneration %6$s</string>
     <string name="eco_lever_smoother">smoother driving</string>
     <string name="eco_lever_eco_mode">Eco mode</string>
     <string name="eco_lever_motorway">%1$d km/h on fast roads</string>
@@ -719,7 +719,7 @@ Spending %6$s %% per km</string>
     <string name="nav_split_consumption_span">kWh/100 km · last %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">ECO-DRIVING</string>
-    <string name="nav_split_eco_parts">anticipation %1$s · smoothness %2$s · efficiency %3$s</string>
+    <string name="nav_split_eco_parts">anticipation %1$s · smoothness %2$s · efficiency %3$s · speed %4$s · regeneration %5$s</string>
     <string name="nav_split_eco_waiting">Score after 2 km of driving</string>
     <string name="nav_split_roads">OTHER ROUTES</string>
     <string name="nav_split_road_charge">%1$s to %2$s %% charge vs routed</string>

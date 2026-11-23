@@ -593,7 +593,7 @@
         <item quantity="one">%1$d harter Stopp, %2$.1f pro 10 km.</item>
         <item quantity="other">%1$d harte Stopps, %2$.1f pro 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Punktzahl %1$d / 100 · Vorausschau %2$s · Gleichmäßigkeit %3$s · Effizienz %4$s</string>
+    <string name="trip_eco_score">Punktzahl %1$d / 100 · Vorausschau %2$s · Gleichmäßigkeit %3$s · Effizienz %4$s · Tempo %5$s · Rekuperation %6$s</string>
     <string name="eco_lever_smoother">sanfteres Fahren</string>
     <string name="eco_lever_eco_mode">Eco-Modus</string>
     <string name="eco_lever_motorway">%1$d km/h auf schnellen Straßen</string>
@@ -665,7 +665,7 @@
     <string name="nav_split_consumption_span">kWh/100 km · letzte %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">ECO-FAHREN</string>
-    <string name="nav_split_eco_parts">Vorausschau %1$s · Gleichmäßigkeit %2$s · Effizienz %3$s</string>
+    <string name="nav_split_eco_parts">Vorausschau %1$s · Gleichmäßigkeit %2$s · Effizienz %3$s · Tempo %4$s · Rekuperation %5$s</string>
     <string name="nav_split_eco_waiting">Punktzahl nach 2 km Fahrt</string>
     <string name="nav_split_roads">ANDERE ROUTEN</string>
     <string name="nav_split_road_charge">%1$s bis %2$s %% Ladung gegenüber der berechneten</string>

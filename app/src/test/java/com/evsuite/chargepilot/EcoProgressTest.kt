@@ -39,12 +39,13 @@ class EcoProgressTest {
     )
 
     @Test fun `a trip better than every earlier one is a record and extends the run`() {
-        // Scores newest first: 100, then 71 three times (anticipation 50, smoothness 100).
+        // Scores newest first: 100, then 69 three times (anticipation 50, smoothness 100,
+        // weighed 0,25 and 0,15 since CP-099).
         val result = progress(0, 3, 3, 3)
         assertEquals(100, result.score!!.total)
         assertTrue(result.isRecord)
         assertEquals(1, result.streak)
-        assertEquals(71, result.averageBefore)
+        assertEquals(69, result.averageBefore)
     }
 
     @Test fun `a run stops at the first trip below its own average`() {

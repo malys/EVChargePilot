@@ -132,7 +132,7 @@ class EcoTripReviewTest {
         socModel: SocConsumptionModel? = model,
         attribution: EnergyAttributionResult? = attribution(),
         whatIf: SpeedWhatIfResult? = whatIf(),
-    ) = EcoTripReviewer.review(trip, socModel, attribution, whatIf, generation)
+    ) = EcoTripReviewer.review(trip, socModel, attribution, whatIf, null, generation)
 
     @Test
     fun `a trip below the fit's expectation reads better than it`() {

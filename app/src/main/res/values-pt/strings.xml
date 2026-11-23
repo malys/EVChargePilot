@@ -596,7 +596,7 @@
         <item quantity="other">%1$d travagens bruscas, %2$.1f por 10 km.</item>
         <item quantity="many">%1$d travagens bruscas, %2$.1f por 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Pontuação %1$d / 100 · antecipação %2$s · suavidade %3$s · eficiência %4$s</string>
+    <string name="trip_eco_score">Pontuação %1$d / 100 · antecipação %2$s · suavidade %3$s · eficiência %4$s · velocidade %5$s · regeneração %6$s</string>
     <string name="eco_lever_smoother">condução mais suave</string>
     <string name="eco_lever_eco_mode">modo Eco</string>
     <string name="eco_lever_motorway">%1$d km/h nas vias rápidas</string>
@@ -668,7 +668,7 @@
     <string name="nav_split_consumption_span">kWh/100 km · últimos %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">CONDUÇÃO EFICIENTE</string>
-    <string name="nav_split_eco_parts">antecipação %1$s · suavidade %2$s · eficiência %3$s</string>
+    <string name="nav_split_eco_parts">antecipação %1$s · suavidade %2$s · eficiência %3$s · velocidade %4$s · regeneração %5$s</string>
     <string name="nav_split_eco_waiting">Pontuação após 2 km de condução</string>
     <string name="nav_split_roads">OUTRAS ROTAS</string>
     <string name="nav_split_road_charge">%1$s a %2$s %% de carga face à calculada</string>

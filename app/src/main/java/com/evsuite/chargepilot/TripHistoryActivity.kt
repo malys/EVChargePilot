@@ -705,7 +705,7 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
         binding.detailEcoReview.contentDescription = text
     }
 
-    /** The selected trip out of 100, with the three parts so the driver sees which one to work on. */
+    /** The selected trip out of 100, with the five parts so the driver sees which one to work on. */
     private fun scoreLine(verdict: EcoVerdict): String? {
         val trip = adapter.items.firstOrNull { it.summary.startedAtMs == selectedStartedAtMs }
             ?: return null
@@ -716,6 +716,8 @@ class TripHistoryActivity : PrimaryNavigationActivity() {
             score.anticipation?.toString() ?: DASH,
             score.smoothness?.toString() ?: DASH,
             score.efficiency?.toString() ?: DASH,
+            score.speed?.toString() ?: DASH,
+            score.regeneration?.toString() ?: DASH,
         )
     }
 

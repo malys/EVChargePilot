@@ -12,6 +12,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   name. Kept in `trip_drivers.tsv`, never exported. Needs EVTasker with *Set the driver*;
   without it every trip is *Unknown driver* and nothing else changes.
 
+### Changed
+
+- **Eco score: five measured criteria (CP-099).** Anticipation and smoothness are the share of
+  speed shed or gained firmly (beyond 1,5 m/s²) instead of a count of hard stops that read 0 or
+  100. Efficiency reads the battery energy integrated each second, scaled by this car's own
+  history, rather than the gauge alone. Two new parts: speed (km/h over 110 from 95 km/h on)
+  and regeneration (the share of braking energy taken back). Acceleration is measured over two
+  seconds, so the split ring no longer flashes on a read that missed the car's update. Trips
+  recorded before keep their old parts.
+
 ## [0.3.0] - 2026-11-19
 
 ### Changed

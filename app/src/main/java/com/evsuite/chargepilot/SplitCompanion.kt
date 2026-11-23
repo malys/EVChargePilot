@@ -242,6 +242,8 @@ internal class SplitCompanion(
             score.anticipation?.toString() ?: DASH,
             score.smoothness?.toString() ?: DASH,
             score.efficiency?.toString() ?: DASH,
+            score.speed?.toString() ?: DASH,
+            score.regeneration?.toString() ?: DASH,
         )
     }
 

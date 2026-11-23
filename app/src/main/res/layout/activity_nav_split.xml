@@ -262,9 +262,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:textAppearance="@style/Text.EV.Secondary"
-                    tools:text="anticipation 80 · souplesse 70 · efficacité 60" />
+                    tools:text="anticipation 80 · souplesse 70 · efficacité 60 · vitesse — · régénération 55" />
             </LinearLayout>
         </LinearLayout>
 

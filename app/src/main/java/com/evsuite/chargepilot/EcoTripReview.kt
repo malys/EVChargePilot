@@ -129,9 +129,11 @@ object EcoTripReviewer {
         socModel: SocConsumptionModel?,
         attribution: EnergyAttributionResult?,
         whatIf: SpeedWhatIfResult?,
+        /** CP-099: [scaleOf] over the history; null judges the trip on the gauge alone. */
+        kwhPerSocPercent: Double?,
         generation: FirmwareInfo.Gen = FirmwareInfo.getGeneration(),
     ): EcoTripReview {
-        val verdict = verdict(trip, socModel, generation)
+        val verdict = verdict(trip, socModel, kwhPerSocPercent, generation)
         val findings = listOfNotNull(
             motorway(whatIf),
             cabin(attribution),
@@ -301,9 +303,10 @@ object EcoTripReviewer {
     fun verdict(
         trip: StoredTrip,
         socModel: SocConsumptionModel?,
+        kwhPerSocPercent: Double?,
         generation: FirmwareInfo.Gen = FirmwareInfo.getGeneration(),
     ): EcoVerdict = EcoDrivingMonitor.forReplay().replay(trip.samples.orEmpty())
-        .verdict(socModel, trip.summary, meanOutsideTempCelsius(trip), generation)
+        .verdict(socModel, trip.summary, meanOutsideTempCelsius(trip), generation, kwhPerSocPercent)
 
     private fun steadiness(trip: StoredTrip): EcoFinding.Steadiness? {
         val share = DrivingStyle.of(trip).harshSharePercent ?: return null
@@ -371,6 +374,7 @@ fun reviewHistory(filesDir: File, trips: List<StoredTrip>): ReviewedHistory {
     val evidence = trips.firstNotNullOfOrNull { it.summary.batteryPowerEvidence }
     val model = LocalEnergyModel.loadOrTrain(filesDir, trips, evidence)
     val socModel = (SocConsumptionFitter().fit(trips) as? SocConsumptionFitResult.Ready)?.model
+    val scale = scaleOf(trips)
     val attributions = trips.associate { trip ->
         trip.summary.startedAtMs to EnergyAttributionCalculator.calculate(trip, model)
     }
@@ -380,6 +384,7 @@ fun reviewHistory(filesDir: File, trips: List<StoredTrip>): ReviewedHistory {
             socModelWithout(trips, trip),
             attributions[trip.summary.startedAtMs],
             SpeedWhatIfCalculator.calculate(trip, model, socModel),
+            scale,
         )
     }
     return ReviewedHistory(attributions, withClimate(trips, reviews))
@@ -398,8 +403,13 @@ fun reviewTrip(filesDir: File, trips: List<StoredTrip>, trip: StoredTrip): EcoTr
         socModelWithout(trips, trip),
         EnergyAttributionCalculator.calculate(trip, model),
         SpeedWhatIfCalculator.calculate(trip, model, socModel),
+        scaleOf(trips),
     )
 }
+
+/** CP-099: kWh per gauge percent on this car, from its own history rather than the spec sheet. */
+internal fun scaleOf(trips: List<StoredTrip>): Double? =
+    EcoDrivingMonitor.kwhPerSocPercent(trips.map { it.summary })
 
 /**
  * The expectation a trip is judged against, fitted on every trip but that one.
@@ -423,9 +433,10 @@ fun ecoProgress(
     include: (StoredTrip) -> Boolean = { true },
 ): EcoProgress {
     val recent = tripsNewestFirst.filter(include).take(EcoTripAdvice.HISTORY_TRIPS)
+    val scale = scaleOf(tripsNewestFirst)
     val verdicts = recent.associate { trip ->
         trip.summary.startedAtMs to
-            EcoTripReviewer.verdict(trip, socModelWithout(tripsNewestFirst, trip))
+            EcoTripReviewer.verdict(trip, socModelWithout(tripsNewestFirst, trip), scale)
     }
     return EcoProgress.of(recent, verdicts, nowMs)
 }

@@ -596,7 +596,7 @@
         <item quantity="other">%1$d frenadas fuertes, %2$.1f cada 10 km.</item>
         <item quantity="many">%1$d frenadas fuertes, %2$.1f cada 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Puntuación %1$d / 100 · anticipación %2$s · suavidad %3$s · eficiencia %4$s</string>
+    <string name="trip_eco_score">Puntuación %1$d / 100 · anticipación %2$s · suavidad %3$s · eficiencia %4$s · velocidad %5$s · regeneración %6$s</string>
     <string name="eco_lever_smoother">una conducción más suave</string>
     <string name="eco_lever_eco_mode">modo Eco</string>
     <string name="eco_lever_motorway">%1$d km/h en vías rápidas</string>
@@ -668,7 +668,7 @@
     <string name="nav_split_consumption_span">kWh/100 km · últimos %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">CONDUCCIÓN EFICIENTE</string>
-    <string name="nav_split_eco_parts">anticipación %1$s · suavidad %2$s · eficiencia %3$s</string>
+    <string name="nav_split_eco_parts">anticipación %1$s · suavidad %2$s · eficiencia %3$s · velocidad %4$s · regeneración %5$s</string>
     <string name="nav_split_eco_waiting">Puntuación tras 2 km de conducción</string>
     <string name="nav_split_roads">OTRAS RUTAS</string>
     <string name="nav_split_road_charge">%1$s a %2$s %% de carga frente a la calculada</string>

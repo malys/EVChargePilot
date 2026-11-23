@@ -619,7 +619,7 @@ Consommation %6$s %% par km</string>
         <item quantity="one">%1$d freinage brusque, %2$.1f aux 10 km.</item>
         <item quantity="other">%1$d freinages brusques, %2$.1f aux 10 km.</item>
     </plurals>
-    <string name="trip_eco_score">Note %1$d / 100 · anticipation %2$s · souplesse %3$s · efficacité %4$s</string>
+    <string name="trip_eco_score">Note %1$d / 100 · anticipation %2$s · souplesse %3$s · efficacité %4$s · vitesse %5$s · régénération %6$s</string>
     <string name="eco_lever_smoother">conduite plus souple</string>
     <string name="eco_lever_eco_mode">mode Éco</string>
     <string name="eco_lever_motorway">%1$d km/h sur voie rapide</string>
@@ -694,7 +694,7 @@ Consommation %6$s %% par km</string>
     <string name="nav_split_consumption_span">kWh/100 km · %1$.0f derniers km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
     <string name="nav_split_eco">ÉCO-CONDUITE</string>
-    <string name="nav_split_eco_parts">anticipation %1$s · souplesse %2$s · efficacité %3$s</string>
+    <string name="nav_split_eco_parts">anticipation %1$s · souplesse %2$s · efficacité %3$s · vitesse %4$s · régénération %5$s</string>
     <string name="nav_split_eco_waiting">Note après 2 km de conduite</string>
     <string name="nav_split_roads">AUTRES ITINÉRAIRES</string>
     <string name="nav_split_road_charge">%1$s à %2$s %% de charge vs calculé</string>
