@@ -450,6 +450,16 @@
                         android:layout_height="wrap_content"
                         android:text="@string/navigation_settings_shape_points" />
 
+                    <!-- The split beside Android Auto (MG4Link) instead of MG4 Navigator. Shown
+                         only where MG4Link is installed. -->
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/androidAutoSplitSwitch"
+                        style="@style/Widget.EV.Switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/navigation_settings_android_auto_split"
+                        android:visibility="gone" />
+
 
                     <!-- The same control as EVTasker's: one button naming the language in use,
                          opening the list of the five the suite speaks. Title and button share a

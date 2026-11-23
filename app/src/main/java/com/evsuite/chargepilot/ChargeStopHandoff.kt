@@ -181,11 +181,21 @@ internal object ChargeStopHandoff {
     fun storeShapePointsEnabled(context: Context, enabled: Boolean) =
         prefs(context).edit().putBoolean(PREF_SHAPE, enabled).apply()
 
+    /**
+     * Whether the split goes beside Android Auto (MG4Link) instead of MG4 Navigator. The driver's
+     * setting; off by default. No route reaches the phone that way, so Navigate only opens it.
+     */
+    fun androidAutoSplit(context: Context): Boolean = prefs(context).getBoolean(PREF_ANDROID_AUTO, false)
+
+    fun storeAndroidAutoSplit(context: Context, enabled: Boolean) =
+        prefs(context).edit().putBoolean(PREF_ANDROID_AUTO, enabled).apply()
+
     private fun prefs(context: Context) = context.applicationContext
         .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
     private const val PREFERENCES = "navigation_handoff"
     private const val PREF_SHAPE = "shape_points"
+    private const val PREF_ANDROID_AUTO = "android_auto_split"
 
     /**
      * The handoff for a destination nothing has been planned to yet — no route, or a route still

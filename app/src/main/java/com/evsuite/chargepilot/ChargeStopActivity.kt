@@ -1301,6 +1301,9 @@ class ChargeStopActivity : AppCompatActivity() {
         NavLegs.disarm()
         // Read here, on the main thread: the worker below must not race a road being chosen.
         val split = splitRoads(target)
+        if (ChargeStopHandoff.androidAutoSplit(this)) {
+            MapApps.mg4Link(this)?.let { return sendToAndroidAuto(target, it, split) }
+        }
         // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.
@@ -1477,6 +1480,25 @@ class ChargeStopActivity : AppCompatActivity() {
                 if (!target.toStop) R.string.charge_stop_navigate_route
                 else R.string.charge_stop_navigate_route_via
             )
+        )
+    }
+
+    /**
+     * The driver chose Android Auto for the split. Nothing goes to the car's adapter: MG4
+     * Navigator would guide in the background, a second voice under Google Maps. Android Auto
+     * takes no destination from the head unit either, so the place is shown to be dictated.
+     */
+    private fun sendToAndroidAuto(target: Handoff, mg4Link: Intent, split: Intent) {
+        val opened = runCatching { startActivity(mg4Link) }.isSuccess
+        if (opened && MapCompanionOverlay.possible(this)) MapCompanionOverlay.show(this, split, untilClosed = true)
+        ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
+            "android auto split: MG4Link opened=$opened, nothing sent to the adapter"
+        }
+        val place = target.label?.takeIf { it.isNotBlank() }
+            ?: String.format(Locale.ROOT, "%.5f, %.5f", target.latitude, target.longitude)
+        announce(
+            if (opened) getString(R.string.charge_stop_navigate_android_auto, place)
+            else getString(R.string.charge_stop_navigate_none)
         )
     }
 

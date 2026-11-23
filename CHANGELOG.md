@@ -21,6 +21,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   parked no longer refuses a window or drags the figure down. A window closes once 15 watched
   points are lost, across charges if need be. Until now the car had produced no window in 11
   charges. The screen names the new source. Needs drives recorded with this build.
+- **Split screen beside Android Auto (MG4Link).** *Settings → Send points…* is followed by a
+  switch, shown only where MG4Link is installed, that puts the companion quarter beside Android
+  Auto instead of MG4 Navigator. Launching the app opens MG4Link with the companion. Navigate
+  sends nothing to the car (MG4 Navigator would guide in the background, a second voice) and
+  shows the place to say to Google Maps: Android Auto takes no destination from the head unit.
+  The companion covers Android Auto's right quarter, which keeps drawing under it.
 
 ### Changed
 
@@ -36,6 +42,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   of EVKX's usable 50,8 / 61,7 / 74,4 kWh, so a new pack reads near 100 % health. The reference
   consumption follows, 14,2 to 14,0 kWh/100 km. A capacity already saved in the settings is kept:
   enter 61 by hand to follow.
+
+### Fixed
+
+- **Navigation: "sent" no longer claimed when MG4Link took the place.** MG4Link answers `geo:`
+  and drops the destination, so the fallback reported it sent; it now goes on to MG4 Navigator.
 
 ## [0.3.0] - 2026-11-19
 

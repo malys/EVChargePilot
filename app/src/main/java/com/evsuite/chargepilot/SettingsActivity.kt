@@ -133,6 +133,12 @@ class SettingsActivity : PrimaryNavigationActivity() {
         binding.shapePointsSwitch.setOnCheckedChangeListener { _, checked ->
             ChargeStopHandoff.storeShapePointsEnabled(this, checked)
         }
+        // Offered only where MG4Link is installed: elsewhere there is nothing to choose.
+        binding.androidAutoSplitSwitch.visibility = if (MapApps.mg4Link(this) != null) View.VISIBLE else View.GONE
+        binding.androidAutoSplitSwitch.isChecked = ChargeStopHandoff.androidAutoSplit(this)
+        binding.androidAutoSplitSwitch.setOnCheckedChangeListener { _, checked ->
+            ChargeStopHandoff.storeAndroidAutoSplit(this, checked)
+        }
     }
 
     /**

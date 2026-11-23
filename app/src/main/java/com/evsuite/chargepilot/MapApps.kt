@@ -47,9 +47,11 @@ object MapApps {
      * sanitising stay in the one place a JVM test proves them.
      */
     fun open(context: Context, geoUri: String, latitude: Double, longitude: Double): Outcome {
+        // MG4Link declares geo: and google.navigation: and drops the destination: Android Auto
+        // has no way to hand one to the phone. Reaching it would read "sent" for nothing.
         val carrying = listOf(geoUri, "google.navigation:q=$latitude,$longitude")
             .map { Intent(Intent.ACTION_VIEW, Uri.parse(it)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-            .filter { it.resolveActivity(context.packageManager) != null }
+            .filter { takesDestination(it.resolveActivity(context.packageManager)?.packageName) }
         for (intent in carrying) {
             if (runCatching { context.startActivity(intent) }.isSuccess) return Outcome.SENT
         }
@@ -80,6 +82,29 @@ object MapApps {
      */
     fun toForeground(context: Context): Boolean {
         val intent = comeForward(context) ?: return false
+        return runCatching { context.startActivity(intent) }.isSuccess
+    }
+
+    /**
+     * MG4Link's own entry, or null when it is not installed. It installs as an update of AllGo's
+     * Android Auto and keeps that package, so the class tells it from the car's original app.
+     * With a phone connected it brings the projection to the front; without one, its home screen.
+     */
+    fun mg4Link(context: Context): Intent? =
+        context.packageManager.getLaunchIntentForPackage(MG4LINK_PACKAGE)
+            ?.takeIf { isMg4Link(it.component?.className) }
+            ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    /**
+     * The map the split goes beside: MG4Link when the driver chose it and it is installed, MG4
+     * Navigator otherwise.
+     */
+    fun splitMap(context: Context): Intent? =
+        (if (ChargeStopHandoff.androidAutoSplit(context)) mg4Link(context) else null) ?: comeForward(context)
+
+    /** Brings [splitMap] to the front. */
+    fun splitToForeground(context: Context): Boolean {
+        val intent = splitMap(context) ?: return false
         return runCatching { context.startActivity(intent) }.isSuccess
     }
 
@@ -137,7 +162,17 @@ object MapApps {
     internal fun mapOnTop(tasks: List<String>?, mapPackage: String?): Boolean =
         mapPackage != null && tasks?.firstOrNull()?.substringBefore('/') == mapPackage
 
+    /** Whether the app a geo: intent resolves to does anything with the place. */
+    internal fun takesDestination(resolvedPackage: String?): Boolean =
+        resolvedPackage != null && resolvedPackage != MG4LINK_PACKAGE
+
+    /** MG4Link, and not the car's original AllGo app it replaces under the same package. */
+    internal fun isMg4Link(launchClass: String?): Boolean =
+        launchClass?.startsWith(MG4LINK_CLASS_PREFIX) == true
+
     private const val REAL_GET_TASKS = "android.permission.REAL_GET_TASKS"
+    internal const val MG4LINK_PACKAGE = "com.allgo.app.androidauto"
+    private const val MG4LINK_CLASS_PREFIX = "com.andrerinas.openheadunit."
     private const val MAX_TASKS = 4
 
     /** A probe line is read on a laptop, not scrolled: enough to spot a lead, not a manifest dump. */

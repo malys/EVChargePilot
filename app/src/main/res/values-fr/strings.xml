@@ -408,6 +408,7 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_navigate_route">Itin\u00e9raire transmis, le v\u00e9hicule ne guide pas encore. D\u00e9marrez-le sur la carte.</string>
     <string name="charge_stop_navigate_route_via">Itin\u00e9raire transmis avec l\u2019arr\u00eat de charge, le v\u00e9hicule ne guide pas encore. D\u00e9marrez-le sur la carte.</string>
     <string name="charge_stop_navigate_map_only">La carte est ouverte, mais cette voiture n\u2019accepte pas de destination venant d\u2019une autre application. Saisissez-la : %1$s</string>
+    <string name="charge_stop_navigate_android_auto">Android Auto est ouvert. Il ne reçoit pas de destination de la voiture : dites-la ou saisissez-la dans Google Maps : %1$s</string>
     <string name="charge_stop_navigate_bad_place">Ce lieu n\u2019a pas de coordonnées utilisables : rien n\u2019a été envoyé.</string>
 
     <!-- CP-058 le compagnon de dérive. Une ligne, une conséquence, jamais une consigne. -->
@@ -647,6 +648,7 @@ Consommation %6$s %% par km</string>
     <string name="advice_history_open">Historique des conseils</string>
     <string name="advice_settings_notify">Notifier les conseils batterie à l’arrêt</string>
     <string name="navigation_settings_shape_points">Envoyer des points de passage du trajet calculé à la navigation</string>
+    <string name="navigation_settings_android_auto_split">Écran partagé à côté d\u2019Android Auto (MG4Link) au lieu de MG4 Navigator. Aucun itinéraire n\u2019arrive au téléphone : Naviguer l\u2019ouvre et affiche le lieu à dire à Google Maps</string>
     <string name="advice_notification_title">Compagnon batterie</string>
     <string name="advice_channel">Conseils batterie</string>
     <string name="advice_channel_description">Ce qui a changé dans les analyses de la batterie, envoyé seulement voiture à l’arrêt, au plus un de chaque sorte par jour.</string>

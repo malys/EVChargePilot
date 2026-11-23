@@ -94,7 +94,7 @@ internal object MapCompanionOverlay {
     /** Granted to the platform-signed build only, and there must be a map to draw beside. */
     fun possible(context: Context): Boolean =
         context.packageManager.checkPermission(SYSTEM_WINDOW, context.packageName) ==
-            PackageManager.PERMISSION_GRANTED && MapApps.comeForward(context) != null
+            PackageManager.PERMISSION_GRANTED && MapApps.splitMap(context) != null
 
     /** Arms the companion for the drive [extras] describes, replacing any earlier one. */
     fun show(context: Context, extras: Intent, untilClosed: Boolean = false) {
@@ -138,7 +138,7 @@ internal object MapCompanionOverlay {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.OPAQUE,
             ).apply { gravity = Gravity.END or Gravity.TOP }
-            mapPackage = MapApps.comeForward(app)?.component?.packageName
+            mapPackage = MapApps.splitMap(app)?.component?.packageName
             shownAt = SystemClock.elapsedRealtime()
             lastGuidingAt = null
             shows = 0

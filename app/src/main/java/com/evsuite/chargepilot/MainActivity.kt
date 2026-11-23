@@ -535,7 +535,7 @@ class MainActivity : PrimaryNavigationActivity() {
 
     /** The map in front, the companion over its right quarter, with or without a route. */
     private fun showSplit() {
-        if (!MapApps.toForeground(this)) return
+        if (!MapApps.splitToForeground(this)) return
         MapCompanionOverlay.show(this, SplitCompanion.intent(emptyList(), 0, false, null), untilClosed = true)
     }
 

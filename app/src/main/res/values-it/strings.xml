@@ -390,6 +390,7 @@
     <string name="charge_stop_navigate_route">Percorso consegnato, ma l\'auto non sta ancora guidando. Avvialo sulla mappa.</string>
     <string name="charge_stop_navigate_route_via">Percorso consegnato con la sosta di ricarica, ma l\'auto non sta ancora guidando. Avvialo sulla mappa.</string>
     <string name="charge_stop_navigate_map_only">La mappa è aperta, ma quest\'auto non accetta destinazioni da un\'altra app. Inseriscila lì: %1$s</string>
+    <string name="charge_stop_navigate_android_auto">Android Auto è aperto. Non riceve destinazioni dall\u2019auto: ditela o scrivetela in Google Maps: %1$s</string>
     <string name="charge_stop_navigate_bad_place">Quel luogo non ha coordinate utilizzabili, quindi non è stato inviato nulla.</string>
     <string name="drift_holding">Il piano regge · circa %1$s %% all\'arrivo (± %2$s) · mancano %3$s km</string>
     <string name="drift_short_restore">Consumando come ora: %1$s %% all\'arrivo, %2$s sotto la tua riserva · %3$d km/h sui %4$s km di strada veloce davanti lo recuperano, per %5$s min</string>
@@ -622,6 +623,7 @@
     <string name="advice_history_open">Storico consigli</string>
     <string name="advice_settings_notify">Notifica i consigli batteria a veicolo fermo</string>
     <string name="navigation_settings_shape_points">Invia punti intermedi del percorso calcolato alla navigazione</string>
+    <string name="navigation_settings_android_auto_split">Schermo diviso accanto ad Android Auto (MG4Link) invece di MG4 Navigator. Nessun percorso arriva al telefono: Naviga lo apre e mostra il luogo da dire a Google Maps</string>
     <string name="advice_notification_title">Compagno della batteria</string>
     <string name="advice_channel">Consigli batteria</string>
     <string name="advice_channel_description">Cosa è cambiato nelle analisi della batteria, inviato solo con l\'auto ferma, al massimo uno per tipo al giorno.</string>

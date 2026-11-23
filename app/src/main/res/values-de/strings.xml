@@ -390,6 +390,7 @@
     <string name="charge_stop_navigate_route">Route übergeben, aber das Auto führt noch nicht. Starte sie auf der Karte.</string>
     <string name="charge_stop_navigate_route_via">Route mit Ladestopp übergeben, aber das Auto führt noch nicht. Starte sie auf der Karte.</string>
     <string name="charge_stop_navigate_map_only">Die Karte ist offen, aber dieses Auto nimmt kein Ziel von einer anderen App an. Gib es dort ein: %1$s</string>
+    <string name="charge_stop_navigate_android_auto">Android Auto ist offen. Es nimmt kein Ziel vom Auto an: Sagen oder tippen Sie es in Google Maps: %1$s</string>
     <string name="charge_stop_navigate_bad_place">Dieser Ort hat keine brauchbaren Koordinaten, daher wurde nichts gesendet.</string>
     <string name="drift_holding">Plan hält · etwa %1$s %% bei Ankunft (± %2$s) · noch %3$s km</string>
     <string name="drift_short_restore">Bei aktuellem Verbrauch: %1$s %% bei Ankunft, %2$s unter deiner Reserve · %3$d km/h auf den %4$s km schneller Straße voraus holen es zurück, für %5$s min</string>
@@ -619,6 +620,7 @@
     <string name="advice_history_open">Tipp-Verlauf</string>
     <string name="advice_settings_notify">Batterietipps im Stand melden</string>
     <string name="navigation_settings_shape_points">Zwischenpunkte der berechneten Route an die Navigation senden</string>
+    <string name="navigation_settings_android_auto_split">Geteilter Bildschirm neben Android Auto (MG4Link) statt MG4 Navigator. Keine Route erreicht das Telefon: Navigieren öffnet es und zeigt den Ort, den Sie Google Maps sagen</string>
     <string name="advice_notification_title">Batterie-Begleiter</string>
     <string name="advice_channel">Batterietipps</string>
     <string name="advice_channel_description">Was sich in den Batterieanalysen geändert hat, nur bei stehendem Auto gesendet, höchstens einer je Art pro Tag.</string>
