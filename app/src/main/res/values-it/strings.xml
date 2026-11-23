@@ -444,6 +444,7 @@
     <string name="battery_health_evidence_cold">%1$s · %2$d scariche misurate · %3$d escluse perché troppo fredde · %4$.0f giorni · capacità %5$s</string>
     <string name="battery_health_source_counters">Misurato con i contatori di energia dell\'auto</string>
     <string name="battery_health_source_pack_pair">Ricavato da tensione × corrente della batteria, integrato da questa app</string>
+    <string name="battery_health_source_observed_pair">Tensione × corrente della batteria e carica persa negli stessi secondi osservati, integrati da questa app</string>
     <string name="battery_health_unavailable_no_source">Ancora nessun valore di salute. Quest\'auto non ha pubblicato energia utilizzabile per alcuna scarica nel registro, né con i propri contatori né con una lettura della batteria che questa app potesse integrare.</string>
     <string name="battery_health_apply">Usa nelle impostazioni</string>
     <string name="battery_action_charges">Ricariche</string>

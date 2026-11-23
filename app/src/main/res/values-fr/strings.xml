@@ -466,6 +466,7 @@ Consommation %6$s %% par km</string>
     <string name="battery_health_evidence_cold">%1$s · %2$d décharges mesurées · %3$d écartées car trop froides · %4$.0f jours · capacité %5$s</string>
     <string name="battery_health_source_counters">Mesuré sur les compteurs d’énergie de la voiture</string>
     <string name="battery_health_source_pack_pair">Déduit de la tension × courant du pack, intégré par cette application</string>
+    <string name="battery_health_source_observed_pair">Tension × courant du pack et charge perdue sur les mêmes secondes observées, intégrés par cette application</string>
     <string name="battery_health_unavailable_no_source">Pas encore de valeur de santé. Cette voiture n’a publié aucune énergie exploitable pour les décharges enregistrées — ni ses propres compteurs, ni une lecture du pack intégrable par cette application.</string>
     <string name="battery_health_apply">Utiliser dans mes réglages</string>
     <string name="battery_action_charges">Charges</string>

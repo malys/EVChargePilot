@@ -444,6 +444,7 @@
     <string name="battery_health_evidence_cold">%1$s · %2$d descargas medidas · %3$d excluidas por frío · %4$.0f días · capacidad %5$s</string>
     <string name="battery_health_source_counters">Medido con los propios contadores de energía del coche</string>
     <string name="battery_health_source_pack_pair">Derivado de tensión × corriente de la batería, integrado por esta app</string>
+    <string name="battery_health_source_observed_pair">Tensión × corriente de la batería y carga perdida en los mismos segundos observados, integrados por esta app</string>
     <string name="battery_health_unavailable_no_source">Aún no hay cifra de salud. Este coche no publicó energía útil para ninguna descarga del registro, ni con sus propios contadores ni con una lectura de batería que esta app pudiera integrar.</string>
     <string name="battery_health_apply">Usar en mis ajustes</string>
     <string name="battery_action_charges">Cargas</string>

@@ -16,6 +16,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   integrals, no position), named in the manifest with its size and checksum, or why it is missing.
   It is what the battery health estimate reads, so a health figure that never appears can be
   replayed off the car.
+- **Battery health: measured as MG4Link measures it.** The estimate now pairs the pack's energy
+  with the charge lost over the very same watched seconds, so a drive the app missed or a night
+  parked no longer refuses a window or drags the figure down. A window closes once 15 watched
+  points are lost, across charges if need be. Until now the car had produced no window in 11
+  charges. The screen names the new source. Needs drives recorded with this build.
 
 ### Changed
 

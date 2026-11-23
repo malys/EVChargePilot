@@ -240,6 +240,7 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
             when (estimate.source) {
                 SohEnergySource.VEHICLE_COUNTERS -> R.string.battery_health_source_counters
                 SohEnergySource.PACK_PAIR_INTEGRAL -> R.string.battery_health_source_pack_pair
+                SohEnergySource.OBSERVED_PAIR -> R.string.battery_health_source_observed_pair
             }
         )
         val capacity = text.render(estimate.usableCapacityKwh, PATTERN_ENERGY)

@@ -476,6 +476,7 @@ Spending %6$s %% per km</string>
     <string name="battery_health_evidence_cold">%1$s · %2$d discharges measured · %3$d excluded as too cold · %4$.0f days · capacity %5$s</string>
     <string name="battery_health_source_counters">Measured from the car’s own energy counters</string>
     <string name="battery_health_source_pack_pair">Derived from pack voltage × current, integrated by this app</string>
+    <string name="battery_health_source_observed_pair">Pack voltage × current and the charge lost over the same watched seconds, integrated by this app</string>
     <string name="battery_health_unavailable_no_source">No health figure yet. This car published no usable energy for any discharge in the ledger — neither its own counters nor a pack reading this app could integrate.</string>
     <string name="battery_health_apply">Use in my settings</string>
     <string name="battery_action_charges">Charges</string>

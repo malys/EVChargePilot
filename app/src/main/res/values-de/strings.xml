@@ -444,6 +444,7 @@
     <string name="battery_health_evidence_cold">%1$s · %2$d Entladungen gemessen · %3$d als zu kalt ausgeschlossen · %4$.0f Tage · Kapazität %5$s</string>
     <string name="battery_health_source_counters">Gemessen mit den eigenen Energiezählern des Autos</string>
     <string name="battery_health_source_pack_pair">Abgeleitet aus Batteriespannung × Strom, von dieser App integriert</string>
+    <string name="battery_health_source_observed_pair">Batteriespannung × Strom und verlorene Ladung in denselben beobachteten Sekunden, von dieser App integriert</string>
     <string name="battery_health_unavailable_no_source">Noch kein Zustandswert. Dieses Auto hat für keine Entladung im Protokoll brauchbare Energie veröffentlicht — weder eigene Zähler noch einen Batteriewert, den diese App integrieren konnte.</string>
     <string name="battery_health_apply">In Einstellungen übernehmen</string>
     <string name="battery_action_charges">Ladungen</string>
