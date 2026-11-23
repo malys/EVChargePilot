@@ -106,7 +106,7 @@ class DiagnosticExporterTest {
         File(evidence, "evidence-SWI68-too-big.json")
             .writeBytes(ByteArray(DiagnosticExporter.MAX_EVIDENCE_BYTES + 1))
 
-        val exported = DiagnosticExporter.writeBundle("report", evidence, destination, 42L)!!
+        val exported = DiagnosticExporter.writeBundle("report", evidence, destination, nowMs = 42L)!!
 
         ZipFile(exported).use { zip ->
             val names = zip.entries().asSequence().map { it.name }.toList()
@@ -115,6 +115,36 @@ class DiagnosticExporterTest {
             val manifest = zip.getInputStream(zip.getEntry("manifest.txt")).reader().readText()
             assertTrue(manifest.contains("evidence_skipped=1"))
             assertTrue(manifest.contains("evidence-SWI68-too-big.json: size="))
+        }
+    }
+
+    @Test fun `bundle carries the battery ledger and says so`() {
+        val destination = tempDirectory()
+        val ledger = File(tempDirectory(), "battery-ledger.json").apply { writeText("{\"entries\":[]}") }
+
+        val exported = DiagnosticExporter.writeBundle("report", tempDirectory(), destination, ledger, 42L)!!
+
+        ZipFile(exported).use { zip ->
+            val entry = zip.getEntry(DiagnosticExporter.LEDGER_ENTRY)
+            assertNotNull(entry)
+            assertEquals("{\"entries\":[]}", zip.getInputStream(entry).reader().readText())
+            val manifest = zip.getInputStream(zip.getEntry("manifest.txt")).reader().readText()
+            assertTrue(manifest.contains("ledger_included=true"))
+            assertTrue(manifest.contains("ledger.sha256="))
+        }
+    }
+
+    @Test fun `bundle without a ledger still exports and names the absence`() {
+        val destination = tempDirectory()
+        val missing = File(tempDirectory(), "battery-ledger.json")
+
+        val exported = DiagnosticExporter.writeBundle("report", tempDirectory(), destination, missing, 42L)!!
+
+        ZipFile(exported).use { zip ->
+            assertEquals(null, zip.getEntry(DiagnosticExporter.LEDGER_ENTRY))
+            val manifest = zip.getInputStream(zip.getEntry("manifest.txt")).reader().readText()
+            assertTrue(manifest.contains("ledger_included=false"))
+            assertTrue(manifest.contains("ledger.skipped=absent"))
         }
     }
 

@@ -11,6 +11,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   driver, lists per-driver totals and average score, and lets a parked driver assign or forget a
   name. Kept in `trip_drivers.tsv`, never exported. Needs EVTasker with *Set the driver*;
   without it every trip is *Unknown driver* and nothing else changes.
+- **Diagnostic bundle: the battery ledger goes with it.** The zip sent to the USB stick or the
+  inbox now carries `ledger/battery-ledger.json` (charge, odometer, temperatures and energy
+  integrals, no position), named in the manifest with its size and checksum, or why it is missing.
+  It is what the battery health estimate reads, so a health figure that never appears can be
+  replayed off the car.
 
 ### Changed
 

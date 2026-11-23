@@ -19,7 +19,7 @@ class NavGuidanceProbeArtifactTest {
             val saved = EvidenceCaptureFileStore(evidence) { 1_700_000_000_000L }
                 .write(artifact().toJson(), NavGuidanceProbeArtifact.KIND, "SWI69")
 
-            val bundle = DiagnosticExporter.writeBundle("report", evidence, usb, 0L)
+            val bundle = DiagnosticExporter.writeBundle("report", evidence, usb, nowMs = 0L)
 
             assertNotNull(saved)
             assertNotNull(bundle)

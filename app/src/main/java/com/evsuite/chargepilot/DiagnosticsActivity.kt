@@ -228,6 +228,7 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
                 val staging = File(cacheDir, "inbox").apply { mkdirs() }
                 val bundle = DiagnosticExporter.writeBundle(
                     diagnosticsReport(), File(appContext.filesDir, "evidence"), staging,
+                    DiagnosticExporter.ledgerFile(appContext),
                 )
                 try {
                     bundle?.let {

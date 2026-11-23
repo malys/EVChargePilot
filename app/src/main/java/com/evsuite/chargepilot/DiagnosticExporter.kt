@@ -1,6 +1,7 @@
 package com.evsuite.chargepilot
 
 import android.content.Context
+import com.evsuite.hardware.telemetry.BatteryLedgerStore
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -19,12 +20,18 @@ object DiagnosticExporter {
     internal const val MAX_EVIDENCE_FILES = 8
     internal const val MAX_EVIDENCE_BYTES = 64 * 1024
     internal const val MAX_BUNDLE_BYTES = 768 * 1024
+    /** 2 000 entries, the store's own cap, stay well under this; deflated JSON is a tenth of it. */
+    internal const val MAX_LEDGER_BYTES = 1024 * 1024
+    internal const val LEDGER_ENTRY = "ledger/battery-ledger.json"
     internal const val TRUNCATION_MARKER = "\n[report truncated at 128 KiB]\n"
 
     fun export(context: Context, report: String, chosenDirectory: File): File? {
         val target = DiagnosticUsbStorage.writableTarget(context, chosenDirectory) ?: return null
-        return writeBundle(report, File(context.filesDir, "evidence"), target)
+        return writeBundle(report, File(context.filesDir, "evidence"), target, ledgerFile(context))
     }
+
+    /** The battery ledger the health estimate reads: SoC, odometer, temperatures and integrals, no position. */
+    fun ledgerFile(context: Context): File = File(context.filesDir, BatteryLedgerStore.FILE_NAME)
 
     /**
      * One self-contained USB artifact: readable report plus newest bounded CP-003 captures.
@@ -35,6 +42,7 @@ object DiagnosticExporter {
         report: String,
         evidenceDirectory: File,
         directory: File,
+        ledger: File? = null,
         nowMs: Long = System.currentTimeMillis(),
     ): File? {
         if (!directory.isDirectory) return null
@@ -43,7 +51,8 @@ object DiagnosticExporter {
         return try {
             val reportBytes = bounded(report).toByteArray(Charsets.UTF_8)
             val evidence = evidenceFiles(evidenceDirectory)
-            val manifest = manifest(nowMs, reportBytes, evidence)
+            val ledgerBytes = ledger?.let(::ledgerBytes)
+            val manifest = manifest(nowMs, reportBytes, evidence, ledger, ledgerBytes)
             FileOutputStream(temp).use { output ->
                 ZipOutputStream(output.buffered()).use { zip ->
                     zip.writeEntry("manifest.txt", manifest.toByteArray(Charsets.UTF_8), nowMs)
@@ -51,6 +60,7 @@ object DiagnosticExporter {
                     evidence.included.forEach { artifact ->
                         zip.writeEntry("evidence/${artifact.file.name}", artifact.bytes, artifact.modifiedMs)
                     }
+                    ledgerBytes?.let { zip.writeEntry(LEDGER_ENTRY, it, ledger.lastModified()) }
                 }
             }
             RandomAccessFile(temp, "rw").use { it.fd.sync() }
@@ -122,10 +132,17 @@ object DiagnosticExporter {
         return EvidenceSelection(included, skipped)
     }
 
+    /** The ledger as it is on disk, or null when it is absent, empty or larger than [MAX_LEDGER_BYTES]. */
+    private fun ledgerBytes(file: File): ByteArray? =
+        if (!file.isFile || file.length() !in 1..MAX_LEDGER_BYTES.toLong()) null
+        else runCatching { file.readBytes() }.getOrNull()?.takeIf { it.size in 1..MAX_LEDGER_BYTES }
+
     private fun manifest(
         nowMs: Long,
         report: ByteArray,
         evidence: EvidenceSelection,
+        ledger: File?,
+        ledgerBytes: ByteArray?,
     ): String = buildString {
         appendLine("schema=1")
         appendLine("created_epoch_ms=$nowMs")
@@ -142,6 +159,14 @@ object DiagnosticExporter {
         }
         evidence.skipped.forEachIndexed { index, reason ->
             appendLine("skipped.$index=$reason")
+        }
+        if (ledgerBytes != null) {
+            appendLine("ledger_included=true")
+            appendLine("ledger.bytes=${ledgerBytes.size}")
+            appendLine("ledger.sha256=${sha256(ledgerBytes)}")
+        } else if (ledger != null) {
+            appendLine("ledger_included=false")
+            appendLine("ledger.skipped=${if (ledger.isFile) "size=${ledger.length()}" else "absent"}")
         }
     }
 
