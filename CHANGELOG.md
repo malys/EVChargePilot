@@ -26,6 +26,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   and regeneration (the share of braking energy taken back). Acceleration is measured over two
   seconds, so the split ring no longer flashes on a read that missed the car's update. Trips
   recorded before keep their old parts.
+- **Battery capacities: the gauge's span, not the usable figure.** The defaults are now the
+  energy between 100 % and 0 % on the car's gauge, 49 / 61 / 72,5 kWh (MG4Link's figures), instead
+  of EVKX's usable 50,8 / 61,7 / 74,4 kWh, so a new pack reads near 100 % health. The reference
+  consumption follows, 14,2 to 14,0 kWh/100 km. A capacity already saved in the settings is kept:
+  enter 61 by hand to follow.
 
 ## [0.3.0] - 2026-11-19
 

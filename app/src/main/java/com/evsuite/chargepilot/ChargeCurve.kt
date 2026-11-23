@@ -13,9 +13,10 @@ private val DC_64_KWH = listOf(20, 130, 130, 132, 134, 135, 135, 135, 137, 137, 
  * 64 kWh table, so the two share a curve here too.
  */
 enum class Mg4Variant(val usableKwh: Double, val label: String, val defaultAcKw: Double, dc: List<Int>) {
-    STANDARD_51(50.8, "51 kWh", 6.6, DC_51_KWH),
-    LONG_RANGE_64(61.7, "64 kWh", 11.0, DC_64_KWH),
-    EXTENDED_77(74.4, "77 kWh", 11.0, DC_64_KWH),
+    // Energy between 100 % and 0 % on the gauge (MG4Link's figures), not EVKX's usable capacity.
+    STANDARD_51(49.0, "51 kWh", 6.6, DC_51_KWH),
+    LONG_RANGE_64(61.0, "64 kWh", 11.0, DC_64_KWH),
+    EXTENDED_77(72.5, "77 kWh", 11.0, DC_64_KWH),
     ;
 
     /** Theoretical DC power, kW, at every [ChargeCurve.BAND_PERCENT] of charge from 0 to 100. */

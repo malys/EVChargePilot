@@ -53,6 +53,10 @@ class ChargeCurveTest {
         assertEquals(Mg4Variant.STANDARD_51, Mg4Variant.of(50.8, 80.0))
         assertEquals(Mg4Variant.LONG_RANGE_64, Mg4Variant.of(50.8, 130.0))
         assertEquals(Mg4Variant.EXTENDED_77, Mg4Variant.of(74.4, null))
+        // The gauge-span defaults, and the EVKX figures a driver saved before them, both still map.
+        assertEquals(Mg4Variant.STANDARD_51, Mg4Variant.of(49.0, null))
+        assertEquals(Mg4Variant.LONG_RANGE_64, Mg4Variant.of(61.0, null))
+        assertEquals(Mg4Variant.EXTENDED_77, Mg4Variant.of(72.5, null))
         assertEquals(ChargeCurve.BANDS + 1, Mg4Variant.STANDARD_51.dcKw.size)
     }
 }

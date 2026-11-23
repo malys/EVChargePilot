@@ -154,8 +154,13 @@ object VehicleSettings {
         return trimmed.toDoubleOrNull()?.takeIf { it.isFinite() }
     }
 
-    /** MG4 Long Range usable capacity from EVKX, by way of `AGENTS.md`. Not measured here. */
-    const val DEFAULT_CAPACITY_KWH = 61.7
+    /**
+     * MG4 64 kWh: the energy between 100 % and 0 % on the car's gauge, MG4Link's figure, rather
+     * than EVKX's usable 61.7 kWh. The pack keeps a buffer below the gauge's 0 %, and the health
+     * estimate divides energy per point of gauge, so a new pack reads near 100 % against this one.
+     * Not measured here.
+     */
+    const val DEFAULT_CAPACITY_KWH = 61.0
 
     /** Assumed intact, because nothing in this app has measured a pack's age. */
     const val DEFAULT_HEALTH_PERCENT = 100.0
@@ -174,7 +179,7 @@ object VehicleSettings {
      * the rating implies, which is what this app measures. The WLTP sheet's own 16.6 kWh/100 km
      * counts charging losses at the wall and would flatter every drive against it.
      */
-    const val DEFAULT_REFERENCE_CONSUMPTION = 14.2
+    const val DEFAULT_REFERENCE_CONSUMPTION = 14.0
 
     /**
      * Whether a health figure may be stored at all.
