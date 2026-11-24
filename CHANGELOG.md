@@ -45,6 +45,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Eco verdict back on a town-only history.** Once the motorway trips had aged out of the
+  history, the consumption model was refused and every verdict, and the score's efficiency, read
+  *not trained*. Speed² now comes from the physics there (EVHardware `d79f758`).
 - **Navigation: "sent" no longer claimed when MG4Link took the place.** MG4Link answers `geo:`
   and drops the destination, so the fallback reported it sent; it now goes on to MG4 Navigator.
 
