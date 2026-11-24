@@ -6,6 +6,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Added
 
+- **Android Auto lays out beside the companion (MG4Link#69).** With MG4Link 2.2.8-beta2 or
+  later, the split companion asks MG4Link to reserve its right quarter (480 px), and Android Auto
+  draws in the remaining width instead of under the panel. Withdrawn whenever the panel hides or
+  closes. An older MG4Link ignores the request and the panel covers the map as before.
 - **Eco scores per driver (CP-098).** A trip is filed under the driver EVTasker published for
   the ignition cycle (read-only, signature-protected). The trip page filters the eco progress by
   driver, lists per-driver totals and average score, and lets a parked driver assign or forget a

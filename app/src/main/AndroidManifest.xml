@@ -43,6 +43,10 @@
         <provider android:authorities="com.evsuite.tasker.driver" />
     </queries>
 
+    <!-- MG4Link#69: asks MG4Link (2.2.8+) to lay Android Auto out beside the split companion.
+         Signature-level, defined by MG4Link; both apps carry the platform key on the car. -->
+    <uses-permission android:name="com.allgo.app.androidauto.permission.RESERVE_MARGIN" />
+
     <!-- CP-080; reviewed in .github/security/permission-allowlist.txt. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 

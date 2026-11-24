@@ -54,3 +54,7 @@ android.permission.REAL_GET_TASKS
 # app files trips under it. Signature-level, defined by EVTasker and declared here too (install
 # order on API 28). Reads one name and one time from a read-only provider; writes nothing.
 com.evsuite.tasker.permission.READ_DRIVER
+# MG4Link#69, 2026-11-24, owner decision: asks MG4Link to reserve the right strip the split
+# companion covers, so Android Auto lays out beside it. Signature-level, defined by MG4Link
+# (platform key, as this app on the car). Sends one pixel width and this package name; reads nothing.
+com.allgo.app.androidauto.permission.RESERVE_MARGIN

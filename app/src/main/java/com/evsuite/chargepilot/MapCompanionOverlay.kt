@@ -189,6 +189,7 @@ internal object MapCompanionOverlay {
         runCatching { if (onMap) manager.addView(view, params) else manager.removeView(view) }
             .onSuccess {
                 attached = onMap
+                reserveMargin(view.context, onMap)
                 val parked = recorder?.latest?.parked
                 if (onMap) {
                     note("shown #${++shows}, parked=$parked, navigator ${navigatorCopies(view.context)}")
@@ -204,6 +205,18 @@ internal object MapCompanionOverlay {
             }
     }
 
+    /**
+     * Over Android Auto, MG4Link 2.2.8+ shrinks the projection to the width the window leaves
+     * (MG4Link#69): sent on every show, since MG4Link forgets it on a restart, withdrawn on every
+     * hide so Android Auto is never left narrow behind no window.
+     */
+    private fun reserveMargin(context: Context, reserve: Boolean) {
+        if (mapPackage != MapApps.MG4LINK_PACKAGE) return
+        val px = if (reserve) params?.width ?: 0 else 0
+        Mg4LinkMargin.reserve(context, px)
+        note("MG4Link margin px=$px")
+    }
+
     /** Removes the window and stops watching; the map stays as it is, full screen. */
     private fun end(why: String) {
         val app = app ?: return
@@ -211,6 +224,7 @@ internal object MapCompanionOverlay {
         if (attached) {
             runCatching { app.getSystemService(WindowManager::class.java)?.removeView(binding?.root) }
             attached = false
+            reserveMargin(app, reserve = false)
         }
         split?.close()
         split = null
