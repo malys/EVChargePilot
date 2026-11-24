@@ -52,6 +52,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Fixed
 
+- **Trips filed under the driver again.** A driver set at ignition more than a minute before the
+  car moved was dropped (76 s on the 2026-11-24 drive); the window is now 30 min (EVHardware
+  `ae058d4`). The home bar shows *Driver: …* while EVTasker names one, and the diagnostic gains a
+  `[drivers]` section (published or not, trips filed; never the names).
+- **Settings: the language button fits the top bar** (it overflowed by 12 dp and failed the
+  window-bounds check).
 - **Eco verdict back on a town-only history.** Once the motorway trips had aged out of the
   history, the consumption model was refused and every verdict, and the score's efficiency, read
   *not trained*. Speed² now comes from the physics there (EVHardware `d79f758`).

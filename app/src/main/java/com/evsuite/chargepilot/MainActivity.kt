@@ -91,6 +91,7 @@ class MainActivity : PrimaryNavigationActivity() {
     @Volatile private var arrivalAt: String? = null
     private val recent by lazy { RecentConsumption(this) }
     private var recentReadAtMs = 0L
+    private var driverReadAtMs = 0L
 
     private val vehiclePermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -244,6 +245,7 @@ class MainActivity : PrimaryNavigationActivity() {
         renderReach(readings)
         renderEta()
         refreshRecent(value)
+        refreshDriver(value)
         renderDrift(value, parked)
         renderEco()
     }
@@ -463,6 +465,25 @@ class MainActivity : PrimaryNavigationActivity() {
         val at = arrivalAt
         binding.etaValue.visibility = if (at == null) View.GONE else View.VISIBLE
         if (at != null) binding.etaValue.text = getString(R.string.energy_arrival_at, at)
+    }
+
+    /**
+     * CP-098: who EVTasker says is driving this cycle, beside the clock. Hidden when nobody was
+     * named, so a car without EVTasker shows nothing new. Read off the main thread: it is IPC.
+     */
+    private fun refreshDriver(value: EnergySnapshot) {
+        if (value.timestampMs - driverReadAtMs < RECENT_REFRESH_MS) return
+        driverReadAtMs = value.timestampMs
+        runCatching {
+            background.execute {
+                val name = DriverSource.current(this)?.name
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    binding.driverValue.visibility = if (name == null) View.GONE else View.VISIBLE
+                    if (name != null) binding.driverValue.text = getString(R.string.driver_current, name)
+                }
+            }
+        }
     }
 
     /** The last kilometres under the instant figure, read every few seconds off the main thread. */

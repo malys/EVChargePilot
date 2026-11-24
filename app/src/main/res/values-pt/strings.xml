@@ -695,6 +695,7 @@
     <string name="advice_none">Ainda sem conselhos.</string>
 
     <!-- CP-098: driver attribution -->
+    <string name="driver_current">Condutor: %1$s</string>
     <string name="driver_unknown">Condutor desconhecido</string>
     <string name="driver_all">Todos os condutores</string>
     <string name="driver_filter_title">Viagens de quem?</string>

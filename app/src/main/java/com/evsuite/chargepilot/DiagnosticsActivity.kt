@@ -364,6 +364,16 @@ class DiagnosticsActivity : PrimaryNavigationActivity() {
             appendLine()
             // A field showing an em dash says the signal is unusable but not why. This says why:
             // unsupported, declared and never published, or unreachable on this runtime.
+            // CP-098. Whether EVTasker's driver reaches this app, and how many trips are filed
+            // under one. Never the names: they are personal data.
+            appendLine("[drivers]")
+            val published = DriverSource.current(this@DiagnosticsActivity)
+            appendLine("published=${if (published == null) "none" else "yes"} set_at_ms=${published?.setAtMs}")
+            val filed = runCatching {
+                TripDriverStore(File(filesDir, TripDriverStore.FILE_NAME)).read()
+            }.getOrNull()
+            appendLine("trips_filed=${filed?.size} drivers=${filed?.values?.toSet()?.size}")
+            appendLine()
             // CP-074. What the coach concluded and, when it concluded nothing, which refusal
             // it made: no fit yet, a speed the fit never saw, too little distance or too little
             // charge drop. The verdict is the published one, not a refit — a report that

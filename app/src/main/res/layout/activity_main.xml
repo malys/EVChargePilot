@@ -33,6 +33,16 @@
         <!-- The time and, while the car guides a route, when it gets there. The MG4 draws no status
              bar: without this nothing on the panel says the time. Title size, not display: the
              charge stays the one large figure on the page. -->
+        <!-- CP-098: the driver EVTasker named for this cycle; gone when none was. -->
+        <TextView
+            android:id="@+id/driverValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:maxLines="1"
+            android:textAppearance="@style/Text.EV.Secondary"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/etaValue"
             android:layout_width="wrap_content"

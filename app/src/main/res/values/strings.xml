@@ -741,6 +741,7 @@ Spending %6$s %% per km</string>
     <string name="advice_none">No tip yet.</string>
 
     <!-- CP-098: driver attribution -->
+    <string name="driver_current">Driver: %1$s</string>
     <string name="driver_unknown">Unknown driver</string>
     <string name="driver_all">All drivers</string>
     <string name="driver_filter_title">Whose trips?</string>

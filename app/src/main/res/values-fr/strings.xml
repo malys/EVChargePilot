@@ -716,6 +716,7 @@ Consommation %6$s %% par km</string>
     <string name="advice_none">Pas encore de conseil.</string>
 
     <!-- CP-098: driver attribution -->
+    <string name="driver_current">Conducteur : %1$s</string>
     <string name="driver_unknown">Conducteur inconnu</string>
     <string name="driver_all">Tous les conducteurs</string>
     <string name="driver_filter_title">Les trajets de qui ?</string>
