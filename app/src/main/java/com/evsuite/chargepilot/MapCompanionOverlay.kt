@@ -214,7 +214,10 @@ internal object MapCompanionOverlay {
         if (mapPackage != MapApps.MG4LINK_PACKAGE) return
         val px = if (reserve) params?.width ?: 0 else 0
         Mg4LinkMargin.reserve(context, px)
-        note("MG4Link margin px=$px")
+        // A signature permission another app defines is granted at install only if that app was
+        // already there (API 28): MG4Link installed after this app means reinstall this one.
+        val granted = context.checkSelfPermission(Mg4LinkMargin.PERMISSION) == PackageManager.PERMISSION_GRANTED
+        note("MG4Link margin px=$px permission=${if (granted) "granted" else "missing"}")
     }
 
     /** Removes the window and stops watching; the map stays as it is, full screen. */

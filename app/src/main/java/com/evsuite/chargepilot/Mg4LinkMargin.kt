@@ -16,6 +16,7 @@ internal object Mg4LinkMargin {
     const val ACTION_RESERVE_RIGHT = "${MapApps.MG4LINK_PACKAGE}.RESERVE_RIGHT"
     const val EXTRA_PX = "px"
     const val EXTRA_PACKAGE = "package"
+    const val PERMISSION = "${MapApps.MG4LINK_PACKAGE}.permission.RESERVE_MARGIN"
 
     /** The right strip the window covers, in screen pixels; 0 withdraws it. */
     fun request(context: Context, px: Int): Intent =
