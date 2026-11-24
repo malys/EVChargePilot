@@ -344,8 +344,8 @@
     <string name="routing_refused_server_minute">Il servizio di instradamento sta limitando questa chiave. Riprova a breve.</string>
     <string name="routing_refused_server">Il servizio di instradamento ha rifiutato la richiesta (%1$s).</string>
     <string name="routing_refused_unreadable">La risposta era troppo grande o illeggibile ed è stata scartata.</string>
-    <string name="routing_hint_charger_key">Chiave API Open Charge Map (facoltativa)</string>
-    <string name="routing_helper_charger_key">Una seconda chiave gratuita, da openchargemap.org.</string>
+    <string name="routing_hint_charger_key">Chiave API Open Charge Map</string>
+    <string name="routing_helper_charger_key">Facoltativa: una seconda chiave gratuita, da openchargemap.org.</string>
     <string name="routing_charger_configured">Ricerca colonnine configurata.</string>
     <string name="routing_charger_absent">Nessuna chiave colonnine: quando fermarsi, non dove.</string>
     <string name="charge_stop_charger_none">Nessuna colonnina utilizzabile su quel tratto. Ricarica prima.</string>
@@ -511,7 +511,7 @@
     <string name="language_settings_note">Vale solo per questa app. La lingua dell\'auto resta invariata.</string>
     <string name="language_system">Sistema</string>
     <string name="language_settings_current">Lingua: %1$s</string>
-    <string name="eco_settings_note">La banda nella schermata energia è sempre visibile. Consigli e voce sono spenti finché non li chiedi. La voce parla durante la guida solo quando il consiglio cambia, e ancora una volta in P alla fine di ogni viaggio, con ciò che il viaggio avrebbe potuto risparmiare.</string>
+    <string name="eco_settings_note">Spenti finché non li attivi. La voce parla solo quando il consiglio cambia, e una volta in P dopo ogni viaggio.</string>
     <string name="diagnostics_eco_driving">Guida eco</string>
     <string name="trip_eco_verdict">Questa guida: %1$s, %2$+d %% rispetto alla tua media a questa velocità e temperatura.</string>
     <string name="trip_eco_verdict_unavailable">Nessun giudizio per questa guida: %1$s.</string>
@@ -523,7 +523,7 @@
     <string name="trip_eco_finding_windows">Finestrini aperti: circa %1$.1f kWh, il %2$.0f %% di questo viaggio, %3$.0f km sopra i 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Accelerazioni o frenate brusche sul %1$d %% di questa guida.</string>
     <string name="diagnostics_eco_trip_review">Ultimo viaggio, analizzato</string>
-    <string name="vehicle_hint_reference">Consumo di riferimento (kWh/100 km)</string>
+    <string name="vehicle_hint_reference">Consumo di riferimento</string>
     <string name="vehicle_helper_reference">La linea con cui il riepilogo dei viaggi confronta. Vuoto = %1$s kWh/100 km.</string>
     <string name="vehicle_refused_reference">Consumo di riferimento rifiutato: deve essere un numero tra 5 e 50 kWh/100 km.</string>
     <string name="trip_view_overview">Panoramica</string>
@@ -622,8 +622,9 @@
     <string name="advice_history_title">Consigli</string>
     <string name="advice_history_open">Storico consigli</string>
     <string name="advice_settings_notify">Notifica i consigli batteria a veicolo fermo</string>
-    <string name="navigation_settings_shape_points">Invia punti intermedi del percorso calcolato alla navigazione</string>
-    <string name="navigation_settings_android_auto_split">Schermo diviso accanto ad Android Auto (MG4Link) invece di MG4 Navigator. Nessun percorso arriva al telefono: Naviga lo apre e mostra il luogo da dire a Google Maps</string>
+    <string name="navigation_settings_title">Navigazione</string>
+    <string name="navigation_settings_shape_points">Inviare il percorso calcolato alla navigazione</string>
+    <string name="navigation_settings_android_auto_split">Schermo diviso accanto ad Android Auto (MG4Link)</string>
     <string name="advice_notification_title">Compagno della batteria</string>
     <string name="advice_channel">Consigli batteria</string>
     <string name="advice_channel_description">Cosa è cambiato nelle analisi della batteria, inviato solo con l\'auto ferma, al massimo uno per tipo al giorno.</string>

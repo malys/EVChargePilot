@@ -344,8 +344,8 @@
     <string name="routing_refused_server_minute">El servicio de rutas está limitando esta clave. Vuelve a intentarlo en breve.</string>
     <string name="routing_refused_server">El servicio de rutas rechazó la petición (%1$s).</string>
     <string name="routing_refused_unreadable">La respuesta era demasiado grande o ilegible y se descartó.</string>
-    <string name="routing_hint_charger_key">Clave de API de Open Charge Map (opcional)</string>
-    <string name="routing_helper_charger_key">Una segunda clave gratuita, de openchargemap.org.</string>
+    <string name="routing_hint_charger_key">Clave de API de Open Charge Map</string>
+    <string name="routing_helper_charger_key">Opcional: una segunda clave gratuita, de openchargemap.org.</string>
     <string name="routing_charger_configured">Búsqueda de cargadores configurada.</string>
     <string name="routing_charger_absent">Sin clave de cargadores: cuándo parar, no dónde.</string>
     <string name="charge_stop_charger_none">No se encontró ningún cargador útil en ese tramo. Carga antes.</string>
@@ -511,7 +511,7 @@
     <string name="language_settings_note">Solo para esta app. El idioma del coche no cambia.</string>
     <string name="language_system">Sistema</string>
     <string name="language_settings_current">Idioma: %1$s</string>
-    <string name="eco_settings_note">La banda de la pantalla de energía se muestra siempre. Los consejos y la voz están apagados hasta que los pidas. La voz habla al conducir solo cuando cambia el consejo, y una vez más en P al final de cada trayecto, con lo que el trayecto podría haber ahorrado.</string>
+    <string name="eco_settings_note">Apagados por defecto. La voz solo habla cuando cambia el consejo, y una vez en P tras cada trayecto.</string>
     <string name="diagnostics_eco_driving">Conducción eficiente</string>
     <string name="trip_eco_verdict">Este trayecto: %1$s, %2$+d %% frente a tu propia media a esta velocidad y temperatura.</string>
     <string name="trip_eco_verdict_unavailable">Sin veredicto para este trayecto: %1$s.</string>
@@ -523,7 +523,7 @@
     <string name="trip_eco_finding_windows">Ventanillas abiertas: unos %1$.1f kWh, el %2$.0f %% de este trayecto, %3$.0f km por encima de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Aceleraciones o frenadas fuertes en el %1$d %% de este trayecto.</string>
     <string name="diagnostics_eco_trip_review">Último trayecto, revisado</string>
-    <string name="vehicle_hint_reference">Consumo de referencia (kWh/100 km)</string>
+    <string name="vehicle_hint_reference">Consumo de referencia</string>
     <string name="vehicle_helper_reference">La línea con la que el resumen de trayectos compara. Vacío = %1$s kWh/100 km.</string>
     <string name="vehicle_refused_reference">Consumo de referencia rechazado: debe ser un número entre 5 y 50 kWh/100 km.</string>
     <string name="trip_view_overview">Resumen</string>
@@ -622,8 +622,9 @@
     <string name="advice_history_title">Consejos</string>
     <string name="advice_history_open">Historial de consejos</string>
     <string name="advice_settings_notify">Avisar de los consejos de batería con el coche aparcado</string>
-    <string name="navigation_settings_shape_points">Enviar puntos intermedios de la ruta calculada a la navegación</string>
-    <string name="navigation_settings_android_auto_split">Pantalla dividida junto a Android Auto (MG4Link) en lugar de MG4 Navigator. Ninguna ruta llega al teléfono: Navegar lo abre y muestra el lugar que decir a Google Maps</string>
+    <string name="navigation_settings_title">Navegación</string>
+    <string name="navigation_settings_shape_points">Enviar la ruta calculada a la navegación</string>
+    <string name="navigation_settings_android_auto_split">Pantalla dividida junto a Android Auto (MG4Link)</string>
     <string name="advice_notification_title">Compañero de batería</string>
     <string name="advice_channel">Consejos de batería</string>
     <string name="advice_channel_description">Lo que cambió en los análisis de batería, enviado solo con el coche parado, como mucho uno de cada tipo al día.</string>

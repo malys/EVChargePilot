@@ -358,8 +358,8 @@ Consommation %6$s %% par km</string>
     <string name="routing_refused_unreadable">La réponse était trop volumineuse ou illisible : elle a été écartée.</string>
 
     <!-- CP-048 jeu de données des bornes -->
-    <string name="routing_hint_charger_key">Clé d\u2019API Open Charge Map (facultative)</string>
-    <string name="routing_helper_charger_key">Une seconde clé gratuite, sur openchargemap.org.</string>
+    <string name="routing_hint_charger_key">Clé d\u2019API Open Charge Map</string>
+    <string name="routing_helper_charger_key">Facultative : une seconde clé gratuite, sur openchargemap.org.</string>
     <string name="routing_charger_configured">Recherche de bornes configurée.</string>
     <string name="routing_charger_absent">Aucune clé bornes : quand s\u2019arrêter, pas où.</string>
     <string name="charge_stop_charger_none">Aucune borne utilisable sur cette portion. Rechargez avant.</string>
@@ -536,7 +536,7 @@ Consommation %6$s %% par km</string>
     <string name="language_settings_note">S’applique à cette application seulement. La langue de la voiture reste inchangée.</string>
     <string name="language_system">Système</string>
     <string name="language_settings_current">Langue : %1$s</string>
-    <string name="eco_settings_note">Le verdict sur l’écran énergie est toujours affiché. Les conseils et la voix restent désactivés tant qu’ils ne sont pas demandés. En roulant, la voix ne parle que lorsque le conseil change, et une fois en P à la fin de chaque trajet, avec ce que le trajet aurait pu économiser.</string>
+    <string name="eco_settings_note">Désactivés par défaut. La voix ne parle que quand le conseil change, et une fois en P après chaque trajet.</string>
     <string name="diagnostics_eco_driving">Éco-conduite</string>
     <!-- CP-075. Le bilan du trajet : un verdict, puis au plus trois constats chiffrés. -->
     <string name="trip_eco_verdict">Ce trajet : %1$s, %2$+d %% par rapport à votre propre moyenne à cette vitesse et à cette température.</string>
@@ -549,7 +549,7 @@ Consommation %6$s %% par km</string>
     <string name="trip_eco_finding_windows">Fenêtres ouvertes : environ %1$.1f kWh, soit %2$.0f %% de ce trajet, %3$.0f km au-delà de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Accélérations ou freinages francs sur %1$d %% de ce trajet.</string>
     <string name="diagnostics_eco_trip_review">Dernier trajet, bilan</string>
-    <string name="vehicle_hint_reference">Consommation de référence (kWh/100 km)</string>
+    <string name="vehicle_hint_reference">Consommation de référence</string>
     <string name="vehicle_helper_reference">La ligne à laquelle la synthèse des trajets compare la conduite. Vide = %1$s kWh/100 km.</string>
     <string name="vehicle_refused_reference">Consommation de référence refusée : elle doit être un nombre entre 5 et 50 kWh/100 km.</string>
     <string name="trip_view_overview">Synthèse</string>
@@ -647,8 +647,9 @@ Consommation %6$s %% par km</string>
     <string name="advice_history_title">Conseils</string>
     <string name="advice_history_open">Historique des conseils</string>
     <string name="advice_settings_notify">Notifier les conseils batterie à l’arrêt</string>
-    <string name="navigation_settings_shape_points">Envoyer des points de passage du trajet calculé à la navigation</string>
-    <string name="navigation_settings_android_auto_split">Écran partagé à côté d\u2019Android Auto (MG4Link) au lieu de MG4 Navigator. Aucun itinéraire n\u2019arrive au téléphone : Naviguer l\u2019ouvre et affiche le lieu à dire à Google Maps</string>
+    <string name="navigation_settings_title">Navigation</string>
+    <string name="navigation_settings_shape_points">Envoyer le trajet calculé à la navigation</string>
+    <string name="navigation_settings_android_auto_split">Écran partagé à côté d\u2019Android Auto (MG4Link)</string>
     <string name="advice_notification_title">Compagnon batterie</string>
     <string name="advice_channel">Conseils batterie</string>
     <string name="advice_channel_description">Ce qui a changé dans les analyses de la batterie, envoyé seulement voiture à l’arrêt, au plus un de chaque sorte par jour.</string>

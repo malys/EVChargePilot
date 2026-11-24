@@ -344,8 +344,8 @@
     <string name="routing_refused_server_minute">Der Routing-Dienst drosselt diesen Schlüssel. Bald erneut versuchen.</string>
     <string name="routing_refused_server">Der Routing-Dienst hat die Anfrage abgelehnt (%1$s).</string>
     <string name="routing_refused_unreadable">Die Antwort war zu groß oder unlesbar und wurde verworfen.</string>
-    <string name="routing_hint_charger_key">Open-Charge-Map-API-Schlüssel (optional)</string>
-    <string name="routing_helper_charger_key">Ein zweiter kostenloser Schlüssel von openchargemap.org.</string>
+    <string name="routing_hint_charger_key">Open-Charge-Map-API-Schlüssel</string>
+    <string name="routing_helper_charger_key">Optional: ein zweiter kostenloser Schlüssel von openchargemap.org.</string>
     <string name="routing_charger_configured">Ladesäulensuche eingerichtet.</string>
     <string name="routing_charger_absent">Kein Ladesäulen-Schlüssel: wann halten, nicht wo.</string>
     <string name="charge_stop_charger_none">Auf diesem Streckenabschnitt keine brauchbare Ladesäule gefunden. Vorher laden.</string>
@@ -511,7 +511,7 @@
     <string name="language_settings_note">Gilt nur für diese App. Die Sprache des Autos bleibt unverändert.</string>
     <string name="language_system">System</string>
     <string name="language_settings_current">Sprache: %1$s</string>
-    <string name="eco_settings_note">Das Band auf dem Energie-Bildschirm wird immer angezeigt. Tipps und Stimme sind aus, bis du sie einschaltest. Die Stimme spricht während der Fahrt nur, wenn sich der Tipp ändert, und noch einmal in P am Ende jeder Fahrt, mit dem, was die Fahrt hätte sparen können.</string>
+    <string name="eco_settings_note">Standardmäßig aus. Die Stimme spricht nur, wenn sich der Tipp ändert, und einmal in P nach jeder Fahrt.</string>
     <string name="diagnostics_eco_driving">Eco-Fahren</string>
     <string name="trip_eco_verdict">Diese Fahrt: %1$s, %2$+d %% gegenüber deinem eigenen Durchschnitt bei dieser Geschwindigkeit und Temperatur.</string>
     <string name="trip_eco_verdict_unavailable">Kein Urteil für diese Fahrt: %1$s.</string>
@@ -523,7 +523,7 @@
     <string name="trip_eco_finding_windows">Offene Fenster: etwa %1$.1f kWh, %2$.0f %% dieser Fahrt, %3$.0f km über 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Starkes Beschleunigen oder Bremsen auf %1$d %% dieser Fahrt.</string>
     <string name="diagnostics_eco_trip_review">Letzte Fahrt, ausgewertet</string>
-    <string name="vehicle_hint_reference">Referenzverbrauch (kWh/100 km)</string>
+    <string name="vehicle_hint_reference">Referenzverbrauch</string>
     <string name="vehicle_helper_reference">Die Linie, an der die Fahrtenübersicht misst. Leer = %1$s kWh/100 km.</string>
     <string name="vehicle_refused_reference">Referenzverbrauch abgelehnt: eine Zahl zwischen 5 und 50 kWh/100 km ist nötig.</string>
     <string name="trip_view_overview">Übersicht</string>
@@ -619,8 +619,9 @@
     <string name="advice_history_title">Tipps</string>
     <string name="advice_history_open">Tipp-Verlauf</string>
     <string name="advice_settings_notify">Batterietipps im Stand melden</string>
-    <string name="navigation_settings_shape_points">Zwischenpunkte der berechneten Route an die Navigation senden</string>
-    <string name="navigation_settings_android_auto_split">Geteilter Bildschirm neben Android Auto (MG4Link) statt MG4 Navigator. Keine Route erreicht das Telefon: Navigieren öffnet es und zeigt den Ort, den Sie Google Maps sagen</string>
+    <string name="navigation_settings_title">Navigation</string>
+    <string name="navigation_settings_shape_points">Berechnete Route an die Navigation senden</string>
+    <string name="navigation_settings_android_auto_split">Geteilter Bildschirm neben Android Auto (MG4Link)</string>
     <string name="advice_notification_title">Batterie-Begleiter</string>
     <string name="advice_channel">Batterietipps</string>
     <string name="advice_channel_description">Was sich in den Batterieanalysen geändert hat, nur bei stehendem Auto gesendet, höchstens einer je Art pro Tag.</string>

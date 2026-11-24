@@ -33,6 +33,19 @@
         <!-- The USB file and the Save are the whole page's, not one card's, so they sit in the
              bar where Trips and Battery keep their page actions. Save is the filled one; all three
              are icons, as on Trips, so the tabs keep the room. -->
+        <!-- The same control as EVTasker's: one button naming the language in use, opening the
+             list of the five the suite speaks; the "this app only" note is its tooltip. In the
+             bar, so the preference column keeps inside the panel's height. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/languageAction"
+            style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            android:tooltipText="@string/language_settings_note"
+            app:icon="@drawable/ic_action_language" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/settingsImportAction"
             style="@style/Widget.EVChargePilot.IconButton"
@@ -258,7 +271,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/spacing_md"
-                    android:layout_weight="1.25"
+                    android:layout_weight="1.1"
                     android:background="@drawable/bg_card"
                     android:orientation="vertical"
                     android:padding="@dimen/spacing_md">
@@ -391,7 +404,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/spacing_md"
-                    android:layout_weight="1"
+                    android:layout_weight="1.15"
                     android:background="@drawable/bg_card"
                     android:orientation="vertical"
                     android:padding="@dimen/spacing_md">
@@ -441,6 +454,13 @@
                         android:text="@string/eco_settings_note"
                         android:textAppearance="@style/Text.EV.Secondary" />
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:text="@string/navigation_settings_title"
+                        android:textAppearance="@style/Text.EV.Title" />
+
                     <!-- Points along the planned road in the route handoff, so MG4 Navigator
                          follows the road the plan costed. Read when a plan is drawn. -->
                     <com.google.android.material.materialswitch.MaterialSwitch
@@ -460,33 +480,6 @@
                         android:text="@string/navigation_settings_android_auto_split"
                         android:visibility="gone" />
 
-
-                    <!-- The same control as EVTasker's: one button naming the language in use,
-                         opening the list of the five the suite speaks. Title and button share a
-                         row and the "this app only" note is the button's tooltip, so the column
-                         keeps inside the panel's height. -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_md"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/language_settings_title"
-                            android:textAppearance="@style/Text.EV.Title" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/languageAction"
-                            style="@style/Widget.EVChargePilot.Button.OutlinedIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/touch_target"
-                            android:tooltipText="@string/language_settings_note"
-                            app:icon="@drawable/ic_action_language" />
-                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

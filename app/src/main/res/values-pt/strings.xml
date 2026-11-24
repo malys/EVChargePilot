@@ -344,8 +344,8 @@
     <string name="routing_refused_server_minute">O serviço de rotas está a limitar esta chave. Tente de novo em breve.</string>
     <string name="routing_refused_server">O serviço de rotas recusou o pedido (%1$s).</string>
     <string name="routing_refused_unreadable">A resposta era demasiado grande ou ilegível e foi descartada.</string>
-    <string name="routing_hint_charger_key">Chave da API Open Charge Map (opcional)</string>
-    <string name="routing_helper_charger_key">Uma segunda chave gratuita, de openchargemap.org.</string>
+    <string name="routing_hint_charger_key">Chave da API Open Charge Map</string>
+    <string name="routing_helper_charger_key">Opcional: uma segunda chave gratuita, de openchargemap.org.</string>
     <string name="routing_charger_configured">Pesquisa de carregadores configurada.</string>
     <string name="routing_charger_absent">Sem chave de carregadores: quando parar, não onde.</string>
     <string name="charge_stop_charger_none">Nenhum carregador útil encontrado nesse troço. Carregue antes.</string>
@@ -511,7 +511,7 @@
     <string name="language_settings_note">Aplica-se só a esta app. O idioma do carro não muda.</string>
     <string name="language_system">Sistema</string>
     <string name="language_settings_current">Idioma: %1$s</string>
-    <string name="eco_settings_note">A banda no ecrã de energia é sempre mostrada. Conselhos e voz estão desligados até os pedir. A voz fala durante a condução só quando o conselho muda, e mais uma vez em P no fim de cada viagem, com o que a viagem poderia ter poupado.</string>
+    <string name="eco_settings_note">Desligados por omissão. A voz só fala quando o conselho muda, e uma vez em P após cada viagem.</string>
     <string name="diagnostics_eco_driving">Condução eficiente</string>
     <string name="trip_eco_verdict">Esta condução: %1$s, %2$+d %% face à sua própria média a esta velocidade e temperatura.</string>
     <string name="trip_eco_verdict_unavailable">Sem veredicto para esta condução: %1$s.</string>
@@ -523,7 +523,7 @@
     <string name="trip_eco_finding_windows">Janelas abertas: cerca de %1$.1f kWh, %2$.0f %% desta viagem, %3$.0f km acima de 60 km/h.</string>
     <string name="trip_eco_finding_steadiness">Acelerações ou travagens bruscas em %1$d %% desta condução.</string>
     <string name="diagnostics_eco_trip_review">Última viagem, analisada</string>
-    <string name="vehicle_hint_reference">Consumo de referência (kWh/100 km)</string>
+    <string name="vehicle_hint_reference">Consumo de referência</string>
     <string name="vehicle_helper_reference">A linha com que o resumo das viagens compara. Vazio = %1$s kWh/100 km.</string>
     <string name="vehicle_refused_reference">Consumo de referência recusado: tem de ser um número entre 5 e 50 kWh/100 km.</string>
     <string name="trip_view_overview">Resumo</string>
@@ -622,8 +622,9 @@
     <string name="advice_history_title">Conselhos</string>
     <string name="advice_history_open">Histórico de conselhos</string>
     <string name="advice_settings_notify">Notificar os conselhos da bateria com o carro estacionado</string>
-    <string name="navigation_settings_shape_points">Enviar pontos intermédios do percurso calculado à navegação</string>
-    <string name="navigation_settings_android_auto_split">Ecrã dividido ao lado do Android Auto (MG4Link) em vez do MG4 Navigator. Nenhuma rota chega ao telefone: Navegar abre-o e mostra o local a dizer ao Google Maps</string>
+    <string name="navigation_settings_title">Navegação</string>
+    <string name="navigation_settings_shape_points">Enviar o percurso calculado à navegação</string>
+    <string name="navigation_settings_android_auto_split">Ecrã dividido ao lado do Android Auto (MG4Link)</string>
     <string name="advice_notification_title">Companheiro da bateria</string>
     <string name="advice_channel">Conselhos da bateria</string>
     <string name="advice_channel_description">O que mudou nas análises da bateria, enviado só com o carro parado, no máximo um de cada tipo por dia.</string>

@@ -34,6 +34,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- **Settings fit the panel.** The language button moves to the top bar, the preference column
+  gets a Navigation heading, and the long texts are shorter (eco note, navigation switches,
+  reference consumption and Open Charge Map labels), so nothing is cut or hidden below the fold.
 - **Eco score: five measured criteria (CP-099).** Anticipation and smoothness are the share of
   speed shed or gained firmly (beyond 1,5 m/s²) instead of a count of hard stops that read 0 or
   100. Efficiency reads the battery energy integrated each second, scaled by this car's own
