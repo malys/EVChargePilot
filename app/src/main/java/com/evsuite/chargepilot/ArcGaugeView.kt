@@ -68,11 +68,11 @@ class ArcGaugeView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val labelRoom = labelPaint.textSize * 1.6f
-        val size = min(width.toFloat(), (height - labelRoom) * 2f / (1f + SIN_30)) - stroke
-        if (size <= 0f) return
-        val radius = size / 2f
+        // Centred on the view, so the figure the host centres over it sits in the arc's middle.
         val cx = width / 2f
-        val cy = stroke / 2f + radius
+        val cy = height / 2f
+        val radius = minOf(min(width, height) / 2f - stroke / 2f, (cy - labelRoom) / SIN_30)
+        if (radius <= 0f) return
         oval.set(cx - radius, cy - radius, cx + radius, cy + radius)
         canvas.drawArc(oval, START_DEG, SWEEP_DEG, false, trackPaint)
         fraction?.takeIf { it > 0f }?.let {

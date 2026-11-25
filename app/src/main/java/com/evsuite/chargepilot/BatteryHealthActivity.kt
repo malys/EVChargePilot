@@ -187,6 +187,20 @@ class BatteryHealthActivity : PrimaryNavigationActivity() {
                 binding.healthEvidence.text = evidenceText(estimate, text)
                 binding.healthBar.show(healthSpans(estimate), declaredMark())
             }
+            // A figure from the first windows, as MG4Link gives one; never offered to the settings.
+            is StateOfHealthResult.Provisional -> {
+                val estimate = current.estimate
+                binding.healthValue.text =
+                    text.render(estimate.stateOfHealthPercent, PATTERN_SOC)
+                binding.healthTrend.text = getString(
+                    R.string.battery_health_provisional,
+                    estimate.windowCount,
+                    StateOfHealthEstimator.MIN_WINDOWS,
+                    StateOfHealthEstimator.MIN_SOC_DROP_PERCENT,
+                )
+                binding.healthEvidence.text = evidenceText(estimate, text)
+                binding.healthBar.show(healthSpans(estimate), declaredMark())
+            }
             is StateOfHealthResult.Unavailable, null -> {
                 val seen = (current as? StateOfHealthResult.Unavailable)?.windowsSeen ?: 0
                 if (seen == 0 && current != null) {

@@ -659,17 +659,14 @@
     <string name="trip_join_moving">Zum Verbinden von Fahrten anhalten.</string>
     <string name="energy_arrival_at">Ankunft %1$s</string>
     <string name="energy_recent">%1$s · %2$s</string>
-    <string name="nav_split_route_eta">%1$s km · %2$s min · Ankunft %3$s</string>
+    <string name="nav_split_route_eta">%1$s km · %2$s min · Ankunft\u00A0%3$s</string>
     <string name="nav_split_route_stop">≈ %1$s km · Ladestopp in %2$s km</string>
     <string name="nav_split_no_guidance">Keine Zielführung aktiv</string>
     <string name="nav_split_margin">≈ %1$s km · %2$s %% bei Ankunft</string>
     <string name="nav_split_margin_short">Reichweite kürzer als die verbleibende Strecke</string>
     <string name="nav_split_battery">Batterie %1$s</string>
-    <string name="nav_split_consumption">VERBRAUCH</string>
-    <string name="nav_split_consumption_span">kWh/100 km · letzte %1$.0f km</string>
+    <string name="nav_split_consumption_span">kWh/100 km · %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
-    <string name="nav_split_eco">ECO-FAHREN</string>
-    <string name="nav_split_eco_parts">Vorausschau %1$s · Gleichmäßigkeit %2$s · Effizienz %3$s · Tempo %4$s · Rekuperation %5$s</string>
     <string name="nav_split_eco_waiting">Punktzahl nach 2 km Fahrt</string>
     <string name="nav_split_roads">ANDERE ROUTEN</string>
     <string name="nav_split_road_charge">%1$s bis %2$s %% Ladung gegenüber der berechneten</string>
@@ -680,12 +677,16 @@
     <string name="battery_curve_title">Ladekurve</string>
     <string name="battery_curve_legend">MG4 %1$s · gestrichelt: DC (EVKX) und AC %2$.1f kW · Säulen: gemessen, AC grün, DC blau</string>
     <string name="battery_health_windows_label">Entladungen ab %1$.0f Punkten gemessen</string>
+    <string name="battery_health_provisional">Vorläufig: %1$d von %2$d Entladungen ab %3$.0f Punkten gemessen</string>
     <string name="battery_health_sessions_label">Ladevorgänge</string>
     <string name="battery_health_stress_label" formatted="false">hohe Leistung, Kälte oder unter 20 %, diesen Monat</string>
     <string name="advice_scores_title">Öko-Note pro Fahrt</string>
     <string name="advice_scores_legend">letzte %1$d Fahrten · Schnitt %2$d / 100 · unter dem Schnitt in Orange</string>
     <string name="advice_braking_title">Harte Bremsungen pro 10 km</string>
     <string name="advice_braking_legend">Schnitt %1$.1f · höchster %2$.1f</string>
+    <!-- After a driver's figure, the same figure for every trip. -->
+    <string name="advice_scores_all">alle: %1$d</string>
+    <string name="advice_braking_all">alle: %1$.1f</string>
     <string name="advice_driving_title">Fahren</string>
     <string name="advice_charge_title">Laden und Batterie</string>
     <string name="advice_none">Noch kein Tipp.</string>

@@ -713,29 +713,30 @@ Spending %6$s %% per km</string>
     <string name="trip_join_moving">Stop the car to join trips.</string>
     <string name="energy_arrival_at">Arrival %1$s</string>
     <string name="energy_recent">%1$s · %2$s</string>
-    <string name="nav_split_route_eta">%1$s km · %2$s min · arrival %3$s</string>
+    <string name="nav_split_route_eta">%1$s km · %2$s min · arrival\u00A0%3$s</string>
     <string name="nav_split_route_stop">≈ %1$s km · charging stop in %2$s km</string>
     <string name="nav_split_no_guidance">No guidance running</string>
     <string name="nav_split_margin">≈ %1$s km · %2$s %% on arrival</string>
     <string name="nav_split_margin_short">Range shorter than the distance left</string>
     <string name="nav_split_battery">Battery %1$s</string>
-    <string name="nav_split_consumption">CONSUMPTION</string>
-    <string name="nav_split_consumption_span">kWh/100 km · last %1$.0f km</string>
+    <string name="nav_split_consumption_span">kWh/100 km · %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
-    <string name="nav_split_eco">ECO-DRIVING</string>
-    <string name="nav_split_eco_parts">anticipation %1$s · smoothness %2$s · efficiency %3$s · speed %4$s · regeneration %5$s</string>
     <string name="nav_split_eco_waiting">Score after 2 km of driving</string>
     <string name="nav_split_roads">OTHER ROUTES</string>
     <string name="nav_split_road_charge">%1$s to %2$s %% charge vs routed</string>
     <string name="battery_curve_title">Charge curve</string>
     <string name="battery_curve_legend">MG4 %1$s · dashed: DC (EVKX) and AC %2$.1f kW · columns: measured, AC green, DC blue</string>
     <string name="battery_health_windows_label">discharges of %1$.0f points or more measured</string>
+    <string name="battery_health_provisional">Provisional: %1$d of %2$d discharges of %3$.0f points measured</string>
     <string name="battery_health_sessions_label">charges</string>
     <string name="battery_health_stress_label" formatted="false">hard power, cold or under 20 %, this month</string>
     <string name="advice_scores_title">Eco score per trip</string>
     <string name="advice_scores_legend">last %1$d trips · average %2$d / 100 · below average in orange</string>
     <string name="advice_braking_title">Hard braking per 10 km</string>
     <string name="advice_braking_legend">average %1$.1f · highest %2$.1f</string>
+    <!-- After a driver's figure, the same figure for every trip. -->
+    <string name="advice_scores_all">everyone: %1$d</string>
+    <string name="advice_braking_all">everyone: %1$.1f</string>
     <string name="advice_driving_title">Driving</string>
     <string name="advice_charge_title">Charging and battery</string>
     <string name="advice_none">No tip yet.</string>

@@ -662,17 +662,14 @@
     <string name="trip_join_moving">Ferma l\'auto per unire i viaggi.</string>
     <string name="energy_arrival_at">Arrivo %1$s</string>
     <string name="energy_recent">%1$s · %2$s</string>
-    <string name="nav_split_route_eta">%1$s km · %2$s min · arrivo %3$s</string>
+    <string name="nav_split_route_eta">%1$s km · %2$s min · arrivo\u00A0%3$s</string>
     <string name="nav_split_route_stop">≈ %1$s km · sosta di ricarica tra %2$s km</string>
     <string name="nav_split_no_guidance">Nessuna guida in corso</string>
     <string name="nav_split_margin">≈ %1$s km · %2$s %% all\'arrivo</string>
     <string name="nav_split_margin_short">Autonomia inferiore alla distanza rimanente</string>
     <string name="nav_split_battery">Batteria %1$s</string>
-    <string name="nav_split_consumption">CONSUMO</string>
-    <string name="nav_split_consumption_span">kWh/100 km · ultimi %1$.0f km</string>
+    <string name="nav_split_consumption_span">kWh/100 km · %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
-    <string name="nav_split_eco">GUIDA ECO</string>
-    <string name="nav_split_eco_parts">anticipazione %1$s · fluidità %2$s · efficienza %3$s · velocità %4$s · rigenerazione %5$s</string>
     <string name="nav_split_eco_waiting">Punteggio dopo 2 km di guida</string>
     <string name="nav_split_roads">ALTRI PERCORSI</string>
     <string name="nav_split_road_charge">%1$s-%2$s %% di carica rispetto al calcolato</string>
@@ -684,12 +681,16 @@
     <string name="battery_curve_title">Curva di ricarica</string>
     <string name="battery_curve_legend">MG4 %1$s · tratteggio: DC (EVKX) e AC %2$.1f kW · colonne: misurato, AC verde, DC blu</string>
     <string name="battery_health_windows_label">scariche di almeno %1$.0f punti misurate</string>
+    <string name="battery_health_provisional">Provvisorio: %1$d di %2$d scariche di %3$.0f punti misurate</string>
     <string name="battery_health_sessions_label">ricariche</string>
     <string name="battery_health_stress_label" formatted="false">alta potenza, freddo o sotto 20 %, questo mese</string>
     <string name="advice_scores_title">Voto eco per viaggio</string>
     <string name="advice_scores_legend">ultimi %1$d viaggi · media %2$d / 100 · sotto la media in arancione</string>
     <string name="advice_braking_title">Frenate brusche ogni 10 km</string>
     <string name="advice_braking_legend">media %1$.1f · massimo %2$.1f</string>
+    <!-- After a driver's figure, the same figure for every trip. -->
+    <string name="advice_scores_all">tutti: %1$d</string>
+    <string name="advice_braking_all">tutti: %1$.1f</string>
     <string name="advice_driving_title">Guida</string>
     <string name="advice_charge_title">Ricarica e batteria</string>
     <string name="advice_none">Ancora nessun consiglio.</string>

@@ -662,17 +662,14 @@
     <string name="trip_join_moving">Pare o carro para juntar viagens.</string>
     <string name="energy_arrival_at">Chegada %1$s</string>
     <string name="energy_recent">%1$s · %2$s</string>
-    <string name="nav_split_route_eta">%1$s km · %2$s min · chegada %3$s</string>
+    <string name="nav_split_route_eta">%1$s km · %2$s min · chegada\u00A0%3$s</string>
     <string name="nav_split_route_stop">≈ %1$s km · paragem de carregamento a %2$s km</string>
     <string name="nav_split_no_guidance">Nenhuma orientação em curso</string>
     <string name="nav_split_margin">≈ %1$s km · %2$s %% à chegada</string>
     <string name="nav_split_margin_short">Autonomia inferior à distância restante</string>
     <string name="nav_split_battery">Bateria %1$s</string>
-    <string name="nav_split_consumption">CONSUMO</string>
-    <string name="nav_split_consumption_span">kWh/100 km · últimos %1$.0f km</string>
+    <string name="nav_split_consumption_span">kWh/100 km · %1$.0f km</string>
     <string name="nav_split_consumption_value">%1$.1f kWh/100 km</string>
-    <string name="nav_split_eco">CONDUÇÃO EFICIENTE</string>
-    <string name="nav_split_eco_parts">antecipação %1$s · suavidade %2$s · eficiência %3$s · velocidade %4$s · regeneração %5$s</string>
     <string name="nav_split_eco_waiting">Pontuação após 2 km de condução</string>
     <string name="nav_split_roads">OUTRAS ROTAS</string>
     <string name="nav_split_road_charge">%1$s a %2$s %% de carga face à calculada</string>
@@ -684,12 +681,16 @@
     <string name="battery_curve_title">Curva de carga</string>
     <string name="battery_curve_legend">MG4 %1$s · tracejado: DC (EVKX) e AC %2$.1f kW · colunas: medido, AC verde, DC azul</string>
     <string name="battery_health_windows_label">descargas de pelo menos %1$.0f pontos medidas</string>
+    <string name="battery_health_provisional">Provisório: %1$d de %2$d descargas de %3$.0f pontos medidas</string>
     <string name="battery_health_sessions_label">carregamentos</string>
     <string name="battery_health_stress_label" formatted="false">potência alta, frio ou abaixo de 20 %, este mês</string>
     <string name="advice_scores_title">Nota eco por viagem</string>
     <string name="advice_scores_legend">últimas %1$d viagens · média %2$d / 100 · abaixo da média a laranja</string>
     <string name="advice_braking_title">Travagens bruscas por 10 km</string>
     <string name="advice_braking_legend">média %1$.1f · máximo %2$.1f</string>
+    <!-- After a driver's figure, the same figure for every trip. -->
+    <string name="advice_scores_all">todos: %1$d</string>
+    <string name="advice_braking_all">todos: %1$.1f</string>
     <string name="advice_driving_title">Condução</string>
     <string name="advice_charge_title">Carga e bateria</string>
     <string name="advice_none">Ainda sem conselhos.</string>

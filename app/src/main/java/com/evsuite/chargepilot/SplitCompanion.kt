@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.ColorRes
 import com.evsuite.chargepilot.databinding.ActivityNavSplitBinding
 import com.evsuite.hardware.FirmwareInfo
 import com.evsuite.hardware.saic.SaicNavGuidance
@@ -221,30 +222,15 @@ internal class SplitCompanion(
         // CP-097: fed on every frame, so a hard second is caught even before the score exists.
         val pulse = harsh.add(value.timestampMs, value.speedKmh)
         val score = EnergyTripSession.current(value.timestampMs)?.let { EcoScore.of(it, verdict) }
-        binding.splitEcoBand.text = recorder()?.eco?.band(verdict) ?: context.getString(R.string.value_unavailable)
         if (score == null) {
             binding.splitEcoRing.show(null, context.getString(R.string.value_unavailable))
-            binding.splitEcoParts.text = context.getString(R.string.nav_split_eco_waiting)
+            binding.splitEcoBand.text = context.getString(R.string.nav_split_eco_waiting)
             return
         }
-        binding.splitEcoRing.show(
-            score.total / PERCENT,
-            score.total.toString(),
-            when {
-                // Red either way: a low score is already orange, and the cue must stand out from it.
-                pulse != null -> R.color.ev_error
-                score.total < ECO_WARN_BELOW -> R.color.ev_warn
-                else -> R.color.ev_accent
-            },
-        )
-        binding.splitEcoParts.text = context.getString(
-            R.string.nav_split_eco_parts,
-            score.anticipation?.toString() ?: DASH,
-            score.smoothness?.toString() ?: DASH,
-            score.efficiency?.toString() ?: DASH,
-            score.speed?.toString() ?: DASH,
-            score.regeneration?.toString() ?: DASH,
-        )
+        binding.splitEcoBand.text = recorder()?.eco?.band(verdict) ?: context.getString(R.string.value_unavailable)
+        // The figure takes the arc's colour: the glance reads the score's level without the arc.
+        val color = ecoColor(score.total, pulse != null)
+        binding.splitEcoRing.show(score.total / PERCENT, score.total.toString(), color, color)
     }
 
     /**
@@ -295,12 +281,6 @@ internal class SplitCompanion(
             )
         }
         binding.splitRoads.visibility = View.VISIBLE
-        // The gauges are sized to fill a column with no roads; the roads take that room back.
-        val arc = context.resources.getDimensionPixelSize(R.dimen.chargepilot_split_arc_compact)
-        binding.splitArcFrame.layoutParams = binding.splitArcFrame.layoutParams.apply { width = arc; height = arc }
-        binding.splitConsumption.setTextAppearance(R.style.Text_EV_Title)
-        val eco = context.resources.getDimensionPixelSize(R.dimen.chargepilot_split_eco_compact)
-        binding.splitEcoRing.layoutParams = binding.splitEcoRing.layoutParams.apply { width = eco; height = eco }
     }
 
     companion object {
@@ -308,9 +288,19 @@ internal class SplitCompanion(
         private const val PERCENT = 100f
         private const val ARC_STEP = 5.0
         private const val ECO_WARN_BELOW = 50
+        private const val ECO_GOOD_FROM = 70
+
+        /** Green from [ECO_GOOD_FROM], orange under [ECO_WARN_BELOW], the accent between. */
+        @ColorRes
+        internal fun ecoColor(score: Int, harsh: Boolean): Int = when {
+            // Red either way: a low score is already orange, and the cue must stand out from it.
+            harsh -> R.color.ev_error
+            score < ECO_WARN_BELOW -> R.color.ev_warn
+            score >= ECO_GOOD_FROM -> R.color.ev_ok
+            else -> R.color.ev_accent
+        }
         private const val SPACING_DP = 8f
         private const val ROAD_BAR_DP = 8f
-        private const val DASH = "—"
         private const val TRACE_REFRESH_MS = 10_000L
 
         private const val PREVIEW_KM = 42.3

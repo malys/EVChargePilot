@@ -37,4 +37,13 @@ class NavSplitDestinationTest {
         assertEquals(48.0, SplitCompanion.arrivalSoc(80.0, 300.0, 120.0), 1e-9)
         assertEquals(80.0, SplitCompanion.arrivalSoc(80.0, 300.0, 0.0), 1e-9)
     }
+
+    @Test
+    fun `the eco colour climbs with the score and a harsh second overrides it`() {
+        assertEquals(R.color.ev_warn, SplitCompanion.ecoColor(49, false))
+        assertEquals(R.color.ev_accent, SplitCompanion.ecoColor(50, false))
+        assertEquals(R.color.ev_accent, SplitCompanion.ecoColor(69, false))
+        assertEquals(R.color.ev_ok, SplitCompanion.ecoColor(70, false))
+        assertEquals(R.color.ev_error, SplitCompanion.ecoColor(95, true))
+    }
 }

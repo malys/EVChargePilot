@@ -22,6 +22,21 @@
             android:text="@string/advice_history_title"
             android:textAppearance="@style/Text.EV.Title" />
 
+        <!-- Whose trips the columns show: everyone's by default, one driver's on a tap. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/driverFilterAction"
+            style="@style/Widget.EV.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            android:ellipsize="end"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:maxWidth="320dp"
+            android:singleLine="true"
+            android:text="@string/driver_all"
+            android:visibility="gone" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/backAction"
             style="@style/Widget.EV.Button.Outlined"
@@ -76,7 +91,7 @@
                 android:layout_marginTop="@dimen/spacing_xs"
                 android:ellipsize="end"
                 android:fontFeatureSettings="tnum"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textAppearance="@style/Text.EV.Secondary" />
         </LinearLayout>
 
@@ -108,7 +123,7 @@
                 android:layout_marginTop="@dimen/spacing_xs"
                 android:ellipsize="end"
                 android:fontFeatureSettings="tnum"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textAppearance="@style/Text.EV.Secondary" />
         </LinearLayout>
         </LinearLayout>

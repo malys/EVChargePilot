@@ -41,14 +41,21 @@ class RingGaugeView @JvmOverloads constructor(
     private var fraction: Float? = null
     private var label = ""
     @ColorRes private var color = R.color.ev_accent
+    @ColorRes private var labelColor = R.color.ev_text_primary
 
     /** [fraction] null draws the bare track: nothing known, nothing claimed. */
-    fun show(fraction: Float?, label: String, @ColorRes color: Int = R.color.ev_accent) {
+    fun show(
+        fraction: Float?,
+        label: String,
+        @ColorRes color: Int = R.color.ev_accent,
+        @ColorRes labelColor: Int = R.color.ev_text_primary,
+    ) {
         val clamped = fraction?.takeIf(Float::isFinite)?.coerceIn(0f, 1f)
-        if (this.fraction == clamped && this.label == label && this.color == color) return
+        if (this.fraction == clamped && this.label == label && this.color == color && this.labelColor == labelColor) return
         this.fraction = clamped
         this.label = label
         this.color = color
+        this.labelColor = labelColor
         contentDescription = label
         invalidate()
     }
@@ -66,15 +73,21 @@ class RingGaugeView @JvmOverloads constructor(
             arcPaint.color = ContextCompat.getColor(context, color)
             canvas.drawArc(ring, START_DEGREES, it * FULL_DEGREES, false, arcPaint)
         }
+        textPaint.color = ContextCompat.getColor(context, labelColor)
+        // As large as the share allows, shrunk only when a wide label would cross the track.
         textPaint.textSize = size * TEXT_SHARE
+        val room = (size - 2f * trackPaint.strokeWidth) * FIT_SHARE
+        val wide = textPaint.measureText(label)
+        if (wide > room) textPaint.textSize *= room / wide
         val baseline = ring.centerY() - (textPaint.descent() + textPaint.ascent()) / 2f
         canvas.drawText(label, ring.centerX(), baseline, textPaint)
     }
 
     private companion object {
-        const val STROKE_DP = 10f
+        const val STROKE_DP = 6f
         const val START_DEGREES = -90f
         const val FULL_DEGREES = 360f
-        const val TEXT_SHARE = 0.24f
+        const val TEXT_SHARE = 0.4f
+        const val FIT_SHARE = 0.85f
     }
 }
