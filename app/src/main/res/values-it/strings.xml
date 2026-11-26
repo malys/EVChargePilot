@@ -391,6 +391,7 @@
     <string name="charge_stop_navigate_route_via">Percorso consegnato con la sosta di ricarica, ma l\'auto non sta ancora guidando. Avvialo sulla mappa.</string>
     <string name="charge_stop_navigate_map_only">La mappa è aperta, ma quest\'auto non accetta destinazioni da un\'altra app. Inseriscila lì: %1$s</string>
     <string name="charge_stop_navigate_android_auto">Android Auto è aperto. Non riceve destinazioni dall\u2019auto: ditela o scrivetela in Google Maps: %1$s</string>
+    <string name="charge_stop_navigate_android_auto_spoken">Destinazione inviata all\u2019assistente del telefono tramite Android Auto: %1$s. Se entro una decina di secondi non parte nulla, ditela voi.</string>
     <string name="charge_stop_navigate_bad_place">Quel luogo non ha coordinate utilizzabili, quindi non è stato inviato nulla.</string>
     <string name="drift_holding">Il piano regge · circa %1$s %% all\'arrivo (± %2$s) · mancano %3$s km</string>
     <string name="drift_short_restore">Consumando come ora: %1$s %% all\'arrivo, %2$s sotto la tua riserva · %3$d km/h sui %4$s km di strada veloce davanti lo recuperano, per %5$s min</string>

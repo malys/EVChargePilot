@@ -391,6 +391,7 @@
     <string name="charge_stop_navigate_route_via">Route mit Ladestopp übergeben, aber das Auto führt noch nicht. Starte sie auf der Karte.</string>
     <string name="charge_stop_navigate_map_only">Die Karte ist offen, aber dieses Auto nimmt kein Ziel von einer anderen App an. Gib es dort ein: %1$s</string>
     <string name="charge_stop_navigate_android_auto">Android Auto ist offen. Es nimmt kein Ziel vom Auto an: Sagen oder tippen Sie es in Google Maps: %1$s</string>
+    <string name="charge_stop_navigate_android_auto_spoken">Ziel über Android Auto an den Assistenten des Telefons gesendet: %1$s. Startet nach etwa zehn Sekunden nichts, sagen Sie es selbst.</string>
     <string name="charge_stop_navigate_bad_place">Dieser Ort hat keine brauchbaren Koordinaten, daher wurde nichts gesendet.</string>
     <string name="drift_holding">Plan hält · etwa %1$s %% bei Ankunft (± %2$s) · noch %3$s km</string>
     <string name="drift_short_restore">Bei aktuellem Verbrauch: %1$s %% bei Ankunft, %2$s unter deiner Reserve · %3$d km/h auf den %4$s km schneller Straße voraus holen es zurück, für %5$s min</string>

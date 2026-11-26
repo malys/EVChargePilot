@@ -1491,14 +1491,18 @@ class ChargeStopActivity : AppCompatActivity() {
     private fun sendToAndroidAuto(target: Handoff, mg4Link: Intent, split: Intent) {
         val opened = runCatching { startActivity(mg4Link) }.isSuccess
         if (opened && MapCompanionOverlay.possible(this)) MapCompanionOverlay.show(this, split, untilClosed = true)
+        val spoken = opened && Mg4LinkAssistant.navigate(this, target.latitude, target.longitude, target.label)
         ValidationProbe.record(ValidationQuestion.NAVIGATION_HANDOFF) {
-            "android auto split: MG4Link opened=$opened, nothing sent to the adapter"
+            "android auto split: MG4Link opened=$opened, assistant command sent=$spoken, nothing sent to the adapter"
         }
         val place = target.label?.takeIf { it.isNotBlank() }
             ?: String.format(Locale.ROOT, "%.5f, %.5f", target.latitude, target.longitude)
         announce(
-            if (opened) getString(R.string.charge_stop_navigate_android_auto, place)
-            else getString(R.string.charge_stop_navigate_none)
+            when {
+                spoken -> getString(R.string.charge_stop_navigate_android_auto_spoken, place)
+                opened -> getString(R.string.charge_stop_navigate_android_auto, place)
+                else -> getString(R.string.charge_stop_navigate_none)
+            }
         )
     }
 

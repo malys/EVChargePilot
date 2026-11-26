@@ -391,6 +391,7 @@
     <string name="charge_stop_navigate_route_via">Ruta entregada con la parada de carga, pero el coche aún no guía. Iníciala en el mapa.</string>
     <string name="charge_stop_navigate_map_only">El mapa está abierto, pero este coche no acepta destinos de otra app. Introdúcelo allí: %1$s</string>
     <string name="charge_stop_navigate_android_auto">Android Auto está abierto. No recibe destinos del coche: dígalo o escríbalo en Google Maps: %1$s</string>
+    <string name="charge_stop_navigate_android_auto_spoken">Destino enviado al asistente del teléfono por Android Auto: %1$s. Si nada empieza en unos diez segundos, dígalo usted.</string>
     <string name="charge_stop_navigate_bad_place">Ese lugar no tiene coordenadas útiles, así que no se envió nada.</string>
     <string name="drift_holding">El plan se mantiene · unos %1$s %% a la llegada (± %2$s) · faltan %3$s km</string>
     <string name="drift_short_restore">Gastando como ahora: %1$s %% a la llegada, %2$s por debajo de tu reserva · %3$d km/h en los %4$s km de vía rápida que quedan lo recuperan, por %5$s min</string>

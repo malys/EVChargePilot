@@ -417,6 +417,7 @@ Spending %6$s %% per km</string>
     <string name="charge_stop_navigate_route_via">Route handed over with the charging stop, and the car is not guiding yet. Start it on the map.</string>
     <string name="charge_stop_navigate_map_only">The map is open, but this car takes no destination from another app. Enter it there: %1$s</string>
     <string name="charge_stop_navigate_android_auto">Android Auto is open. It takes no destination from the car: say or type it in Google Maps: %1$s</string>
+    <string name="charge_stop_navigate_android_auto_spoken">Destination sent to the phone\u2019s assistant over Android Auto: %1$s. If nothing starts within about ten seconds, say it yourself.</string>
     <string name="charge_stop_navigate_bad_place">That place has no usable coordinates, so nothing was sent.</string>
 
     <!-- CP-058 the drift companion. One line, a consequence, never an instruction. The

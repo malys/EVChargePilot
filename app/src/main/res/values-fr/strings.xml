@@ -409,6 +409,7 @@ Consommation %6$s %% par km</string>
     <string name="charge_stop_navigate_route_via">Itin\u00e9raire transmis avec l\u2019arr\u00eat de charge, le v\u00e9hicule ne guide pas encore. D\u00e9marrez-le sur la carte.</string>
     <string name="charge_stop_navigate_map_only">La carte est ouverte, mais cette voiture n\u2019accepte pas de destination venant d\u2019une autre application. Saisissez-la : %1$s</string>
     <string name="charge_stop_navigate_android_auto">Android Auto est ouvert. Il ne reçoit pas de destination de la voiture : dites-la ou saisissez-la dans Google Maps : %1$s</string>
+    <string name="charge_stop_navigate_android_auto_spoken">Destination transmise à l\u2019assistant du téléphone via Android Auto : %1$s. Si rien ne démarre d\u2019ici une dizaine de secondes, dites-la vous-même.</string>
     <string name="charge_stop_navigate_bad_place">Ce lieu n\u2019a pas de coordonnées utilisables : rien n\u2019a été envoyé.</string>
 
     <!-- CP-058 le compagnon de dérive. Une ligne, une conséquence, jamais une consigne. -->
