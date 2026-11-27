@@ -63,3 +63,7 @@ com.allgo.app.androidauto.permission.RESERVE_MARGIN
 # the head unit. Signature-level, defined by MG4Link (platform key, as this app on the car).
 # Sends one place (coordinates, optional label) on the driver's tap; reads nothing.
 com.allgo.app.androidauto.permission.ASSISTANT_COMMAND
+# 2026-11-27, owner report: with the phone off the Android Auto split showed MG4Link's home
+# screen instead of MG4 Navigator. Install-time (normal). Reads only whether a hands-free or audio
+# link is connected; no device name, address, scan or connection is made.
+android.permission.BLUETOOTH

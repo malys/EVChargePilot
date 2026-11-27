@@ -1301,9 +1301,7 @@ class ChargeStopActivity : AppCompatActivity() {
         NavLegs.disarm()
         // Read here, on the main thread: the worker below must not race a road being chosen.
         val split = splitRoads(target)
-        if (ChargeStopHandoff.androidAutoSplit(this)) {
-            MapApps.mg4Link(this)?.let { return sendToAndroidAuto(target, it, split) }
-        }
+        MapApps.androidAutoMap(this)?.let { return sendToAndroidAuto(target, it, split) }
         // Off the main thread, and not as a nicety: the adapter's transaction is not `oneway`
         // and it fans out to every registered listener while holding the lock on its callback
         // list, so this call waits for the navigation app to come back.

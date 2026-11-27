@@ -1,6 +1,8 @@
 package com.evsuite.chargepilot
 
 import android.app.ActivityManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothProfile
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -96,11 +98,27 @@ object MapApps {
             ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     /**
-     * The map the split goes beside: MG4Link when the driver chose it and it is installed, MG4
-     * Navigator otherwise.
+     * MG4Link when the driver chose the Android Auto split, it is installed and a phone is linked
+     * over Bluetooth; null otherwise. With the phone off MG4Link can only show its home screen,
+     * so the split and Navigate fall back to MG4 Navigator (2026-11-27). MG4Link publishes its
+     * session state to no other app, so a linked phone is the proxy: linked but not projecting
+     * still opens MG4Link.
      */
-    fun splitMap(context: Context): Intent? =
-        (if (ChargeStopHandoff.androidAutoSplit(context)) mg4Link(context) else null) ?: comeForward(context)
+    fun androidAutoMap(context: Context): Intent? =
+        if (ChargeStopHandoff.androidAutoSplit(context) && phoneLinked(context)) mg4Link(context) else null
+
+    /** A hands-free or audio Bluetooth link is up. Unreadable is never yes. */
+    // BLUETOOTH is install-time; a SecurityException anyway lands in runCatching as "no".
+    @Suppress("MissingPermission")
+    private fun phoneLinked(context: Context): Boolean = runCatching {
+        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+        adapter.isEnabled && listOf(BluetoothProfile.HEADSET, BluetoothProfile.A2DP).any {
+            adapter.getProfileConnectionState(it) == BluetoothAdapter.STATE_CONNECTED
+        }
+    }.getOrDefault(false)
+
+    /** The map the split goes beside: [androidAutoMap], MG4 Navigator otherwise. */
+    fun splitMap(context: Context): Intent? = androidAutoMap(context) ?: comeForward(context)
 
     /** Brings [splitMap] to the front. */
     fun splitToForeground(context: Context): Boolean {

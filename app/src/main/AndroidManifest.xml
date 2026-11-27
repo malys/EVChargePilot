@@ -49,6 +49,9 @@
     <!-- MG4Link#71: a destination spoken to the phone's assistant over Android Auto. -->
     <uses-permission android:name="com.allgo.app.androidauto.permission.ASSISTANT_COMMAND" />
 
+    <!-- Reads whether a phone is linked, so the Android Auto split falls back to MG4 Navigator
+         with the phone off; reviewed in .github/security/permission-allowlist.txt. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
     <!-- CP-080; reviewed in .github/security/permission-allowlist.txt. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
