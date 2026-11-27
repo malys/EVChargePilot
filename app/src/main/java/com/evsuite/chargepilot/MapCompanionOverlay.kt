@@ -61,6 +61,13 @@ internal object MapCompanionOverlay {
     /** One unreadable or false answer is not the end of a route. */
     internal const val LOST_MS = 5_000L
 
+    /**
+     * Launched with the car, the split starts before the phone's Bluetooth link is up, so
+     * [MapApps.androidAutoMap] says no and MG4 Navigator comes forward. For this long after the
+     * launch the split keeps asking and moves to MG4Link once the phone links (2026-11-27).
+     */
+    internal const val PHONE_WAIT_MS = 120_000L
+
     private const val SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW"
     private const val ALL_TASKS = 32
 
@@ -78,6 +85,7 @@ internal object MapCompanionOverlay {
     private var shows = 0
     private var guidingHeard = false
     private var untilClosed = false
+    private var phoneWaitUntil = 0L
     private var recorder: TripRecordingService? = null
     private val worker = Executors.newSingleThreadExecutor { Thread(it, "chargepilot-overlay") }
 
@@ -97,7 +105,7 @@ internal object MapCompanionOverlay {
             PackageManager.PERMISSION_GRANTED && MapApps.splitMap(context) != null
 
     /** Arms the companion for the drive [extras] describes, replacing any earlier one. */
-    fun show(context: Context, extras: Intent, untilClosed: Boolean = false) {
+    fun show(context: Context, extras: Intent, untilClosed: Boolean = false, waitForPhone: Boolean = false) {
         main.post {
             end("replaced")
             this.untilClosed = untilClosed
@@ -140,6 +148,7 @@ internal object MapCompanionOverlay {
             ).apply { gravity = Gravity.END or Gravity.TOP }
             mapPackage = MapApps.splitMap(app)?.component?.packageName
             shownAt = SystemClock.elapsedRealtime()
+            phoneWaitUntil = if (waitForPhone && mapPackage != MapApps.MG4LINK_PACKAGE) shownAt + PHONE_WAIT_MS else 0L
             lastGuidingAt = null
             shows = 0
             guidingHeard = false
@@ -156,6 +165,15 @@ internal object MapCompanionOverlay {
             if (!untilClosed && guidanceOver(now, shownAt, lastGuidingAt)) return end("guidance over")
             if (now - guidanceReadAt >= GUIDANCE_POLL_MS) {
                 guidanceReadAt = now
+                // Only while the driver is on the split's map: a later link never pulls them off
+                // another screen.
+                if (attached && now < phoneWaitUntil) MapApps.androidAutoMap(app)?.let { link ->
+                    if (runCatching { app.startActivity(link) }.isSuccess) {
+                        phoneWaitUntil = 0L
+                        mapPackage = link.component?.packageName
+                        note("phone linked ${now - shownAt} ms after the tap, map=$mapPackage")
+                    }
+                }
                 // A read still in flight when this arming ends must not land on the next one.
                 val session = shownAt
                 worker.execute {
