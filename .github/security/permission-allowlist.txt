@@ -58,3 +58,8 @@ com.evsuite.tasker.permission.READ_DRIVER
 # companion covers, so Android Auto lays out beside it. Signature-level, defined by MG4Link
 # (platform key, as this app on the car). Sends one pixel width and this package name; reads nothing.
 com.allgo.app.androidauto.permission.RESERVE_MARGIN
+# MG4Link#71, 2026-11-26, owner decision: in the Android Auto split, Navigate asks MG4Link to
+# speak "Navigate to …" into the phone's assistant, since Android Auto takes no destination from
+# the head unit. Signature-level, defined by MG4Link (platform key, as this app on the car).
+# Sends one place (coordinates, optional label) on the driver's tap; reads nothing.
+com.allgo.app.androidauto.permission.ASSISTANT_COMMAND
